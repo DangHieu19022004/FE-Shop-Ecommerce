@@ -25,7 +25,7 @@
       <div class="form__uploadcv_content">
         <div class="form__uploadcv_content_left">
           <label for="img_avatar" class="form__uploadcv_content_left__title"
-            >Ảnh</label
+            >{{ formData.Avatar ? formData.Avatar.name : 'Ảnh' }}</label
           >
           <MsInput
             v-model="formData.Avatar"
