@@ -24,10 +24,21 @@
       </div>
       <div class="form__uploadcv_content">
         <div class="form__uploadcv_content_left">
-          <label for="img_avatar" class="form__uploadcv_content_left__title"
-            >{{ formData.Avatar ? formData.Avatar.name : 'Ảnh' }}</label
+          <label
+            v-if="!avatarSrc"
+            for="img_avatar"
+            class="form__uploadcv_content_left__title"
+            >{{ avatarLabel }}</label
           >
+          <img
+            v-if="avatarSrc"
+            :src="avatarSrc"
+            alt="avatar"
+            class="form__uploadcv_content_left__avatar"
+            @click="clearAvatar"
+          />
           <MsInput
+            v-else
             v-model="formData.Avatar"
             id="img_avatar"
             name="img_avatar"
@@ -467,7 +478,7 @@
   </div>
 </template>
 <script setup>
-import { ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import MsInput from "@/components/ms-input/MsInput.vue";
 import MsSelect from "../ms-input/MsSelect.vue";
 /**
@@ -516,6 +527,38 @@ const formData = ref({
   WorkPosition: "",
   Description: "",
   Email: "",
+});
+
+const avatarSrc = ref("");
+let avatarObjectUrl = "";
+
+watch(
+  () => formData.value.Avatar,
+  (avatar) => {
+    if (avatarObjectUrl) {
+      URL.revokeObjectURL(avatarObjectUrl);
+      avatarObjectUrl = "";
+    }
+    if (avatar instanceof Blob) {
+      avatarObjectUrl = URL.createObjectURL(avatar);
+      avatarSrc.value = avatarObjectUrl;
+      return;
+    }
+    if (typeof avatar === "string") {
+      avatarSrc.value = avatar;
+      return;
+    }
+    avatarSrc.value = "";
+  },
+  { immediate: true },
+);
+
+const avatarLabel = computed(() => {
+  const avatar = formData.value.Avatar;
+  if (avatar instanceof File && avatar.name) {
+    return avatar.name;
+  }
+  return "Ảnh";
 });
 
 const errorMessages = ref({
@@ -576,6 +619,9 @@ watch(
  */
 const unMarkTouched = (field) => {
   touchedFields.value[field] = false;
+};
+const clearAvatar = () => {
+  formData.value.Avatar = "";
 };
 const markTouched = (field) => {
   const data = formData.value;

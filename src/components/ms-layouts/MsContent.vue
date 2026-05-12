@@ -205,7 +205,6 @@ const activeFilters = ref({
 });
 const searchDelayMs = 300;
 let keywordTimer = null;
-let paginTimer = null;
 const normalize = (value) =>
   String(value ?? "")
     .toLowerCase()
@@ -469,9 +468,7 @@ onBeforeUnmount(() => {
   if (keywordTimer) {
     clearTimeout(keywordTimer);
   }
-  if (paginTimer) {
-    clearTimeout(paginTimer);
-  }
+
 });
 
 /**
