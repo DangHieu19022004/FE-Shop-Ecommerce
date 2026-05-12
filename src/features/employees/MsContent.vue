@@ -184,10 +184,10 @@
 </template>
 <script setup>
 import { ref, computed, watch, onBeforeUnmount } from "vue";
-import MsTable from "../ms-table/MsTable.vue";
-import MsFilter from "../ms-popup/MsFilter.vue";
-import MsVisibleColumns from "../ms-popup/MsVisibleColumns.vue";
-import MsImportExportXLSX from "../ms-popup/MsImportExportXLSX.vue";
+import MsTable from "../../components/base/MsTable.vue";
+import MsFilter from "./MsFilter.vue";
+import MsVisibleColumns from "./MsVisibleColumns.vue";
+import MsImportExportXLSX from "./MsImportExportXLSX.vue";
 import * as XLSX from "xlsx";
 // VARIABLE:
 const currentPage = ref(1);

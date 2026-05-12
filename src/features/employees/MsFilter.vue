@@ -62,9 +62,9 @@
 </template>
 <script setup>
 import { ref } from "vue";
-import MsButton from "../ms-button/MsButton.vue";
-import MsInput from "../ms-input/MsInput.vue";
-import MsSelect from "../ms-input/MsSelect.vue";
+import MsButton from "../../components/base/MsButton.vue";
+import MsInput from "../../components/base/MsInput.vue";
+import MsSelect from "../../components/base/MsSelect.vue";
 
 const filters = ref({
   startDate: "",

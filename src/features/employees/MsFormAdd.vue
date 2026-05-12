@@ -479,8 +479,8 @@
 </template>
 <script setup>
 import { computed, ref, watch } from "vue";
-import MsInput from "@/components/ms-input/MsInput.vue";
-import MsSelect from "../ms-input/MsSelect.vue";
+import MsInput from "@/components/base/MsInput.vue";
+import MsSelect from "../../components/base/MsSelect.vue";
 /**
  * NOTICE: EMIT + PROP
  */
@@ -565,7 +565,7 @@ const errorMessages = ref({
   FullName: "Vui lòng nhập họ tên ứng viên",
   BirthDay: "Vui lòng nhập ngày sinh",
   Gender: "Vui lòng chọn giới tính",
-  Area: "Vui lòng chọn khu vực",
+  // Area: "Vui lòng chọn khu vực",
   Phone: "Vui lòng nhập số điện thoại hợp lệ",
   Email: "Vui lòng nhập email hợp lệ",
   // Country: "Vui lòng chọn quốc gia",
@@ -627,20 +627,24 @@ const markTouched = (field) => {
   const data = formData.value;
   if (field === "Phone") {
     let phonePattern = /^\d{10,11}$/;
-    if(!data.Phone) {
+    if (!data.Phone) {
       errorMessages.value.Phone = "Số điện thoại không được để trống";
     } else if (!phonePattern.test(data.Phone)) {
       errorMessages.value.Phone = "Vui lòng nhập số điện thoại hợp lệ (10-11 chữ số)";
+    } else {
+      errorMessages.value.Phone = "";
     }
     touchedFields.value[field] = true;
     return;
   }
   if (field === "Email") {
     let emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if(!data.Email) {
+    if (!data.Email) {
       errorMessages.value.Email = "Email không được để trống";
     } else if (!emailPattern.test(data.Email)) {
       errorMessages.value.Email = "Vui lòng nhập email hợp lệ";
+    } else {
+      errorMessages.value.Email = "";
     }
     touchedFields.value[field] = true;
     return;

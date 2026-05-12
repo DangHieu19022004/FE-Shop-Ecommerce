@@ -45,12 +45,12 @@
   </div>
 </template>
 <script setup>
-import MsOverlay from "@/components/ms-overlay/MsOverlay.vue";
-import MsFormAdd from "@/components/ms-popup/MsFormAdd.vue";
-import MsAlert from "@/components/ms-popup/MsAlert.vue";
-import MsNavBar from "@/components/ms-layouts/MsNavBar.vue";
-import MsSideBar from "@/components/ms-layouts/MsSideBar.vue";
-import MsToastContainer from "@/components/ms-popup/MsToastContainer.vue";
+import MsOverlay from "@/components/overlay/MsOverlay.vue";
+import MsFormAdd from "@/features/employees/MsFormAdd.vue";
+import MsAlert from "@/components/overlay/MsAlert.vue";
+import MsNavBar from "@/layouts/MsNavBar.vue";
+import MsSideBar from "@/layouts/MsSideBar.vue";
+import MsToastContainer from "@/components/overlay/MsToastContainer.vue";
 import { onMounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import candidateDataJson from "@/stores/candidate-data.json";

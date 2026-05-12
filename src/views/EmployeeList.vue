@@ -9,7 +9,7 @@
       />
 </template>
 <script setup>
-import MsContent from "@/components/ms-layouts/MsContent.vue";
+import MsContent from "@/features/employees/MsContent.vue";
 import { defineProps, defineEmits, computed } from "vue";
 const props = defineProps({
   dataProp: {

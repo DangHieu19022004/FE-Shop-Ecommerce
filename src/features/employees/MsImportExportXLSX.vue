@@ -6,9 +6,9 @@
 </div>
 </template>
 <script setup>
-import MsButton from '../ms-button/MsButton.vue'
+import MsButton from '../../components/base/MsButton.vue'
 import {defineEmits, ref } from 'vue';
-import MsInput from '../ms-input/MsInput.vue';
+import MsInput from '../../components/base/MsInput.vue';
 
 const emit = defineEmits(['export', 'import']);
 

@@ -9,7 +9,7 @@
 <script setup>
 import { onMounted, onUnmounted, computed } from 'vue';
 import { defineProps } from 'vue';
-import MsButton from '../ms-button/MsButton.vue';
+import MsButton from '../base/MsButton.vue';
 /**
  * VARIABLE:
  */
