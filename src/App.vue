@@ -4,4 +4,7 @@
 	<router-view />
 </template>
 
-<style scoped></style>
+<style>
+@import './assets/styles/icon.css';
+@import './assets/styles/utility.css';
+</style>

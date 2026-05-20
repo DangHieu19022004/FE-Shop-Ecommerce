@@ -1,5 +1,6 @@
 <template lang="">
   <div class="ms-input">
+    <label v-if="label" class="ms-input__label" :for="id">{{ label }}</label>
     <input 
       ref="inputRef"
       :class="[props.class, { 'ms-input--error': props.errorMessages }]"
@@ -46,6 +47,10 @@ const props = defineProps({
     type: String,
     default: "",
   },
+  label: {
+    type: String,
+    default: "",
+  },
   name: {
     type: String,
     default: "",
@@ -85,6 +90,13 @@ const handleFocus = () => {
 };
 </script>
 <style >
+.ms-input__label {
+  display: block;
+  font-size: 14px;
+  margin-bottom: 4px;
+  color: #111;
+}
+
 .ms-input .ms-input--error {
   border: 1px solid #f44336 !important;
 }

@@ -1,321 +1,376 @@
 .icon {
-    fill: currentColor;
+  fill: currentColor;
 }
 
 .icon--sm {
-    width: 16px !important;
-    height: 16px !important;
+  width: 16px !important;
+  height: 16px !important;
 }
 
 .icon--md {
-    width: 24px !important;
-    height: 24px !important;
+  width: 24px !important;
+  height: 24px !important;
 }
 
 .icon--lg {
-    width: 32px !important;
-    height: 32px !important;
+  width: 32px !important;
+  height: 32px !important;
 }
 
-.mi__icon__app__switch {
-    width: 24px;
-    height: 24px;
-    min-width: 24px;
-    background-image: url('../icons/icon-swich-app.svg');
-    background-repeat: no-repeat;
-}
 
-.mi__icon__recuitment__logo {
-    width: 32px;
-    height: 32px;
-    min-width: 24px;
-    background-image: url('../icons/logo-recruitment-new.d56a0096f9a2229b.svg');
-    background-size: contain;
-    background-repeat: no-repeat;
-}
-
-.mi__icon__search {
-    width: 24px;
-    height: 24px;
-    -webkit-mask-image: url('../icons/search.svg');
-    background-color: currentColor;
-    -webkit-mask-repeat: no-repeat;
-
-}
-
-.mi__icon__globe__click {
-    width: 20px;
-    height: 21px;
-    -webkit-mask-image: url('../icons/globe_click.svg');
-    background-color: currentColor;
-    -webkit-mask-repeat: no-repeat;
-}
-
-.mi__icon__ai__agent {
-    width: 54px;
-    height: 54px;
-    background-image: url('../icons/ai-agent.svg');
-    background-color: currentColor;
-    background-repeat: no-repeat;
-    background-size: contain;
-}
-
-.mi__icon__speaker {
-    background: url('../icons/icon-notification-version.d5e3dc604036ed5b.svg');
-    background-repeat: no-repeat;
-    background-size: cover;
-    width: 24px;
-    height: 24px;
-}
-
-.mi__icon__cart {
-    height: 20px;
-    aspect-ratio: 1 / 1;
-    background: url('../icons/cs-icon-store.svg') no-repeat center;
-    background-size: 20px 20px;
-    cursor: pointer;
-}
-
-.mi__icon__chevron__left {
-    width: 20px;
-    height: 20px;
-    min-width: 20px;
-    -webkit-mask-image: url('../icons/chevron-left.svg');
-    -webkit-mask-size: contain;
-    background-color: currentColor;
-    -webkit-mask-repeat: no-repeat;
-}
-
-.mi__icon__news {
-    width: 24px;
-    height: 24px;
-    min-width: 24px;
-    -webkit-mask-image: url(../icons/ICON.svg);
+.sb__recrui_icon {
+    -webkit-mask-image: url(https://amisplatform.misacdn.net/apps/recruit/assets/images/ICON.svg);
     -webkit-mask-position: -94px -113px;
     -webkit-mask-repeat: no-repeat;
     background-color: #c5ccd5;
 }
 
-
-.mi__icon__group {
-    width: 24px;
-    height: 24px;
-    min-width: 24px;
-    -webkit-mask-image: url(../icons/ICON.svg);
+.sb__candidate_icon {
+    -webkit-mask-image: url(https://amisplatform.misacdn.net/apps/recruit/assets/images/ICON.svg);
     -webkit-mask-position: -24px -112px;
     -webkit-mask-repeat: no-repeat;
-    background-color: #c5ccd5;
+    background-color: #ffffff;
 }
 
-.mi__icon__calendar {
-    width: 24px;
-    height: 24px;
-    min-width: 24px;
-    -webkit-mask-image: url(../icons/ICON.svg);
-    -webkit-mask-position: -144px -113px;
-    -webkit-mask-repeat: no-repeat;
-    background-color: #c5ccd5;
-}
-
-.mi__icon__talent {
-    width: 24px;
-    height: 24px;
-    min-width: 24px;
-    -webkit-mask-image: url(../icons/ICON.svg);
+.sb__talent_pool_icon {
+    -webkit-mask-image: url(https://amisplatform.misacdn.net/apps/recruit/assets/images/ICON.svg);
     -webkit-mask-position: 0px -112px;
     -webkit-mask-repeat: no-repeat;
     background-color: #c5ccd5;
 }
 
-.mi__icon__statistic__board {
-    width: 24px;
-    height: 24px;
-    min-width: 24px;
-    -webkit-mask-image: url(../icons/ICON.svg);
+.sb__recrui_campaign_icon {
+    -webkit-mask-image: url(https://amisplatform.misacdn.net/apps/recruit/assets/images/ICON.svg);
     -webkit-mask-position: -73px -633px;
     -webkit-mask-repeat: no-repeat;
-    background-color: #c5ccd5;
+    background-color: #ffffff;
 }
 
-.mi__icon__task {
-    width: 24px;
-    height: 24px;
-    min-width: 24px;
-    -webkit-mask-image: url(../icons/ICON.svg);
+.sb__task_icon {
+    -webkit-mask-image: url(https://amisplatform.misacdn.net/apps/recruit/assets/images/ICON.svg);
     -webkit-mask-position: -336px -113px;
     -webkit-mask-repeat: no-repeat;
     background-color: #c5ccd5;
 }
 
-.mi__icon__mail {
-    width: 24px;
-    height: 24px;
-    min-width: 24px;
-    -webkit-mask-image: url(../icons/ICON.svg);
-    -webkit-mask-position: -160px -248px;
-    -webkit-mask-repeat: no-repeat;
-    background-color: #c5ccd5;
-}
-
-.mi__icon__pie_chart {
-    width: 24px;
-    height: 24px;
-    min-width: 24px;
-    -webkit-mask-image: url(../icons/ICON.svg);
-    -webkit-mask-position: -72px -113px;
-    -webkit-mask-repeat: no-repeat;
-    background-color: #c5ccd5;
-}
-
-.mi__icon__settings {
-    width: 24px;
-    height: 24px;
-    min-width: 24px;
-    -webkit-mask-image: url(../icons/ICON.svg);
+.sb__setting_icon {
+    -webkit-mask-image: url(https://amisplatform.misacdn.net/apps/recruit/assets/images/ICON.svg);
     -webkit-mask-position: 0px -136px;
     -webkit-mask-repeat: no-repeat;
     background-color: #c5ccd5;
 }
 
+.sb__report_icon {
+    -webkit-mask-image: url(https://amisplatform.misacdn.net/apps/recruit/assets/images/ICON.svg);
+    -webkit-mask-position: -72px -113px;
+    -webkit-mask-repeat: no-repeat;
+    background-color: #c5ccd5;
+}
+.sb__left_icon {
+    -webkit-mask-image: url(https://amisplatform.misacdn.net/apps/recruit/assets/images/ICON.svg);
+    -webkit-mask-position: -60px -696px;
+    -webkit-mask-repeat: no-repeat;
+    width: 20px;
+    height: 20px;
+    background-color: #fff;
+}
+
+.mi__icon__app__switch {
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  background-image: url('./assets/icons/icon-swich-app.svg');
+  background-repeat: no-repeat;
+}
+
+.mi__icon__recuitment__logo {
+  width: 32px;
+  height: 32px;
+  min-width: 24px;
+  background-image: url('./assets/icons/logo-recruitment-new.d56a0096f9a2229b.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+.mi__icon__search {
+  width: 24px;
+  height: 24px;
+  -webkit-mask-image: url('./assets/icons/search.svg');
+  background-color: currentColor;
+  -webkit-mask-repeat: no-repeat;
+}
+
+.mi__icon__globe__click {
+  width: 20px;
+  height: 21px;
+  -webkit-mask-image: url('./assets/icons/globe_click.svg');
+  background-color: currentColor;
+  -webkit-mask-repeat: no-repeat;
+}
+
+.mi__icon__ai__agent {
+  width: 54px;
+  height: 54px;
+  background-image: url('./assets/icons/ai-agent.svg');
+  background-color: currentColor;
+  background-repeat: no-repeat;
+  background-size: contain;
+}
+
+.mi__icon__speaker {
+  background: url('./assets/icons/icon-notification-version.d5e3dc604036ed5b.svg');
+  background-repeat: no-repeat;
+  background-size: cover;
+  width: 24px;
+  height: 24px;
+}
+
+.mi__icon__cart {
+  height: 20px;
+  aspect-ratio: 1 / 1;
+  background: url('./assets/icons/cs-icon-store.svg') no-repeat center;
+  background-size: 20px 20px;
+  cursor: pointer;
+}
+
+.mi__icon__chevron__left {
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
+  -webkit-mask-image: url('./assets/icons/chevron-left.svg');
+  -webkit-mask-size: contain;
+  background-color: currentColor;
+  -webkit-mask-repeat: no-repeat;
+}
+
+.mi__icon__news {
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  -webkit-mask-image: url('./assets/icons/ICON.svg');
+  -webkit-mask-position: -94px -113px;
+  -webkit-mask-repeat: no-repeat;
+  background-color: #c5ccd5;
+}
+
+.mi__icon__group {
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  -webkit-mask-image: url('./assets/icons/ICON.svg');
+  -webkit-mask-position: -24px -112px;
+  -webkit-mask-repeat: no-repeat;
+  background-color: #c5ccd5;
+}
+
+.mi__icon__calendar {
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  -webkit-mask-image: url('./assets/icons/ICON.svg');
+  -webkit-mask-position: -144px -113px;
+  -webkit-mask-repeat: no-repeat;
+  background-color: #c5ccd5;
+}
+
+.mi__icon__talent {
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  -webkit-mask-image: url('./assets/icons/ICON.svg');
+  -webkit-mask-position: 0px -112px;
+  -webkit-mask-repeat: no-repeat;
+  background-color: #c5ccd5;
+}
+
+.mi__icon__statistic__board {
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  -webkit-mask-image: url('./assets/icons/ICON.svg');
+  -webkit-mask-position: -73px -633px;
+  -webkit-mask-repeat: no-repeat;
+  background-color: #c5ccd5;
+}
+
+.mi__icon__task {
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  -webkit-mask-image: url('./assets/icons/ICON.svg');
+  -webkit-mask-position: -336px -113px;
+  -webkit-mask-repeat: no-repeat;
+  background-color: #c5ccd5;
+}
+
+.mi__icon__mail {
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  -webkit-mask-image: url('./assets/icons/ICON.svg');
+  -webkit-mask-position: -160px -248px;
+  -webkit-mask-repeat: no-repeat;
+  background-color: #c5ccd5;
+}
+
+.mi__icon__pie_chart {
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  -webkit-mask-image: url('./assets/icons/ICON.svg');
+  -webkit-mask-position: -72px -113px;
+  -webkit-mask-repeat: no-repeat;
+  background-color: #c5ccd5;
+}
+
+.mi__icon__settings {
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  -webkit-mask-image: url('./assets/icons/ICON.svg');
+  -webkit-mask-position: 0px -136px;
+  -webkit-mask-repeat: no-repeat;
+  background-color: #c5ccd5;
+}
+
 .mi__icon__idea__book {
-    width: 24px;
-    height: 24px;
-    min-width: 24px;
-    background-image: url(../icons/book_idea.svg);
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  background-image: url('./assets/icons/book_idea.svg');
 }
 
 .mi__icon__delete__person {
-    width: 24px;
-    height: 24px;
-    min-width: 24px;
-    -webkit-mask-image: url(../icons/icon-delete-candidate.svg);
-    -webkit-mask-position: 0px 0px;
-    -webkit-mask-repeat: no-repeat;
-    background-color: #65696e;
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  -webkit-mask-image: url('./assets/icons/icon-delete-candidate.svg');
+  -webkit-mask-position: 0px 0px;
+  -webkit-mask-repeat: no-repeat;
+  background-color: #65696e;
 }
 
 .mi__icon__plus {
-    width: 20px;
-    height: 20px;
-    min-width: 20px;
-    -webkit-mask-image: url(../icons/ICON.svg);
-    -webkit-mask-position: -20px -656px;
-    -webkit-mask-repeat: no-repeat;
-    background-color: #212121;
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
+  -webkit-mask-image: url('./assets/icons/ICON.svg');
+  -webkit-mask-position: -20px -656px;
+  -webkit-mask-repeat: no-repeat;
+  background-color: #212121;
 }
 
 .mi__icon__filter {
-    width: 20px;
-    height: 20px;
-    min-width: 20px;
-    -webkit-mask-image: url(../icons/ICON.svg);
-    -webkit-mask-position: -40px -656px;
-    -webkit-mask-repeat: no-repeat;
-    background-color: #212121;
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
+  -webkit-mask-image: url('./assets/icons/ICON.svg');
+  -webkit-mask-position: -40px -656px;
+  -webkit-mask-repeat: no-repeat;
+  background-color: #212121;
 }
 
 .mi__icon__export {
-    width: 20px;
-    height: 20px;
-    min-width: 20px;
-    -webkit-mask-image: url(../icons/ICON.svg);
-    -webkit-mask-position: -60px -656px;
-    -webkit-mask-repeat: no-repeat;
-    background-color: #212121;
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
+  -webkit-mask-image: url('./assets/icons/ICON.svg');
+  -webkit-mask-position: -60px -656px;
+  -webkit-mask-repeat: no-repeat;
+  background-color: #212121;
 }
 
 .mi__icon__interactive__history {
-    width: 24px;
-    height: 24px;
-    min-width: 24px;
-    -webkit-mask-image: url(../icons/ICON.svg);
-    -webkit-mask-position: 0 -844px;
-    -webkit-mask-repeat: no-repeat;
-    background-color: #212121;
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  -webkit-mask-image: url('./assets/icons/ICON.svg');
+  -webkit-mask-position: 0 -844px;
+  -webkit-mask-repeat: no-repeat;
+  background-color: #212121;
 }
 
-/* .mi__icon__settings {
-    width: 24px;
-    height: 24px;
-    min-width: 24px;
-    -webkit-mask-image: url(../icons/ICON.svg);
-    -webkit-mask-position: -24px -608px;
-    -webkit-mask-repeat: no-repeat;
-    background-color: #212121;
-} */
-
 .mi__icon__chevron-left {
-    width: 20px;
-    height: 20px;
-    min-width: 20px;
-    -webkit-mask-image: url(../icons/ICON.svg);
-    -webkit-mask-position: -60px -696px;
-    -webkit-mask-repeat: no-repeat;
-    background-color: #212121;
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
+  -webkit-mask-image: url('./assets/icons/ICON.svg');
+  -webkit-mask-position: -60px -696px;
+  -webkit-mask-repeat: no-repeat;
+  background-color: #212121;
 }
 
 .mi__icon__chevron-right {
-    width: 20px;
-    height: 20px;
-    min-width: 20px;
-    -webkit-mask-image: url(../icons/ICON.svg);
-    -webkit-mask-position: -40px -696px;
-    -webkit-mask-repeat: no-repeat;
-    background-color: #212121;
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
+  -webkit-mask-image: url('./assets/icons/ICON.svg');
+  -webkit-mask-position: -40px -696px;
+  -webkit-mask-repeat: no-repeat;
+  background-color: #212121;
 }
 
 .mi__icon__tick {
-    width: 16px;
-    height: 16px;
-    min-width: 16px;
-    -webkit-mask-image: url(../icons/ICON.svg);
-    -webkit-mask-position: -208px -32px;
-    -webkit-mask-repeat: no-repeat;
-    background-color: #212121;
+  width: 16px;
+  height: 16px;
+  min-width: 16px;
+  -webkit-mask-image: url('./assets/icons/ICON.svg');
+  -webkit-mask-position: -208px -32px;
+  -webkit-mask-repeat: no-repeat;
+  background-color: #212121;
 }
 
 .mi__icon__pencil {
-    width: 20px;
-    height: 20px;
-    min-width: 20px;
-    -webkit-mask-image: url(../icons/ICON.svg);
-    -webkit-mask-position: -180px -656px;
-    -webkit-mask-repeat: no-repeat;
-    background-color: #7a8188;
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
+  -webkit-mask-image: url('./assets/icons/ICON.svg');
+  -webkit-mask-position: -180px -656px;
+  -webkit-mask-repeat: no-repeat;
+  background-color: #7a8188;
 }
 
-.mi__icon__star{
-    width: 17px;
-    height: 17px;
-    min-width: 17px;
-    -webkit-mask-image: url(../icons/star.svg);
-    -webkit-mask-repeat: no-repeat;
-    background-color: #7a8188;
+.mi__icon__star {
+  width: 17px;
+  height: 17px;
+  min-width: 17px;
+  -webkit-mask-image: url('./assets/icons/star.svg');
+  -webkit-mask-repeat: no-repeat;
+  background-color: #7a8188;
 }
 
-.mi__icon__close{
-    width: 22px;
-    height: 22px;
-    min-width: 22px;
-    -webkit-mask-image: url(../icons/ICON.svg);
-    -webkit-mask-position: -73px -136px;
-    -webkit-mask-repeat: no-repeat;
-    background-color: #666666;
+.mi__icon__close {
+  width: 22px;
+  height: 22px;
+  min-width: 22px;
+  -webkit-mask-image: url('./assets/icons/ICON.svg');
+  -webkit-mask-position: -73px -136px;
+  -webkit-mask-repeat: no-repeat;
+  background-color: #666666;
 }
 
-.mi__icon__more__vertical{
-    width: 16px;
-    height: 16px;
-    min-width: 16px;
-    -webkit-mask-image: url(../icons/ICON.svg);
-    -webkit-mask-position: -96px -80px;
-    -webkit-mask-repeat: no-repeat;
-    background-color: #7a8188;
+.mi__icon__more__vertical {
+  width: 16px;
+  height: 16px;
+  min-width: 16px;
+  -webkit-mask-image: url('./assets/icons/ICON.svg');
+  -webkit-mask-position: -96px -80px;
+  -webkit-mask-repeat: no-repeat;
+  background-color: #7a8188;
 }
 
-.mi__icon__dot{
-    width: 15px;
-    min-width: 15px;
-    height: 15px;
-    background: url(../icons/ICON.svg) -305px -33px no-repeat;
+.mi__icon__dot {
+  width: 15px;
+  min-width: 15px;
+  height: 15px;
+  background: url('./assets/icons/ICON.svg') -305px -33px no-repeat;
+}
+
+.icon__exit {
+  -webkit-mask-image: url(https://amisplatform.misacdn.net/apps/recruit/assets/images/ICON.svg);
+  -webkit-mask-position: -73px -136px;
+  -webkit-mask-repeat: no-repeat;
+  background-color: #666666;
+  width: 22px;
+  height: 22px;
 }

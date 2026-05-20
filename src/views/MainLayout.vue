@@ -24,13 +24,6 @@
         class="overlay--alert"
         @click="alertState.isShow = false"
       />
-      <MsFormAdd
-        v-if="isShowForm"
-        @close="handleCloseForm"
-        @submit="handleCandidateSubmit"
-        @error="openAlert"
-        :currentData="currentCandidate"
-      />
       <MsAlert
         v-if="alertState.isShow"
         :title="alertState.title"
@@ -46,7 +39,6 @@
 </template>
 <script setup>
 import MsOverlay from "@/components/overlay/MsOverlay.vue";
-import MsFormAdd from "@/features/employees/MsFormAdd.vue";
 import MsAlert from "@/components/overlay/MsAlert.vue";
 import MsNavBar from "@/layouts/MsNavBar.vue";
 import MsSideBar from "@/layouts/MsSideBar.vue";
@@ -76,22 +68,7 @@ const pendingUpdate = ref(null);
 const pendingDelete = ref(null);
 const pendingImport = ref(null);
 const visibleColumns = ref({
-  FullName: true,
-  Phone: true,
-  Email: true,
-  RecruitmentCampaign: true,
-  Position: true,
-  JobPosting: true,
-  RecruitmentStage: true,
-  Rating: true,
-  ApplicationDate: true,
-  CandidateSource: true,
-  EducationLevel: true,
-  EducationPlace: true,
-  Major: true,
-  RecentWorkplace: true,
-  PersonInCharge: true,
-  Department: true,
+
 });
 const route = useRoute();
 
@@ -127,12 +104,7 @@ const handleConfirmAlert = () => {
   isShowForm.value = false;
 
   if (pendingUpdate.value) {
-    data.value.splice(
-      pendingUpdate.value.index,
-      1,
-      pendingUpdate.value.candidateData
-    );
-    localStorage.setItem("candicateData", JSON.stringify(data.value));
+    //Cập nhật dữ liệu
 
     pendingUpdate.value = null;
     toasts.value.push({
@@ -143,10 +115,8 @@ const handleConfirmAlert = () => {
     });
   }
   if (pendingDelete.value) {
-    data.value = data.value.filter(
-      (item) => String(item.Id) !== String(pendingDelete.value.candidateData.Id)
-    );
-    localStorage.setItem("candicateData", JSON.stringify(data.value));
+    //Xóa dữ liệu
+
     pendingDelete.value = null;
     toasts.value.push({
       id: Date.now() + Math.random(),
@@ -156,8 +126,8 @@ const handleConfirmAlert = () => {
     });
   }
   if (pendingImport.value) {
-    data.value = [...data.value, ...pendingImport.value.jsonData];
-    localStorage.setItem("candicateData", JSON.stringify(data.value));
+    //Nhập dữ liệu xlsx
+
     pendingImport.value = null;
     toasts.value.push({
       id: Date.now() + Math.random(),
@@ -193,57 +163,10 @@ const openAlert = (payload) => {
   };
 };
 const initCandidateData = () => {
-  const stored = localStorage.getItem("candicateData");
-  if (stored) {
-    data.value = JSON.parse(stored) || [];
-    return;
-  }
+  // check localStorage trước, nếu có thì dùng luôn, không có thì gọi db
 
-  const seed = candidateDataJson?.candicates ?? [];
-  data.value = seed;
-  localStorage.setItem("candicateData", JSON.stringify(seed));
 };
 
-const handleCandidateSubmit = (candidateData) => {
-  if (candidateData.Id) {
-    //edit
-    const index = data.value.findIndex(
-      (item) => String(item.Id) === String(candidateData.Id)
-    );
-    if (index == -1) {
-      toasts.value.push({
-        id: Date.now() + Math.random(),
-        message: "Không tìm thấy ứng viên để cập nhật",
-        type: "error",
-        duration: 3000,
-      });
-      return;
-    }
-    alertState.value = {
-      isShow: true,
-      title: "Xác nhận",
-      message: "Bạn có chắc muốn cập nhật thông tin ứng viên này không?",
-      showConfirmButton: true,
-    };
-    //Lưu lại thông tin ứng viên đang chờ cập nhật
-    pendingUpdate.value = { index, candidateData };
-    return;
-  } else {
-    //add
-    candidateData.Id = Date.now();
-    data.value.unshift(candidateData);
-    toasts.value.push({
-      id: Date.now() + Math.random(),
-      message: "Thêm ứng viên thành công",
-      type: "success",
-      duration: 3000,
-    });
-  }
-
-  localStorage.setItem("candicateData", JSON.stringify(data.value));
-
-  isShowForm.value = false;
-};
 
 const removeToast = (id) => {
   toasts.value = toasts.value.filter((toast) => toast.id !== id);
@@ -253,16 +176,13 @@ const removeToast = (id) => {
  * NOTICE: watch
  */
 
-watch(
-  () => route.name,
-  (name) => {
-    if (name !== "employeeList") {
-      isShowForm.value = false;
-    }
-  }
-);
 watch(isCollapse, () => {
   localStorage.setItem("sidebarCollapse", isCollapse.value);
 });
 </script>
-<style lang=""></style>
+<style scoped>
+.container {
+  display: flex;
+  height: calc(100vh - 48px);
+}
+</style>

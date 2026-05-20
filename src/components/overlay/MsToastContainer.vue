@@ -29,7 +29,7 @@ const removeToast = (id) => {
 <style>
     .ms-toast-container {
         position: fixed;
-        top: 20px;
+        top: 30px;
         right: 20px;
         display: flex;
         flex-direction: column;
@@ -37,16 +37,53 @@ const removeToast = (id) => {
         z-index: 9999;
     }
 
-    /* animation */
-
-    .toast-enter-active,
-    .toast-leave-active {
-        transition: all .3s ease;
+    .toast-enter-active {
+        animation: show-toast 0.3s ease forwards;
     }
 
-    .toast-enter-from,
-    .toast-leave-to {
-        opacity: 0;
-        transform: translateX(100%);
+    .toast-leave-active {
+        animation: hide-toast 0.3s ease forwards;
+    }
+
+    @keyframes show-toast {
+        0% {
+            transform: translateX(100%);
+        }
+        40% {
+            transform: translateX(-5%);
+        }
+        80% {
+            transform: translateX(0%);
+        }
+        100% {
+            transform: translateX(-10px);
+        }
+    }
+
+    @keyframes hide-toast {
+        0% {
+            transform: translateX(-10px);
+        }
+        40% {
+            transform: translateX(0%);
+        }
+        80% {
+            transform: translateX(-5%);
+        }
+        100% {
+            transform: translateX(calc(100% + 20px));
+        }
+    }
+
+    @media screen and (max-width: 530px) {
+        .ms-toast-container {
+            width: 95%;
+        }
+
+        .ms-toast-container :deep(.ms-toast) {
+            width: 100%;
+            font-size: 1rem;
+            margin-left: 20px;
+        }
     }
 </style>
