@@ -45,7 +45,6 @@ import MsSideBar from "@/layouts/MsSideBar.vue";
 import MsToastContainer from "@/components/overlay/MsToastContainer.vue";
 import { onMounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
-import candidateDataJson from "@/stores/candidate-data.json";
 
 onMounted(() => {
   initCandidateData();
