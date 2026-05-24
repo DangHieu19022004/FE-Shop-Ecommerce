@@ -3,63 +3,70 @@
             <div class="sbbg">
                 <div class="sb__top">
                     <div class="sb__list">
-                        <router-link to="/demo" class="hvp dpl pd-8-12 menu__item">
-                            <div class="menu__icon sb__recrui_icon m-r-16"></div>
-                            <div :class="['menu__text', { menu__text_hide: props.isCollapse }]">Tin tuyển dụng</div>
+                        <router-link to="/demo" class="hvp dpl menu__item">
+                            <MsButton
+                                iconLeft="mi-sidebar-dashboard mg-r-8"
+                                message="Tổng quan"
+                                :class="['align-left', { 'is-collapse': props.isCollapse }]"
+                                >
+                            </MsButton>
                         </router-link>
-                        <router-link to="/demo" class="hvp dpl pd-8-12 menu__item">
-                            <div class="menu__icon sb__candidate_icon m-r-16"></div>
-                            <div :class="['menu__text', { menu__text_hide: props.isCollapse }]">Ứng viên</div>
+                        <router-link to="/hello" class="hvp dpl menu__item">
+                            <MsButton
+                                iconLeft="mi-sidebar-salary-composition mg-r-8"
+                                message="Thành phần lương"
+                                :class="['align-left', { 'is-collapse': props.isCollapse }]"
+                                >
+                            </MsButton>
                         </router-link>
-                        <router-link to="/demo" class="hvp dpl pd-8-12 menu__item">
-                            <div class="menu__icon m-r-16"><i class="fa-regular fa-circle-play"></i></div>
-                            <div :class="['menu__text', { menu__text_hide: props.isCollapse }]">Demo</div>
+                        <router-link to="/demo" class="hvp dpl menu__item">
+                            <MsButton
+                                iconLeft="mi-sidebar-salary-template mg-r-8"
+                                message="Mẫu bảng lương"
+                                :class="['align-left', { 'is-collapse': props.isCollapse }]"
+                                >
+                            </MsButton>
                         </router-link>
-    
-                        <router-link to="/demo" class="hvp dpl pd-8-12 menu__item">
-                            <div class="menu__icon m-r-16"><i class="fa-regular fa-calendar"></i></div>
-                            <div :class="['menu__text', { menu__text_hide: props.isCollapse }]">Lịch</div>
+                        <router-link to="/demo" class="hvp dpl menu__item">
+                            <MsButton
+                                iconLeft="mi-sidebar-salary-data mg-r-8"
+                                message="Dữ liệu tính lương"
+                                iconRight="ms-icon-chevron-right mg-l-16 "
+                                :class="['align-left', { 'is-collapse': props.isCollapse }]"
+                                >
+                            </MsButton>
                         </router-link>
-    
-                        <router-link to="/demo" class="hvp dpl pd-8-12 menu__item">
-                            <div class="menu__icon m-r-16 sb__talent_pool_icon"></div>
-                            <div :class="['menu__text', { menu__text_hide: props.isCollapse }]">Kho tiềm năng</div>
+                        <router-link to="/demo" class="hvp dpl menu__item">
+                            <MsButton
+                                iconLeft="mi-sidebar-salary-table mg-r-8"
+                                message="Tính lương"
+                                iconRight="ms-icon-chevron-right mg-l-16 "
+                                :class="['align-left', { 'is-collapse': props.isCollapse }]"
+                                >
+                            </MsButton>
                         </router-link>
-    
-                        <router-link to="/demo" class="hvp dpl pd-8-12 menu__item">
-                            <div class="menu__icon m-r-16 sb__recrui_campaign_icon"></div>
-                            <div :class="['menu__text', { menu__text_hide: props.isCollapse }]">Chiến dịch tuyển dụng</div>
+                        <router-link to="/demo" class="hvp dpl menu__item">
+                            <MsButton
+                                iconLeft="mi-sidebar-payment mg-r-8"
+                                message="Chi trả"
+                                iconRight="ms-icon-chevron-right mg-l-16 "
+                                :class="['align-left', { 'is-collapse': props.isCollapse }]"
+                                >
+                            </MsButton>
                         </router-link>
-    
-                        <router-link to="/demo" class="hvp dpl pd-8-12 menu__item">
-                            <div class="menu__icon m-r-16 sb__task_icon"></div>
-                            <div :class="['menu__text', { menu__text_hide: props.isCollapse }]">Công việc</div>
-                        </router-link>
-    
-                        <router-link to="/demo" class="hvp dpl pd-8-12 menu__item">
-                            <div class="menu__icon m-r-16"><i class="fa-regular fa-envelope"></i></div>
-                            <div :class="['menu__text', { menu__text_hide: props.isCollapse }]">aiMarketing</div>
-                        </router-link>
-    
-                        <router-link to="/demo" class="hvp dpl pd-8-12 menu__item">
-                            <div class="menu__icon m-r-16 sb__report_icon"></div>
-                            <div :class="['menu__text', { menu__text_hide: props.isCollapse }]">Báo cáo</div>
-                        </router-link>
-    
-                        <router-link to="/demo" class="hvp dpl pd-8-12 menu__item">
-                            <div class="menu__icon m-r-16 sb__setting_icon"></div>
-                            <div :class="['menu__text', { menu__text_hide: props.isCollapse }]">Thiết lập</div>
-                        </router-link>
-    
-                        <router-link to="/demo" class="hvp dpl pd-8-12 menu__item">
-                            <div class="menu__icon m-r-16"><i class="fa-solid fa-ellipsis"></i></div>
-                            <div :class="['menu__text', { menu__text_hide: props.isCollapse }]">Khác</div>
+                        <router-link to="/demo" class="hvp dpl menu__item">
+                            <MsButton
+                                iconLeft="mi-sidebar-report mg-r-8"
+                                message="Báo cáo"
+                                :class="['align-left', { 'is-collapse': props.isCollapse }]"
+                                >
+                            </MsButton>
                         </router-link>
                     </div>
                 </div>
                 <div class="sb__bottom">
                     <div :class="['sb__btn_left hvp', { sb__btn_left_hide: props.isCollapse }]" @click="toggleCollapse">
-                        <div :class="['sb__left_icon', { hide_sidebar_btn: props.isCollapse }]"></div>
+                        <div :class="['ms-icon-sidebar-collapse', { hide_sidebar_btn: props.isCollapse }]"></div>
                         <div :class="['sb__left_title m-l-8', { sb__left_title_hide: props.isCollapse }]">Thu gọn</div>
                     </div>
                 </div>
@@ -69,6 +76,7 @@
 </template>
 <script setup>
 import { defineProps, defineEmits } from "vue";
+import MsButton from "@/components/base/MsButton.vue";
 
 const props = defineProps(['isCollapse']);
 const emit = defineEmits(['update:isCollapse'])
@@ -78,8 +86,8 @@ const toggleCollapse = () => {
 </script>
 <style scoped>
 .sidebar {
-    width: 233px;
-    background-color: #fff;
+    width: 235px;
+    background-color: #ffffff;
     height: 100%;
     display: flex;
     flex-direction: column;
@@ -114,6 +122,8 @@ const toggleCollapse = () => {
     color: rgba(255, 255, 255, 0.72);
     text-decoration: none;
     transition: all 0.2s ease;
+    gap: 12px;
+    width: 206px;
 }
 
 .menu__item:hover {
@@ -142,12 +152,12 @@ const toggleCollapse = () => {
 }
 
 .sb__btn_left {
-    background-color: rgba(255, 255, 255, 0.1);
-    border: 0.5px solid #fff;
+    background-color: #fafafa;
+    border: 0.5px #D7D7D7 solid;
     border-radius: 4px;
     padding: 8px;
     width: 200px;
-    color: #fff;
+    color: #000000;
     display: flex;
 }
 
@@ -166,5 +176,18 @@ const toggleCollapse = () => {
 
 .sb__btn_left_hide {
     width: 40px;
+}
+
+:deep(.ms-button.align-left) {
+    justify-content: flex-start !important;
+    font-size: 13px;
+}
+
+:deep(.ms-button.is-collapse .ms-button__content) {
+    display: none;
+}
+
+:deep(.ms-button.is-collapse .ms-button__icon--right) {
+    display: none;
 }
 </style>

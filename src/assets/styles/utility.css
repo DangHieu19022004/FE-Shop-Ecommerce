@@ -85,6 +85,14 @@ a {
   margin: 8px;
 }
 
+.mg-r-8 {
+  margin-right: 8px;
+}
+
+.mg-l-16 {
+  margin-left: 16px;
+}
+
 .m-b-8 {
   margin-bottom: 8px;
 }
