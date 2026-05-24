@@ -79,11 +79,7 @@ const toggleCollapse = () => {
 <style scoped>
 .sidebar {
     width: 233px;
-    background-color: #051529;
-    background-image: url();
-    background-position: bottom;
-    background-repeat: no-repeat;
-    background-size: cover;
+    background-color: #fff;
     height: 100%;
     display: flex;
     flex-direction: column;
@@ -92,7 +88,6 @@ const toggleCollapse = () => {
 
 .sbbg {
     height: 100%;
-    background: rgba(0, 0, 0, 0.3);
     padding-top: 32px;
     padding-bottom: 16px;
     display: flex;

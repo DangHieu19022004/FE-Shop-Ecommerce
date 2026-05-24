@@ -29,6 +29,26 @@ a {
   gap: 12px;
 }
 
+.icon--sm {
+  width: 16px !important;
+  height: 16px !important;
+}
+
+.icon--base {
+  width: 20px !important;
+  height: 20px !important;
+}
+
+.icon--md {
+  width: 24px !important;
+  height: 24px !important;
+}
+
+.icon--lg {
+  width: 36px !important;
+  height: 36px !important;
+}
+
 .split-3cols {
   justify-content: space-between;
   align-items: flex-end;

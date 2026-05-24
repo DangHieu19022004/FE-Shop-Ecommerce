@@ -3,7 +3,7 @@
     <label v-if="label" class="ms-input__label" :for="id">{{ label }}</label>
     <input 
       ref="inputRef"
-      :class="[props.class, { 'ms-input--error': props.errorMessages }]"
+      :class="['ms-input-in', props.class, { 'ms-input--error': props.errorMessages }]"
       :value="props.type === 'file' ? '' : modelValue"
       :type="type" 
       :placeholder="placeholder" 
@@ -102,7 +102,15 @@ const handleFocus = () => {
 }
 .ms-input {
   position: relative;
+}
 
+.ms-input-in{
+  width: 100%;
+  padding: 4px 8px;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  background-color: transparent;
 }
 
 .ms-input__tooltip {
