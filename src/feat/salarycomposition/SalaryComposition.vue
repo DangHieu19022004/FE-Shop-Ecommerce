@@ -113,7 +113,11 @@ import MsInput from "@/components/base/MsInput.vue";
   margin-right: 4px;
   font-size: 14px;
 }
-
+.status-value{
+    color: #111;
+    font-weight: 500;
+    font-size: 14px;
+}
 .content_body{
     width: 100%;
     flex: 1; /* Chiếm toàn bộ không gian còn lại */

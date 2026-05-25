@@ -174,6 +174,11 @@ const toggleCollapse = () => {
     width: 80px;
 }
 
+.sidebar.sidebar_hide .menu__item {
+    width: 56px;
+    justify-content: center;
+}
+
 .sb__btn_left_hide {
     width: 40px;
 }
@@ -189,5 +194,12 @@ const toggleCollapse = () => {
 
 :deep(.ms-button.is-collapse .ms-button__icon--right) {
     display: none;
+}
+
+:deep(.ms-button.is-collapse) {
+    width: 40px;
+    justify-content: center !important;
+    padding-left: 0;
+    padding-right: 0;
 }
 </style>
