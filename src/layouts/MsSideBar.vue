@@ -11,7 +11,7 @@
                                 >
                             </MsButton>
                         </router-link>
-                        <router-link to="/hello" class="hvp dpl menu__item">
+                        <router-link to="/salarycomposition" class="hvp dpl menu__item">
                             <MsButton
                                 iconLeft="mi-sidebar-salary-composition mg-r-8"
                                 message="Thành phần lương"

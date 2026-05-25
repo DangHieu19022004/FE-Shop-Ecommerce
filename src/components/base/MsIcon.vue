@@ -1,7 +1,7 @@
 <template>
     <div
         ref="iconRef"
-        :class='["ms-icon", `ms-icon--${props.shape}`, { "ms-icon--no-hover": props.background, "ms-icon--no-cursor": props.background }]'
+        :class='["ms-icon", `ms-icon--${props.shape}`, { "ms-icon--no-hover": props.background, "ms-icon--no-cursor": props.background }, props.wrapperClass]'
         @mouseenter="handleMouseEnter"
     >
         <div :class="props.class"></div>
@@ -24,6 +24,10 @@ const props = defineProps({
         default: "",
     },
     class: {
+        type: String,
+        default: "",
+    },
+    wrapperClass: {
         type: String,
         default: "",
     },

@@ -73,6 +73,10 @@ a {
   display: none;
 }
 
+.fw-500 {
+  font-weight: 500;
+}
+
 .pd-12 {
   padding: 12px;
 }

@@ -1,18 +1,27 @@
 <template lang="">
 <button
-  :class="['ms-button', `ms-button--${type}`, `ms-button--tooltip-${tooltipPosition}`]"
-  :data-tooltip="message"
+  :class="[
+    'ms-button',
+    `ms-button--${type}`,
+    `ms-button--tooltip-${tooltipPosition}`,
+    { 'ms-button--line-left': normalizedLineLeft, 'ms-button--line-right': normalizedLineRight },
+    { 'ms-button--no-tooltip': !normalizedIsTooltip },
+    { 'ms-button--icon-only': !message && (iconLeft || iconRight) }
+  ]"
+  :data-tooltip="normalizedIsTooltip ? message : ''"
   @click="emit('click')"
 >
     <i v-if="iconLeft" :class="[iconLeft, 'ms-button__icon']"></i>
-    <span class="ms-button__content">
-        {{ message }}
+    <span v-if="message || $slots.default" class="ms-button__content">
+         <slot>
+          {{ message }}
+        </slot>
     </span>
     <i v-if="iconRight" :class="[iconRight, 'ms-button__icon', 'ms-button__icon--right']"></i>
 </button>
 </template>
 <script setup>
-import { defineProps, defineEmits } from "vue";
+import { computed, defineProps, defineEmits } from "vue";
 
 /**
  * NOTICE: emit + props
@@ -38,8 +47,29 @@ const props = defineProps({
     type: String,
     default: "right",
   },
+  isTooltip: {
+    type: Boolean,
+    default: true,
+  },
+  lineStateLeft: {
+    type: Boolean,
+    default: false,
+  },
+  lineStateRight: {
+    type: Boolean,
+    default: false,
+  },
 });
 const emit = defineEmits(["click"]);
+
+const normalizeBool = (value) => {
+  if (value === "false" || value === false || value === 0) return false;
+  return Boolean(value);
+};
+
+const normalizedIsTooltip = computed(() => normalizeBool(props.isTooltip));
+const normalizedLineLeft = computed(() => normalizeBool(props.lineStateLeft));
+const normalizedLineRight = computed(() => normalizeBool(props.lineStateRight));
 </script>
 <style scoped>
 .ms-button {
@@ -55,11 +85,16 @@ const emit = defineEmits(["click"]);
   position: relative;
   width: 100%;
 }
-.ms-button__icon{
-  padding: 8px;
+.ms-button__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ms-button--icon-only .ms-button__icon {
+  padding: 0;
 }
 .ms-button__icon--right {
-  margin-left: auto;
+  margin-left: 8px;
 }
 .ms-button--none {
   background-color: transparent;
@@ -103,9 +138,29 @@ const emit = defineEmits(["click"]);
 .ms-button--success:hover {
   background-color: #218838;
 }
+.ms-button--green {
+  background-color: #0E9A62;
+  color: #fff !important;
+}
+.ms-button--green:hover {
+  background-color: #0A724B;
+  color: #fff !important;
+}
 .ms-button__content {
   display: inline-block;
   /* margin-left: 0.5rem; */
+}
+
+.ms-button--line-left {
+  border-left: 1px solid #ffffff !important;
+  border-top-left-radius: 0 !important;
+  border-bottom-left-radius: 0 !important;
+}
+
+.ms-button--line-right {
+  border-right: 1px solid #ffffff !important;
+  border-top-right-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
 }
 
 .ms-button::after,
@@ -140,6 +195,14 @@ const emit = defineEmits(["click"]);
 .ms-button:hover::before {
   opacity: 1;
   visibility: visible;
+}
+
+.ms-button--no-tooltip::after,
+.ms-button--no-tooltip::before,
+.ms-button--no-tooltip:hover::after,
+.ms-button--no-tooltip:hover::before {
+  opacity: 0;
+  visibility: hidden;
 }
 
 .ms-button--tooltip-right::after {
