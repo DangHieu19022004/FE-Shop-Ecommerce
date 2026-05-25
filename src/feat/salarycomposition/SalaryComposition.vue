@@ -61,8 +61,45 @@
           </div>
         </div>
         <div class="content_body">
-         <div class="table">
-            <!-- Bảng mockup -->
+         <div class="content_body_table">
+            <MsTable
+              :fields="fields"
+              :data-rows="salaryCompositions"
+              table-class="candicate_table"
+              table-class-head="candicate_table_head"
+              table-class-body="candicate_table_body"
+            >
+              <template #header-checkbox>
+                <input type="checkbox" name="selectedCandidates" id="select-all" />
+              </template>
+
+              <template #cell-checkbox="{ row }">
+                <input
+                  type="checkbox"
+                  name="selectedCandidates"
+                  class="checkbox_item"
+                  :id="row.salary_composition_id"
+                  :value="row.salary_composition_id"
+                />
+              </template>
+
+              <template #cell-actions="{ row }">
+                <div class="btn__action">
+                  <div
+                    class="btn__edit_item hvp"
+                    :data-id="row.salary_composition_id"
+                    @click="emit('openFormEdit', row)"
+                  ></div>
+                  <div
+                    class="btn__delete_item hvp"
+                    :data-id="row.salary_composition_id"
+                    @click="emit('deleteItem', row)"
+                  >
+                    <i class="fa-solid fa-trash"></i>
+                  </div>
+                </div>
+              </template>
+            </MsTable>
          </div>
         </div>
         <div class="content_body_footer">
@@ -103,9 +140,56 @@
 </template>
 <script setup>
 import MsButton from "@/components/base/MsButton.vue";
-import BaseDataGrid from "@/components/base/BaseDataGrid.vue";
 import MsIcon from "@/components/base/MsIcon.vue";
 import MsInput from "@/components/base/MsInput.vue";
+import MsTable from "@/components/base/MsTable.vue";
+
+const emit = defineEmits(["openFormEdit", "deleteItem"]);
+
+const salaryCompositions = [
+  {
+    salary_composition_id: "mock-id-001",
+    salary_composition_code: "LUONG_CO_BAN",
+    salary_composition_name: "Lương cơ bản",
+    organization_name: "Tất cả đơn vị",
+    composition_type: "Lương",
+    composition_nature: "Thu nhập",
+    taxable: "Chịu thuế",
+    tax_deduction: "Không",
+    quota: "",
+    value_type: "Tiền tệ",
+    formula: "15000000",
+    description: "Lương cơ bản nhân viên",
+    option_show_paycheck: "Có",
+    source_type: "Hệ thống",
+    status: "Đang theo dõi",
+  },
+];
+
+const fields = [
+  { key: "", label: "", slot: "checkbox" },
+  { key: "salary_composition_code", label: "Mã thành phần" },
+  { key: "salary_composition_name", label: "Tên thành phần" },
+  { key: "organization_name", label: "Đơn vị áp dụng" },
+  { key: "composition_type", label: "Loại thành phần" },
+  { key: "composition_nature", label: "Tính chất" },
+  { key: "taxable", label: "Chịu thuế" },
+  { key: "tax_deduction", label: "Giảm trừ khi tính thuế" },
+  { key: "quota", label: "Định mức" },
+  { key: "value_type", label: "Kiểu giá trị" },
+  { key: "formula", label: "Giá trị" },
+  { key: "description", label: "Mô tả" },
+  { key: "option_show_paycheck", label: "Hiển thị trên phiếu lương" },
+  { key: "source_type", label: "Nguồn tạo" },
+  { key: "status", label: "Trạng thái" },
+  {
+    key: "actions",
+    label: "",
+    slot: "actions",
+    classHead: "col_unhide",
+    classBody: "col_unhide",
+  },
+];
 </script>
 <style>
 .status-label {
@@ -124,11 +208,16 @@ import MsInput from "@/components/base/MsInput.vue";
     background-color: #f8f9fa; /* Màu demo cho thấy vùng bảng */
     border-top: 1px solid #d9dee7;
     border-bottom: 1px solid #d9dee7;
+  min-width: 0;
+  min-height: 0;
 }
 
-.table {
-  width: 100%;
-  height: 100%;
+.content_body_table {
+    flex: 1;
+    width: 100%;        
+    overflow: auto;
+  min-width: 0;
+  min-height: 0;
 }
 
 .content_body_wrapper {
@@ -137,12 +226,16 @@ import MsInput from "@/components/base/MsInput.vue";
   flex: 1;
   background-color: #fff;
   border-radius: 4px;
+  min-width: 0;
+  min-height: 0;
 }
 
 .content {
   display: flex;
   flex-direction: column;
   height: 100%;
+  min-width: 0;
+  min-height: 0;
 }
 
 .content_bg {
@@ -151,6 +244,8 @@ import MsInput from "@/components/base/MsInput.vue";
   flex: 1;
   background-color: #f1f2f1;
   padding: 24px;
+  min-width: 0;
+  min-height: 0;
 }
 
 .content_body_footer {
@@ -329,5 +424,15 @@ import MsInput from "@/components/base/MsInput.vue";
   padding: 6px !important;
   margin-left: 12px;
   background-color: #fff;
+}
+
+.btn__delete_item {
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #7a8188;
 }
 </style>
