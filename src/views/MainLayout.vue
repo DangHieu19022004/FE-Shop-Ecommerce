@@ -13,7 +13,7 @@
           @openFormAdd="handleOpenFormAdd"
           @openFormEdit="handleOpenFormEdit"
           @deleteItem="handleDeleteItem"
-          @error="openAlert"
+          @openAlert="openAlert"
           @alertImportData="handleAlertImportData"
         />
       </router-view>
@@ -29,6 +29,10 @@
         :title="alertState.title"
         :message="alertState.message"
         :showConfirmButton="alertState.showConfirmButton"
+        :cancelText="alertState.cancelText"
+        :confirmText="alertState.confirmText"
+        :cancelType="alertState.cancelType"
+        :confirmType="alertState.confirmType"
         @close="alertState.isShow = false"
         @confirm="handleConfirmAlert"
       />
@@ -62,10 +66,15 @@ const alertState = ref({
   title: "",
   message: "",
   showConfirmButton: false,
+  cancelText: "Hủy",
+  confirmText: "Xác nhận",
+  cancelType: "none",
+  confirmType: "green"
 });
 const pendingUpdate = ref(null);
 const pendingDelete = ref(null);
 const pendingImport = ref(null);
+const pendingAction = ref(null);
 const visibleColumns = ref({
 
 });
@@ -80,6 +89,10 @@ const handleAlertImportData = (jsonData) => {
     title: "Xác nhận",
     message: "Bạn có chắc muốn nhập dữ liệu từ file không?",
     showConfirmButton: true,
+    cancelText: "Hủy",
+    confirmText: "Xác nhận",
+    cancelType: "none",
+    confirmType: "green"
   };
   //Lưu lại thông tin dữ liệu đang chờ nhập
   pendingImport.value = { jsonData };
@@ -100,11 +113,18 @@ const handleOpenFormAdd = () => {
 
 const handleConfirmAlert = () => {
   alertState.value.isShow = false;
+
+  // Nếu có callback onConfirm từ component con (vd: FormSalaryComposition)
+  if (pendingAction.value) {
+    pendingAction.value();
+    pendingAction.value = null;
+    return;
+  }
+
   isShowForm.value = false;
 
   if (pendingUpdate.value) {
     //Cập nhật dữ liệu
-
     pendingUpdate.value = null;
     toasts.value.push({
       id: Date.now() + Math.random(),
@@ -115,7 +135,6 @@ const handleConfirmAlert = () => {
   }
   if (pendingDelete.value) {
     //Xóa dữ liệu
-
     pendingDelete.value = null;
     toasts.value.push({
       id: Date.now() + Math.random(),
@@ -126,7 +145,6 @@ const handleConfirmAlert = () => {
   }
   if (pendingImport.value) {
     //Nhập dữ liệu xlsx
-
     pendingImport.value = null;
     toasts.value.push({
       id: Date.now() + Math.random(),
@@ -149,16 +167,26 @@ const handleDeleteItem = (candidateData) => {
     title: "Xác nhận",
     message: "Bạn có chắc muốn xóa ứng viên này không?",
     showConfirmButton: true,
+    cancelText: "Hủy",
+    confirmText: "Xác nhận",
+    cancelType: "none",
+    confirmType: "green"
   };
   //Lưu lại thông tin ứng viên đang chờ xóa
   pendingDelete.value = { candidateData };
 };
 const openAlert = (payload) => {
+  // Lưu callback onConfirm nếu component con truyền vào
+  pendingAction.value = payload.onConfirm ?? null;
   alertState.value = {
     isShow: true,
     title: payload.title,
     message: payload.message,
-    showConfirmButton: payload.showConfirmButton,
+    showConfirmButton: payload.showConfirmButton ?? true,
+    cancelText: payload.cancelText ?? "Hủy",
+    confirmText: payload.confirmText ?? "Xác nhận",
+    cancelType: payload.cancelType ?? "none",
+    confirmType: payload.confirmType ?? "green"
   };
 };
 const initCandidateData = () => {

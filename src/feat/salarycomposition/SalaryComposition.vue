@@ -1,5 +1,6 @@
 <template lang="">
-  <div class="content_bg">
+  <FormSalaryComposition v-if="isShowForm" @close="isShowForm = false" @openAlert="$emit('openAlert', $event)"/>
+  <div v-else class="content_bg">
     <div class="content">
       <div class="content_header">
         <div>
@@ -20,6 +21,7 @@
             :isTooltip="false"
             lineStateRight
             iconLeft="mi-plus-white mg-r-8 fw-500"
+            @click="handleOpenForm"
           />
           <MsButton
             class="btn-add-menu fw-500"
@@ -27,7 +29,14 @@
             type="green"
             :isTooltip="false"
             lineStateLeft
+            @click="openSelectComposition"
           />
+          <div v-if="toggleSelectComposition" class="select-composition">
+            <MsButton
+              message="Chọn từ danh mục của hệ thống"
+              :isTooltip="false"
+            />
+          </div>
         </div>
       </div>
       <div class="content_body_wrapper">
@@ -152,8 +161,19 @@ import MsButton from "@/components/base/MsButton.vue";
 import MsIcon from "@/components/base/MsIcon.vue";
 import MsInput from "@/components/base/MsInput.vue";
 import MsTable from "@/components/base/MsTable.vue";
+import FormSalaryComposition from "./FormSalaryComposition.vue";
+import { ref } from "vue";
 
-const emit = defineEmits(["openFormEdit", "deleteItem"]);
+var toggleSelectComposition = ref(false)
+var  isShowForm = ref(false)
+const handleOpenForm = () => {
+  isShowForm.value = !isShowForm.value
+}
+const openSelectComposition = () => {
+  toggleSelectComposition.value=!toggleSelectComposition.value
+}
+
+const emit = defineEmits(["openFormEdit", "deleteItem", "openAlert"]);
 
 const salaryCompositions = [
   {
@@ -202,6 +222,7 @@ const fields = [
     resizable: false,
   },
 ];
+
 </script>
 <style scoped>
   .btn_action{
@@ -346,6 +367,7 @@ const fields = [
 .content_header_right {
   display: flex;
   align-items: center;
+  position: relative;
 }
 
 .content_header_right .ms-button {
@@ -455,5 +477,38 @@ const fields = [
   align-items: center;
   justify-content: center;
   color: #7a8188;
+}
+
+/* ── Select Composition Dropdown ── */
+.select-composition {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 4px;
+  z-index: 100;
+  background-color: #fff;
+  border: 1px solid #d9dee7;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  min-width: 240px;
+  padding: 4px;
+}
+
+.select-composition :deep(.ms-button) {
+  width: 100% !important;
+  justify-content: flex-start !important;
+  border: none !important;
+  background: transparent !important;
+  padding: 8px 12px !important;
+  height: auto !important;
+  font-size: 14px;
+  color: #1f1f1f;
+  cursor: pointer;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.select-composition :deep(.ms-button:hover) {
+  background-color: #f1f2f1 !important;
 }
 </style>

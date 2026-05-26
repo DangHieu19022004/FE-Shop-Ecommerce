@@ -677,3 +677,9 @@ CSS Header:
     mask-repeat: no-repeat;
     background-color: #25b973 !important;
 }
+
+.mi-close {
+    width: 10px;
+    height: 10px;
+    background: url("/src/assets/icons/mi-many.svg") no-repeat -443px -57px;
+}
