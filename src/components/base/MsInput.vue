@@ -1,6 +1,6 @@
 <template lang="">
-  <div class="ms-input">
-    <label v-if="label" class="ms-input__label" :for="id">{{ label }}</label>
+  <div :class="['ms-input', { 'ms-input--horizontal': horizontal }]">
+    <label v-if="label" class="ms-input__label" :for="id">{{ label }} <span v-if="isRequired" class="color-red"> *</span></label>
     <input 
       ref="inputRef"
       :class="['ms-input-in', props.class, { 'ms-input--error': props.errorMessages }]"
@@ -63,6 +63,14 @@ const props = defineProps({
     type: String,
     default: "",
   },
+  isRequired: {
+    type: Boolean,
+    default: false,
+  },
+  horizontal: {
+    type: Boolean,
+    default: false,
+  },
 });
 const emit = defineEmits(["update:modelValue", "blur", "focus", "change"]);
 const inputRef = ref(null);
@@ -89,65 +97,131 @@ const handleFocus = () => {
   emit("focus");
 };
 </script>
-<style >
+<style>
+.ms-input {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
+
+/* Layout 2 cột: label trái, input phải */
+.ms-input--horizontal {
+  flex-direction: row;
+  gap: 0;
+}
+
+.ms-input--horizontal .ms-input__label {
+  flex: 0 0 200px;
+  min-width: 200px;
+  margin-bottom: 0;
+  padding-right: 12px;
+  font-size: 13px;
+  color: #374151;
+  line-height: 36px;
+}
+
+.ms-input--horizontal .ms-input-in {
+  flex: 1;
+  min-width: 0;
+}
+
+.ms-input--horizontal .ms-input__tooltip {
+  left: 200px;
+}
+
+
 .ms-input__label {
   display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 2px;
+  user-select: none;
+}
+
+.ms-input-in {
+  width: 100%;
+  height: 36px;
+  padding: 0 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
   font-size: 14px;
-  margin-bottom: 4px;
-  color: #111;
+  color: #111827;
+  background-color: #ffffff;
+  outline: none;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
+}
+
+.ms-input-in::placeholder {
+  color: #9ca3af;
+  font-size: 13px;
+}
+
+.ms-input-in:hover {
+  border-color: #0E9A62;
+  background-color: #f9fffe;
+}
+
+.ms-input-in:focus {
+  border-color: #0E9A62;
+  box-shadow: 0 0 0 3px rgba(14, 154, 98, 0.12);
+  background-color: #ffffff;
 }
 
 .ms-input .ms-input--error {
-  border: 1px solid #f44336 !important;
-}
-.ms-input {
-  position: relative;
+  border-color: #f44336 !important;
+  box-shadow: 0 0 0 3px rgba(244, 67, 54, 0.1) !important;
 }
 
-.ms-input-in{
-  width: 100%;
-  padding: 4px 8px;
-  border: none;
-  border-radius: 4px;
-  font-size: 14px;
-  background-color: transparent;
+.ms-input .ms-input--error:hover,
+.ms-input .ms-input--error:focus {
+  border-color: #f44336 !important;
 }
 
+/* Tooltip lỗi */
 .ms-input__tooltip {
   position: absolute;
-
-  bottom: calc(100% + 8px);
+  bottom: calc(100% + 6px);
   left: 0;
-
   background: #f44336;
-  color: white;
-
-  padding: 6px 10px;
+  color: #fff;
+  padding: 5px 10px;
   border-radius: 4px;
-
   font-size: 12px;
   white-space: nowrap;
-
   opacity: 0;
   visibility: hidden;
-
-  transition: 0.2s;
+  transition: opacity 0.15s ease, visibility 0.15s ease;
   z-index: 999;
+  pointer-events: none;
 }
 
-/* hover input -> hiện tooltip */
+.ms-input__tooltip::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 12px;
+  border: 5px solid transparent;
+  border-top-color: #f44336;
+}
+
 .ms-input:hover .ms-input__tooltip {
   opacity: 1;
   visibility: visible;
 }
+
 .ms-input__error {
   min-height: 16px;
   font-size: 12px;
   color: transparent;
 }
+
 .ms-input__error--visible {
   color: #f44336;
 }
+
 .width-100 {
   width: 100%;
 }
