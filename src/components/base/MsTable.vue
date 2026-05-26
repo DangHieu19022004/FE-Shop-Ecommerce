@@ -33,10 +33,7 @@
             >
               <!-- Icon pin hiển khi cột đang được ghim -->
               <span v-if="field.pinned === 'left'" class="col-pin-icon" title="Đang ghim cột">
-                <svg width="10" height="10" viewBox="0 0 16 16" fill="none">
-                  <path d="M9.5 1.5L14.5 6.5L10.5 10.5L8 8L4 12L3 11L7 7L4.5 4.5L8.5 0.5L9.5 1.5Z" fill="#1c6ef3"/>
-                  <line x1="2" y1="14" x2="6" y2="10" stroke="#1c6ef3" stroke-width="1.5" stroke-linecap="round"/>
-                </svg>
+                <div class="mi-pinned"></div>
               </span>
 
               <!-- Nội dung header -->

@@ -3,20 +3,26 @@
         ref="iconRef"
         :class='["ms-icon", `ms-icon--${props.shape}`, { "ms-icon--no-hover": props.background, "ms-icon--no-cursor": props.background }, props.wrapperClass]'
         @mouseenter="handleMouseEnter"
+        @mouseleave="handleMouseLeave"
     >
         <div :class="props.class"></div>
-        <span
-            v-if="props.message && !props.background"
-            ref="tooltipRef"
-            :class='["ms-icon__tooltip", `ms-icon__tooltip--${tooltipPosition}`]'
-            :style="{ '--tooltip-offset-x': `${tooltipOffsetX}px` }"
-        >
-            {{ props.message }}
-        </span>
+
+        <!-- Teleport ra body để thoát hoàn toàn khỏi mọi stacking context của cha -->
+        <Teleport to="body">
+            <span
+                v-if="props.message && !props.background && isHovered"
+                ref="tooltipRef"
+                :class='["ms-icon__tooltip", `ms-icon__tooltip--${tooltipPosition}`]'
+                :style="tooltipStyle"
+            >
+                {{ props.message }}
+            </span>
+        </Teleport>
     </div>
 </template>
+
 <script setup>
-import {defineProps, nextTick, ref} from "vue";
+import { defineProps, nextTick, ref } from "vue";
 
 const props = defineProps({
     message: {
@@ -44,9 +50,12 @@ const props = defineProps({
 const iconRef = ref(null);
 const tooltipRef = ref(null);
 const tooltipPosition = ref("bottom");
-const tooltipOffsetX = ref(0);
+const tooltipStyle = ref({});
+const isHovered = ref(false);
 
 const handleMouseEnter = () => {
+    isHovered.value = true;
+    // Chờ Teleport render xong tooltip trước khi đo kích thước
     nextTick(() => {
         if (!iconRef.value || !tooltipRef.value) return;
 
@@ -57,27 +66,34 @@ const handleMouseEnter = () => {
         const gap = 6;
         const safePadding = 8;
 
-        const spaceTop = iconRect.top;
         const spaceBottom = viewportHeight - iconRect.bottom;
+        const spaceTop = iconRect.top;
 
+        let top;
         if (spaceBottom < tooltipRect.height + gap && spaceTop >= tooltipRect.height + gap) {
             tooltipPosition.value = "top";
+            top = iconRect.top - tooltipRect.height - gap;
         } else {
             tooltipPosition.value = "bottom";
+            top = iconRect.bottom + gap;
         }
 
-        const idealLeft = iconRect.left + iconRect.width / 2 - tooltipRect.width / 2;
-        const overflowLeft = safePadding - idealLeft;
-        const overflowRight = idealLeft + tooltipRect.width - (viewportWidth - safePadding);
+        // Căn giữa theo icon, điều chỉnh nếu tràn viewport
+        let left = iconRect.left + iconRect.width / 2 - tooltipRect.width / 2;
+        left = Math.max(safePadding, Math.min(left, viewportWidth - tooltipRect.width - safePadding));
 
-        let offsetX = 0;
-        if (overflowLeft > 0) offsetX += overflowLeft;
-        if (overflowRight > 0) offsetX -= overflowRight;
-
-        tooltipOffsetX.value = offsetX;
+        tooltipStyle.value = {
+            top: top + "px",
+            left: left + "px",
+        };
     });
 };
+
+const handleMouseLeave = () => {
+    isHovered.value = false;
+};
 </script>
+
 <style>
 .ms-icon {
     position: relative;
@@ -104,35 +120,39 @@ const handleMouseEnter = () => {
     background-color: #B6B5B5;
 }
 
+/* Tooltip render ở body qua Teleport — thoát mọi stacking context */
 .ms-icon__tooltip {
-    position: absolute;
-    left: 50%;
-    transform: translateX(calc(-50% + var(--tooltip-offset-x, 0px)));
+    position: fixed;
     padding: 10px 18px;
     border-radius: 4px;
     background-color: #222;
     color: #fff;
     font-size: 14px;
     white-space: nowrap;
-    visibility: hidden;
     pointer-events: none;
-    transition: opacity 0.15s ease, visibility 0.15s ease;
-    z-index: 1;
+    z-index: 99999;
+    animation: ms-tooltip-in 0.12s ease forwards;
 }
 
-.ms-icon__tooltip--bottom {
-    top: calc(100% + 6px);
+@keyframes ms-tooltip-in {
+    from { opacity: 0; transform: translateY(4px); }
+    to   { opacity: 1; transform: translateY(0); }
 }
 
 .ms-icon__tooltip--top {
-    bottom: calc(100% + 6px);
+    animation: ms-tooltip-in-up 0.12s ease forwards;
+}
+
+@keyframes ms-tooltip-in-up {
+    from { opacity: 0; transform: translateY(-4px); }
+    to   { opacity: 1; transform: translateY(0); }
 }
 
 .ms-icon__tooltip::after {
     content: "";
     position: absolute;
     left: 50%;
-    transform: translateX(calc(-50% - var(--tooltip-offset-x, 0px)));
+    transform: translateX(-50%);
     border-width: 5px;
     border-style: solid;
 }
@@ -145,10 +165,5 @@ const handleMouseEnter = () => {
 .ms-icon__tooltip--top::after {
     bottom: -10px;
     border-color: #222 transparent transparent transparent;
-}
-
-.ms-icon:hover .ms-icon__tooltip {
-    opacity: 1;
-    visibility: visible;
 }
 </style>
