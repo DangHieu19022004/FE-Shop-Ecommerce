@@ -3,31 +3,14 @@
     <div class="content">
       <div class="content_header">
         <div>
-          <h2 class="content_header_left">Thành phần lương</h2>
-        </div>
-        <div class="content_header_right">
-          <MsButton
-            class="btn-system mg-r-8 fw-500"
-            message="Danh mục của hệ thống"
-            :isTooltip="false"
-            iconLeft="mi-rule mg-r-8"
-            @click="$router.push('/salary-composition-system')"
-          />
-          <MsButton
-            class="btn-add fw-500"
-            message="Thêm"
-            type="green"
-            :isTooltip="false"
-            lineStateRight
-            iconLeft="mi-plus-white mg-r-8 fw-500"
-          />
-          <MsButton
-            class="btn-add-menu fw-500"
-            iconLeft="mi-chevron-down-white"
-            type="green"
-            :isTooltip="false"
-            lineStateLeft
-          />
+          <div class="content_header_left_icon">
+             <MsIcon
+                class="mi-arrow-left"
+                wrapperClass="icon-back"
+                @click="$router.push('/salarycomposition')"
+            />
+            <h2 class="content_header_left_title">Danh mục thành phần lương của hệ thống</h2>
+          </div>
         </div>
       </div>
       <div class="content_body_wrapper">
@@ -42,18 +25,9 @@
                     :isTooltip="false"
                     iconRight="mi-chevron-down mg-l-8"
                     >
-                    <span class="status-label">Trạng thái:</span>
+                    <span class="status-label">Loại thành phần:</span>
                     <span class="status-value">Tất cả</span>
                 </MsButton>
-            </div>
-            <div class="hvp content_body_search_unit">
-              <MsButton
-                :isTooltip="false"
-                iconRight="mi-chevron-down"
-                class="btn-search-unit"
-              >
-                <span class="status-label">Tất cả đơn vị</span>
-              </MsButton>
             </div>
           </div>
           <div class="content_body_header_right">
@@ -147,77 +121,6 @@ import MsTable from "@/components/base/MsTable.vue";
 
 const emit = defineEmits(["openFormEdit", "deleteItem"]);
 
-const salaryCompositions = [
-  {
-    salary_composition_id: "mock-id-001",
-    salary_composition_code: "LUONG_CO_BAN",
-    salary_composition_name: "Lương cơ bản",
-    organization_name: "Tất cả đơn vị",
-    composition_type: "Lương",
-    composition_nature: "Thu nhập",
-    taxable: "Chịu thuế",
-    tax_deduction: "Không",
-    quota: "",
-    value_type: "Tiền tệ",
-    formula: "15000000",
-    description: "Lương cơ bản nhân viên",
-    option_show_paycheck: "Có",
-    source_type: "Hệ thống",
-    status: "Đang theo dõi",
-  },
-  {
-    salary_composition_id: "mock-id-001",
-    salary_composition_code: "LUONG_CO_BAN",
-    salary_composition_name: "Lương cơ bản",
-    organization_name: "Tất cả đơn vị",
-    composition_type: "Lương",
-    composition_nature: "Thu nhập",
-    taxable: "Chịu thuế",
-    tax_deduction: "Không",
-    quota: "",
-    value_type: "Tiền tệ",
-    formula: "15000000",
-    description: "Lương cơ bản nhân viên",
-    option_show_paycheck: "Có",
-    source_type: "Hệ thống",
-    status: "Đang theo dõi",
-  },
-  {
-    salary_composition_id: "mock-id-001",
-    salary_composition_code: "LUONG_CO_BAN",
-    salary_composition_name: "Lương cơ bản",
-    organization_name: "Tất cả đơn vị",
-    composition_type: "Lương",
-    composition_nature: "Thu nhập",
-    taxable: "Chịu thuế",
-    tax_deduction: "Không",
-    quota: "",
-    value_type: "Tiền tệ",
-    formula: "15000000",
-    description: "Lương cơ bản nhân viên",
-    option_show_paycheck: "Có",
-    source_type: "Hệ thống",
-    status: "Đang theo dõi",
-  },
-  {
-    salary_composition_id: "mock-id-001",
-    salary_composition_code: "LUONG_CO_BAN",
-    salary_composition_name: "Lương cơ bản",
-    organization_name: "Tất cả đơn vị",
-    composition_type: "Lương",
-    composition_nature: "Thu nhập",
-    taxable: "Chịu thuế",
-    tax_deduction: "Không",
-    quota: "",
-    value_type: "Tiền tệ",
-    formula: "15000000",
-    description: "Lương cơ bản nhân viên",
-    option_show_paycheck: "Có",
-    source_type: "Hệ thống",
-    status: "Đang theo dõi",
-  },
-];
-
 const fields = [
   { key: "", label: "", slot: "checkbox", draggable: false, pinnable: false, resizable: false },
   { key: "salary_composition_code", label: "Mã thành phần" },
@@ -243,7 +146,7 @@ const fields = [
   },
 ];
 </script>
-<style scoped>
+<style>
 .status-label {
   color: #666;
   margin-right: 4px;
@@ -263,7 +166,11 @@ const fields = [
   min-width: 0;
   min-height: 0;
 }
-
+.content_header_left_icon{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
 .content_body_table {
     flex: 1;
     width: 100%;        
@@ -370,7 +277,7 @@ const fields = [
 
 .content_header {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
   margin-bottom: 16px;
 }

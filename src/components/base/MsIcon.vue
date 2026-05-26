@@ -4,6 +4,7 @@
         :class='["ms-icon", `ms-icon--${props.shape}`, { "ms-icon--no-hover": props.background, "ms-icon--no-cursor": props.background }, props.wrapperClass]'
         @mouseenter="handleMouseEnter"
         @mouseleave="handleMouseLeave"
+        @click="$emit('click')"
     >
         <div :class="props.class"></div>
 
@@ -22,8 +23,9 @@
 </template>
 
 <script setup>
-import { defineProps, nextTick, ref } from "vue";
+import { defineProps, nextTick, ref, defineEmits } from "vue";
 
+const emit = defineEmits(["click"]);
 const props = defineProps({
     message: {
         type: String,

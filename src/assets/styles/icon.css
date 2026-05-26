@@ -542,3 +542,24 @@ CSS Header:
     background-image: url("/src/assets/icons/mi-unpin.svg");
     background-size: contain;
 }
+
+.mi-arrow-left {
+    width: 14px;
+    height: 12px;
+    -webkit-mask-image: url(https://testcdnamisapp.misacdn.net/apps/payroll/static/img/ICON_V3_1-qvutYp_o.svg);
+    -moz-mask-image: url(https://testcdnamisapp.misacdn.net/apps/payroll/static/img/ICON_V3_1-qvutYp_o.svg);
+    -ms-mask-image: url(https://testcdnamisapp.misacdn.net/apps/payroll/static/img/ICON_V3_1-qvutYp_o.svg);
+    -o-mask-image: url(https://testcdnamisapp.misacdn.net/apps/payroll/static/img/ICON_V3_1-qvutYp_o.svg);
+    mask-image: url(https://testcdnamisapp.misacdn.net/apps/payroll/static/img/ICON_V3_1-qvutYp_o.svg);
+    -webkit-mask-position: -203px -4px;
+    -moz-mask-position: -203px -4px;
+    -ms-mask-position: -203px -4px;
+    -o-mask-position: -203px -4px;
+    mask-position: -203px -4px;
+    -webkit-mask-repeat: no-repeat;
+    -moz-mask-repeat: no-repeat;
+    -ms-mask-repeat: no-repeat;
+    -o-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    background-color: #6e737a !important;
+}

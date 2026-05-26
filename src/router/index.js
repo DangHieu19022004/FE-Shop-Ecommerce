@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from "vue-router";
 import MainLayout from "@/views/MainLayout.vue";
 import DemoView from "@/views/DemoView.vue";
 import SalaryComposition from "@/feat/salarycomposition/SalaryComposition.vue";
+import SalaryCompositionSystem from "@/feat/salarycompositionsystems/SalaryCompositionSystem.vue";
 const routes = [
   {
     path: "/",
@@ -18,6 +19,11 @@ const routes = [
         path: "salarycomposition",
         name: "salaryComposition",
         component: SalaryComposition
+      },
+      {
+        path: "salary-composition-system",
+        name: "salaryCompositionSystem",
+        component: SalaryCompositionSystem
       }
     ]
   }
