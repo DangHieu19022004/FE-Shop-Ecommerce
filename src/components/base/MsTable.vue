@@ -1,6 +1,6 @@
 <template>
   <div class="ms-table-wrapper" ref="wrapperRef">
-    <table :class="tableClass" class="ms-table" ref="tableRef">
+    <table :class="[tableClass, { 'ms-table--empty': dataRows.length === 0 }]" class="ms-table" ref="tableRef">
       <!-- COLGROUP để control width theo từng cột -->
       <colgroup>
         <col
@@ -53,9 +53,12 @@
       </thead>
 
       <tbody :class="tableClassBody" :id="tableIdBody">
-        <tr v-if="dataRows.length === 0">
+        <tr v-if="dataRows.length === 0" class="ms-empty-row">
           <td :colspan="internalFields.length" class="ms-empty">
-            {{ emptyText }}
+            <div class="ms-empty-content">
+              <div class="mi-table-nodata"></div>
+              <span>{{ emptyText }}</span>
+            </div>
           </td>
         </tr>
 
@@ -408,7 +411,21 @@ function getTdStyle(field, index) {
   border-collapse: collapse;
   min-width: max-content;
   width: 100%;
+  height: auto;       /* Bỏ height: 100% khi có dữ liệu để tránh giãn dòng */
   table-layout: fixed;
+}
+
+.ms-table.ms-table--empty {
+  height: 100%;       /* Khi rỗng thì chiếm 100% để căn giữa icon */
+}
+
+/* tbody fill phần còn lại sau thead */
+.ms-table tbody {
+  height: auto;
+}
+
+.ms-table.ms-table--empty tbody {
+  height: calc(100% - 40px); /* 40px = height của thead */
 }
 
 /* ── th / td chung ── */
@@ -551,10 +568,23 @@ function getTdStyle(field, index) {
 
 /* ── Empty state ── */
 .ms-empty {
+  height: 100%;          /* tr/td chiếm hết tbody */
   text-align: center;
   color: #9ca3af;
-  padding: 40px 0;
   font-size: 14px;
+  vertical-align: middle;
+}
+
+/* Nội dung căn giữa cả ngang lẫn dọc */
+.ms-empty-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  height: 100%;
+  min-height: 200px;
+  padding: 24px 0;
 }
 
 /* ── Sticky action column ── */

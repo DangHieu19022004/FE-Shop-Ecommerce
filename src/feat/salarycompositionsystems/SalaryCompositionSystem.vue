@@ -120,33 +120,8 @@ import MsInput from "@/components/base/MsInput.vue";
 import MsTable from "@/components/base/MsTable.vue";
 
 const emit = defineEmits(["openFormEdit", "deleteItem"]);
-
-const fields = [
-  { key: "", label: "", slot: "checkbox", draggable: false, pinnable: false, resizable: false },
-  { key: "salary_composition_code", label: "Mã thành phần" },
-  { key: "salary_composition_name", label: "Tên thành phần" },
-  { key: "organization_name", label: "Đơn vị áp dụng" },
-  { key: "composition_type", label: "Loại thành phần" },
-  { key: "composition_nature", label: "Tính chất" },
-  { key: "taxable", label: "Chịu thuế" },
-  { key: "tax_deduction", label: "Giảm trừ khi tính thuế" },
-  { key: "quota", label: "Định mức" },
-  { key: "value_type", label: "Kiểu giá trị" },
-  { key: "formula", label: "Giá trị" },
-  { key: "description", label: "Mô tả" },
-  { key: "option_show_paycheck", label: "Hiển thị trên phiếu lương" },
-  { key: "source_type", label: "Nguồn tạo" },
-  { key: "status", label: "Trạng thái" },
-  {
-    key: "actions",
-    label: "",
-    slot: "actions",
-    classHead: "col_unhide",
-    classBody: "col_unhide",
-  },
-];
 </script>
-<style>
+<style scoped>
 .status-label {
   color: #666;
   margin-right: 4px;
@@ -165,6 +140,8 @@ const fields = [
     border-bottom: 1px solid #d9dee7;
   min-width: 0;
   min-height: 0;
+  display: flex;
+  flex-direction: column;
 }
 .content_header_left_icon{
     display: flex;
@@ -173,10 +150,13 @@ const fields = [
 }
 .content_body_table {
     flex: 1;
-    width: 100%;        
-    overflow: auto;
+    width: 100%;     
+    height: 100%;   
+    overflow: hidden;
   min-width: 0;
   min-height: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .content_body_wrapper {

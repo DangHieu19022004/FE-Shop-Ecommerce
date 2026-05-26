@@ -563,3 +563,12 @@ CSS Header:
     mask-repeat: no-repeat;
     background-color: #6e737a !important;
 }
+
+.mi-table-nodata {
+    display: inline-block;
+    background-image: url(https://testcdnamisapp.misacdn.net/apps/payroll/static/img/EmptyState-hFasANEP.svg);
+    background-repeat: no-repeat;
+    width: 195px;
+    height: 133px;
+    background-position: -152px -3046px;
+}

@@ -21,7 +21,7 @@ const routes = [
         component: SalaryComposition
       },
       {
-        path: "salary-composition-system",
+        path: "salarycomposition/salarycomposition-system",
         name: "salaryCompositionSystem",
         component: SalaryCompositionSystem
       }

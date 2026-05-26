@@ -11,7 +11,7 @@
             message="Danh mục của hệ thống"
             :isTooltip="false"
             iconLeft="mi-rule mg-r-8"
-            @click="$router.push('/salary-composition-system')"
+            @click="$router.push('/salarycomposition/salarycomposition-system')"
           />
           <MsButton
             class="btn-add fw-500"
@@ -165,57 +165,6 @@ const salaryCompositions = [
     source_type: "Hệ thống",
     status: "Đang theo dõi",
   },
-  {
-    salary_composition_id: "mock-id-001",
-    salary_composition_code: "LUONG_CO_BAN",
-    salary_composition_name: "Lương cơ bản",
-    organization_name: "Tất cả đơn vị",
-    composition_type: "Lương",
-    composition_nature: "Thu nhập",
-    taxable: "Chịu thuế",
-    tax_deduction: "Không",
-    quota: "",
-    value_type: "Tiền tệ",
-    formula: "15000000",
-    description: "Lương cơ bản nhân viên",
-    option_show_paycheck: "Có",
-    source_type: "Hệ thống",
-    status: "Đang theo dõi",
-  },
-  {
-    salary_composition_id: "mock-id-001",
-    salary_composition_code: "LUONG_CO_BAN",
-    salary_composition_name: "Lương cơ bản",
-    organization_name: "Tất cả đơn vị",
-    composition_type: "Lương",
-    composition_nature: "Thu nhập",
-    taxable: "Chịu thuế",
-    tax_deduction: "Không",
-    quota: "",
-    value_type: "Tiền tệ",
-    formula: "15000000",
-    description: "Lương cơ bản nhân viên",
-    option_show_paycheck: "Có",
-    source_type: "Hệ thống",
-    status: "Đang theo dõi",
-  },
-  {
-    salary_composition_id: "mock-id-001",
-    salary_composition_code: "LUONG_CO_BAN",
-    salary_composition_name: "Lương cơ bản",
-    organization_name: "Tất cả đơn vị",
-    composition_type: "Lương",
-    composition_nature: "Thu nhập",
-    taxable: "Chịu thuế",
-    tax_deduction: "Không",
-    quota: "",
-    value_type: "Tiền tệ",
-    formula: "15000000",
-    description: "Lương cơ bản nhân viên",
-    option_show_paycheck: "Có",
-    source_type: "Hệ thống",
-    status: "Đang theo dõi",
-  },
 ];
 
 const fields = [
@@ -262,14 +211,19 @@ const fields = [
     border-bottom: 1px solid #d9dee7;
   min-width: 0;
   min-height: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .content_body_table {
     flex: 1;
     width: 100%;        
-    overflow: auto;
+    height: 100%;
+    overflow: hidden;
   min-width: 0;
   min-height: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .content_body_wrapper {
