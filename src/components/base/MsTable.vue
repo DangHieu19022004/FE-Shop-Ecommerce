@@ -15,7 +15,7 @@
           <th
             v-for="(field, index) in internalFields"
             :key="index"
-            :class="[field.classHead, { 'col-pinned-left': field.pinned === 'left', 'col-drag-over': dragOverIndex === index }]"
+            :class="[field.classHead, { 'col-pinned-left': field.pinned === 'left', 'col-drag-over': dragOverIndex === index, 'col-actions': field.key === 'actions' }]"
             :style="getThStyle(field, index)"
             @dragover.prevent="onColDragOver($event, index)"
             @drop="onColDrop($event, index)"
@@ -71,7 +71,7 @@
           <td
             v-for="(field, colIndex) in internalFields"
             :key="colIndex"
-            :class="[field.classBody, { 'col-pinned-left': field.pinned === 'left' }]"
+            :class="[field.classBody, { 'col-pinned-left': field.pinned === 'left', 'col-actions': field.key === 'actions' }]"
             :style="getTdStyle(field, colIndex)"
           >
             <slot :name="`cell-${field.slot || field.key}`" :row="row">
@@ -380,6 +380,12 @@ function getThStyle(field, index) {
     style.zIndex = 3;
     style.backgroundColor = "#f9fafb";
     style.boxShadow = "2px 0 6px -2px rgba(0,0,0,0.12)";
+  } else if (field.key === "actions") {
+    style.position = "sticky";
+    style.right = "0px";
+    style.zIndex = 3;
+    style.backgroundColor = "transparent";
+    style.boxShadow = "-2px 0 6px -2px rgba(0,0,0,0.12)";
   }
   return style;
 }
@@ -392,6 +398,12 @@ function getTdStyle(field, index) {
     style.zIndex = 1;
     style.backgroundColor = "#fff";
     style.boxShadow = "2px 0 6px -2px rgba(0,0,0,0.08)";
+  } else if (field.key === "actions") {
+    style.position = "sticky";
+    style.right = "0px";
+    style.zIndex = 1;
+    style.backgroundColor = "transparent";
+    style.boxShadow = "-2px 0 6px -2px rgba(0,0,0,0.08)";
   }
   return style;
 }
@@ -563,7 +575,8 @@ function getTdStyle(field, index) {
 
 /* ── Hover row ── */
 .ms-table tbody tr:hover td {
-  background-color: #f5f8ff;
+  background-color: #CDEADF!important;
+  cursor: pointer;
 }
 
 /* ── Empty state ── */
@@ -629,5 +642,34 @@ tbody tr:hover .btn__action {
   -webkit-mask-position: -180px -656px;
   -webkit-mask-repeat: no-repeat;
   background-color: #7a8188;
+}
+
+/* ── Hover to show actions ── */
+.ms-table tbody tr :deep(.btn_action),
+.ms-table tbody tr :deep(.btn__action) {
+  opacity: 0;
+  transition: opacity 0.15s ease-in-out;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ms-table tbody tr:hover :deep(.btn_action),
+.ms-table tbody tr:hover :deep(.btn__action) {
+  opacity: 1;
+}
+
+/* Đảm bảo cột action không bị che khuất và có màu nền đồng bộ với dòng (tránh đè chữ khi cuộn) */
+.ms-table .col-actions {
+  min-width: 210px;
+  width: 210px;
+}
+
+.ms-table td.col-actions {
+  background-color: transparent !important;
+}
+
+.ms-table tbody tr:hover td.col-actions {
+  background-color: transparent !important;
 }
 </style>

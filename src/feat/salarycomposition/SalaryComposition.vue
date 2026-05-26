@@ -85,19 +85,27 @@
               </template>
 
               <template #cell-actions="{ row }">
-                <div class="btn__action">
-                  <div
-                    class="btn__edit_item hvp"
-                    :data-id="row.salary_composition_id"
-                    @click="emit('openFormEdit', row)"
-                  ></div>
-                  <div
-                    class="btn__delete_item hvp"
-                    :data-id="row.salary_composition_id"
-                    @click="emit('deleteItem', row)"
-                  >
-                    <i class="fa-solid fa-trash"></i>
-                  </div>
+                <div class="btn_action">
+                  <MsIcon
+                    class="mi-circle-check-green"
+                    shape="square"
+                    wrapperClass="border-icon"
+                  />
+                  <MsIcon
+                    class="mi-copy"
+                    shape="square"
+                    wrapperClass="border-icon"
+                  />
+                  <MsIcon
+                    class="mi-pencil"
+                    shape="square"
+                    wrapperClass="border-icon"
+                  />
+                  <MsIcon
+                    class="mi-trash-red"
+                    shape="square"
+                    wrapperClass="border-icon"
+                  />
                 </div>
               </template>
             </MsTable>
@@ -189,10 +197,17 @@ const fields = [
     slot: "actions",
     classHead: "col_unhide",
     classBody: "col_unhide",
+    draggable: false,
+    pinnable: false,
+    resizable: false,
   },
 ];
 </script>
 <style scoped>
+  .btn_action{
+    transform: translateX(-20px);
+    background-color: transparent;
+  }
 .status-label {
   color: #666;
   margin-right: 4px;
