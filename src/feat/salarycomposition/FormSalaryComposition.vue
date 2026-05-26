@@ -19,7 +19,23 @@
         </div>
         <div class="content_body_footer">
             <div class="footer-right">
-              
+              <MsButton
+                message="Hủy bỏ"
+                isTooltip="false"
+                class="border-gray fz-14"
+              />
+              <MsButton
+                message="Lưu và thêm"
+                isTooltip="false"
+                class="fz-14"
+                type="border-green"
+              />
+              <MsButton
+                message="Lưu"
+                isTooltip="false"
+                class="fz-14"
+                type="green"
+              />
             </div>
         </div>
       </div>

@@ -43,6 +43,14 @@ a {
   display: flex;
 }
 
+.border-gray {
+  border: 1px solid #e0e0e0 !important;
+}
+
+.fz-14 {
+  font-size: 14px !important;
+}
+
 .sp-between {
   justify-content: space-between;
   align-items: center;

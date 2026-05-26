@@ -10,7 +10,7 @@
             @click="emit('close')"
           />
         </div>
-        <div class="modal_alert_content">{{ props.message }}</div>
+        <div class="modal_alert_content"><slot>{{ props.message }}</slot></div>
       </div>
     </div>
     <div v-if="props.showConfirmButton" class="modal_alert_action">

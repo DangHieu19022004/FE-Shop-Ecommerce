@@ -83,7 +83,8 @@ const normalizedLineRight = computed(() => normalizeBool(props.lineStateRight));
   font-size: 1rem;
   transition: background-color 0.3s ease;
   position: relative;
-  width: 100%;
+  white-space: nowrap;
+  width: auto;
 }
 .ms-button__icon {
   display: flex;
@@ -145,6 +146,14 @@ const normalizedLineRight = computed(() => normalizeBool(props.lineStateRight));
 .ms-button--green:hover {
   background-color: #0A724B;
   color: #fff !important;
+}
+.ms-button--border-green {
+  background-color: #fff;
+  color: #0E9A62 !important;
+  border: 1px solid #0E9A62 !important;
+}
+.ms-button--border-green:hover {
+  background-color: #A8D9C8;
 }
 .ms-button__content {
   display: inline-block;
