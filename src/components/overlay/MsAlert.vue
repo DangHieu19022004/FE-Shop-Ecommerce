@@ -1,8 +1,6 @@
 <template>
   <div class="modal_alert">
     <div class="modal_alert_wrapper">
-      
-
       <div class="modal_alert_text">
         <div class="dpl sp-between">
           <div class="modal_alert_title">{{ props.title }}</div>
@@ -14,8 +12,8 @@
         </div>
         <div class="modal_alert_content">{{ props.message }}</div>
       </div>
-      
-      <div v-if="props.showConfirmButton" class="modal_alert_action">
+    </div>
+    <div v-if="props.showConfirmButton" class="modal_alert_action">
         <MsButton
           :message="props.cancelText"
           :type="props.cancelType"
@@ -31,7 +29,6 @@
           @click="emit('confirm')"
         />
       </div>
-    </div>
   </div>
 </template>
 
@@ -147,7 +144,10 @@ const emit = defineEmits(["close", "confirm"]);
   justify-content: flex-end;
   align-items: center;
   gap: 8px;
-  margin-top: 8px;
+  height: 60px;
+  width: 100%;
+  padding: 0 16px;
+  background-color: #f3f3f3;
 }
 
 /* Custom styles for MsButton within MsAlert */
