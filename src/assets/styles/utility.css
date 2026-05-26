@@ -186,3 +186,7 @@ a {
 .p-r-16 {
   padding-right: 16px;
 }
+
+.color-red {
+  color: red !important;
+}
