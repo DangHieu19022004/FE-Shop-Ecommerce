@@ -21,12 +21,12 @@ CSS Header:
     background-color: #fff !important;
 }
 
-.mi-payroll-logo{
-  /* icon-md */
-  background-image: url("https://testcdnamisapp.misacdn.net/apps/payroll/static/logos/icon-payroll-logo.svg?v=");
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: contain;
+.mi-payroll-logo {
+    /* icon-md */
+    background-image: url("https://testcdnamisapp.misacdn.net/apps/payroll/static/logos/icon-payroll-logo.svg?v=");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
 }
 
 .mi-search-white {
@@ -98,7 +98,7 @@ CSS Header:
     background-color: #fff !important;
 }
 
-.mi-chat{
+.mi-chat {
     width: 24px;
     height: 24px;
     background-image: url("/src/assets/icons/mi-chat.svg");
@@ -107,7 +107,7 @@ CSS Header:
     background-size: 24px;
 }
 
-.mi-alert{
+.mi-alert {
     width: 24px;
     height: 24px;
     background-image: url("/src/assets/icons/mi-alert.svg");
@@ -116,7 +116,7 @@ CSS Header:
     background-size: 24px;
 }
 
-.mi-ask{
+.mi-ask {
     width: 24px;
     height: 24px;
     background-image: url("/src/assets/icons/mi-ask-circle.svg");
@@ -125,7 +125,7 @@ CSS Header:
     background-size: 24px;
 }
 
-.mi-other-feat{
+.mi-other-feat {
     width: 24px;
     height: 24px;
     background-image: url("/src/assets/icons/mi-other-feat.svg");
@@ -134,7 +134,7 @@ CSS Header:
     background-size: 24px;
 }
 
-.mi-book{
+.mi-book {
     width: 24px;
     height: 24px;
     background-image: url("/src/assets/icons/mi-book.svg");
@@ -143,12 +143,12 @@ CSS Header:
     background-size: 24px;
 }
 
-.mi-avatar{
-  /* icon-md */
-  background-image: url("https://testcdnamisapp.misacdn.net/APIS/PlatformAPI/api/Avatar/44660afe-149e-4984-9e3c-21fedc82d344/T8UM3JZX.jpg?avatarID=f552c9cb-f42c-419b-9d7a-2304e5f5e8e8&width=64&height=64");
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: contain;
+.mi-avatar {
+    /* icon-md */
+    background-image: url("https://testcdnamisapp.misacdn.net/APIS/PlatformAPI/api/Avatar/44660afe-149e-4984-9e3c-21fedc82d344/T8UM3JZX.jpg?avatarID=f552c9cb-f42c-419b-9d7a-2304e5f5e8e8&width=64&height=64");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
 }
 
 .mi-sidebar-dashboard {
@@ -479,15 +479,15 @@ CSS Header:
 }
 
 .mi-next-right {
-	background: url('/src/assets/icons/mi-many.svg') no-repeat -237px -57px;
-	width: 6px;
-	height: 10px;
+    background: url('/src/assets/icons/mi-many.svg') no-repeat -237px -57px;
+    width: 6px;
+    height: 10px;
 }
 
 .mi-next-left {
-	background: url('/src/assets/icons/mi-many.svg') no-repeat -221px -57px;
-	width: 6px;
-	height: 10px;
+    background: url('/src/assets/icons/mi-many.svg') no-repeat -221px -57px;
+    width: 6px;
+    height: 10px;
 }
 
 .mi-next-double-left {
@@ -500,4 +500,45 @@ CSS Header:
     background: url('/src/assets/icons/mi-many.svg') no-repeat -491px -56px;
     width: 12px;
     height: 10px;
+}
+
+.mi-circle-off {
+    width: 16px;
+    height: 16px;
+    background-image: url("/src/assets/icons/mi-none.svg");
+    background-size: contain;
+}
+
+.mi-arrow-up {
+    width: 16px;
+    height: 16px;
+    background-image: url("/src/assets/icons/mi-arrow-up.svg");
+    background-size: contain;
+}
+
+.mi-arrow-down {
+    width: 16px;
+    height: 16px;
+    background-image: url("/src/assets/icons/mi-arrow-down.svg");
+    background-size: contain;
+}
+
+.mi-pinned {
+    width: 16px;
+    height: 16px;
+    background-image: url("/src/assets/icons/mi-pinned.svg");
+    background-size: contain;
+}
+
+.mi-check {
+    width: 16px;
+    height: 16px;
+    background: url("/src/assets/icons/mi-many2.svg") no-repeat -579px -150px;
+}
+
+.mi-unpin {
+    width: 16px;
+    height: 16px;
+    background-image: url("/src/assets/icons/mi-unpin.svg");
+    background-size: contain;
 }

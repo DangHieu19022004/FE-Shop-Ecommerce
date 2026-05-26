@@ -164,10 +164,27 @@ const salaryCompositions = [
     source_type: "Hệ thống",
     status: "Đang theo dõi",
   },
+  {
+    salary_composition_id: "mock-id-001",
+    salary_composition_code: "LUONG_CO_BAN",
+    salary_composition_name: "Lương cơ bản",
+    organization_name: "Tất cả đơn vị",
+    composition_type: "Lương",
+    composition_nature: "Thu nhập",
+    taxable: "Chịu thuế",
+    tax_deduction: "Không",
+    quota: "",
+    value_type: "Tiền tệ",
+    formula: "15000000",
+    description: "Lương cơ bản nhân viên",
+    option_show_paycheck: "Có",
+    source_type: "Hệ thống",
+    status: "Đang theo dõi",
+  },
 ];
 
 const fields = [
-  { key: "", label: "", slot: "checkbox" },
+  { key: "", label: "", slot: "checkbox", draggable: false, pinnable: false, resizable: false },
   { key: "salary_composition_code", label: "Mã thành phần" },
   { key: "salary_composition_name", label: "Tên thành phần" },
   { key: "organization_name", label: "Đơn vị áp dụng" },
