@@ -17,27 +17,35 @@
             :key="index"
             :class="[field.classHead, { 'col-pinned-left': field.pinned === 'left', 'col-drag-over': dragOverIndex === index }]"
             :style="getThStyle(field, index)"
-            :draggable="draggable && field.draggable !== false"
-            @dragstart="onColDragStart($event, index)"
             @dragover.prevent="onColDragOver($event, index)"
             @drop="onColDrop($event, index)"
             @dragend="onColDragEnd"
             @click.stop="pinnable && field.pinnable !== false ? openMenu($event, index) : null"
           >
-            <!-- Icon pin hiển khi cột đang được ghim -->
-            <span v-if="field.pinned === 'left'" class="col-pin-icon" title="Đang ghim cột">
-              <svg width="10" height="10" viewBox="0 0 16 16" fill="none">
-                <path d="M9.5 1.5L14.5 6.5L10.5 10.5L8 8L4 12L3 11L7 7L4.5 4.5L8.5 0.5L9.5 1.5Z" fill="#1c6ef3"/>
-                <line x1="2" y1="14" x2="6" y2="10" stroke="#1c6ef3" stroke-width="1.5" stroke-linecap="round"/>
-              </svg>
-            </span>
+            <!--
+              col-drag-zone: chỉ vùng content này mới có thể khởi động drag-to-reorder.
+              Resize handle nằm ngoài zone này nên không bị lẫn.
+            -->
+            <div
+              class="col-drag-zone"
+              :draggable="draggable && field.draggable !== false"
+              @dragstart="onColDragStart($event, index)"
+            >
+              <!-- Icon pin hiển khi cột đang được ghim -->
+              <span v-if="field.pinned === 'left'" class="col-pin-icon" title="Đang ghim cột">
+                <svg width="10" height="10" viewBox="0 0 16 16" fill="none">
+                  <path d="M9.5 1.5L14.5 6.5L10.5 10.5L8 8L4 12L3 11L7 7L4.5 4.5L8.5 0.5L9.5 1.5Z" fill="#1c6ef3"/>
+                  <line x1="2" y1="14" x2="6" y2="10" stroke="#1c6ef3" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+              </span>
 
-            <!-- Nội dung header -->
-            <slot :name="`header-${field.slot || field.key}`" :field="field">
-              {{ field.label }}
-            </slot>
+              <!-- Nội dung header -->
+              <slot :name="`header-${field.slot || field.key}`" :field="field">
+                {{ field.label }}
+              </slot>
+            </div>
 
-            <!-- Resize handle: ẩn nếu field.resizable === false hoặc global resizable=false -->
+            <!-- Resize handle: nằm ngoài col-drag-zone, không trigger drag cột -->
             <div
               v-if="resizable && field.resizable !== false"
               class="col-resize-handle"
@@ -464,6 +472,28 @@ function getTdStyle(field, index) {
   border-left: 2px solid #1c6ef3 !important;
   background-color: #eff6ff !important;
 }
+
+/* ── Drag zone: vùng content kéo thả cột, tách biệt khỏi resize handle ── */
+.col-drag-zone {
+  display: inline-flex;
+  align-items: center;
+  height: 100%;
+  width: calc(100% - 5px); /* trừ đi 5px của resize handle */
+  overflow: hidden;
+  cursor: grab;
+  gap: 4px;
+}
+
+.col-drag-zone:active {
+  cursor: grabbing;
+}
+
+/* Cột không cho drag: cursor bình thường */
+[draggable="false"] .col-drag-zone,
+.col-drag-zone[draggable="false"] {
+  cursor: default;
+}
+
 
 /* ── Pin button ── */
 .col-pin-btn {
