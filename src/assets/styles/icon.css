@@ -683,3 +683,30 @@ CSS Header:
     height: 10px;
     background: url("/src/assets/icons/mi-many.svg") no-repeat -443px -57px;
 }
+
+.mi-circle-info {
+    width: 20px;
+    height: 20px;
+    -webkit-mask-image: url(https://testcdnamisapp.misacdn.net/apps/payroll/static/img/ICON_V3_1-qvutYp_o.svg);
+    -moz-mask-image: url(https://testcdnamisapp.misacdn.net/apps/payroll/static/img/ICON_V3_1-qvutYp_o.svg);
+    -ms-mask-image: url(https://testcdnamisapp.misacdn.net/apps/payroll/static/img/ICON_V3_1-qvutYp_o.svg);
+    -o-mask-image: url(https://testcdnamisapp.misacdn.net/apps/payroll/static/img/ICON_V3_1-qvutYp_o.svg);
+    mask-image: url(https://testcdnamisapp.misacdn.net/apps/payroll/static/img/ICON_V3_1-qvutYp_o.svg);
+    -webkit-mask-position: -220px -40px;
+    -moz-mask-position: -220px -40px;
+    -ms-mask-position: -220px -40px;
+    -o-mask-position: -220px -40px;
+    mask-position: -220px -40px;
+    -webkit-mask-repeat: no-repeat;
+    -moz-mask-repeat: no-repeat;
+    -ms-mask-repeat: no-repeat;
+    -o-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    background-color: #6e737a !important;
+}
+
+.mi-info-blue {
+    width: 14px;
+    height: 14px;
+    background: url(https://testcdnamisapp.misacdn.net/apps/payroll/static/img/ICON_V3_2-yHWDHVC3.svg) -129px -377px no-repeat;
+}

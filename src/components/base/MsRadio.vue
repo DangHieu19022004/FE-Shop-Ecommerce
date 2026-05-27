@@ -7,7 +7,12 @@
     </label>
 
     <!-- Danh sách option -->
-    <div class="ms-radio__options">
+    <div
+      :class="[
+        'ms-radio__options',
+        { 'ms-radio__options--horizontal': horizontalInput }
+      ]"
+    >
       <label
         v-for="option in options"
         :key="option.value"
@@ -53,6 +58,8 @@ defineProps({
   isRequired: { type: Boolean, default: false },
   /** Layout: label nhóm + options nằm trên cùng 1 hàng */
   horizontal: { type: Boolean, default: false },
+  /** Layout items: dọc (default) hoặc ngang */
+  horizontalInput: { type: Boolean, default: false },
   errorMessages: { type: String, default: "" },
 });
 
@@ -107,6 +114,13 @@ const emit = defineEmits(["update:modelValue"]);
 ══════════════════════════════════ */
 .ms-radio__options {
   display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.ms-radio__options--horizontal {
+  flex-direction: row;
   flex-wrap: wrap;
   align-items: center;
   gap: 24px;
