@@ -143,7 +143,7 @@ const handleFocus = () => {
 
 .ms-input-in {
   width: 100%;
-  height: 36px;
+  /* height: 36px; */
   padding: 0 12px;
   border: 1px solid #d1d5db;
   border-radius: 6px;

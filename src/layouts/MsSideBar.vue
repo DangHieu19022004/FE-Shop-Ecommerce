@@ -8,6 +8,7 @@
                                 iconLeft="mi-sidebar-dashboard mg-r-8"
                                 message="Tổng quan"
                                 :class="['align-left', { 'is-collapse': props.isCollapse }]"
+                                spreadIcon
                                 >
                             </MsButton>
                         </router-link>
@@ -16,6 +17,7 @@
                                 iconLeft="mi-sidebar-salary-composition mg-r-8"
                                 message="Thành phần lương"
                                 :class="['align-left', { 'is-collapse': props.isCollapse }]"
+                                spreadIcon
                                 >
                             </MsButton>
                         </router-link>
@@ -24,6 +26,7 @@
                                 iconLeft="mi-sidebar-salary-template mg-r-8"
                                 message="Mẫu bảng lương"
                                 :class="['align-left', { 'is-collapse': props.isCollapse }]"
+                                spreadIcon
                                 >
                             </MsButton>
                         </router-link>
@@ -33,6 +36,7 @@
                                 message="Dữ liệu tính lương"
                                 iconRight="ms-icon-chevron-right mg-l-16 "
                                 :class="['align-left', { 'is-collapse': props.isCollapse }]"
+                                spreadIcon
                                 >
                             </MsButton>
                         </router-link>
@@ -42,6 +46,7 @@
                                 message="Tính lương"
                                 iconRight="ms-icon-chevron-right mg-l-16 "
                                 :class="['align-left', { 'is-collapse': props.isCollapse }]"
+                                spreadIcon
                                 >
                             </MsButton>
                         </router-link>
@@ -51,6 +56,7 @@
                                 message="Chi trả"
                                 iconRight="ms-icon-chevron-right mg-l-16 "
                                 :class="['align-left', { 'is-collapse': props.isCollapse }]"
+                                spreadIcon
                                 >
                             </MsButton>
                         </router-link>
@@ -59,6 +65,7 @@
                                 iconLeft="mi-sidebar-report mg-r-8"
                                 message="Báo cáo"
                                 :class="['align-left', { 'is-collapse': props.isCollapse }]"
+                                spreadIcon
                                 >
                             </MsButton>
                         </router-link>

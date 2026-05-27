@@ -170,6 +170,8 @@ import MsInput from "@/components/base/MsInput.vue";
 
 :deep(.ms-input-in.navbar__search-input) {
     color: #E0E0E0;
+    background-color: transparent;
+    border: none;
 }
 
 :deep(.ms-input-in.navbar__search-input::placeholder) {

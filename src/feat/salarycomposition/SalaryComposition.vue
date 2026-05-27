@@ -60,6 +60,7 @@
                 :isTooltip="false"
                 iconRight="mi-chevron-down"
                 class="btn-search-unit"
+                spreadIcon
               >
                 <span class="status-label">Tất cả đơn vị</span>
               </MsButton>
@@ -448,11 +449,13 @@ const fields = [
     border: 1px solid #d9dee7;
     height: 32px;
 }
-.ms-input-in.content_body_search-input {
+:deep(.ms-input-in.content_body_search-input) {
   color: #111;
+  background-color: transparent;
+  border: none;
 }
-.ms-input-in.content_body_search-input:focus,
-.ms-input-in.content_body_search-input:focus-visible {
+:deep(.ms-input-in.content_body_search-input:focus),
+:deep(.ms-input-in.content_body_search-input:focus-visible) {
   border: none;
   outline: none !important;
   box-shadow: none;

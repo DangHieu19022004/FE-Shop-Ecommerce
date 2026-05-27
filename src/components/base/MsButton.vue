@@ -6,7 +6,8 @@
     `ms-button--tooltip-${tooltipPosition}`,
     { 'ms-button--line-left': normalizedLineLeft, 'ms-button--line-right': normalizedLineRight },
     { 'ms-button--no-tooltip': !normalizedIsTooltip },
-    { 'ms-button--icon-only': !message && (iconLeft || iconRight) }
+    { 'ms-button--icon-only': !message && (iconLeft || iconRight) },
+    { 'ms-button--spread-icon': normalizedSpreadIcon },
   ]"
   :data-tooltip="normalizedIsTooltip ? message : ''"
   @click="emit('click')"
@@ -59,6 +60,14 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  /**
+   * Khi true: text (flex:1) đẩy iconRight sang tận cùng bên phải.
+   * Khi false (mặc định): iconRight nằm sát text.
+   */
+  spreadIcon: {
+    type: Boolean,
+    default: false,
+  },
 });
 const emit = defineEmits(["click"]);
 
@@ -70,6 +79,7 @@ const normalizeBool = (value) => {
 const normalizedIsTooltip = computed(() => normalizeBool(props.isTooltip));
 const normalizedLineLeft = computed(() => normalizeBool(props.lineStateLeft));
 const normalizedLineRight = computed(() => normalizeBool(props.lineStateRight));
+const normalizedSpreadIcon = computed(() => normalizeBool(props.spreadIcon));
 </script>
 <style scoped>
 .ms-button {
@@ -158,6 +168,18 @@ const normalizedLineRight = computed(() => normalizeBool(props.lineStateRight));
 .ms-button__content {
   display: inline-block;
   /* margin-left: 0.5rem; */
+}
+
+/* Khi spreadIcon: button full-width flex, text chiếm hết không gian giữa */
+.ms-button--spread-icon {
+  width: 100%;
+}
+.ms-button--spread-icon .ms-button__content {
+  flex: 1;
+  text-align: left;
+}
+.ms-button--spread-icon .ms-button__icon--right {
+  margin-left: auto;
 }
 
 .ms-button--line-left {

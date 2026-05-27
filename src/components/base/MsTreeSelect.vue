@@ -308,7 +308,7 @@ onBeforeUnmount(() => {
   background-color: #f3f4f6;
   border: 1px solid #e5e7eb;
   border-radius: 4px;
-  font-size: 13px;
+  font-size: 14px;
   color: #111827;
   line-height: 20px;
   white-space: nowrap;
@@ -338,7 +338,7 @@ onBeforeUnmount(() => {
 
 .ms-tree-select__placeholder {
   color: #9ca3af;
-  font-size: 13px;
+  font-size: 14px;
   line-height: 28px;
   user-select: none;
 }
