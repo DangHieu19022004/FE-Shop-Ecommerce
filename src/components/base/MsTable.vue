@@ -672,4 +672,52 @@ tbody tr:hover .btn__action {
 .ms-table tbody tr:hover td.col-actions {
   background-color: transparent !important;
 }
+
+/* ── Checkbox (match MsCheckbox theme) ── */
+.ms-table :deep(input[type="checkbox"]) {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+  border: 2px solid #d1d5db;
+  background-color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: border-color 0.18s ease, background-color 0.18s ease;
+}
+
+.ms-table :deep(input[type="checkbox"]:hover) {
+  border-color: #0e9a62;
+}
+
+.ms-table :deep(input[type="checkbox"]:checked),
+.ms-table :deep(input[type="checkbox"]:indeterminate) {
+  border-color: #0e9a62;
+  background-color: #0e9a62;
+}
+
+.ms-table :deep(input[type="checkbox"]:checked)::after {
+  content: "";
+  display: block;
+  width: 3px;
+  height: 6px;
+  border: solid #fff;
+  border-width: 0 2px 2px 0;
+  transform: translateY(-2px) rotate(45deg);
+}
+
+.ms-table :deep(input[type="checkbox"]:indeterminate)::after {
+  content: "";
+  width: 8px;
+  height: 2px;
+  background: #fff;
+}
+
+.ms-table :deep(input[type="checkbox"]:disabled) {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
 </style>

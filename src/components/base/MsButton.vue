@@ -135,6 +135,14 @@ const normalizedSpreadIcon = computed(() => normalizeBool(props.spreadIcon));
 .ms-button--danger:hover {
   background-color: #c82333;
 }
+.ms-button--border-danger {
+  background-color: #fff;
+  color: #dc3545;
+  border: 1px solid #dc3545;
+}
+.ms-button--border-danger:hover {
+  background-color: #FEE4E2;
+}
 .ms-button--warning {
   background-color: #ffc107;
   color: #212529;

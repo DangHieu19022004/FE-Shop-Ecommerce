@@ -40,7 +40,23 @@
         </div>
       </div>
       <div class="content_body_wrapper">
-        <div class="content_body_header">
+        <div v-if="selectedIds.length > 0" class="checkbox_function">
+          <p class="fz-14 m-r-8">Đã chọn </p>
+          <b class="fz-14">{{selectedIds.length}}</b>
+          <MsButton
+              message="Bỏ chọn"
+              class="m-r-8 color-green fz-14"
+              isTooltip="false"
+            />
+            <MsButton
+              :isTooltip="false"
+              message="Xóa"
+              iconLeft="mi-trash-red"
+              class="m-r-8 fz-14"
+              type="border-danger"
+            />
+          </div>
+        <div v-else class="content_body_header">
           <div class="content_body_header_left">
             <div class="hvp content_body_search">
               <MsIcon class="mi-search icon--base" background />
@@ -66,6 +82,7 @@
               </MsButton>
             </div>
           </div>
+          
           <div class="content_body_header_right">
             <MsIcon class="mi-filter icon--base" wrapperClass="border-icon" message="Bộ lọc" shape="square"/>
             <MsIcon class="mi-setting icon--base" wrapperClass="border-icon" message="Thiết lập" shape="square"/>
@@ -81,7 +98,15 @@
               table-class-body="candicate_table_body"
             >
               <template #header-checkbox>
-                <input type="checkbox" name="selectedCandidates" id="select-all" />
+                <input
+                  type="checkbox"
+                  name="selectedCandidates"
+                  id="select-all"
+                  :checked="isAllSelected"
+                  :indeterminate.prop="isIndeterminate"
+                  @change="toggleSelectAll"
+                  @click.stop
+                />
               </template>
 
               <template #cell-checkbox="{ row }">
@@ -91,6 +116,9 @@
                   class="checkbox_item"
                   :id="row.salary_composition_id"
                   :value="row.salary_composition_id"
+                  :checked="isRowSelected(row.salary_composition_id)"
+                  @change="toggleRow(row.salary_composition_id)"
+                  @click.stop
                 />
               </template>
 
@@ -163,7 +191,7 @@ import MsIcon from "@/components/base/MsIcon.vue";
 import MsInput from "@/components/base/MsInput.vue";
 import MsTable from "@/components/base/MsTable.vue";
 import FormSalaryComposition from "./FormSalaryComposition.vue";
-import { ref } from "vue";
+import { ref, computed } from "vue";
 
 var toggleSelectComposition = ref(false)
 var  isShowForm = ref(false)
@@ -195,6 +223,34 @@ const salaryCompositions = [
     status: "Đang theo dõi",
   },
 ];
+
+const selectedIds = ref([]);
+
+const isAllSelected = computed(() =>
+  salaryCompositions.length > 0 && selectedIds.value.length === salaryCompositions.length
+);
+
+const isIndeterminate = computed(() =>
+  selectedIds.value.length > 0 && selectedIds.value.length < salaryCompositions.length
+);
+
+const toggleSelectAll = (event) => {
+  if (event.target.checked) {
+    selectedIds.value = salaryCompositions.map((row) => row.salary_composition_id);
+  } else {
+    selectedIds.value = [];
+  }
+};
+
+const isRowSelected = (id) => selectedIds.value.includes(id);
+
+const toggleRow = (id) => {
+  if (selectedIds.value.includes(id)) {
+    selectedIds.value = selectedIds.value.filter((item) => item !== id);
+  } else {
+    selectedIds.value = [...selectedIds.value, id];
+  }
+};
 
 const fields = [
   { key: "", label: "", slot: "checkbox", draggable: false, pinnable: false, resizable: false },
@@ -482,6 +538,16 @@ const fields = [
   color: #7a8188;
 }
 
+.checkbox_function{
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 14px;
+  background-color: #fff;
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+}
+
 /* ── Select Composition Dropdown ── */
 .select-composition {
   position: absolute;
@@ -514,4 +580,5 @@ const fields = [
 .select-composition :deep(.ms-button:hover) {
   background-color: #f1f2f1 !important;
 }
+
 </style>
