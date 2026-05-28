@@ -46,7 +46,7 @@ import MsOverlay from "@/components/overlay/MsOverlay.vue";
 import MsAlert from "@/components/overlay/MsAlert.vue";
 import MsNavBar from "@/layouts/MsNavBar.vue";
 import MsSideBar from "@/layouts/MsSideBar.vue";
-import MsToastContainer from "@/components/overlay/MsToastContainer.vue";
+import MsToastContainer from "@/components/overlay/MsToast/MsToastContainer.vue";
 import { onMounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 

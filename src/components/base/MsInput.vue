@@ -119,7 +119,7 @@ const handleFocus = () => {
   padding-right: 12px;
   font-size: 13px;
   color: #374151;
-  line-height: 36px;
+  line-height: 32px;
 }
 
 .ms-input--horizontal .ms-input-in {

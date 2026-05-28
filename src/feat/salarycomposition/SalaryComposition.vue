@@ -46,7 +46,7 @@
           <MsButton
               message="Bỏ chọn"
               class="m-r-8 color-green fz-14"
-              isTooltip="false"
+              :isTooltip="false"
             />
             <MsButton
               :isTooltip="false"
