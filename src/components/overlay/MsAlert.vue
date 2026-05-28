@@ -4,10 +4,12 @@
       <div class="modal_alert_text">
         <div class="dpl sp-between">
           <div class="modal_alert_title">{{ props.title }}</div>
-          <MsIcon
-            class="mi-close alert-close-btn"
-            shape="square"
+          <MsButton
+            iconLeft="mi-close"
+            :isTooltip="false"
             @click="emit('close')"
+            class="alert-close-btn"
+            shapeBtn="circle"
           />
         </div>
         <div class="modal_alert_content"><slot>{{ props.message }}</slot></div>

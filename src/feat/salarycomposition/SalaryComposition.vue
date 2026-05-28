@@ -58,8 +58,13 @@
           </div>
         <div v-else class="content_body_header">
           <div class="content_body_header_left">
-            <div class="hvp content_body_search">
-              <MsIcon class="mi-search icon--base" background />
+            <div class="content_body_search">
+              <MsButton
+                iconLeft="mi-search"
+                tooltipMessage="Tìm kiếm"
+                unActive
+                tooltipPosition="bottom"
+              />
               <MsInput placeholder="Tìm kiếm" class="content_body_search-input" />
             </div>
             <div class="content_body_status">

@@ -4,10 +4,11 @@
       <div class="content_header">
         <div>
           <div class="content_header_left_icon">
-             <MsIcon
-                class="mi-arrow-left"
-                wrapperClass="icon-back"
-                @click="handleCloseForm"
+            <MsButton
+              iconLeft="mi-arrow-left"
+              :isTooltip="false"
+              shapeBtn="circle"
+              @click="handleCloseForm"
             />
             <h2 class="content_header_left_title">Thêm thành phần</h2>
           </div>
@@ -140,9 +141,11 @@
               v-model="isOverLimit"
               label="Cho phép giá trị tính vượt qua định mức"
             />
-            <MsIcon
-              class="mi-circle-info"
-              message="Nếu không tích chọn thì khi tính giá trị thành phần lương này mà vượt quá định mức thì hệ thống sẽ tự lấy tối đa bằng định mức đã nhập"
+            <MsButton
+              iconLeft="mi-circle-info"
+              tooltipPosition="bottom"
+              tooltipMessage="Nếu không tích chọn thì khi tính giá trị thành phần lương này mà vượt quá định mức thì hệ thống sẽ tự lấy tối đa bằng định mức đã nhập"
+              shapeBtn="circle"
             />
           </div>
 

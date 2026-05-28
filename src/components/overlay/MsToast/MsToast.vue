@@ -2,15 +2,18 @@
     <div :class="['ms-toast', `ms-toast--${props.type}`]">
         <!-- Icon wrapper: 40×40 colored square, căn giữa icon -->
         <div class="ms-toast__icon-wrapper">
-            <MsIcon :class="`mi-toast--${props.type}`" :background="true" />
+            <MsButton
+                :iconLeft="`mi-toast--${props.type}`"
+                :isTooltip="false"
+                unActive
+            />
         </div>
-
         <!-- Nội dung: message + nút đóng -->
         <div class="ms-toast__body">
-            <span class="ms-toast__text">{{ props.message }}</span>
-            <MsIcon
-                class="mi-close ms-toast__close"
-                shape="square"
+            <MsButton
+                :message="props.message"
+                iconRight="mi-close"
+                :isTooltip="false"
                 @click="onClose"
             />
         </div>
@@ -20,6 +23,7 @@
 <script setup>
 import { onMounted, onUnmounted } from 'vue';
 import MsIcon from '@/components/base/MsIcon.vue';
+import MsButton from '@/components/base/MsButton.vue';
 
 /**
  * PROPS + EMITS
@@ -125,7 +129,6 @@ onUnmounted(() => {
     min-width: 0;
     padding-left: 12px;
     padding-right: 8px;
-    gap: 12px;
 }
 
 /* ── Text ───────────────────────────────────────────────────── */
