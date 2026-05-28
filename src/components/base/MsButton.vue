@@ -1,5 +1,7 @@
 <template lang="">
 <button
+  v-bind="$attrs"
+  ref="buttonRef"
   :class="[
     'ms-button',
     `ms-button--${type}`,
@@ -8,9 +10,14 @@
     { 'ms-button--no-tooltip': !normalizedIsTooltip },
     { 'ms-button--icon-only': !message && (iconLeft || iconRight) },
     { 'ms-button--spread-icon': normalizedSpreadIcon },
+    { 'ms-button--unactive': normalizedUnActive },
+    { [`ms-button--shape-${shapeBtn}`]: shapeBtn },
   ]"
-  :data-tooltip="normalizedIsTooltip ? message : ''"
-  @click="emit('click')"
+  :disabled="normalizedIsDisabled"
+  :aria-disabled="normalizedUnActive"
+  @click="handleClick"
+  @mouseenter="showTooltip"
+  @mouseleave="hideTooltip"
 >
     <i v-if="iconLeft" :class="[iconLeft, 'ms-button__icon']"></i>
     <span v-if="message || $slots.default" class="ms-button__content">
@@ -19,16 +26,30 @@
         </slot>
     </span>
     <i v-if="iconRight" :class="[iconRight, 'ms-button__icon', 'ms-button__icon--right']"></i>
+    <Teleport to="body">
+      <span
+        v-if="isShowTooltip"
+        ref="tooltipRef"
+        :class="['ms-button__tooltip', `ms-button__tooltip--${tooltipPosition}`]"
+        :style="tooltipStyle"
+      >
+        {{ normalizedTooltipMessage }}
+      </span>
+    </Teleport>
 </button>
 </template>
 <script setup>
-import { computed, defineProps, defineEmits } from "vue";
+import { computed, defineProps, defineEmits, nextTick, ref } from "vue";
 
 /**
  * NOTICE: emit + props
  */
 const props = defineProps({
   message: {
+    type: String,
+    default: "",
+  },
+  tooltipMessage: {
     type: String,
     default: "",
   },
@@ -68,6 +89,14 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  unActive: {
+    type: Boolean,
+    default: false,
+  },
+  shapeBtn: {
+    type: String,
+    default: "",
+  },
 });
 const emit = defineEmits(["click"]);
 
@@ -80,6 +109,58 @@ const normalizedIsTooltip = computed(() => normalizeBool(props.isTooltip));
 const normalizedLineLeft = computed(() => normalizeBool(props.lineStateLeft));
 const normalizedLineRight = computed(() => normalizeBool(props.lineStateRight));
 const normalizedSpreadIcon = computed(() => normalizeBool(props.spreadIcon));
+const normalizedUnActive = computed(() => normalizeBool(props.unActive));
+const normalizedTooltipMessage = computed(() => props.tooltipMessage || props.message);
+const normalizedIsDisabled = computed(
+  () => normalizedUnActive.value && !normalizedTooltipMessage.value
+);
+const buttonRef = ref(null);
+const tooltipRef = ref(null);
+const isShowTooltip = ref(false);
+const tooltipStyle = ref({});
+
+const handleClick = () => {
+  if (normalizedUnActive.value) return;
+  emit("click");
+};
+
+const showTooltip = () => {
+  if (!normalizedIsTooltip.value || !normalizedTooltipMessage.value) return;
+
+  isShowTooltip.value = true;
+  nextTick(() => {
+    if (!buttonRef.value || !tooltipRef.value) return;
+
+    const buttonRect = buttonRef.value.getBoundingClientRect();
+    const tooltipRect = tooltipRef.value.getBoundingClientRect();
+    const gap = 8;
+    let top = 0;
+    let left = 0;
+
+    if (props.tooltipPosition === "left") {
+      top = buttonRect.top + buttonRect.height / 2 - tooltipRect.height / 2;
+      left = buttonRect.left - tooltipRect.width - gap;
+    } else if (props.tooltipPosition === "top") {
+      top = buttonRect.top - tooltipRect.height - gap;
+      left = buttonRect.left + buttonRect.width / 2 - tooltipRect.width / 2;
+    } else if (props.tooltipPosition === "bottom") {
+      top = buttonRect.bottom + gap;
+      left = buttonRect.left + buttonRect.width / 2 - tooltipRect.width / 2;
+    } else {
+      top = buttonRect.top + buttonRect.height / 2 - tooltipRect.height / 2;
+      left = buttonRect.right + gap;
+    }
+
+    tooltipStyle.value = {
+      top: `${top}px`,
+      left: `${left}px`,
+    };
+  });
+};
+
+const hideTooltip = () => {
+  isShowTooltip.value = false;
+};
 </script>
 <style scoped>
 .ms-button {
@@ -104,6 +185,18 @@ const normalizedSpreadIcon = computed(() => normalizeBool(props.spreadIcon));
 .ms-button--icon-only .ms-button__icon {
   padding: 0;
 }
+.ms-button--icon-only.ms-button--shape-circle {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border-radius: 50%;
+}
+.ms-button--icon-only.ms-button--shape-square {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border-radius: 4px;
+}
 .ms-button__icon--right {
   margin-left: 8px;
 }
@@ -113,6 +206,12 @@ const normalizedSpreadIcon = computed(() => normalizeBool(props.spreadIcon));
 }
 .ms-button--none:hover {
   background-color: rgba(0, 0, 0, 0.1);
+}
+.ms-button--unactive,
+.ms-button--unactive:hover {
+  cursor: default;
+  background-color: transparent;
+  opacity: 0.6;
 }
 .ms-button--primary {
   background-color: #007bff;
@@ -202,27 +301,19 @@ const normalizedSpreadIcon = computed(() => normalizeBool(props.spreadIcon));
   border-bottom-right-radius: 0 !important;
 }
 
-.ms-button::after,
-.ms-button::before {
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-  transition: opacity 0.15s ease, visibility 0.15s ease;
-  z-index: 10;
-}
-
-.ms-button::after {
-  content: attr(data-tooltip);
-  position: absolute;
-  background: #222;
-  color: #fff;
+.ms-button__tooltip {
+  position: fixed;
+  z-index: 99999;
+  background: #434343;
+  color: #d0d0d0;
   padding: 6px 10px;
   border-radius: 4px;
   font-size: 12px;
   white-space: nowrap;
+  pointer-events: none;
 }
 
-.ms-button::before {
+.ms-button__tooltip::before {
   content: "";
   position: absolute;
   width: 0;
@@ -230,74 +321,36 @@ const normalizedSpreadIcon = computed(() => normalizeBool(props.spreadIcon));
   border-style: solid;
 }
 
-.ms-button:hover::after,
-.ms-button:hover::before {
-  opacity: 1;
-  visibility: visible;
-}
-
-.ms-button--no-tooltip::after,
-.ms-button--no-tooltip::before,
-.ms-button--no-tooltip:hover::after,
-.ms-button--no-tooltip:hover::before {
-  opacity: 0;
-  visibility: hidden;
-}
-
-.ms-button--tooltip-right::after {
+.ms-button__tooltip--right::before {
   top: 50%;
-  left: calc(100% + 8px);
-  transform: translateY(-50%);
-}
-
-.ms-button--tooltip-right::before {
-  top: 50%;
-  left: calc(100% + 2px);
+  right: 100%;
   transform: translateY(-50%);
   border-width: 6px 6px 6px 0;
-  border-color: transparent #222 transparent transparent;
+  border-color: transparent #434343 transparent transparent;
 }
 
-.ms-button--tooltip-left::after {
+.ms-button__tooltip--left::before {
   top: 50%;
-  right: calc(100% + 8px);
-  transform: translateY(-50%);
-}
-
-.ms-button--tooltip-left::before {
-  top: 50%;
-  right: calc(100% + 2px);
+  left: 100%;
   transform: translateY(-50%);
   border-width: 6px 0 6px 6px;
-  border-color: transparent transparent transparent #222;
+  border-color: transparent transparent transparent #434343;
 }
 
-.ms-button--tooltip-top::after {
+.ms-button__tooltip--top::before {
   left: 50%;
-  bottom: calc(100% + 8px);
-  transform: translateX(-50%);
-}
-
-.ms-button--tooltip-top::before {
-  left: 50%;
-  bottom: calc(100% + 2px);
+  top: 100%;
   transform: translateX(-50%);
   border-width: 6px 6px 0 6px;
-  border-color: #222 transparent transparent transparent;
+  border-color: #434343 transparent transparent transparent;
 }
 
-.ms-button--tooltip-bottom::after {
+.ms-button__tooltip--bottom::before {
   left: 50%;
-  top: calc(100% + 8px);
-  transform: translateX(-50%);
-}
-
-.ms-button--tooltip-bottom::before {
-  left: 50%;
-  top: calc(100% + 2px);
+  bottom: 100%;
   transform: translateX(-50%);
   border-width: 0 6px 6px 6px;
-  border-color: transparent transparent #222 transparent;
+  border-color: transparent transparent #434343 transparent;
 }
 
 
