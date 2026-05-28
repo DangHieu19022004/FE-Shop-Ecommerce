@@ -19,6 +19,7 @@
           <!-- Tên thành phần -->
           <div class="form-field">
             <MsInput
+              ref="salaryCompositionNameRef"
               type="text"
               id="input_name_salary"
               isRequired
@@ -296,8 +297,9 @@ import MsSelect from "@/components/base/MsSelect.vue";
 import MsRadio from "@/components/base/MsRadio.vue";
 import MsCheckbox from "@/components/base/MsCheckbox.vue";
 import MsFormula from "@/components/base/MsFormula/MsFormula.vue";
-import { ref } from "vue";
+import { nextTick, onMounted, ref } from "vue";
 
+const salaryCompositionNameRef = ref(null);
 const selectedOrgs = ref([]);
 const selectedCategory = ref(null);
 const selectedTax = ref("chiu_thue");
@@ -528,6 +530,11 @@ const markTouched = (field) => {
 const unMarkTouched = (field) => {
   touchedFields.value[field] = false;
 };
+
+onMounted(async () => {
+  await nextTick();
+  salaryCompositionNameRef.value?.focus?.();
+});
 
 </script>
 <style scoped>
