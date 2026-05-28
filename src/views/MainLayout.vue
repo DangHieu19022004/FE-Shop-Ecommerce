@@ -128,7 +128,7 @@ const handleConfirmAlert = () => {
     pendingUpdate.value = null;
     toasts.value.push({
       id: Date.now() + Math.random(),
-      message: "Cập nhật ứng viên thành công",
+      message: "Cập nhật thành công",
       type: "success",
       duration: 3000,
     });
@@ -138,7 +138,7 @@ const handleConfirmAlert = () => {
     pendingDelete.value = null;
     toasts.value.push({
       id: Date.now() + Math.random(),
-      message: "Xóa ứng viên thành công",
+      message: "Xóa thành công",
       type: "success",
       duration: 3000,
     });
@@ -165,14 +165,14 @@ const handleDeleteItem = (candidateData) => {
   alertState.value = {
     isShow: true,
     title: "Xác nhận",
-    message: "Bạn có chắc muốn xóa ứng viên này không?",
+    message: "Bạn có chắc muốn xóa này không?",
     showConfirmButton: true,
     cancelText: "Hủy",
     confirmText: "Xác nhận",
     cancelType: "none",
     confirmType: "green"
   };
-  //Lưu lại thông tin ứng viên đang chờ xóa
+  //Lưu lại thông tin đang chờ xóa
   pendingDelete.value = { candidateData };
 };
 const openAlert = (payload) => {
