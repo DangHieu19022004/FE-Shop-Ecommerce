@@ -6,7 +6,7 @@
         <col
           v-for="(field, index) in internalFields"
           :key="'col-' + index"
-          :style="{ width: columnWidths[index] ? columnWidths[index] + 'px' : 'auto' }"
+          :style="{ width: getColumnWidth(index) + 'px' }"
         />
       </colgroup>
 
@@ -148,6 +148,16 @@ const props = defineProps({
     type: Boolean,
     default: true,
   },
+  /** Width mặc định cho các cột không khai báo field.width */
+  defaultColumnWidth: {
+    type: Number,
+    default: 150,
+  },
+  /** Width tối thiểu khi resize cột */
+  minColumnWidth: {
+    type: Number,
+    default: 40,
+  },
 });
 
 const emit = defineEmits(["row-click", "update:fields"]);
@@ -227,6 +237,7 @@ watch(
   () => props.fields,
   (newFields) => {
     internalFields.value = newFields.map((f) => ({ ...f, pinned: f.pinned || null }));
+    columnWidths.value = buildInitialColumnWidths(internalFields.value);
   },
   { deep: true }
 );
@@ -234,14 +245,29 @@ watch(
 // ─── Column widths (resize) ───────────────────────────────────────────────────
 const columnWidths = ref({});
 
-function initColumnWidths() {
-  if (!tableRef.value) return;
-  const ths = tableRef.value.querySelectorAll("thead th");
+function normalizeColumnWidth(width) {
+  const parsedWidth = typeof width === "number" ? width : parseFloat(width);
+  return Number.isFinite(parsedWidth) && parsedWidth > 0 ? parsedWidth : null;
+}
+
+function getInitialColumnWidth(field) {
+  return normalizeColumnWidth(field?.width) || props.defaultColumnWidth;
+}
+
+function buildInitialColumnWidths(fields) {
   const widths = {};
-  ths.forEach((th, i) => {
-    widths[i] = th.getBoundingClientRect().width;
+  fields.forEach((field, index) => {
+    widths[index] = getInitialColumnWidth(field);
   });
-  columnWidths.value = widths;
+  return widths;
+}
+
+function getColumnWidth(index) {
+  return columnWidths.value[index] || getInitialColumnWidth(internalFields.value[index]);
+}
+
+function initColumnWidths() {
+  columnWidths.value = buildInitialColumnWidths(internalFields.value);
 }
 
 onMounted(() => {
@@ -266,7 +292,7 @@ function onResizeStart(e, index) {
 
   if (!columnWidths.value[index]) {
     const ths = tableRef.value?.querySelectorAll("thead th");
-    resizeStartWidth = ths?.[index]?.getBoundingClientRect().width || 120;
+    resizeStartWidth = ths?.[index]?.getBoundingClientRect().width || getColumnWidth(index);
     columnWidths.value = { ...columnWidths.value, [index]: resizeStartWidth };
   } else {
     resizeStartWidth = columnWidths.value[index];
@@ -281,7 +307,7 @@ function onResizeStart(e, index) {
 function onResizeMove(e) {
   if (!resizing) return;
   const delta = e.clientX - resizeStartX;
-  const newWidth = Math.max(40, resizeStartWidth + delta);
+  const newWidth = Math.max(props.minColumnWidth, resizeStartWidth + delta);
   columnWidths.value = { ...columnWidths.value, [resizeIndex]: newWidth };
 }
 
@@ -303,9 +329,13 @@ onBeforeUnmount(() => {
 let dragSrcIndex = -1;
 const dragOverIndex = ref(-1);
 
+function isColumnDraggable(index) {
+  return internalFields.value[index]?.draggable !== false;
+}
+
 function onColDragStart(e, index) {
   // Không cho drag nếu field tắt draggable
-  if (internalFields.value[index]?.draggable === false) {
+  if (!isColumnDraggable(index)) {
     e.preventDefault();
     return;
   }
@@ -314,17 +344,26 @@ function onColDragStart(e, index) {
   // Lưu width hiện tại trước khi reorder
   if (!columnWidths.value[index]) {
     const ths = tableRef.value?.querySelectorAll("thead th");
-    columnWidths.value = { ...columnWidths.value, [index]: ths?.[index]?.getBoundingClientRect().width || 120 };
+    columnWidths.value = { ...columnWidths.value, [index]: ths?.[index]?.getBoundingClientRect().width || getColumnWidth(index) };
   }
 }
 
 function onColDragOver(e, index) {
-  if (dragSrcIndex === index) return;
+  if (dragSrcIndex === -1 || dragSrcIndex === index || !isColumnDraggable(index)) {
+    dragOverIndex.value = -1;
+    if (e.dataTransfer) e.dataTransfer.dropEffect = "none";
+    return;
+  }
+
+  if (e.dataTransfer) e.dataTransfer.dropEffect = "move";
   dragOverIndex.value = index;
 }
 
 function onColDrop(e, index) {
-  if (dragSrcIndex === -1 || dragSrcIndex === index) return;
+  if (dragSrcIndex === -1 || dragSrcIndex === index || !isColumnDraggable(index)) {
+    dragOverIndex.value = -1;
+    return;
+  }
 
   const newFields = [...internalFields.value];
   const [moved] = newFields.splice(dragSrcIndex, 1);
@@ -366,7 +405,7 @@ const pinnedLeftOffsets = computed(() => {
   internalFields.value.forEach((field, i) => {
     if (field.pinned === "left") {
       offsets[i] = accumulated;
-      accumulated += columnWidths.value[i] || 120;
+      accumulated += getColumnWidth(i);
     }
   });
   return offsets;
