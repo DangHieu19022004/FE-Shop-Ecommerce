@@ -9,6 +9,7 @@
     <!-- Multiselect -->
     <div class="ms-select__control">
       <Multiselect
+        ref="multiselectRef"
         v-model="selected"
         :options="data"
         :label="optionLabel"
@@ -65,6 +66,7 @@ import Multiselect from "vue-multiselect";
 import { ref, watch } from "vue";
 
 const isOpen = ref(false);
+const multiselectRef = ref(null);
 
 const props = defineProps({
   name:       { type: String,  default: "" },
@@ -117,6 +119,14 @@ const handleRemove = () => {
 };
 const handleBlur  = () => { isOpen.value = false; emit("blur"); };
 const handleFocus = () => { isOpen.value = true;  emit("focus"); };
+
+defineExpose({
+  focus: () => {
+    multiselectRef.value?.activate?.();
+    multiselectRef.value?.$el?.focus?.();
+    multiselectRef.value?.$el?.click?.();
+  },
+});
 </script>
 
 <style>

@@ -38,6 +38,7 @@
           <!-- Mã thành phần -->
           <div class="form-field">
             <MsInput
+              ref="salaryCompositionCodeRef"
               type="text"
               id="input_code_salary"
               isRequired
@@ -68,6 +69,7 @@
           <!-- Loại thành phần lương -->
           <div class="form-field">
             <MsSelect
+              ref="compositionTypeRef"
               :data="categoryOptions"
               label-text="Loại thành phần lương"
               :is-required="true"
@@ -88,6 +90,7 @@
           <div class="form-field">
             <div class="type_salary_wrapper">
               <MsSelect
+                ref="compositionNatureRef"
                 :data="typeOptions"
                 labelText="Tính chất"
                 isRequired
@@ -121,13 +124,14 @@
           <!-- Định mức -->
           <div class="form-field">
             <MsFormula
+              ref="quotaRef"
               id="input_limit_salary"
               label="Định mức"
               horizontal
               placeholder="Tự động gợi ý công thức và tham số khi gõ"
               v-model="formData.quota"
               :variables="formulaVariables"
-              @validate="(errs) => errorMessages.quota = errs[0] || ''"
+              @validate="setCustomError('quota', $event[0] || '')"
               @blur="markTouched('quota')"
               @focus="unMarkTouched('quota')"
             />
@@ -208,13 +212,14 @@
           <!-- Công thức giá trị -->
           <div class="form-field">
             <MsFormula
+              ref="formulaRef"
               id="input_value_salary"
               class="is-over-limit fz-14"
               horizontal
               placeholder="Tự động gợi ý công thức và tham số khi gõ"
               v-model="formData.formula"
               :variables="formulaVariables"
-              @validate="(errs) => errorMessages.formula = errs[0] || ''"
+              @validate="setCustomError('formula', $event[0] || '')"
               @blur="markTouched('formula')"
               @focus="unMarkTouched('formula')"
             />
@@ -280,6 +285,7 @@
                 :isTooltip="false"
                 class="fz-14"
                 type="green"
+                @click="handleSubmit"
               />
             </div>
         </div>
@@ -289,7 +295,6 @@
 </template>
 <script setup>
 import MsButton from "@/components/base/MsButton.vue";
-import MsIcon from "@/components/base/MsIcon.vue";
 import MsInput from "@/components/base/MsInput.vue";
 import MsTable from "@/components/base/MsTable.vue";
 import MsTreeSelect from "@/components/base/MsTreeSelect/MsTreeSelect.vue";
@@ -299,7 +304,13 @@ import MsCheckbox from "@/components/base/MsCheckbox.vue";
 import MsFormula from "@/components/base/MsFormula/MsFormula.vue";
 import { nextTick, onMounted, ref } from "vue";
 
+// VARIABLE:
 const salaryCompositionNameRef = ref(null);
+const salaryCompositionCodeRef = ref(null);
+const compositionTypeRef = ref(null);
+const compositionNatureRef = ref(null);
+const quotaRef = ref(null);
+const formulaRef = ref(null);
 const selectedOrgs = ref([]);
 const selectedCategory = ref(null);
 const selectedTax = ref("chiu_thue");
@@ -323,6 +334,7 @@ const formulaVariables = [
   'THUE_TNCN',
 ];
 
+// Lưu trạng thái đã tương tác với từng field để quyết định khi nào hiển thị message lỗi
 const touchedFields = ref({});
 
 const formData = ref({
@@ -380,33 +392,52 @@ const formData = ref({
   modifiedDate: "",
 });
 
-const errorMessages = ref({
-  salaryCompositionName: "Vui lòng nhập tên thành phần lương",
-  
-  salaryCompositionCode: "Vui lòng nhập mã thành phần lương",
+const customErrorMessages = ref({});
 
-  compositionNature: "Vui lòng chọn tính chất",
+const isEmptyValue = (value) => {
+  if (Array.isArray(value)) return value.length === 0;
+  return value === null || value === undefined || String(value).trim() === "";
+};
 
-  compositionType:"Vui lòng chọn loại thành phần lương",
+const requiredRule = (message) => (value) => isEmptyValue(value) ? message : "";
+const customErrorRule = (field) => () => customErrorMessages.value[field] || "";
 
-  taxable: "",
+const validationRules = {
+  salaryCompositionName: [
+    requiredRule("Vui lòng nhập tên thành phần lương"),
+  ],
+  salaryCompositionCode: [
+    requiredRule("Vui lòng nhập mã thành phần lương"),
+  ],
+  compositionNature: [
+    requiredRule("Vui lòng chọn tính chất"),
+  ],
+  compositionType: [
+    requiredRule("Vui lòng chọn loại thành phần lương"),
+  ],
+  quota: [
+    customErrorRule("quota"),
+  ],
+  formula: [
+    customErrorRule("formula"),
+  ],
+};
 
-  taxDeduction: "",
+const fieldRefs = {
+  salaryCompositionName: salaryCompositionNameRef,
+  salaryCompositionCode: salaryCompositionCodeRef,
+  compositionType: compositionTypeRef,
+  compositionNature: compositionNatureRef,
+  quota: quotaRef,
+  formula: formulaRef,
+};
 
-  quota: "",
-
-  valueType: "",
-
-  formula: "",
-
-  description: "",
-
-  optionShowPaycheck: "",
-
-  sourceType: "",
-
-  status: "",
-});
+const errorMessages = ref(
+  Object.keys(validationRules).reduce((messages, field) => {
+    messages[field] = "";
+    return messages;
+  }, {})
+);
 
 const optionsDisplay = [
   { value: "co", label: "Có" },
@@ -502,6 +533,7 @@ const orgTreeData = [
   },
 ];
 
+//NOTICE: EMIT + PROPS
 const emit = defineEmits(["openAlert", "close"]);
 const handleCloseForm = () => {
     emit("openAlert", {
@@ -516,19 +548,92 @@ const handleCloseForm = () => {
     })
 }
 
+
+// FUNCTION:
 const isTouched = (field) => Boolean(touchedFields.value[field]);
 
-const markTouched = (field) => {
-  const data = formData.value;
-  
-  //custom validate nếu có (phone, number,...)
+const validateField = (field) => {
+  const rules = validationRules[field] || [];
+  const message = rules
+    .map((rule) => rule(formData.value[field], formData.value))
+    .find(Boolean) || "";
 
-  // nếu field rỗng (falsy) thì !""=true => touched, nếu field có giá trị (truthy) thì !"abc"=false => không touched
-  touchedFields.value[field] = !data[field];
+  errorMessages.value[field] = message;
+  return !message;
+};
+
+// validate full field in form
+const validateForm = () => {
+  const results = Object.keys(validationRules).map(validateField);
+  return results.every(Boolean);
+};
+
+const getFirstErrorField = () => {
+  return Object.keys(validationRules).find((field) => errorMessages.value[field]);
+};
+
+const getFocusableElement = (fieldRef) => {
+  const target = fieldRef?.value;
+  if (!target) return null;
+  if (typeof target.focus === "function") return target;
+
+  return target.$el?.querySelector(
+    "input, textarea, button, [tabindex]:not([tabindex='-1']), .multiselect"
+  );
+};
+
+const focusFirstErrorField = async () => {
+  await nextTick();
+
+  const firstErrorField = getFirstErrorField();
+  if (!firstErrorField) return;
+
+  const focusableElement = getFocusableElement(fieldRefs[firstErrorField]);
+  if (!focusableElement) return;
+
+  focusableElement.$el?.scrollIntoView?.({ behavior: "smooth", block: "center" });
+  focusableElement.scrollIntoView?.({ behavior: "smooth", block: "center" });
+  focusableElement.focus?.();
+
+  if (!focusableElement.focus && typeof focusableElement.click === "function") {
+    focusableElement.click();
+  }
+
+  await nextTick();
+  touchedFields.value[firstErrorField] = true;
+};
+
+const setCustomError = (field, message) => {
+  customErrorMessages.value[field] = message;
+  validateField(field);
+};
+
+const markTouched = (field) => {
+  touchedFields.value[field] = true;
+  validateField(field);
 };
 
 const unMarkTouched = (field) => {
   touchedFields.value[field] = false;
+};
+
+const touchAll = () => {
+  const fields = Object.keys(validationRules);
+  fields.forEach((field) => {
+    touchedFields.value[field] = true;
+  });
+};
+
+const handleSubmit = () => {
+  touchAll();
+  const isValid = validateForm();
+  if (!isValid) {
+    focusFirstErrorField();
+    return;
+  }
+
+  // Xử lý submit form (call API, show toast, ...)
+  console.log("Form data:", formData.value);
 };
 
 onMounted(async () => {

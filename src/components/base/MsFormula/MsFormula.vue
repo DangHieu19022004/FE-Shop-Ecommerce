@@ -151,6 +151,20 @@ function insertVariable(varName) {
     emit('update:modelValue', (props.modelValue || '') + varName);
   }
 }
+
+function focus() {
+  const container = document.getElementById(editorId.value);
+  const textarea = container
+    ? container.closest('.ms-formula__editor-wrap')?.querySelector('textarea')
+    : null;
+
+  textarea?.focus();
+}
+
+defineExpose({
+  focus,
+  insertVariable,
+});
 </script>
 
 <style>
