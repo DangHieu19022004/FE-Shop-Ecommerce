@@ -45,7 +45,7 @@
           <b class="fz-14">{{selectedIds.length}}</b>
           <MsButton
               message="Bỏ chọn"
-              class="m-r-8 color-green fz-14"
+              class="m-r-8 color-green fz-14 no-background"
               :isTooltip="false"
             />
             <MsButton
@@ -67,7 +67,7 @@
               />
               <MsInput placeholder="Tìm kiếm" class="content_body_search-input" />
             </div>
-            <div class="content_body_status">
+            <div class="content_body_status overflow-hidden">
                 <MsButton
                     :isTooltip="false"
                     iconRight="mi-chevron-down mg-l-8"
@@ -76,7 +76,7 @@
                     <span class="status-value">Tất cả</span>
                 </MsButton>
             </div>
-            <div class="hvp content_body_search_unit">
+            <div class="hvp content_body_search_unit overflow-hidden">
               <MsButton
                 :isTooltip="false"
                 iconRight="mi-chevron-down"
@@ -89,8 +89,21 @@
           </div>
           
           <div class="content_body_header_right">
-            <MsIcon class="mi-filter icon--base" wrapperClass="border-icon" message="Bộ lọc" shape="square"/>
-            <MsIcon class="mi-setting icon--base" wrapperClass="border-icon" message="Thiết lập" shape="square"/>
+            <MsButton
+              iconLeft="mi-filter"
+              tooltipMessage="Bộ lọc"
+              shapeBtn="square"
+              tooltipPosition="bottom"
+              type="border-secondary"
+              class="mg-r-8"
+            />
+            <MsButton
+              iconLeft="mi-setting"
+              tooltipMessage="Thiết lập"
+              shapeBtn="square"
+              tooltipPosition="bottom"
+              type="border-secondary"
+            />
           </div>
         </div>
         <div class="content_body">
@@ -129,25 +142,29 @@
 
               <template #cell-actions="{ row }">
                 <div class="btn_action">
-                  <MsIcon
-                    class="mi-circle-check-green"
-                    shape="square"
-                    wrapperClass="border-icon"
+                  <MsButton
+                    iconLeft="mi-circle-check-green"
+                    type="border-none"
+                    shapeBtn="square"
+                    class="sz-32"
                   />
-                  <MsIcon
-                    class="mi-copy"
-                    shape="square"
-                    wrapperClass="border-icon"
+                  <MsButton
+                    iconLeft="mi-copy"
+                    type="border-none"
+                    shapeBtn="square"
+                    class="sz-32"
                   />
-                  <MsIcon
-                    class="mi-pencil"
-                    shape="square"
-                    wrapperClass="border-icon"
+                  <MsButton
+                    iconLeft="mi-pencil"
+                    type="border-none"
+                    shapeBtn="square"
+                    class="sz-32"
                   />
-                  <MsIcon
-                    class="mi-trash-red"
-                    shape="square"
-                    wrapperClass="border-icon"
+                  <MsButton
+                    iconLeft="mi-trash-red"
+                    type="border-none"
+                    shapeBtn="square"
+                    class="sz-32"
                   />
                 </div>
               </template>
@@ -258,27 +275,28 @@ const toggleRow = (id) => {
 };
 
 const fields = [
-  { key: "", label: "", slot: "checkbox", draggable: false, pinnable: false, resizable: false },
-  { key: "salary_composition_code", label: "Mã thành phần" },
-  { key: "salary_composition_name", label: "Tên thành phần" },
-  { key: "organization_name", label: "Đơn vị áp dụng" },
-  { key: "composition_type", label: "Loại thành phần" },
-  { key: "composition_nature", label: "Tính chất" },
-  { key: "taxable", label: "Chịu thuế" },
-  { key: "tax_deduction", label: "Giảm trừ khi tính thuế" },
-  { key: "quota", label: "Định mức" },
-  { key: "value_type", label: "Kiểu giá trị" },
-  { key: "formula", label: "Giá trị" },
-  { key: "description", label: "Mô tả" },
-  { key: "option_show_paycheck", label: "Hiển thị trên phiếu lương" },
-  { key: "source_type", label: "Nguồn tạo" },
-  { key: "status", label: "Trạng thái" },
+  { key: "", label: "", slot: "checkbox", width: 48, draggable: false, pinnable: false, resizable: false },
+  { key: "salary_composition_code", label: "Mã thành phần", width: 180 },
+  { key: "salary_composition_name", label: "Tên thành phần", width: 220 },
+  { key: "organization_name", label: "Đơn vị áp dụng", width: 200 },
+  { key: "composition_type", label: "Loại thành phần", width: 180 },
+  { key: "composition_nature", label: "Tính chất", width: 160 },
+  { key: "taxable", label: "Chịu thuế", width: 130 },
+  { key: "tax_deduction", label: "Giảm trừ khi tính thuế", width: 210 },
+  { key: "quota", label: "Định mức", width: 140 },
+  { key: "value_type", label: "Kiểu giá trị", width: 160 },
+  { key: "formula", label: "Giá trị", width: 160 },
+  { key: "description", label: "Mô tả", width: 240 },
+  { key: "option_show_paycheck", label: "Hiển thị trên phiếu lương", width: 230 },
+  { key: "source_type", label: "Nguồn tạo", width: 150 },
+  { key: "status", label: "Trạng thái", width: 160 },
   {
     key: "actions",
     label: "",
     slot: "actions",
     classHead: "col_unhide",
     classBody: "col_unhide",
+    width: 210,
     draggable: false,
     pinnable: false,
     resizable: false,
@@ -288,7 +306,9 @@ const fields = [
 </script>
 <style scoped>
   .btn_action{
-    transform: translateX(-20px);
+    display: flex;
+    align-items: center;
+    gap: 16px !important;
     background-color: transparent;
   }
 .status-label {
@@ -437,8 +457,8 @@ const fields = [
   padding: 0 12px;
   font-size: 14px;
   border-radius: 6px;
-  width: auto;
-  white-space: nowrap;
+  /* width: auto;
+  white-space: nowrap; */
 }
 
 .content_header_right .btn-system {
@@ -486,6 +506,10 @@ const fields = [
   height: 32px;
   border: 1px solid #d9dee7;
 }
+.content_body_search:hover,
+.content_body_search:focus-within {
+  border-color: #34B057;
+}
 .btn-search-unit {
   justify-content: space-between !important;
   color: #111;
@@ -525,6 +549,16 @@ const fields = [
     display: flex;
     align-items: center;
 }
+.content_body_header_right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.content_body_header_right .mg-r-8 {
+  margin-right: 0;
+}
+
 .border-icon {
   border: 1px solid #d9dee7;
   border-radius: 4px;

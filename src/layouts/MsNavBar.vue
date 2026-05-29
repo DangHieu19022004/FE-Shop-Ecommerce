@@ -3,63 +3,74 @@
         <div class="bgnv">
             <div class="navbar__header">
                 <div class="navbar__header_left">
-                    <MsIcon
-                        message="Tất cả ứng dụng"
-                        class="mi-ninedot-white hvp icon--sm"
-                        shape="circle"
+                    <MsButton
+                        iconLeft="mi-ninedot-white icon--sm"
+                        shapeBtn="circle"
+                        tooltipPosition="right"
+                        tooltipMessage="Tất cả ứng dụng"
                     />
                     <div class="mi-payroll-logo hvp icon--lg"></div>
                     <div class="payroll-header">Tiền lương</div>
                 </div>
                 <div class="navbar__header_right">
-                    <div class="hvp navbar__search">
-                        <MsIcon
-                            class="mi-search-white icon--base"
-                            background
+                    <div class="navbar__search">
+                        <MsButton
+                            iconLeft="mi-search-white icon--base"
+                            :isTooltip="false"
+                            unActive
                         />
                         <MsInput
                             placeholder="Tìm kiếm"
                             class="navbar__search-input"
                         />
                     </div>
-                    <MsIcon
-                        message="Thiết lập"
-                        class="mi-setting-white hvp"
-                        shape="circle"
+                    <MsButton
+                        iconLeft="mi-setting-white hvp"
+                        shapeBtn="circle"
+                        tooltipMessage="Thiết lập"
+                        tooltipPosition="bottom"
                     />
-                    <MsIcon
-                        class="mi-agent-box hvp"
-                        background
+                    <MsButton
+                        iconLeft="mi-agent-box"
+                        shapeBtn="circle"
+                        :isTooltip="false"
+                        class="w-38"
                     />
-                    <MsIcon
-                        message="Tính năng mới"
-                        class="mi-new-feature-white hvp"
-                        shape="circle"
+                    <MsButton
+                        iconLeft="mi-new-feature-white"
+                        shapeBtn="circle"
+                        tooltipMessage="Tính năng mới"
+                        tooltipPosition="bottom"
                     />
-                    <MsIcon
-                        message="Tin nhắn"
-                        class="mi-chat hvp"
-                        shape="circle"
+                   <MsButton
+                        iconLeft="mi-chat"
+                        shapeBtn="circle"
+                        tooltipMessage="Tin nhắn"
+                        tooltipPosition="bottom"
+                   />
+                    <MsButton
+                        iconLeft="mi-alert"
+                        shapeBtn="circle"
+                        tooltipMessage="Thông báo"
+                        tooltipPosition="bottom"
                     />
-                    <MsIcon
-                        message="Thông báo"
-                        class="mi-alert hvp"
-                        shape="circle"
+                    <MsButton
+                        iconLeft="mi-ask"
+                        shapeBtn="circle"
+                        tooltipMessage="Trợ giúp"
+                        tooltipPosition="bottom"
                     />
-                    <MsIcon
-                        message="Trợ giúp"
-                        class="mi-ask hvp"
-                        shape="circle"
+                    <MsButton
+                        iconLeft="mi-other-feat"
+                        shapeBtn="circle"
+                        tooltipMessage="Tính năng khác"
+                        tooltipPosition="bottom"
                     />
-                    <MsIcon
-                        message="Tính năng khác"
-                        class="mi-other-feat hvp"
-                        shape="circle"
-                    />
-                    <MsIcon
-                        message="Kiến thức hữu ích"
-                        class="mi-book hvp"
-                        shape="circle"
+                    <MsButton
+                        iconLeft="mi-book"
+                        shapeBtn="circle"
+                        tooltipMessage="Kiến thức hữu ích"
+                        tooltipPosition="bottom"
                     />
                     <div class="hvp navbar__user">
                         <div class="missing-avatar">
@@ -78,6 +89,7 @@
     </header>
 </template>
 <script setup>
+import MsButton from "@/components/base/MsButton.vue";
 import MsIcon from "@/components/base/MsIcon.vue";
 import MsInput from "@/components/base/MsInput.vue";
 

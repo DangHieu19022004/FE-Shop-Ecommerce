@@ -4,11 +4,12 @@
       <div class="content_header">
         <div>
           <div class="content_header_left_icon">
-             <MsIcon
-                class="mi-arrow-left"
-                wrapperClass="icon-back"
-                @click="$router.push('/salarycomposition')"
-            />
+            <MsButton
+              iconLeft="mi-arrow-left"
+              shapeBtn="circle"
+              :isTooltip="false"
+              @click="$router.push('/salarycomposition')"
+             />
             <h2 class="content_header_left_title">Danh mục thành phần lương của hệ thống</h2>
           </div>
         </div>
@@ -16,10 +17,16 @@
       <div class="content_body_wrapper">
         <div class="content_body_header">
           <div class="content_body_header_left">
-            <div class="hvp content_body_search">
-              <MsIcon class="mi-search icon--base" background />
+             <div class="content_body_search">
+              <MsButton
+                iconLeft="mi-search"
+                tooltipMessage="Tìm kiếm"
+                unActive
+                tooltipPosition="bottom"
+              />
               <MsInput placeholder="Tìm kiếm" class="content_body_search-input" />
             </div>
+
             <div class="content_body_status">
                 <MsButton
                     :isTooltip="false"
@@ -31,8 +38,20 @@
             </div>
           </div>
           <div class="content_body_header_right">
-            <MsIcon class="mi-filter icon--base" wrapperClass="border-icon" message="Bộ lọc" shape="square"/>
-            <MsIcon class="mi-setting icon--base" wrapperClass="border-icon" message="Thiết lập" shape="square"/>
+            <MsButton
+              iconLeft="mi-filter"
+              tooltipMessage="Bộ lọc"
+              shapeBtn="square"
+              tooltipPosition="bottom"
+              type="border-secondary"
+            />
+            <MsButton
+              iconLeft="mi-setting"
+              tooltipMessage="Thiết lập"
+              shapeBtn="square"
+              tooltipPosition="bottom"
+              type="border-secondary"
+            />
           </div>
         </div>
         <div class="content_body">
@@ -175,6 +194,11 @@ const emit = defineEmits(["openFormEdit", "deleteItem"]);
   height: 100%;
   min-width: 0;
   min-height: 0;
+}
+.content_body_header_right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .content_bg {
@@ -344,11 +368,17 @@ const emit = defineEmits(["openFormEdit", "deleteItem"]);
     border: 1px solid #d9dee7;
     height: 32px;
 }
-.ms-input-in.content_body_search-input {
-  color: #111;
+.content_body_search:hover,
+.content_body_search:focus-within {
+  border-color: #34B057;
 }
-.ms-input-in.content_body_search-input:focus,
-.ms-input-in.content_body_search-input:focus-visible {
+:deep(.ms-input-in.content_body_search-input) {
+  color: #111;
+  background-color: transparent;
+  border: none;
+}
+:deep(.ms-input-in.content_body_search-input:focus),
+:deep(.ms-input-in.content_body_search-input:focus-visible) {
   border: none;
   outline: none !important;
   box-shadow: none;

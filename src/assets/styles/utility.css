@@ -202,3 +202,20 @@ a {
 .color-green{
   color: #28a745 !important;
 }
+
+.no-background {
+  background: none !important;
+}
+
+.overflow-hidden {
+  overflow: hidden;
+}
+
+.sz-32 {
+  width: 32px !important;
+  height: 32px !important;
+}
+
+.w-38{
+  width: 38px !important;
+}
