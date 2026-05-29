@@ -182,19 +182,22 @@ const hideTooltip = () => {
   align-items: center;
   justify-content: center;
 }
+.ms-button--icon-only {
+  padding: 6px;
+}
 .ms-button--icon-only .ms-button__icon {
   padding: 0;
 }
 .ms-button--icon-only.ms-button--shape-circle {
   width: 36px;
   height: 36px;
-  padding: 0;
+  padding: 6px;
   border-radius: 50%;
 }
 .ms-button--icon-only.ms-button--shape-square {
   width: 36px;
   height: 36px;
-  padding: 0;
+  padding: 6px;
   border-radius: 4px;
 }
 .ms-button__icon--right {
@@ -206,6 +209,14 @@ const hideTooltip = () => {
 }
 .ms-button--none:hover {
   background-color: rgba(0, 0, 0, 0.1);
+}
+.ms-button--border-none {
+  background-color: #fff;
+  color: #000;
+  border: 1px solid transparent;
+}
+.ms-button--border-none:hover {
+  background-color: #B6B5B5;
 }
 .ms-button--unactive,
 .ms-button--unactive:hover {
@@ -226,6 +237,14 @@ const hideTooltip = () => {
 }
 .ms-button--secondary:hover {
   background-color: #545b62;
+}
+.ms-button--border-secondary {
+  background-color: #fff;
+  color: #6c757d;
+  border: 1px solid #6c757d;
+}
+.ms-button--border-secondary:hover {
+  background-color: #e2e6ea;
 }
 .ms-button--danger {
   background-color: #dc3545;
