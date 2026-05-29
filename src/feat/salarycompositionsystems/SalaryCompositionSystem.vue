@@ -134,7 +134,6 @@
 </template>
 <script setup>
 import MsButton from "@/components/base/MsButton.vue";
-import MsIcon from "@/components/base/MsIcon.vue";
 import MsInput from "@/components/base/MsInput.vue";
 import MsTable from "@/components/base/MsTable.vue";
 

@@ -36,7 +36,6 @@
 
 <script setup>
 import MsButton from "@/components/base/MsButton.vue";
-import MsIcon from "@/components/base/MsIcon.vue";
 
 /**
  * NOTICE: PROP + EMIT

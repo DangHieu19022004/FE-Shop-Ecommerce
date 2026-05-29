@@ -22,7 +22,6 @@
 
 <script setup>
 import { onMounted, onUnmounted } from 'vue';
-import MsIcon from '@/components/base/MsIcon.vue';
 import MsButton from '@/components/base/MsButton.vue';
 
 /**
@@ -111,15 +110,6 @@ onUnmounted(() => {
 .ms-toast--warning .ms-toast__icon-wrapper { background-color: var(--toast-color-warning); }
 .ms-toast--info    .ms-toast__icon-wrapper { background-color: var(--toast-color-info);    }
 
-/* Vô hiệu hoá hover + padding mặc định của MsIcon bên trong icon wrapper */
-.ms-toast__icon-wrapper .ms-icon {
-    padding: 0;
-    cursor: default;
-}
-.ms-toast__icon-wrapper .ms-icon:hover {
-    background-color: transparent !important;
-}
-
 /* ── Body: message + close ──────────────────────────────────── */
 /* icon → content: 12px  |  content → close: 12px  |  close → right: 8px */
 .ms-toast__body {
@@ -144,18 +134,6 @@ onUnmounted(() => {
     text-overflow: ellipsis;
 }
 
-/* ── Close button (MsIcon mi-close) ────────────────────────── */
-.ms-toast__close.ms-icon {
-    flex-shrink: 0;
-    width: 24px;
-    height: 24px;
-    padding: 4px;
-    border-radius: 4px;
-    cursor: pointer;
-}
-.ms-toast__close.ms-icon:hover {
-    background-color: rgba(0, 0, 0, 0.07) !important;
-}
 
 /* ── Toast-type icons (mask-image SVG, white fill) ──────────── */
 [class^="mi-toast--"],
