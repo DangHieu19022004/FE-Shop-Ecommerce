@@ -103,7 +103,6 @@
               </MsButton>
             </div>
           </div>
-          
           <div class="content_body_header_right">
             <MsButton
               iconLeft="mi-filter"
@@ -113,13 +112,20 @@
               type="border-secondary"
               class="mg-r-8"
             />
-            <MsButton
-              iconLeft="mi-setting"
-              tooltipMessage="Thiết lập"
-              shapeBtn="square"
-              tooltipPosition="bottom"
-              type="border-secondary"
-            />
+            <div class="setting-btn-wrapper" @click.stop>
+              <MsButton
+                iconLeft="mi-setting"
+                tooltipMessage="Thiết lập"
+                shapeBtn="square"
+                tooltipPosition="bottom"
+                type="border-secondary"
+                @click="togglePopupSettingColumn"
+              />
+              <PopupSettingColumn
+                v-if="isOpenPopupSettingColumn"
+                @close="isOpenPopupSettingColumn = false"
+              />
+            </div>
           </div>
         </div>
         <div class="content_body">
@@ -229,8 +235,13 @@ import MsInput from "@/components/base/MsInput.vue";
 import MsTable from "@/components/base/MsTable/MsTable.vue";
 import FormSalaryComposition from "./FormSalaryComposition.vue";
 import MsDropdownMenu from "@/components/base/MsDropdownMenu.vue";
+import PopupSettingColumn from "./PopupSettingColumn.vue";
 import { ref, computed } from "vue";
 
+const isOpenPopupSettingColumn = ref(false)
+const togglePopupSettingColumn = () => {
+  isOpenPopupSettingColumn.value = !isOpenPopupSettingColumn.value
+}
 const selectedStatus = ref("all");
 const statusMenuOpen = ref(false);
 const statusItems = [
@@ -652,6 +663,10 @@ const fields = [
 .status-dropdown-leave-to {
   opacity: 0;
   transform: translateY(-4px);
+}
+/* ── Setting popup wrapper ── */
+.setting-btn-wrapper {
+  position: relative;
 }
 
 </style>

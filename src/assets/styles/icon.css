@@ -754,8 +754,20 @@ CSS Header:
 .mi-update {
     width: 20px;
     height: 20px;
+    -webkit-mask-image: url(https://testcdnamisapp.misacdn.net/apps/payroll/static/img/ICON_V3_1-qvutYp_o.svg);
+    -moz-mask-image: url(https://testcdnamisapp.misacdn.net/apps/payroll/static/img/ICON_V3_1-qvutYp_o.svg);
+    -ms-mask-image: url(https://testcdnamisapp.misacdn.net/apps/payroll/static/img/ICON_V3_1-qvutYp_o.svg);
+    -o-mask-image: url(https://testcdnamisapp.misacdn.net/apps/payroll/static/img/ICON_V3_1-qvutYp_o.svg);
     mask-image: url(https://testcdnamisapp.misacdn.net/apps/payroll/static/img/ICON_V3_1-qvutYp_o.svg);
-    mask-repeat: no-repeat;
-    background-color: rgb(110, 115, 122) !important;
+    -webkit-mask-position: -260px -60px;
+    -moz-mask-position: -260px -60px;
+    -ms-mask-position: -260px -60px;
+    -o-mask-position: -260px -60px;
     mask-position: -260px -60px;
+    -webkit-mask-repeat: no-repeat;
+    -moz-mask-repeat: no-repeat;
+    -ms-mask-repeat: no-repeat;
+    -o-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    background-color: #6e737a !important;
 }
