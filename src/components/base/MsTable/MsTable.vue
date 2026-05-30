@@ -97,7 +97,7 @@
 
 <script setup>
 import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from "vue";
-import MsMenuTable from "../overlay/MsMenuTable.vue";
+import MsMenuTable from "./MsMenuTable.vue";
 
 // ─── Props ───────────────────────────────────────────────────────────────────
 const props = defineProps({

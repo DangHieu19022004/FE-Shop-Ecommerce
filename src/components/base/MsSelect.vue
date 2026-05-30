@@ -328,31 +328,34 @@ defineExpose({
 
 .ms-multiselect .multiselect__option {
   font-size: 14px;
-  color: #2ab5a8;
+  color: #1f2937;           /* màu chữ mặc định: đen */
   padding: 10px 16px;
   min-height: unset;
   line-height: 20px;
   white-space: normal;
   cursor: pointer;
   background: transparent;
-  transition: background 0.12s;
+  transition: background 0.12s, color 0.12s;
 }
 
+/* Hover → nền xám nhạt */
 .ms-multiselect .multiselect__option:hover,
 .ms-multiselect .multiselect__option--highlight {
-  background: #f0fbfa;
-  color: #1a9a8e;
+  background: #f3f4f6;
+  color: #111827;
 }
 
+/* Đang được chọn → nền xanh lá nhạt, chữ xanh lá đậm */
 .ms-multiselect .multiselect__option--selected {
-  font-weight: 600;
-  color: #1a9a8e;
-  background: #e6f7f6;
+  font-weight: 500;
+  color: #15803d;
+  background: #dcfce7;
 }
 
+/* Hover khi đang được chọn */
 .ms-multiselect .multiselect__option--selected.multiselect__option--highlight {
-  background: #d0f0ee;
-  color: #1a9a8e;
+  background: #bbf7d0;
+  color: #15803d;
 }
 
 .ms-multiselect__option-content {

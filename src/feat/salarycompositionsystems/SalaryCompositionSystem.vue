@@ -135,7 +135,7 @@
 <script setup>
 import MsButton from "@/components/base/MsButton.vue";
 import MsInput from "@/components/base/MsInput.vue";
-import MsTable from "@/components/base/MsTable.vue";
+import MsTable from "@/components/base/MsTable/MsTable.vue";
 
 const emit = defineEmits(["openFormEdit", "deleteItem"]);
 </script>

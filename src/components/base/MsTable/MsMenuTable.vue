@@ -43,7 +43,7 @@
 </template>
 
 <script setup>
-import MsButton from '../base/MsButton.vue';
+import MsButton from "../MsButton.vue";
 
 defineProps({
   /** true nếu cột đang được ghim, false nếu chưa ghim */

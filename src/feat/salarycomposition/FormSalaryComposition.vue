@@ -296,7 +296,7 @@
 <script setup>
 import MsButton from "@/components/base/MsButton.vue";
 import MsInput from "@/components/base/MsInput.vue";
-import MsTable from "@/components/base/MsTable.vue";
+import MsTable from "@/components/base/MsTable/MsTable.vue";
 import MsTreeSelect from "@/components/base/MsTreeSelect/MsTreeSelect.vue";
 import MsSelect from "@/components/base/MsSelect.vue";
 import MsRadio from "@/components/base/MsRadio.vue";

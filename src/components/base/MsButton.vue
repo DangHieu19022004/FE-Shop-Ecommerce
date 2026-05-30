@@ -119,9 +119,9 @@ const tooltipRef = ref(null);
 const isShowTooltip = ref(false);
 const tooltipStyle = ref({});
 
-const handleClick = () => {
+const handleClick = (event) => {
   if (normalizedUnActive.value) return;
-  emit("click");
+  emit("click", event);
 };
 
 const showTooltip = () => {

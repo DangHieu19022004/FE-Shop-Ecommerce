@@ -71,10 +71,26 @@
                 <MsButton
                     :isTooltip="false"
                     iconRight="mi-chevron-down mg-l-8"
-                    >
+                    class="status-trigger"
+                    :class="{ 'status-trigger--open': statusMenuOpen }"
+                    @click.stop="statusMenuOpen = !statusMenuOpen"
+                >
                     <span class="status-label">Trạng thái:</span>
-                    <span class="status-value">Tất cả</span>
+                    <span class="status-value">{{ selectedStatusLabel }}</span>
                 </MsButton>
+
+                <!-- Dropdown menu -->
+                <Transition name="status-dropdown">
+                    <MsDropdownMenu
+                        v-if="statusMenuOpen"
+                        :items="statusItems"
+                        v-model="selectedStatus"
+                        position="bottom-start"
+                        :offset="4"
+                        class="status-dropdown"
+                        @select="statusMenuOpen = false"
+                    />
+                </Transition>
             </div>
             <div class="hvp content_body_search_unit overflow-hidden">
               <MsButton
@@ -210,9 +226,22 @@
 <script setup>
 import MsButton from "@/components/base/MsButton.vue";
 import MsInput from "@/components/base/MsInput.vue";
-import MsTable from "@/components/base/MsTable.vue";
+import MsTable from "@/components/base/MsTable/MsTable.vue";
 import FormSalaryComposition from "./FormSalaryComposition.vue";
+import MsDropdownMenu from "@/components/base/MsDropdownMenu.vue";
 import { ref, computed } from "vue";
+
+const selectedStatus = ref("all");
+const statusMenuOpen = ref(false);
+const statusItems = [
+  { label: "Tất cả",         value: "all"      },
+  { label: "Đang theo dõi",  value: "active"   },
+  { label: "Ngừng theo dõi", value: "inactive" },
+];
+/** Label hiển thị trên button trigger */
+const selectedStatusLabel = computed(
+  () => statusItems.find((i) => i.value === selectedStatus.value)?.label ?? "Tất cả"
+);
 
 var toggleSelectComposition = ref(false)
 var  isShowForm = ref(false)
@@ -519,7 +548,7 @@ const fields = [
   display: flex;
   align-items: center;
   background-color: #fff;
-  border-radius: 4px;
+  border-radius: 8px;
   width: 350px;
   height: 32px;
   border: 1px solid #d9dee7;
@@ -586,37 +615,43 @@ const fields = [
   border-top-right-radius: 4px;
 }
 
-/* ── Select Composition Dropdown ── */
-.select-composition {
-  position: absolute;
-  top: 100%;
-  right: 0;
-  margin-top: 4px;
-  z-index: 100;
-  background-color: #fff;
-  border: 1px solid #d9dee7;
-  border-radius: 4px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  min-width: 240px;
-  padding: 4px;
+/* ── Status dropdown trigger wrapper ── */
+.content_body_status {
+  position: relative;
 }
 
-.select-composition :deep(.ms-button) {
-  width: 100% !important;
-  justify-content: flex-start !important;
-  border: none !important;
-  background: transparent !important;
-  padding: 8px 12px !important;
-  height: auto !important;
-  font-size: 14px;
-  color: #1f1f1f;
-  cursor: pointer;
-  border-radius: 4px;
+.status-trigger {
   white-space: nowrap;
 }
 
-.select-composition :deep(.ms-button:hover) {
-  background-color: #f1f2f1 !important;
+.status-label {
+  font-size: 13px;
+  color: #6b7280;
+  margin-right: 4px;
+  flex-shrink: 0;
+}
+
+.status-value {
+  font-size: 13px;
+  font-weight: 500;
+  color: #111827;
+}
+
+/* Chevron xoay khi mở */
+.status-trigger--open :deep(.ms-button__icon--right) {
+  transform: rotate(180deg);
+  transition: transform 0.2s ease;
+}
+
+/* Transition animation */
+.status-dropdown-enter-active,
+.status-dropdown-leave-active {
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+.status-dropdown-enter-from,
+.status-dropdown-leave-to {
+  opacity: 0;
+  transform: translateY(-4px);
 }
 
 </style>

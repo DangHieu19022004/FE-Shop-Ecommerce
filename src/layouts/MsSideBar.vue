@@ -3,6 +3,8 @@
             <div class="sbbg">
                 <div class="sb__top">
                     <div class="sb__list">
+
+                        <!-- Tổng quan (không có submenu) -->
                         <router-link to="/demo" class="hvp dpl menu__item">
                             <MsButton
                                 iconLeft="mi-sidebar-dashboard mg-r-8"
@@ -12,6 +14,8 @@
                                 >
                             </MsButton>
                         </router-link>
+
+                        <!-- Thành phần lương (không có submenu) -->
                         <router-link to="/salarycomposition" class="hvp dpl menu__item">
                             <MsButton
                                 iconLeft="mi-sidebar-salary-composition mg-r-8"
@@ -21,6 +25,8 @@
                                 >
                             </MsButton>
                         </router-link>
+
+                        <!-- Mẫu bảng lương (không có submenu) -->
                         <router-link to="/demo" class="hvp dpl menu__item">
                             <MsButton
                                 iconLeft="mi-sidebar-salary-template mg-r-8"
@@ -30,45 +36,97 @@
                                 >
                             </MsButton>
                         </router-link>
-                        <router-link to="/demo" class="hvp dpl menu__item">
-                            <MsButton
-                                iconLeft="mi-sidebar-salary-data mg-r-8"
-                                message="Dữ liệu tính lương"
-                                iconRight="ms-icon-chevron-right mg-l-16 "
-                                :class="['align-left', { 'is-collapse': props.isCollapse }]"
-                                spreadIcon
-                                >
-                            </MsButton>
-                        </router-link>
-                        <router-link to="/demo" class="hvp dpl menu__item">
-                            <MsButton
-                                iconLeft="mi-sidebar-salary-table mg-r-8"
-                                message="Tính lương"
-                                iconRight="ms-icon-chevron-right mg-l-16 "
-                                :class="['align-left', { 'is-collapse': props.isCollapse }]"
-                                spreadIcon
-                                >
-                            </MsButton>
-                        </router-link>
-                        <router-link to="/demo" class="hvp dpl menu__item">
-                            <MsButton
-                                iconLeft="mi-sidebar-payment mg-r-8"
-                                message="Chi trả"
-                                iconRight="ms-icon-chevron-right mg-l-16 "
-                                :class="['align-left', { 'is-collapse': props.isCollapse }]"
-                                spreadIcon
-                                >
-                            </MsButton>
-                        </router-link>
+
+                        <!-- Dữ liệu tính lương -->
+                        <div
+                            class="menu__item-wrapper"
+                            @mouseenter="openMenuId = 'salary-data'"
+                            @mouseleave="openMenuId = null"
+                        >
+                            <div class="hvp dpl menu__item">
+                                <MsButton
+                                    iconLeft="mi-sidebar-salary-data mg-r-8"
+                                    message="Dữ liệu tính lương"
+                                    iconRight="ms-icon-chevron-right mg-l-16 "
+                                    :isTooltip="false"
+                                    :class="['align-left', { 'is-collapse': props.isCollapse }]"
+                                    spreadIcon
+                                />
+                            </div>
+                            <Transition name="dropdown-fade">
+                                <MsDropdownMenu
+                                    v-if="openMenuId === 'salary-data' && !props.isCollapse"
+                                    :items="salaryDataItems"
+                                    position="right-start"
+                                    :offset="2"
+                                />
+                            </Transition>
+                        </div>
+
+                        <!-- Tính lương (có submenu) -->
+                        <div
+                            class="menu__item-wrapper"
+                            @mouseenter="openMenuId = 'salary-calc'"
+                            @mouseleave="openMenuId = null"
+                        >
+                            <div class="hvp dpl menu__item">
+                                <MsButton
+                                    iconLeft="mi-sidebar-salary-table mg-r-8"
+                                    message="Tính lương"
+                                    iconRight="ms-icon-chevron-right mg-l-16 "
+                                    :isTooltip="false"
+                                    :class="['align-left', { 'is-collapse': props.isCollapse }]"
+                                    spreadIcon
+                                />
+                            </div>
+                            <Transition name="dropdown-fade">
+                                <MsDropdownMenu
+                                    v-if="openMenuId === 'salary-calc' && !props.isCollapse"
+                                    :items="salaryCalcItems"
+                                    position="right-start"
+                                    :offset="2"
+                                />
+                            </Transition>
+                        </div>
+
+                        <!-- Chi trả -->
+                        <div
+                            class="menu__item-wrapper"
+                            @mouseenter="openMenuId = 'payment'"
+                            @mouseleave="openMenuId = null"
+                        >
+                            <div class="hvp dpl menu__item">
+                                <MsButton
+                                    iconLeft="mi-sidebar-payment mg-r-8"
+                                    message="Chi trả"
+                                    iconRight="ms-icon-chevron-right mg-l-16 "
+                                    :isTooltip="false"
+                                    :class="['align-left', { 'is-collapse': props.isCollapse }]"
+                                    spreadIcon
+                                />
+                            </div>
+                            <Transition name="dropdown-fade">
+                                <MsDropdownMenu
+                                    v-if="openMenuId === 'payment' && !props.isCollapse"
+                                    :items="paymentItems"
+                                    position="right-start"
+                                    :offset="2"
+                                />
+                            </Transition>
+                        </div>
+
+                        <!-- Báo cáo-->
                         <router-link to="/demo" class="hvp dpl menu__item">
                             <MsButton
                                 iconLeft="mi-sidebar-report mg-r-8"
                                 message="Báo cáo"
+                                :isTooltip="false"
                                 :class="['align-left', { 'is-collapse': props.isCollapse }]"
                                 spreadIcon
                                 >
                             </MsButton>
                         </router-link>
+
                     </div>
                 </div>
                 <div class="sb__bottom">
@@ -82,14 +140,47 @@
         </aside>
 </template>
 <script setup>
-import { defineProps, defineEmits } from "vue";
+import { ref } from "vue";
 import MsButton from "@/components/base/MsButton.vue";
+import MsDropdownMenu from "@/components/base/MsDropdownMenu.vue";
 
 const props = defineProps(['isCollapse']);
-const emit = defineEmits(['update:isCollapse'])
+const emit = defineEmits(['update:isCollapse']);
+
+/** ID của menu đang mở (hover), null = đóng hết */
+const openMenuId = ref(null);
+
 const toggleCollapse = () => {
     emit('update:isCollapse', !props.isCollapse);
-}
+};
+
+/* ══════════════════════════
+   Dropdown data
+══════════════════════════ */
+const salaryDataItems = [
+  { label: 'Chấm công',      value: 'attendance' },
+  { label: 'Doanh số',       value: 'sales' },
+  { label: 'KPI',            value: 'kpi' },
+  { label: 'Sản phẩm',       value: 'product' },
+  { label: 'Thu nhập khác',  value: 'other-income' },
+  { label: 'Khấu trừ khác',  value: 'other-deduction' },
+];
+
+const salaryCalcItems = [
+  { label: 'Bảng lương',      value: 'payroll' },
+  { label: 'Tạm ứng',         value: 'advance-payment' },
+  { label: 'Tổng hợp lương',  value: 'payroll-summary' },
+  { label: 'Phân bổ lương',   value: 'salary-allocation' },
+  { label: 'Ngân sách lương', value: 'salary-budget' },
+  { label: 'Bảng thuế',       value: 'tax-sheet' },
+  { label: 'Quyết toán thuế', value: 'tax-finalization' },
+];
+
+const paymentItems = [
+  { label: 'Bảng chi trả',     value: 'payment-sheet' },
+  { label: 'Tổng hợp chi trả', value: 'payment-summary' },
+];
+
 </script>
 <style scoped>
 .sidebar {
@@ -122,6 +213,9 @@ const toggleCollapse = () => {
     margin-left: 12px;
 }
 
+/* ──────────────────────────
+   Menu item đơn (router-link)
+────────────────────────── */
 .menu__item {
     display: flex;
     align-items: center;
@@ -138,6 +232,28 @@ const toggleCollapse = () => {
     color: #ffffff;
 }
 
+/* ──────────────────────────
+   Menu item có submenu
+   (wrapper chứa trigger + dropdown)
+────────────────────────── */
+.menu__item-wrapper {
+    position: relative;   /* positioning context cho MsDropdownMenu */
+    width: 206px;
+    border-radius: 6px;
+}
+
+.menu__item-wrapper .menu__item {
+    width: 100%;
+}
+
+.menu__item-wrapper:hover .menu__item {
+    background: rgba(255, 255, 255, 0.08);
+    color: #ffffff;
+}
+
+/* ──────────────────────────
+   Icons & text
+────────────────────────── */
 .menu__icon {
     width: 24px;
     height: 24px;
@@ -152,6 +268,9 @@ const toggleCollapse = () => {
     line-height: 1;
 }
 
+/* ──────────────────────────
+   Bottom collapse button
+────────────────────────── */
 .sb__bottom {
     height: 40px;
     display: flex;
@@ -177,6 +296,9 @@ const toggleCollapse = () => {
     display: none;
 }
 
+/* ──────────────────────────
+   Collapsed state
+────────────────────────── */
 .sidebar.sidebar_hide {
     width: 80px;
 }
@@ -186,10 +308,17 @@ const toggleCollapse = () => {
     justify-content: center;
 }
 
+.sidebar.sidebar_hide .menu__item-wrapper {
+    width: 56px;
+}
+
 .sb__btn_left_hide {
     width: 40px;
 }
 
+/* ──────────────────────────
+   MsButton overrides (deep)
+────────────────────────── */
 :deep(.ms-button.align-left) {
     justify-content: flex-start !important;
     font-size: 13px;
@@ -208,5 +337,19 @@ const toggleCollapse = () => {
     justify-content: center !important;
     padding-left: 0;
     padding-right: 0;
+}
+
+/* ──────────────────────────
+   Dropdown transition
+────────────────────────── */
+.dropdown-fade-enter-active,
+.dropdown-fade-leave-active {
+    transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.dropdown-fade-enter-from,
+.dropdown-fade-leave-to {
+    opacity: 0;
+    transform: translateX(-6px);
 }
 </style>

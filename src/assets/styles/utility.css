@@ -123,6 +123,10 @@ a {
   padding: 8px;
 }
 
+.pd-16 {
+  padding: 16px;
+}
+
 .mg-8 {
   margin: 8px;
 }
@@ -199,7 +203,7 @@ a {
   height: 86px;
 }
 
-.color-green{
+.color-green {
   color: #28a745 !important;
 }
 
@@ -216,6 +220,6 @@ a {
   height: 32px !important;
 }
 
-.w-38{
+.w-38 {
   width: 38px !important;
 }
