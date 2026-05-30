@@ -4,14 +4,14 @@
         iconLeft="mi-circle-off"
         :isTooltip="false"
         message="Không sắp xếp"
-        iconRight="mi-check"
+        iconRight="ms-icon-check"
         class="btn-menu"
     />
     <!-- Ghim cột: chỉ hiện khi chưa ghim -->
     <MsButton
       v-if="!isPinned"
       iconLeft="mi-pinned"
-      :iconRight="isPinned ? 'mi-check' : ''"
+      :iconRight="isPinned ? 'ms-icon-check' : ''"
       message="Ghim cột"
       :isTooltip="false"
       class="btn-menu"
@@ -21,7 +21,7 @@
     <MsButton
       v-if="isPinned"
       iconLeft="mi-unpin"
-      iconRight="mi-check"
+      iconRight="ms-icon-check"
       message="Bỏ ghim cột"
       :isTooltip="false"
       class="btn-menu"

@@ -67,7 +67,7 @@
               />
               <MsInput placeholder="Tìm kiếm" class="content_body_search-input" />
             </div>
-            <div class="content_body_status overflow-hidden">
+            <div class="content_body_status">
                 <MsButton
                     :isTooltip="false"
                     iconRight="mi-chevron-down mg-l-8"

@@ -532,8 +532,24 @@ CSS Header:
 
 .mi-check {
     width: 16px;
-    height: 16px;
-    background: url("/src/assets/icons/mi-many2.svg") no-repeat -579px -150px;
+    height: 11px;
+    mask-image: url(https://testcdnamisapp.misacdn.net/apps/payroll/static/img/ICON_V3_1-qvutYp_o.svg);
+    mask-repeat: no-repeat;
+    background-color: #0E9A62 !important;
+    mask-position: -103px -65px;
+}
+
+.ms-icon-check {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    mask-image: url(/src/assets/icons/mi-many2.svg);
+    mask-repeat: no-repeat;
+    mask-size: 1128px 744px;
+    flex-shrink: 0;
+    background-image: none;
+    background-color: #717680;
+    mask-position: -576px -144px;
 }
 
 .mi-unpin {
@@ -733,4 +749,13 @@ CSS Header:
     background: url('/src/assets/icons/mi-many.svg') no-repeat -100px -89px;
     width: 20px;
     height: 18px;
+}
+
+.mi-update {
+    width: 20px;
+    height: 20px;
+    mask-image: url(https://testcdnamisapp.misacdn.net/apps/payroll/static/img/ICON_V3_1-qvutYp_o.svg);
+    mask-repeat: no-repeat;
+    background-color: rgb(110, 115, 122) !important;
+    mask-position: -260px -60px;
 }
