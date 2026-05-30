@@ -92,16 +92,12 @@
                     />
                 </Transition>
             </div>
-            <div class="hvp content_body_search_unit overflow-hidden">
-              <MsButton
-                :isTooltip="false"
-                iconRight="mi-chevron-down"
-                class="btn-search-unit"
-                spreadIcon
-              >
-                <span class="status-label">Tất cả đơn vị</span>
-              </MsButton>
-            </div>
+            <MsTreeSelect
+                placeholder="Tất cả đơn vị"
+                :options="orgTreeData"
+                v-model="selectedOrgs"
+                class="m-l-8 h-32"
+            />
           </div>
           <div class="content_body_header_right">
             <MsButton
@@ -236,12 +232,14 @@ import MsTable from "@/components/base/MsTable/MsTable.vue";
 import FormSalaryComposition from "./FormSalaryComposition.vue";
 import MsDropdownMenu from "@/components/base/MsDropdownMenu.vue";
 import PopupSettingColumn from "./PopupSettingColumn.vue";
+import MsTreeSelect from "@/components/base/MsTreeSelect/MsTreeSelect.vue";
 import { ref, computed } from "vue";
 
 const isOpenPopupSettingColumn = ref(false)
 const togglePopupSettingColumn = () => {
   isOpenPopupSettingColumn.value = !isOpenPopupSettingColumn.value
 }
+const selectedOrgs = ref([]);
 const selectedStatus = ref("all");
 const statusMenuOpen = ref(false);
 const statusItems = [
@@ -339,6 +337,47 @@ const fields = [
     draggable: false,
     pinnable: false,
     resizable: false,
+  },
+];
+
+const orgTreeData = [
+  {
+    id: "root",
+    label: "Misa Test pdthien 2024",
+    children: [
+      {
+        id: "mb",
+        label: "Chi nhánh miền Bắc",
+        children: [
+          {
+            id: "ksx",
+            label: "Khối sản xuất",
+            children: [],
+          },
+          {
+            id: "ttkd_bac",
+            label: "Trung tâm kinh doanh",
+            children: [],
+          },
+          {
+            id: "tthtkh",
+            label: "Trung tâm hỗ trợ khách hàng",
+            children: [],
+          },
+        ],
+      },
+      {
+        id: "mn",
+        label: "Chi nhánh miền Nam",
+        children: [
+          {
+            id: "ttkd_nam",
+            label: "Trung tâm kinh doanh",
+            children: [],
+          },
+        ],
+      },
+    ],
   },
 ];
 
@@ -554,7 +593,7 @@ const fields = [
   color: #111;
 }
 
-.content_body_search_unit {
+/* .content_body_search_unit {
   margin-left: 8px;
   display: flex;
   align-items: center;
@@ -563,7 +602,7 @@ const fields = [
   width: 350px;
   height: 32px;
   border: 1px solid #d9dee7;
-}
+} */
 .content_body_status{
     margin-left: 8px;
     display: flex;
@@ -668,5 +707,7 @@ const fields = [
 .setting-btn-wrapper {
   position: relative;
 }
-
+:deep(.ms-tree-select__control ){
+  width: 100%;
+}
 </style>

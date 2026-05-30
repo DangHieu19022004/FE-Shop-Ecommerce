@@ -175,6 +175,14 @@ a {
   margin-bottom: 16px;
 }
 
+.w-32 {
+  width: 32px !important;
+}
+
+.h-32 {
+  height: 32px !important;
+}
+
 .p-l-8 {
   padding-left: 8px;
 }
@@ -222,4 +230,8 @@ a {
 
 .w-38 {
   width: 38px !important;
+}
+
+.w-100-p {
+  width: 100%;
 }

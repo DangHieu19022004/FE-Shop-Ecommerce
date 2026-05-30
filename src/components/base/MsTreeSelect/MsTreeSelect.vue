@@ -271,7 +271,7 @@ onBeforeUnmount(() => {
 .ms-tree-select__control {
   display: flex;
   align-items: center;
-  min-height: 36px;
+  min-height: 32px;
   padding: 4px 8px;
   padding-right: 32px;
   border: 1px solid #d1d5db;
@@ -312,7 +312,7 @@ onBeforeUnmount(() => {
   color: #111827;
   line-height: 20px;
   white-space: nowrap;
-  max-width: 200px;
+  max-width: 400px;
   overflow: hidden;
   text-overflow: ellipsis;
 }
