@@ -730,4 +730,41 @@ const orgTreeData = [
 :deep(.ms-tree-select__control) {
   width: 350px;
 }
+
+/* ── Dropdown Select Composition ── */
+.select-composition {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  z-index: 500;
+  background: #fff;
+  border-radius: 6px;
+  min-width: 220px;
+  box-shadow: 0 4px 20px rgba(17, 24, 39, 0.14);
+  border: 1px solid #e5e7eb;
+  padding: 4px 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.select-composition :deep(.ms-button) {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  height: 36px;
+  padding: 0 12px;
+  font-size: 14px;
+  color: #1f2937;
+  background-color: transparent;
+  border: none;
+  border-radius: 0;
+  cursor: pointer;
+  transition: background-color 0.12s ease, color 0.12s ease;
+}
+
+.select-composition :deep(.ms-button:hover) {
+  background-color: #f3f4f6;
+  color: #111827;
+}
 </style>

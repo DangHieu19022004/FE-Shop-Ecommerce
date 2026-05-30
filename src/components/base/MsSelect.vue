@@ -8,24 +8,11 @@
 
     <!-- Multiselect -->
     <div class="ms-select__control">
-      <Multiselect
-        ref="multiselectRef"
-        v-model="selected"
-        :options="data"
-        :label="optionLabel"
-        :track-by="trackBy"
-        :placeholder="placeholder"
-        :searchable="searchable"
-        :allow-empty="allowEmpty"
-        :show-labels="false"
-        class="ms-multiselect"
-        :class="{ 'ms-multiselect--error': errorMessages }"
-        :style="width ? { width: typeof width === 'number' ? width + 'px' : width } : {}"
-        @select="handleSelect"
-        @remove="handleRemove"
-        @open="handleFocus"
-        @close="handleBlur"
-      >
+      <Multiselect ref="multiselectRef" v-model="selected" :options="data" :label="optionLabel" :track-by="trackBy"
+        :placeholder="placeholder" :searchable="searchable" :allow-empty="allowEmpty" :show-labels="false"
+        :disabled="disabled" class="ms-multiselect" :class="{ 'ms-multiselect--error': errorMessages }"
+        :style="width ? { width: typeof width === 'number' ? width + 'px' : width } : {}" @select="handleSelect"
+        @remove="handleRemove" @open="handleFocus" @close="handleBlur">
         <template #noOptions>
           <span class="ms-multiselect__empty">Không có dữ liệu</span>
         </template>
@@ -41,13 +28,19 @@
             </span>
           </slot>
         </template>
+        <template #singleLabel="slotProps">
+          <slot name="singleLabel" v-bind="slotProps">
+            <span class="ms-multiselect__option-content">
+              <span class="ms-multiselect__option-label">
+                {{ slotProps.option?.[optionLabel] }}
+              </span>
+            </span>
+          </slot>
+        </template>
         <!-- Custom caret: dùng icon font mi-chevron-down, xoay khi mở -->
         <template #caret="{ toggle }">
-          <span
-            class="ms-multiselect__caret"
-            :class="{ 'ms-multiselect__caret--open': isOpen }"
-            @mousedown.prevent.stop="toggle"
-          >
+          <span class="ms-multiselect__caret" :class="{ 'ms-multiselect__caret--open': isOpen }"
+            @mousedown.prevent.stop="toggle">
             <i class="mi-chevron-down"></i>
           </span>
         </template>
@@ -69,25 +62,26 @@ const isOpen = ref(false);
 const multiselectRef = ref(null);
 
 const props = defineProps({
-  name:       { type: String,  default: "" },
-  id:         { type: String,  default: "" },
+  name: { type: String, default: "" },
+  id: { type: String, default: "" },
   /** Danh sách options */
-  data:       { type: Array,   default: () => [] },
+  data: { type: Array, default: () => [] },
   /** v-model (theo trackBy key) */
   modelValue: { default: null },
   /** Text label hiển thị phía trên (hoặc bên trái khi horizontal) */
-  labelText:  { type: String,  default: "" },
+  labelText: { type: String, default: "" },
   /** Key trong object dùng hiển thị text option */
-  optionLabel:{ type: String,  default: "label" },
+  optionLabel: { type: String, default: "label" },
   /** Key trong object dùng làm value */
-  trackBy:    { type: String,  default: "value" },
-  placeholder:{ type: String,  default: "" },
+  trackBy: { type: String, default: "value" },
+  placeholder: { type: String, default: "" },
   searchable: { type: Boolean, default: false },
   allowEmpty: { type: Boolean, default: true },
-  errorMessages: { type: String,  default: "" },
+  errorMessages: { type: String, default: "" },
   isRequired: { type: Boolean, default: false },
   /** Nếu true: label & input nằm cùng hàng ngang */
   horizontal: { type: Boolean, default: false },
+  disabled: { type: Boolean, default: false },
   /**
    * Set cứng width cho phần ô input (không tính label).
    * Nhận số (px) hoặc string CSS: :width="315" hoặc width="315px"
@@ -117,8 +111,8 @@ const handleRemove = () => {
   emit("update:modelValue", null);
   emit("change", null);
 };
-const handleBlur  = () => { isOpen.value = false; emit("blur"); };
-const handleFocus = () => { isOpen.value = true;  emit("focus"); };
+const handleBlur = () => { isOpen.value = false; emit("blur"); };
+const handleFocus = () => { isOpen.value = true; emit("focus"); };
 
 defineExpose({
   focus: () => {
@@ -149,6 +143,7 @@ defineExpose({
   align-items: center;
   gap: 0;
 }
+
 .ms-select--horizontal .ms-select__label {
   flex: 0 0 200px;
   max-width: 200px;
@@ -157,6 +152,7 @@ defineExpose({
   white-space: nowrap;
   line-height: 36px;
 }
+
 .ms-select--horizontal .ms-select__control {
   flex: 1 1 0;
   min-width: 0;
@@ -174,6 +170,7 @@ defineExpose({
   color: #344054;
   line-height: 1.4;
 }
+
 .ms-select__required {
   color: #f44336;
   margin-left: 2px;
@@ -225,6 +222,18 @@ defineExpose({
   border-color: #f44336 !important;
 }
 
+.ms-multiselect.multiselect--disabled {
+  opacity: 0.8;
+  background: transparent;
+  pointer-events: none;
+}
+
+.ms-multiselect.multiselect--disabled .multiselect__tags {
+  background: #eff1f4 !important;
+  border-color: #d1d5db !important;
+  cursor: not-allowed;
+}
+
 /* ══════════════════════════
    Text đã chọn & placeholder
 ══════════════════════════ */
@@ -238,6 +247,7 @@ defineExpose({
   overflow: hidden;
   text-overflow: ellipsis;
   background: transparent;
+  width: 100%;
 }
 
 .ms-multiselect .multiselect__placeholder {
@@ -261,6 +271,7 @@ defineExpose({
   background: transparent;
   box-shadow: none;
 }
+
 .ms-multiselect .multiselect__input:focus {
   outline: none;
 }
@@ -308,12 +319,15 @@ defineExpose({
   scrollbar-width: thin;
   scrollbar-color: #d0d5dd transparent;
 }
+
 .ms-multiselect .multiselect__content-wrapper::-webkit-scrollbar {
   width: 5px;
 }
+
 .ms-multiselect .multiselect__content-wrapper::-webkit-scrollbar-track {
   background: transparent;
 }
+
 .ms-multiselect .multiselect__content-wrapper::-webkit-scrollbar-thumb {
   background-color: #c5cdd9;
   border-radius: 3px;
@@ -328,7 +342,8 @@ defineExpose({
 
 .ms-multiselect .multiselect__option {
   font-size: 14px;
-  color: #1f2937;           /* màu chữ mặc định: đen */
+  color: #1f2937;
+  /* màu chữ mặc định: đen */
   padding: 10px 16px;
   min-height: unset;
   line-height: 20px;
@@ -397,6 +412,7 @@ defineExpose({
   transition: 0.2s;
   z-index: 999;
 }
+
 .ms-select__control:hover .ms-input__tooltip {
   opacity: 1;
   visibility: visible;

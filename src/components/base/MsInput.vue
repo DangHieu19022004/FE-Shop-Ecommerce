@@ -10,6 +10,7 @@
       :name="name"
       :id="id"
       :accept="accept"
+      :disabled="disabled"
       @input="handleInput"
       @change="handleChange"
       @blur="handleBlur"
@@ -68,6 +69,10 @@ const props = defineProps({
     default: false,
   },
   horizontal: {
+    type: Boolean,
+    default: false,
+  },
+  disabled: {
     type: Boolean,
     default: false,
   },
@@ -168,6 +173,18 @@ const handleFocus = () => {
   border-color: #0E9A62;
   box-shadow: 0 0 0 3px rgba(14, 154, 98, 0.12);
   background-color: #ffffff;
+}
+
+.ms-input-in:disabled {
+  background-color: #eff1f4;
+  color: #8c929f;
+  cursor: not-allowed;
+  border-color: #d1d5db !important;
+}
+
+.ms-input-in:disabled:hover {
+  background-color: #eff1f4;
+  border-color: #d1d5db !important;
 }
 
 .ms-input .ms-input--error {

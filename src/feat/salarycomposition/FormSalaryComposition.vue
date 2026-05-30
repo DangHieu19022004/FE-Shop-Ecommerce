@@ -102,18 +102,20 @@
                 @focus="unMarkTouched('compositionNature')"
                 :errorMessages="isTouched('compositionNature') ? errorMessages.compositionNature : ''"
               />
-              <div class="type_salary">
+              <div v-if="formData.compositionNature !== 'khac'" class="type_salary">
                 <MsRadio
+                  v-if="formData.compositionNature === 'thu_nhap'"
                   v-model="selectedTax"
                   name="tax-type"
                   :options="taxOptions"
                   class="fz-14"
                   horizontalInput
                 />
-                <!-- <MsCheckbox
+                <MsCheckbox
+                  v-if="formData.compositionNature === 'khau_tru'"
                   v-model="isDeductedTax"
                   label="Giảm trừ khi tính thuế"
-                /> -->
+                />
               </div>
             </div>
             <div class="validate-msg">
@@ -122,7 +124,7 @@
           </div>
 
           <!-- Định mức -->
-          <div class="form-field">
+          <div v-if="formData.compositionNature !== 'khac'" class="form-field">
             <MsFormula
               ref="quotaRef"
               id="input_limit_salary"
@@ -135,13 +137,13 @@
               @blur="markTouched('quota')"
               @focus="unMarkTouched('quota')"
             />
-            <div class="validate-msg">
+            <!-- <div class="validate-msg">
               {{ isTouched('quota') ? errorMessages.quota : '' }}
-            </div>
+            </div> -->
           </div>
 
           <!-- Cho phép vượt định mức -->
-          <div class="is-over-limit">
+          <div v-if="formData.compositionNature !== 'khac'" class="is-over-limit">
             <MsCheckbox
               v-model="isOverLimit"
               label="Cho phép giá trị tính vượt qua định mức"
@@ -158,17 +160,18 @@
           <div class="form-field">
             <MsSelect
               labelText="Kiểu giá trị"
-              v-model="selectedType"
+              v-model="formData.valueType"
               :data="typeValues"
               horizontal
               class="fz-14"
               :width="315"
+              :disabled="formData.compositionNature !== 'khac'"
             />
             <div class="validate-msg"></div>
           </div>
 
           <!-- Giá trị -->
-          <div class="form-field">
+          <div v-if="formData.valueType === 'so' || formData.valueType === 'tien_te'" class="form-field">
             <MsRadio
               v-model="selectedOptionsValue"
               name="options-value"
@@ -180,13 +183,14 @@
           </div>
 
           <!-- Combobox chọn thành phần lương -->
-          <div class="form-field">
+          <div v-if="formData.valueType === 'so' || formData.valueType === 'tien_te'" class="form-field">
             <div class="value-select-row">
               <MsSelect
                 class="fz-14 is-over-limit"
                 :width="315"
                 v-model="selectedOptionsValueCombobox"
                 :data="optionsValueCombobox"
+                :disabled="selectedOptionsValue === optionsValue[1].value"
               >
                 <template #option="{ option }">
                   <span class="ms-multiselect__option-content">
@@ -197,101 +201,69 @@
                     ></i>
                   </span>
                 </template>
-              </MsSelect>
-              <MsSelect
-                v-model="selectedSalaryCoposition"
-                :data="salaryCompositionOptions"
-                horizontal
-                class="fz-14"
-                placeholder="Chọn thành phần lương để cộng giá trị"
-              />
-            </div>
-            <div class="validate-msg"></div>
-          </div>
+<template #singleLabel="{ option }">
+                  <span class="ms-multiselect__single-content">
+                    <span>{{ option.label }}</span>
+                    <i
+                      v-if="option.iconClass"
+                      :class="['ms-multiselect__option-icon', option.iconClass]"
+                    ></i>
+                  </span>
+                </template>
+</MsSelect>
+<MsSelect v-if="selectedOptionsValue !== optionsValue[1].value" v-model="selectedSalaryCoposition"
+  :data="salaryCompositionOptions" horizontal class="fz-14" placeholder="Chọn thành phần lương để cộng giá trị" />
+</div>
+<div class="validate-msg"></div>
+</div>
 
-          <!-- Công thức giá trị -->
-          <div class="form-field">
-            <MsFormula
-              ref="formulaRef"
-              id="input_value_salary"
-              class="is-over-limit fz-14"
-              horizontal
-              placeholder="Tự động gợi ý công thức và tham số khi gõ"
-              v-model="formData.formula"
-              :variables="formulaVariables"
-              @validate="setCustomError('formula', $event[0] || '')"
-              @blur="markTouched('formula')"
-              @focus="unMarkTouched('formula')"
-            />
-            <div class="validate-msg">
-              {{ isTouched('formula') ? errorMessages.formula : '' }}
-            </div>
-          </div>
-
-          <!-- Mô tả -->
-          <div class="form-field">
-            <div class="ms-input ms-input--horizontal">
-              <label class="ms-input__label" for="input_desc">Mô tả</label>
-              <textarea
-                id="input_desc"
-                class="ms-input-in h-86 text-area"
-              ></textarea>
-            </div>
-            <div class="validate-msg"></div>
-          </div>
-
-          <!-- Hiển thị trên phiếu lương -->
-          <div class="form-field">
-            <MsRadio
-              v-model="selectedOptionsDisplay"
-              name="options-display"
-              :options="optionsDisplay"
-              labelText="Hiển thị trên phiếu lương"
-              class="fz-14"
-              horizontal
-              horizontalInput
-            />
-            <div class="validate-msg"></div>
-          </div>
-
-          <!-- Nguồn tạo -->
-          <div class="form-field">
-            <MsInput
-              type="text"
-              id="input_source"
-              label="Nguồn tạo"
-              horizontal
-              placeholder="Tự thêm"
-              class="fz-14 wd-315"
-            />
-            <div class="validate-msg"></div>
-          </div>
-        </div>
-        <div class="content_body_footer">
-            <div class="footer-right">
-              <MsButton
-                message="Hủy bỏ"
-                :isTooltip="false"
-                class="border-gray fz-14"
-              />
-              <MsButton
-                message="Lưu và thêm"
-                :isTooltip="false"
-                class="fz-14"
-                type="border-green"
-              />
-              <MsButton
-                message="Lưu"
-                :isTooltip="false"
-                class="fz-14"
-                type="green"
-                @click="handleSubmit"
-              />
-            </div>
-        </div>
-      </div>
-    </div>
+<!-- Công thức giá trị -->
+<div
+  v-if="formData.valueType !== 'so' && formData.valueType !== 'tien_te' || selectedOptionsValue === optionsValue[1].value"
+  class="form-field">
+  <MsFormula ref="formulaRef" id="input_value_salary"
+    :class="[{ 'is-over-limit': formData.valueType === 'so' || formData.valueType === 'tien_te' }, 'fz-14']" horizontal
+    :label="formData.valueType !== 'so' && formData.valueType !== 'tien_te' ? 'Giá trị' : ''"
+    placeholder="Tự động gợi ý công thức và tham số khi gõ" v-model="formData.formula" :variables="formulaVariables"
+    @validate="setCustomError('formula', $event[0] || '')" @blur="markTouched('formula')"
+    @focus="unMarkTouched('formula')" />
+  <div class="validate-msg">
+    {{ isTouched('formula') ? errorMessages.formula : '' }}
   </div>
+</div>
+
+<!-- Mô tả -->
+<div class="form-field">
+  <div class="ms-input ms-input--horizontal">
+    <label class="ms-input__label" for="input_desc">Mô tả</label>
+    <textarea id="input_desc" class="ms-input-in h-86 text-area"></textarea>
+  </div>
+  <div class="validate-msg"></div>
+</div>
+
+<!-- Hiển thị trên phiếu lương -->
+<div class="form-field">
+  <MsRadio v-model="selectedOptionsDisplay" name="options-display" :options="optionsDisplay"
+    labelText="Hiển thị trên phiếu lương" class="fz-14" horizontal horizontalInput />
+  <div class="validate-msg"></div>
+</div>
+
+<!-- Nguồn tạo -->
+<div class="form-field">
+  <MsInput type="text" id="input_source" label="Nguồn tạo" horizontal placeholder="Tự thêm" class="fz-14 wd-315" />
+  <div class="validate-msg"></div>
+</div>
+</div>
+<div class="content_body_footer">
+  <div class="footer-right">
+    <MsButton message="Hủy bỏ" :isTooltip="false" class="border-gray fz-14" />
+    <MsButton message="Lưu và thêm" :isTooltip="false" class="fz-14" type="border-green" />
+    <MsButton message="Lưu" :isTooltip="false" class="fz-14" type="green" @click="handleSubmit" />
+  </div>
+</div>
+</div>
+</div>
+</div>
 </template>
 <script setup>
 import MsButton from "@/components/base/MsButton.vue";
@@ -317,8 +289,21 @@ const selectedTax = ref("chiu_thue");
 const isDeductedTax = ref(false);
 const isOverLimit = ref(false);
 const selectedType = ref(null);
-const selectedOptionsValue = ref(null);
-const selectedOptionsValueCombobox = ref(null);
+
+const optionsValue = [
+  { value: "tu_dong_cong", label: "Tự động cộng tổng giá trị của các nhân viên" },
+  { value: "cong_thuc_co_san", label: "Tính theo công thức tự đặt" },
+];
+
+const selectedOptionsValue = ref(optionsValue[1].value);
+
+const optionsValueCombobox = [
+  { value: "option1", label: "Trong cùng đơn vị công tác ", iconClass: "mi-info-blue" },
+  { value: "option2", label: "Dưới quyền", iconClass: "mi-info-blue" },
+  { value: "option3", label: "Thuộc cơ cấu tổ chức", iconClass: "mi-info-blue" },
+];
+
+const selectedOptionsValueCombobox = ref(optionsValueCombobox[0].value);
 const selectedSalaryCoposition = ref(null);
 const selectedOptionsDisplay = ref(null);
 
@@ -332,6 +317,20 @@ const formulaVariables = [
   'PHAN_TRAM_HOAN_THANH',
   'BAO_HIEM_XH',
   'THUE_TNCN',
+];
+
+const typeOptions = [
+  { value: "thu_nhap", label: "Thu nhập" },
+  { value: "khau_tru", label: "Khấu trừ" },
+  { value: "khac", label: "Khác" }
+];
+
+const typeValues = [
+  { value: "so", label: "Số" },
+  { value: "tien_te", label: "Tiền tệ" },
+  { value: "phan_tram", label: "Phần trăm" },
+  { value: "chu", label: "Chữ" },
+  { value: "ngay", label: "Ngày" },
 ];
 
 // Lưu trạng thái đã tương tác với từng field để quyết định khi nào hiển thị message lỗi
@@ -356,7 +355,7 @@ const formData = ref({
 
   // Tính chất
   // income / deduction / other
-  compositionNature: "",
+  compositionNature: typeOptions[0].value,
 
   // Thuế
   taxable: "",
@@ -366,8 +365,7 @@ const formData = ref({
   quota: null,
 
   // Kiểu giá trị
-  // text / number / money / percent
-  valueType: "",
+  valueType: typeValues[1].value,
 
   // Công thức / giá trị
   formula: "",
@@ -449,46 +447,24 @@ const salaryCompositionOptions = [
   { value: "thanh_phan_b", label: "Thành phần B" },
   { value: "thanh_phan_c", label: "Thành phần C" },
 ];
-const optionsValueCombobox = [
-  { value: "option1", label: "Trong cùng đơn vị công tác ", iconClass: "mi-info-blue" },
-  { value: "option2", label: "Dưới quyền", iconClass: "mi-info-blue" },
-  { value: "option3", label: "Thuộc cơ cấu tổ chức", iconClass: "mi-info-blue" },
-];
-
-const typeValues = [
-  { value: "so", label: "Số" },
-  { value: "tien_te", label: "Tiền tệ" },
-  { value: "phan_tram", label: "Phần trăm" },
-  { value: "chu", label: "Chữ" },
-  { value: "ngay", label: "Ngày" },
-];
-
-const optionsValue = [
-  { value: "tu_dong_cong", label: "Tự động cộng tổng giá trị của các nhân viên" },
-  { value: "cong_thuc_co_san", label: "Tính theo công thức tự đặt" },
-];
 
 const categoryOptions = [
-  { value: "nhan_vien",   label: "Thông tin nhân viên" },
-  { value: "cham_cong",  label: "Chấm công" },
-  { value: "doanh_so",   label: "Doanh số" },
-  { value: "kpi",        label: "KPI" },
-  { value: "san_pham",   label: "Sản phẩm" },
-  { value: "luong",      label: "Lương" },
-  { value: "thue_tncn",  label: "Thuế TNCN" },
-  { value: "bao_hiem",   label: "Bảo hiểm - Công đoàn" },
-  { value: "khac",       label: "Khác" },
+  { value: "nhan_vien", label: "Thông tin nhân viên" },
+  { value: "cham_cong", label: "Chấm công" },
+  { value: "doanh_so", label: "Doanh số" },
+  { value: "kpi", label: "KPI" },
+  { value: "san_pham", label: "Sản phẩm" },
+  { value: "luong", label: "Lương" },
+  { value: "thue_tncn", label: "Thuế TNCN" },
+  { value: "bao_hiem", label: "Bảo hiểm - Công đoàn" },
+  { value: "khac", label: "Khác" },
 ];
 
-const typeOptions = [
-  { value: "thu_nhap",   label: "Thu nhập" },
-  { value: "khau_tru", label: "Khấu trừ" },
-  {value:"khac", label: "Khác"}
-];
+
 
 const taxOptions = [
-  { value: "chiu_thue",          label: "Chịu thuế" },
-  { value: "mien_thue_toan",     label: "Miễn thuế toàn phần" },
+  { value: "chiu_thue", label: "Chịu thuế" },
+  { value: "mien_thue_toan", label: "Miễn thuế toàn phần" },
   { value: "mien_thue_mot_phan", label: "Miễn thuế một phần" },
 ];
 
@@ -536,16 +512,16 @@ const orgTreeData = [
 //NOTICE: EMIT + PROPS
 const emit = defineEmits(["openAlert", "close"]);
 const handleCloseForm = () => {
-    emit("openAlert", {
-      title: "Thoát và không lưu?",
-      message: "Nếu bạn thoát, các dữ liệu đang nhập liệu sẽ không được lưu lại.",
-      showConfirmButton: true,
-      cancelText: "Ở lại",
-      confirmText: "Thoát, không lưu",
-      cancelType: "none",
-      confirmType: "red",
-      onConfirm: () => emit("close")  // ← gọi close để SalaryComposition ẩn form
-    })
+  emit("openAlert", {
+    title: "Thoát và không lưu?",
+    message: "Nếu bạn thoát, các dữ liệu đang nhập liệu sẽ không được lưu lại.",
+    showConfirmButton: true,
+    cancelText: "Ở lại",
+    confirmText: "Thoát, không lưu",
+    cancelType: "none",
+    confirmType: "red",
+    onConfirm: () => emit("close")  // ← gọi close để SalaryComposition ẩn form
+  })
 }
 
 
@@ -643,7 +619,6 @@ onMounted(async () => {
 
 </script>
 <style scoped>
-
 .content_body_wrapper {
   width: 100%;
   flex: 1;
@@ -653,15 +628,17 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
 }
-.content_body_wrapper_form{
+
+.content_body_wrapper_form {
   display: flex;
   flex-direction: column;
-  gap:16px;
+  gap: 16px;
   flex: 1;
   overflow: auto;
   padding: 40px 120px 40px 40px;
   border-bottom: 1px solid #d9dee7;
 }
+
 .content_header_left_icon {
   display: flex;
   align-items: center;
@@ -721,26 +698,28 @@ onMounted(async () => {
   margin-bottom: 16px;
 }
 
-.type_salary_wrapper{
+.type_salary_wrapper {
   display: flex;
-  gap:16px;
+  gap: 16px;
 }
 
-.type_salary{
+.type_salary {
   display: flex;
   align-items: center;
   justify-items: center;
 }
+
 :deep(.text-area) {
   line-height: 20px !important;
   padding-top: 8px !important;
   padding-bottom: 8px !important;
 }
-.is-over-limit{
+
+.is-over-limit {
   display: flex;
   align-items: center;
   gap: 4px;
-      padding-left: 200px;
+  padding-left: 200px;
 }
 
 .value-select-row {
@@ -749,13 +728,21 @@ onMounted(async () => {
   align-items: center;
   flex-wrap: wrap;
 }
-.value-select-row > .ms-select:last-child{ flex: 1 1 0; min-width: 0; }
-.value-select-row > .ms-select:first-child  { flex: 0 0 315px; }
+
+.value-select-row>.ms-select:last-child {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.value-select-row>.ms-select:first-child {
+  flex: 0 0 315px;
+}
 
 :deep(.ms-input--horizontal .ms-input-in.wd-315) {
   flex: 0 0 315px;
   width: 315px;
 }
+
 /* ── Form field wrapper + validate message ── */
 .form-field {
   display: flex;
@@ -768,6 +755,14 @@ onMounted(async () => {
   font-size: 12px;
   color: #f44336;
   line-height: 18px;
-  padding-left: 200px; /* căn thẳng với input trong layout horizontal */
+  padding-left: 200px;
+  /* căn thẳng với input trong layout horizontal */
+}
+
+.ms-multiselect__single-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
 }
 </style>
