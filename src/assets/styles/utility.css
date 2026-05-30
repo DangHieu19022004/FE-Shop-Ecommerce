@@ -235,3 +235,11 @@ a {
 .w-100-p {
   width: 100%;
 }
+
+.b-r-4 {
+  border-radius: 4px;
+}
+
+.wd-350px {
+  width: 350px !important;
+}

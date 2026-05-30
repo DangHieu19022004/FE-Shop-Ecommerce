@@ -39,11 +39,13 @@
           </div>
         </div>
       </div>
-      <div class="content_body_wrapper">
-        <div v-if="selectedIds.length > 0" class="checkbox_function">
-          <p class="fz-14 m-r-8">Đã chọn </p>
-          <b class="fz-14">{{selectedIds.length}}</b>
-          <MsButton
+      <!-- Page area: content_body_wrapper + filter sidebar -->
+      <div class="page-area">
+        <div class="content_body_wrapper">
+          <div v-if="selectedIds.length > 0" class="checkbox_function">
+            <p class="fz-14 m-r-8">Đã chọn </p>
+            <b class="fz-14">{{selectedIds.length}}</b>
+            <MsButton
               message="Bỏ chọn"
               class="m-r-8 color-green fz-14 no-background"
               :isTooltip="false"
@@ -56,174 +58,150 @@
               type="border-danger"
             />
           </div>
-        <div v-else class="content_body_header">
-          <div class="content_body_header_left">
-            <div class="content_body_search">
-              <MsButton
-                iconLeft="mi-search"
-                tooltipMessage="Tìm kiếm"
-                unActive
-                tooltipPosition="bottom"
-              />
-              <MsInput placeholder="Tìm kiếm" class="content_body_search-input" />
-            </div>
-            <div class="content_body_status">
+          <div v-else class="content_body_header">
+            <div class="content_body_header_left">
+              <div class="content_body_search">
                 <MsButton
-                    :isTooltip="false"
-                    iconRight="mi-chevron-down mg-l-8"
-                    class="status-trigger"
-                    :class="{ 'status-trigger--open': statusMenuOpen }"
-                    @click.stop="statusMenuOpen = !statusMenuOpen"
+                  iconLeft="mi-search"
+                  tooltipMessage="Tìm kiếm"
+                  unActive
+                  tooltipPosition="bottom"
+                />
+                <MsInput placeholder="Tìm kiếm" class="content_body_search-input" />
+              </div>
+              <div class="content_body_status">
+                <MsButton
+                  :isTooltip="false"
+                  iconRight="mi-chevron-down mg-l-8"
+                  class="status-trigger"
+                  :class="{ 'status-trigger--open': statusMenuOpen }"
+                  @click.stop="statusMenuOpen = !statusMenuOpen"
                 >
-                    <span class="status-label">Trạng thái:</span>
-                    <span class="status-value">{{ selectedStatusLabel }}</span>
+                  <span class="status-label">Trạng thái:</span>
+                  <span class="status-value">{{ selectedStatusLabel }}</span>
                 </MsButton>
-
-                <!-- Dropdown menu -->
                 <Transition name="status-dropdown">
-                    <MsDropdownMenu
-                        v-if="statusMenuOpen"
-                        :items="statusItems"
-                        v-model="selectedStatus"
-                        position="bottom-start"
-                        :offset="4"
-                        class="status-dropdown"
-                        @select="statusMenuOpen = false"
-                    />
+                  <MsDropdownMenu
+                    v-if="statusMenuOpen"
+                    :items="statusItems"
+                    v-model="selectedStatus"
+                    position="bottom-start"
+                    :offset="4"
+                    class="status-dropdown"
+                    @select="statusMenuOpen = false"
+                  />
                 </Transition>
-            </div>
-            <MsTreeSelect
+              </div>
+              <MsTreeSelect
                 placeholder="Tất cả đơn vị"
                 :options="orgTreeData"
                 v-model="selectedOrgs"
                 class="m-l-8 h-32"
-            />
-          </div>
-          <div class="content_body_header_right">
-            <MsButton
-              iconLeft="mi-filter"
-              tooltipMessage="Bộ lọc"
-              shapeBtn="square"
-              tooltipPosition="bottom"
-              type="border-secondary"
-              class="mg-r-8"
-            />
-            <div class="setting-btn-wrapper" @click.stop>
+              />
+            </div>
+            <div class="content_body_header_right">
               <MsButton
-                iconLeft="mi-setting"
-                tooltipMessage="Thiết lập"
+                iconLeft="mi-filter"
+                tooltipMessage="Bộ lọc"
                 shapeBtn="square"
                 tooltipPosition="bottom"
                 type="border-secondary"
-                @click="togglePopupSettingColumn"
+                class="mg-r-8"
+                @click="isOpenFilter = !isOpenFilter"
               />
-              <PopupSettingColumn
-                v-if="isOpenPopupSettingColumn"
-                @close="isOpenPopupSettingColumn = false"
-              />
+              <div class="setting-btn-wrapper" @click.stop>
+                <MsButton
+                  iconLeft="mi-setting"
+                  tooltipMessage="Thiết lập"
+                  shapeBtn="square"
+                  tooltipPosition="bottom"
+                  type="border-secondary"
+                  @click="togglePopupSettingColumn"
+                />
+                <PopupSettingColumn
+                  v-if="isOpenPopupSettingColumn"
+                  @close="isOpenPopupSettingColumn = false"
+                />
+              </div>
             </div>
           </div>
-        </div>
-        <div class="content_body">
-         <div class="content_body_table">
-            <MsTable
-              :fields="fields"
-              :data-rows="salaryCompositions"
-              table-class="candicate_table"
-              table-class-head="candicate_table_head"
-              table-class-body="candicate_table_body"
-            >
-              <template #header-checkbox>
-                <input
-                  type="checkbox"
-                  name="selectedCandidates"
-                  id="select-all"
-                  :checked="isAllSelected"
-                  :indeterminate.prop="isIndeterminate"
-                  @change="toggleSelectAll"
-                  @click.stop
-                />
-              </template>
-
-              <template #cell-checkbox="{ row }">
-                <input
-                  type="checkbox"
-                  name="selectedCandidates"
-                  class="checkbox_item"
-                  :id="row.salary_composition_id"
-                  :value="row.salary_composition_id"
-                  :checked="isRowSelected(row.salary_composition_id)"
-                  @change="toggleRow(row.salary_composition_id)"
-                  @click.stop
-                />
-              </template>
-
-              <template #cell-actions="{ row }">
-                <div class="btn_action">
-                  <MsButton
-                    iconLeft="mi-circle-check-green"
-                    type="border-none"
-                    shapeBtn="square"
-                    class="sz-32"
+          <div class="content_body">
+            <div class="content_body_table">
+              <MsTable
+                :fields="fields"
+                :data-rows="salaryCompositions"
+                table-class="candicate_table"
+                table-class-head="candicate_table_head"
+                table-class-body="candicate_table_body"
+              >
+                <template #header-checkbox>
+                  <input
+                    type="checkbox"
+                    name="selectedCandidates"
+                    id="select-all"
+                    :checked="isAllSelected"
+                    :indeterminate.prop="isIndeterminate"
+                    @change="toggleSelectAll"
+                    @click.stop
                   />
-                  <MsButton
-                    iconLeft="mi-copy"
-                    type="border-none"
-                    shapeBtn="square"
-                    class="sz-32"
+                </template>
+<template #cell-checkbox="{ row }">
+                  <input
+                    type="checkbox"
+                    name="selectedCandidates"
+                    class="checkbox_item"
+                    :id="row.salary_composition_id"
+                    :value="row.salary_composition_id"
+                    :checked="isRowSelected(row.salary_composition_id)"
+                    @change="toggleRow(row.salary_composition_id)"
+                    @click.stop
                   />
-                  <MsButton
-                    iconLeft="mi-pencil"
-                    type="border-none"
-                    shapeBtn="square"
-                    class="sz-32"
-                  />
-                  <MsButton
-                    iconLeft="mi-trash-red"
-                    type="border-none"
-                    shapeBtn="square"
-                    class="sz-32"
-                  />
-                </div>
-              </template>
-            </MsTable>
-         </div>
-        </div>
-        <div class="content_body_footer">
-            <div class="footer-left">
-              <span>Tổng số: <b>245</b></span>
-            </div>
-            <div class="footer-right">
-              <span>Số dòng/trang</span>
-              <div class="page-size hvp">
-                <MsButton
-                    :isTooltip="false"
-                    iconRight="mi-chevron-down"
-                    class="btn-search-unit"
-                >
-                    <span class="status-label">15</span>
-                </MsButton>
-              </div>
-              <span class="page-info"><b>1 - 15</b></span>
-              <div class="pagination-controls">
-                <span class="page-btn disabled">
-                    <div class="mi-next-double-left"></div>
-                </span>
-                <span class="page-btn disabled">
-                    <div class="mi-next-left"></div>
-                </span>
-                <span class="page-btn">
-                    <div class="mi-next-right"></div>
-                </span>
-                <span class="page-btn">
-                    <div class="mi-next-double-right"></div>
-                </span>
-              </div>
-            </div>
-        </div>
-      </div>
+                </template>
+<template #cell-actions="{ row }">
+                  <div class="btn_action">
+                    <MsButton iconLeft="mi-circle-check-green" type="border-none" shapeBtn="square" class="sz-32" />
+                    <MsButton iconLeft="mi-copy" type="border-none" shapeBtn="square" class="sz-32" />
+                    <MsButton iconLeft="mi-pencil" type="border-none" shapeBtn="square" class="sz-32" />
+                    <MsButton iconLeft="mi-trash-red" type="border-none" shapeBtn="square" class="sz-32" />
+                  </div>
+                </template>
+</MsTable>
+</div>
+</div>
+<div class="content_body_footer">
+  <div class="footer-left">
+    <span>Tổng số: <b>245</b></span>
+  </div>
+  <div class="footer-right">
+    <span>Số dòng/trang</span>
+    <div class="page-size hvp">
+      <MsButton :isTooltip="false" iconRight="mi-chevron-down" class="btn-search-unit">
+        <span class="status-label">15</span>
+      </MsButton>
+    </div>
+    <span class="page-info"><b>1 - 15</b></span>
+    <div class="pagination-controls">
+      <span class="page-btn disabled">
+        <div class="mi-next-double-left"></div>
+      </span>
+      <span class="page-btn disabled">
+        <div class="mi-next-left"></div>
+      </span>
+      <span class="page-btn">
+        <div class="mi-next-right"></div>
+      </span>
+      <span class="page-btn">
+        <div class="mi-next-double-right"></div>
+      </span>
     </div>
   </div>
+</div>
+</div>
+<!-- Filter sidebar: bên cạnh content_body_wrapper -->
+<FilterSalaryComposition v-if="isOpenFilter" @close="isOpenFilter = false" />
+</div>
+</div>
+</div>
 </template>
 <script setup>
 import MsButton from "@/components/base/MsButton.vue";
@@ -232,9 +210,11 @@ import MsTable from "@/components/base/MsTable/MsTable.vue";
 import FormSalaryComposition from "./FormSalaryComposition.vue";
 import MsDropdownMenu from "@/components/base/MsDropdownMenu.vue";
 import PopupSettingColumn from "./PopupSettingColumn.vue";
+import FilterSalaryComposition from "./FilterSalaryComposition.vue";
 import MsTreeSelect from "@/components/base/MsTreeSelect/MsTreeSelect.vue";
 import { ref, computed } from "vue";
 
+const isOpenFilter = ref(false)
 const isOpenPopupSettingColumn = ref(false)
 const togglePopupSettingColumn = () => {
   isOpenPopupSettingColumn.value = !isOpenPopupSettingColumn.value
@@ -243,8 +223,8 @@ const selectedOrgs = ref([]);
 const selectedStatus = ref("all");
 const statusMenuOpen = ref(false);
 const statusItems = [
-  { label: "Tất cả",         value: "all"      },
-  { label: "Đang theo dõi",  value: "active"   },
+  { label: "Tất cả", value: "all" },
+  { label: "Đang theo dõi", value: "active" },
   { label: "Ngừng theo dõi", value: "inactive" },
 ];
 /** Label hiển thị trên button trigger */
@@ -253,12 +233,12 @@ const selectedStatusLabel = computed(
 );
 
 var toggleSelectComposition = ref(false)
-var  isShowForm = ref(false)
+var isShowForm = ref(false)
 const handleOpenForm = () => {
   isShowForm.value = !isShowForm.value
 }
 const openSelectComposition = () => {
-  toggleSelectComposition.value=!toggleSelectComposition.value
+  toggleSelectComposition.value = !toggleSelectComposition.value
 }
 
 const emit = defineEmits(["openFormEdit", "deleteItem", "openAlert"]);
@@ -383,28 +363,33 @@ const orgTreeData = [
 
 </script>
 <style scoped>
-  .btn_action{
-    display: flex;
-    align-items: center;
-    gap: 16px !important;
-    background-color: transparent;
-  }
+.btn_action {
+  display: flex;
+  align-items: center;
+  gap: 16px !important;
+  background-color: transparent;
+}
+
 .status-label {
   color: #666;
   margin-right: 4px;
   font-size: 14px;
 }
-.status-value{
-    color: #111;
-    font-weight: 500;
-    font-size: 14px;
+
+.status-value {
+  color: #111;
+  font-weight: 500;
+  font-size: 14px;
 }
-.content_body{
-    width: 100%;
-    flex: 1; /* Chiếm toàn bộ không gian còn lại */
-    background-color: #f8f9fa; /* Màu demo cho thấy vùng bảng */
-    border-top: 1px solid #d9dee7;
-    border-bottom: 1px solid #d9dee7;
+
+.content_body {
+  width: 100%;
+  flex: 1;
+  /* Chiếm toàn bộ không gian còn lại */
+  background-color: #f8f9fa;
+  /* Màu demo cho thấy vùng bảng */
+  border-top: 1px solid #d9dee7;
+  border-bottom: 1px solid #d9dee7;
   min-width: 0;
   min-height: 0;
   display: flex;
@@ -412,10 +397,10 @@ const orgTreeData = [
 }
 
 .content_body_table {
-    flex: 1;
-    width: 100%;        
-    height: 100%;
-    overflow: hidden;
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
   min-width: 0;
   min-height: 0;
   display: flex;
@@ -461,7 +446,8 @@ const orgTreeData = [
   font-size: 14px;
 }
 
-.footer-left b, .page-info b {
+.footer-left b,
+.page-info b {
   font-weight: 600;
   color: #111;
 }
@@ -524,6 +510,7 @@ const orgTreeData = [
   align-items: center;
   margin-bottom: 16px;
 }
+
 .content_header_right {
   display: flex;
   align-items: center;
@@ -555,6 +542,7 @@ const orgTreeData = [
   margin-right: 16px;
   max-height: 32px;
 }
+
 .content_header_title_composition_system {
   margin-left: 8px;
   font-size: 14px;
@@ -583,11 +571,14 @@ const orgTreeData = [
   width: 300px;
   height: 32px;
   border: 1px solid #d9dee7;
+  flex-shrink: 0;
 }
+
 .content_body_search:hover,
 .content_body_search:focus-within {
   border-color: #34B057;
 }
+
 .btn-search-unit {
   justify-content: space-between !important;
   color: #111;
@@ -603,30 +594,34 @@ const orgTreeData = [
   height: 32px;
   border: 1px solid #d9dee7;
 } */
-.content_body_status{
-    margin-left: 8px;
-    display: flex;
-    align-items: center;
-    background-color: #fff3;
-    border-radius: 8px;
-    border: 1px solid #d9dee7;
-    height: 32px;
+.content_body_status {
+  margin-left: 8px;
+  display: flex;
+  align-items: center;
+  background-color: #fff3;
+  border-radius: 8px;
+  border: 1px solid #d9dee7;
+  height: 32px;
 }
+
 :deep(.ms-input-in.content_body_search-input) {
   color: #111;
   background-color: transparent;
   border: none;
 }
+
 :deep(.ms-input-in.content_body_search-input:focus),
 :deep(.ms-input-in.content_body_search-input:focus-visible) {
   border: none;
   outline: none !important;
   box-shadow: none;
 }
-.content_body_header_left{
-    display: flex;
-    align-items: center;
+
+.content_body_header_left {
+  display: flex;
+  align-items: center;
 }
+
 .content_body_header_right {
   display: flex;
   align-items: center;
@@ -655,7 +650,7 @@ const orgTreeData = [
   color: #7a8188;
 }
 
-.checkbox_function{
+.checkbox_function {
   display: flex;
   align-items: center;
   justify-content: flex-start;
@@ -698,16 +693,41 @@ const orgTreeData = [
 .status-dropdown-leave-active {
   transition: opacity 0.15s ease, transform 0.15s ease;
 }
+
 .status-dropdown-enter-from,
 .status-dropdown-leave-to {
   opacity: 0;
   transform: translateY(-4px);
 }
+
 /* ── Setting popup wrapper ── */
 .setting-btn-wrapper {
   position: relative;
 }
-:deep(.ms-tree-select__control ){
+
+:deep(.ms-tree-select__control) {
   width: 100%;
+}
+
+/* ── Filter layout: table + filter panel side by side ── */
+.page-area {
+  display: flex;
+  flex-direction: row;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  gap: 16px;
+}
+
+/* Filter button active state */
+.btn-filter--active {
+  background-color: #e6f4ec !important;
+  border-color: #34b057 !important;
+  color: #34b057 !important;
+}
+
+:deep(.ms-tree-select__control) {
+  width: 350px;
 }
 </style>
