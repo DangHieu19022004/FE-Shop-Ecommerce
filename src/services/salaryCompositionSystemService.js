@@ -2,7 +2,6 @@ import axiosInstance from "./axios";
 
 // ============================================================
 // API DANH MỤC THÀNH PHẦN LƯƠNG HỆ THỐNG (SalaryCompositionSystem)
-// Docs: API-Frontend.md — Section 6
 // Base: /api/SalaryCompositionSystem
 // ============================================================
 

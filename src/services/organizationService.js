@@ -2,7 +2,6 @@ import axiosInstance from "./axios";
 
 // ============================================================
 // API ĐƠN VỊ / PHÒNG BAN (Organization)
-// Docs: API-Frontend.md — Section 3
 // Base: /api/Organization
 // ============================================================
 

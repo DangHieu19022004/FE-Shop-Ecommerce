@@ -2,7 +2,6 @@ import axiosInstance from "./axios";
 
 // ============================================================
 // API THÀNH PHẦN LƯƠNG (SalaryComposition)
-// Docs: API-Frontend.md — Section 5
 // Base: /api/SalaryComposition
 // ============================================================
 

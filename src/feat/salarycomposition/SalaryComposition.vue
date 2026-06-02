@@ -127,7 +127,26 @@
           </div>
           <div class="content_body">
             <div class="content_body_table">
+              <!-- Trạng thái đang tải -->
+              <div v-if="isLoading" class="table-state table-state--loading">
+                <span>Đang tải dữ liệu...</span>
+              </div>
+
+              <!-- Trạng thái lỗi -->
+              <div v-else-if="errorMessage" class="table-state table-state--error">
+                <span>{{ errorMessage }}</span>
+                <MsButton
+                  message="Thử lại"
+                  :isTooltip="false"
+                  type="border-secondary"
+                  class="mg-t-8"
+                  @click="fetchSalaryCompositions"
+                />
+              </div>
+
+              <!-- Bảng dữ liệu (chỉ render khi có data và không loading) -->
               <MsTable
+                v-else
                 :fields="fields"
                 :data-rows="salaryCompositions"
                 table-class="candicate_table"
@@ -150,12 +169,21 @@
                     type="checkbox"
                     name="selectedCandidates"
                     class="checkbox_item"
-                    :id="row.salary_composition_id"
-                    :value="row.salary_composition_id"
-                    :checked="isRowSelected(row.salary_composition_id)"
-                    @change="toggleRow(row.salary_composition_id)"
+                    :id="row.salaryCompositionId"
+                    :value="row.salaryCompositionId"
+                    :checked="isRowSelected(row.salaryCompositionId)"
+                    @change="toggleRow(row.salaryCompositionId)"
                     @click.stop
                   />
+                </template>
+<template #cell-status="{ row }">
+                  <span
+                    class="status-badge"
+                    :class="row.status === 'Đang theo dõi' ? 'status-badge--active' : 'status-badge--inactive'"
+                  >
+                    <span class="status-badge__dot"></span>
+                    {{ row.status }}
+                  </span>
                 </template>
 <template #cell-actions="{ row }">
                   <div class="btn_action">
@@ -170,7 +198,7 @@
 </div>
 <div class="content_body_footer">
   <div class="footer-left">
-    <span>Tổng số: <b>245</b></span>
+    <span>Tổng số: <b>{{ salaryCompositions.length }}</b></span>
   </div>
   <div class="footer-right">
     <span>Số dòng/trang</span>
@@ -212,7 +240,10 @@ import MsDropdownMenu from "@/components/base/MsDropdownMenu.vue";
 import PopupSettingColumn from "./PopupSettingColumn.vue";
 import FilterSalaryComposition from "./FilterSalaryComposition.vue";
 import MsTreeSelect from "@/components/base/MsTreeSelect/MsTreeSelect.vue";
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
+
+// ── Import service ──────────────────────────────────────────
+import salaryCompositionApi from "@/services/salaryCompositionService";
 
 const isOpenFilter = ref(false)
 const isOpenPopupSettingColumn = ref(false)
@@ -243,39 +274,64 @@ const openSelectComposition = () => {
 
 const emit = defineEmits(["openFormEdit", "deleteItem", "openAlert"]);
 
-const salaryCompositions = [
-  {
-    salary_composition_id: "mock-id-001",
-    salary_composition_code: "LUONG_CO_BAN",
-    salary_composition_name: "Lương cơ bản",
-    organization_name: "Tất cả đơn vị",
-    composition_type: "Lương",
-    composition_nature: "Thu nhập",
-    taxable: "Chịu thuế",
-    tax_deduction: "Không",
-    quota: "",
-    value_type: "Tiền tệ",
-    formula: "15000000",
-    description: "Lương cơ bản nhân viên",
-    option_show_paycheck: "Có",
-    source_type: "Hệ thống",
-    status: "Đang theo dõi",
-  },
-];
+// ── State dữ liệu ───────────────────────────────────────────
+const salaryCompositions = ref([]);  // Danh sách thành phần lương từ API
+const isLoading = ref(false);        // Đang gọi API
+const errorMessage = ref("");        // Thông báo lỗi (nếu có)
+
+/**
+ * Gọi API lấy toàn bộ danh sách thành phần lương
+ * Endpoint: GET /api/SalaryComposition
+ *
+ * Backend trả về ServiceResponse:
+ *   { isSuccess: true, code: 200, data: [...], userMessage: "", devMessage: "" }
+ *
+ * Vì axios interceptor đã unwrap response.data,
+ * nên `result` ở đây chính là ServiceResponse object.
+ */
+async function fetchSalaryCompositions() {
+  isLoading.value = true;
+  errorMessage.value = "";
+
+  try {
+    // result = ServiceResponse { isSuccess, code, data, userMessage, devMessage }
+    const result = await salaryCompositionApi.getAll();
+
+    if (result.isSuccess) {
+      // result.data là mảng SalaryComposition[]
+      salaryCompositions.value = result.data;
+    } else {
+      errorMessage.value = result.userMessage || "Không thể tải dữ liệu";
+    }
+  } catch (err) {
+    errorMessage.value = err.message || "Có lỗi xảy ra khi tải dữ liệu";
+    console.error("[SalaryComposition] fetchSalaryCompositions:", err);
+  } finally {
+    isLoading.value = false;
+  }
+}
+
+// Gọi API ngay khi component được mount
+onMounted(() => {
+  fetchSalaryCompositions();
+});
 
 const selectedIds = ref([]);
 
 const isAllSelected = computed(() =>
-  salaryCompositions.length > 0 && selectedIds.value.length === salaryCompositions.length
+  salaryCompositions.value.length > 0 &&
+  selectedIds.value.length === salaryCompositions.value.length
 );
 
 const isIndeterminate = computed(() =>
-  selectedIds.value.length > 0 && selectedIds.value.length < salaryCompositions.length
+  selectedIds.value.length > 0 &&
+  selectedIds.value.length < salaryCompositions.value.length
 );
 
 const toggleSelectAll = (event) => {
   if (event.target.checked) {
-    selectedIds.value = salaryCompositions.map((row) => row.salary_composition_id);
+    // Dùng field đúng theo API: salaryCompositionId (camelCase)
+    selectedIds.value = salaryCompositions.value.map((row) => row.salaryCompositionId);
   } else {
     selectedIds.value = [];
   }
@@ -293,20 +349,20 @@ const toggleRow = (id) => {
 
 const fields = [
   { key: "", label: "", slot: "checkbox", width: 48, draggable: false, pinnable: false, resizable: false },
-  { key: "salary_composition_code", label: "Mã thành phần", width: 180 },
-  { key: "salary_composition_name", label: "Tên thành phần", width: 220 },
-  { key: "organization_name", label: "Đơn vị áp dụng", width: 200 },
-  { key: "composition_type", label: "Loại thành phần", width: 180 },
-  { key: "composition_nature", label: "Tính chất", width: 160 },
+  { key: "salaryCompositionCode", label: "Mã thành phần", width: 180 },
+  { key: "salaryCompositionName", label: "Tên thành phần", width: 220 },
+  { key: "organizationName", label: "Đơn vị áp dụng", width: 200 },
+  { key: "compositionType", label: "Loại thành phần", width: 180 },
+  { key: "compositionNature", label: "Tính chất", width: 160 },
   { key: "taxable", label: "Chịu thuế", width: 130 },
-  { key: "tax_deduction", label: "Giảm trừ khi tính thuế", width: 210 },
+  { key: "taxDeduction", label: "Giảm trừ khi tính thuế", width: 210 },
   { key: "quota", label: "Định mức", width: 140 },
-  { key: "value_type", label: "Kiểu giá trị", width: 160 },
+  { key: "valueType", label: "Kiểu giá trị", width: 160 },
   { key: "formula", label: "Giá trị", width: 160 },
   { key: "description", label: "Mô tả", width: 240 },
-  { key: "option_show_paycheck", label: "Hiển thị trên phiếu lương", width: 230 },
-  { key: "source_type", label: "Nguồn tạo", width: 150 },
-  { key: "status", label: "Trạng thái", width: 160 },
+  { key: "optionShowPaycheck", label: "Hiển thị trên phiếu lương", width: 230 },
+  { key: "sourceType", label: "Nguồn tạo", width: 150 },
+  { key: "status", label: "Trạng thái", slot: "status", width: 160 },
   {
     key: "actions",
     label: "",
@@ -766,5 +822,64 @@ const orgTreeData = [
 .select-composition :deep(.ms-button:hover) {
   background-color: #f3f4f6;
   color: #111827;
+}
+
+/* ── Trạng thái loading / error trong bảng ── */
+.table-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  min-height: 200px;
+  font-size: 14px;
+  color: #6b7280;
+  gap: 8px;
+}
+
+.table-state--error {
+  color: #dc2626;
+}
+
+/* ── Status badge trong cột Trạng thái ── */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  border: 1.5px solid;
+}
+
+.status-badge__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* Đang theo dõi - xanh lá */
+.status-badge--active {
+  color: #16a34a;
+  background-color: #f0fdf4;
+  border-color: #86efac;
+}
+
+.status-badge--active .status-badge__dot {
+  background-color: #16a34a;
+}
+
+/* Ngừng theo dõi - cam */
+.status-badge--inactive {
+  color: #d97706;
+  background-color: #fffbeb;
+  border-color: #fcd34d;
+}
+
+.status-badge--inactive .status-badge__dot {
+  background-color: #d97706;
 }
 </style>

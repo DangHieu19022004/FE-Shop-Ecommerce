@@ -2,7 +2,6 @@ import axiosInstance from "./axios";
 
 // ============================================================
 // API CẤU HÌNH LƯỚI (GridConfig)
-// Docs: API-Frontend.md — Section 4
 // Base: /api/GridConfig
 // ============================================================
 
