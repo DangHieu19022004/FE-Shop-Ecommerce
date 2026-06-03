@@ -47,17 +47,17 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
-import { PrismEditor } from 'vue-prism-editor';
-import 'vue-prism-editor/dist/prismeditor.min.css';
-import { highlightFormula } from './formula-prism.js';
+import { ref, computed } from "vue";
+import { PrismEditor } from "vue-prism-editor";
+import "vue-prism-editor/dist/prismeditor.min.css";
+import { highlightFormula } from "./formula-prism.js";
 
 // ── Props ─────────────────────────────────────────────────────────────────────
 const props = defineProps({
   /** v-model: giá trị công thức */
   modelValue: {
     type: String,
-    default: '',
+    default: "",
   },
   /** Danh sách biến / thành phần lương có thể chèn */
   variables: {
@@ -67,12 +67,12 @@ const props = defineProps({
   /** Placeholder hiển thị khi rỗng */
   placeholder: {
     type: String,
-    default: 'Tự động gợi ý công thức khi gõ',
+    default: "Tự động gợi ý công thức khi gõ",
   },
   /** Label hiển thị */
   label: {
     type: String,
-    default: '',
+    default: "",
   },
   /** Xếp label và editor theo hàng ngang (giống MsInput/MsSelect) */
   horizontal: {
@@ -87,24 +87,24 @@ const props = defineProps({
   /** id cho label/editor */
   id: {
     type: String,
-    default: '',
+    default: "",
   },
   /** Thông báo lỗi từ bên ngoài truyền vào (validate ở FormSalary) */
   errorMessages: {
     type: String,
-    default: '',
+    default: "",
   },
 });
 
 // ── Emits ─────────────────────────────────────────────────────────────────────
-const emit = defineEmits(['update:modelValue', 'blur', 'focus']);
+const emit = defineEmits(["update:modelValue", "blur", "focus"]);
 
 // ── Internal state ────────────────────────────────────────────────────────────
 const isFocused = ref(false);
 
 // ID tự sinh nếu không truyền vào
-const editorId = computed(() =>
-  props.id || `ms-formula-${Math.random().toString(36).slice(2, 8)}`
+const editorId = computed(
+  () => props.id || `ms-formula-${Math.random().toString(36).slice(2, 8)}`,
 );
 
 // ── Highlight function truyền vào PrismEditor ─────────────────────────────────
@@ -114,17 +114,17 @@ function highlightCode(code) {
 
 // ── Event handlers ────────────────────────────────────────────────────────────
 function handleInput(value) {
-  emit('update:modelValue', value);
+  emit("update:modelValue", value);
 }
 
 function handleFocus(e) {
   isFocused.value = true;
-  emit('focus', e);
+  emit("focus", e);
 }
 
 function handleBlur(e) {
   isFocused.value = false;
-  emit('blur', e);
+  emit("blur", e);
 }
 
 /**
@@ -133,29 +133,32 @@ function handleBlur(e) {
 function insertVariable(varName) {
   const container = document.getElementById(editorId.value);
   const textarea = container
-    ? container.closest('.ms-formula__editor-wrap')?.querySelector('textarea')
+    ? container.closest(".ms-formula__editor-wrap")?.querySelector("textarea")
     : null;
 
   if (textarea) {
     const start = textarea.selectionStart;
     const end = textarea.selectionEnd;
-    const current = props.modelValue || '';
+    const current = props.modelValue || "";
     const next = current.slice(0, start) + varName + current.slice(end);
-    emit('update:modelValue', next);
+    emit("update:modelValue", next);
 
     requestAnimationFrame(() => {
       textarea.focus();
-      textarea.setSelectionRange(start + varName.length, start + varName.length);
+      textarea.setSelectionRange(
+        start + varName.length,
+        start + varName.length,
+      );
     });
   } else {
-    emit('update:modelValue', (props.modelValue || '') + varName);
+    emit("update:modelValue", (props.modelValue || "") + varName);
   }
 }
 
 function focus() {
   const container = document.getElementById(editorId.value);
   const textarea = container
-    ? container.closest('.ms-formula__editor-wrap')?.querySelector('textarea')
+    ? container.closest(".ms-formula__editor-wrap")?.querySelector("textarea")
     : null;
 
   textarea?.focus();
@@ -169,12 +172,26 @@ defineExpose({
 
 <style>
 /* ── Token colors: áp dụng global vì PrismEditor render trong shadow-like DOM ── */
-.ms-formula__prism .token.function   { color: #7c3aed; font-weight: 600; }
-.ms-formula__prism .token.variable   { color: #0369a1; }
-.ms-formula__prism .token.number     { color: #b45309; }
-.ms-formula__prism .token.operator   { color: #dc2626; font-weight: 500; }
-.ms-formula__prism .token.string     { color: #16a34a; }
-.ms-formula__prism .token.punctuation{ color: #6b7280; }
+.ms-formula__prism .token.function {
+  color: #7c3aed;
+  font-weight: 600;
+}
+.ms-formula__prism .token.variable {
+  color: #0369a1;
+}
+.ms-formula__prism .token.number {
+  color: #b45309;
+}
+.ms-formula__prism .token.operator {
+  color: #dc2626;
+  font-weight: 500;
+}
+.ms-formula__prism .token.string {
+  color: #16a34a;
+}
+.ms-formula__prism .token.punctuation {
+  color: #6b7280;
+}
 </style>
 
 <style scoped>
@@ -249,7 +266,9 @@ defineExpose({
   border: 1.5px solid #d1d5db;
   border-radius: 6px;
   background: #ffffff;
-  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease;
   overflow: hidden;
   min-height: 86px;
 }
@@ -265,7 +284,7 @@ defineExpose({
 
 .ms-formula__editor-wrap--error {
   border-color: #f44336 !important;
-  box-shadow: 0 0 0 3px rgba(244, 67, 54, 0.10) !important;
+  box-shadow: 0 0 0 3px rgba(244, 67, 54, 0.1) !important;
 }
 
 .ms-formula__editor-wrap--error:hover {
@@ -284,7 +303,7 @@ defineExpose({
   color: #9ca3af;
   pointer-events: none;
   z-index: 2;
-  font-family: 'Fira Code', 'Fira Mono', Consolas, 'Courier New', monospace;
+  font-family: "Fira Code", "Fira Mono", Consolas, "Courier New", monospace;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -295,7 +314,8 @@ defineExpose({
 ══════════════════════════════════════════════ */
 .ms-formula__prism {
   background: transparent !important;
-  font-family: 'Fira Code', 'Fira Mono', Consolas, 'Courier New', monospace !important;
+  font-family:
+    "Fira Code", "Fira Mono", Consolas, "Courier New", monospace !important;
   font-size: 13.5px !important;
   line-height: 1.65 !important;
   padding: 8px 12px !important;
@@ -342,7 +362,9 @@ defineExpose({
   white-space: nowrap;
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.15s ease, visibility 0.15s ease;
+  transition:
+    opacity 0.15s ease,
+    visibility 0.15s ease;
   z-index: 999;
   pointer-events: none;
 }
