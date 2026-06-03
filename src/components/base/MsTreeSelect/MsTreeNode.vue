@@ -140,6 +140,12 @@ const checkboxRef = ref(null);
   transition: background-color 0.12s;
 }
 
+/* Ép icon kế thừa màu từ toggle — tránh bị các global icon class ghi đè */
+.ms-tree-node__toggle i {
+  color: inherit !important;
+  font-size: 14px;
+}
+
 .ms-tree-node__toggle:hover {
   background-color: #e5e7eb;
   color: #111;

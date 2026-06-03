@@ -228,6 +228,11 @@ a {
   height: 32px !important;
 }
 
+.sz-28{
+  width: 28px !important;
+  height: 28px !important;
+}
+
 .w-38 {
   width: 38px !important;
 }
@@ -242,4 +247,14 @@ a {
 
 .wd-350px {
   width: 350px !important;
+}
+
+.pd-0{
+  padding: 0 !important;
+}
+
+.sz-32
+{
+  width: 32px !important;
+  height: 32px !important;
 }

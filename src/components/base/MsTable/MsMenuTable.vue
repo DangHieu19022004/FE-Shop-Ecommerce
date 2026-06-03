@@ -1,13 +1,13 @@
 <template>
   <div class="menu-table" @click.stop>
     <MsButton
-        iconLeft="mi-circle-off"
-        :isTooltip="false"
-        message="Không sắp xếp"
-        iconRight="ms-icon-check"
-        class="btn-menu"
+      iconLeft="mi-circle-off"
+      :isTooltip="false"
+      message="Không sắp xếp"
+      :iconRight="activeSort === 'none' ? 'ms-icon-check' : ''"
+      class="btn-menu"
+      @click="emit('sort', 'none')"
     />
-    <!-- Ghim cột: chỉ hiện khi chưa ghim -->
     <MsButton
       v-if="!isPinned"
       iconLeft="mi-pinned"
@@ -17,7 +17,6 @@
       class="btn-menu"
       @click="emit('pin')"
     />
-    <!-- Bỏ ghim cột: chỉ hiện khi đang ghim -->
     <MsButton
       v-if="isPinned"
       iconLeft="mi-unpin"
@@ -31,13 +30,17 @@
       iconLeft="mi-arrow-up"
       message="Tăng dần"
       :isTooltip="false"
+      :iconRight="activeSort === 'asc' ? 'ms-icon-check' : ''"
       class="btn-menu"
+      @click="emit('sort', 'asc')"
     />
     <MsButton
       iconLeft="mi-arrow-down"
       message="Giảm dần"
       :isTooltip="false"
+      :iconRight="activeSort === 'desc' ? 'ms-icon-check' : ''"
       class="btn-menu"
+      @click="emit('sort', 'desc')"
     />
   </div>
 </template>
@@ -46,14 +49,17 @@
 import MsButton from "../MsButton.vue";
 
 defineProps({
-  /** true nếu cột đang được ghim, false nếu chưa ghim */
   isPinned: {
     type: Boolean,
     default: false,
   },
+  activeSort: {
+    type: String,
+    default: "none",
+  },
 });
 
-const emit = defineEmits(['pin', 'unpin', 'close']);
+const emit = defineEmits(["pin", "unpin", "sort", "close"]);
 </script>
 
 <style scoped>
@@ -66,6 +72,7 @@ const emit = defineEmits(['pin', 'unpin', 'close']);
   min-width: 160px;
   width: 200px;
 }
+
 :deep(.btn-menu) {
   display: flex;
   align-items: center;
@@ -76,7 +83,7 @@ const emit = defineEmits(['pin', 'unpin', 'close']);
   font-size: 14px;
   padding: 0 12px;
 }
-/* Đẩy icon right sang sát cạnh phải */
+
 :deep(.btn-menu .ms-button__icon--right) {
   margin-left: auto;
 }

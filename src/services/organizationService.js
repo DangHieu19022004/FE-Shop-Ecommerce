@@ -19,6 +19,16 @@ const organizationApi = {
   },
 
   /**
+   * Lấy danh sách đơn vị theo cấu trúc cây (cha – con)
+   * Endpoint: GET /api/Organization/Tree
+   * Root nodes ở cấp đầu, các node con nằm trong thuộc tính children
+   * @returns {Promise<ServiceResponse<Organization[]>>} - mảng cây root nodes
+   */
+  getTree() {
+    return axiosInstance.get(`${BASE}/Tree`);
+  },
+
+  /**
    * Lấy danh sách đơn vị có phân trang + tìm kiếm + sắp xếp
    * Endpoint: GET /api/Organization/Paging
    * @param {Object} params

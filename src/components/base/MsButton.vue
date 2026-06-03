@@ -21,6 +21,8 @@
 >
     <i v-if="iconLeft" :class="[iconLeft, 'ms-button__icon']"></i>
     <span v-if="message || $slots.default" class="ms-button__content">
+    <!-- <span class="ms-button__content"> -->
+
          <slot>
           {{ message }}
         </slot>
@@ -197,8 +199,8 @@ const hideTooltip = () => {
 .ms-button--icon-only.ms-button--shape-square {
   width: 36px;
   height: 36px;
-  padding: 6px;
-  border-radius: 4px;
+  /* padding: 6px; */
+  border-radius: 8px;
 }
 .ms-button__icon--right {
   margin-left: 8px;

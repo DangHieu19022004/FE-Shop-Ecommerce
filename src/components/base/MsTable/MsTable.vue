@@ -75,7 +75,7 @@
             :style="getTdStyle(field, colIndex)"
           >
             <slot :name="`cell-${field.slot || field.key}`" :row="row">
-              {{ row[field.key] || "--" }}
+              <template v-if="field.key !== 'actions' && field.key !== 'ghost'">{{ row[field.key] || "--" }}</template>
             </slot>
           </td>
         </tr>
@@ -86,10 +86,12 @@
     <MsMenuTable
       v-if="menuOpen && pinnable"
       :is-pinned="activeFieldPinned"
+      :active-sort="activeFieldSort"
       :style="menuStyle"
       class="ms-table-col-menu"
       @pin="onMenuPin"
       @unpin="onMenuUnpin"
+      @sort="onMenuSort"
       @close="closeMenu"
     />
   </div>
@@ -158,9 +160,17 @@ const props = defineProps({
     type: Number,
     default: 40,
   },
+  sortField: {
+    type: String,
+    default: "",
+  },
+  sortDirection: {
+    type: String,
+    default: "",
+  },
 });
 
-const emit = defineEmits(["row-click", "update:fields"]);
+const emit = defineEmits(["row-click", "update:fields", "sort-change"]);
 
 // ─── Refs ─────────────────────────────────────────────────────────────────────
 const tableRef = ref(null);
@@ -174,6 +184,12 @@ const activeColIndex = ref(-1);
 const activeFieldPinned = computed(
   () => internalFields.value[activeColIndex.value]?.pinned === 'left'
 );
+
+const activeFieldSort = computed(() => {
+  const activeField = internalFields.value[activeColIndex.value];
+  if (!activeField || activeField.key !== props.sortField) return "none";
+  return props.sortDirection || "none";
+});
 
 function openMenu(e, index) {
   // Toggle: nếu đang mở đúng cột này thì đóng lại
@@ -218,6 +234,20 @@ function onMenuUnpin() {
     field.pinned = null;
     emit('update:fields', internalFields.value.map(f => ({ ...f })));
   }
+  closeMenu();
+}
+
+function onMenuSort(direction) {
+  const field = internalFields.value[activeColIndex.value];
+  if (!field || !field.key) {
+    closeMenu();
+    return;
+  }
+
+  emit("sort-change", {
+    field: direction === "none" ? "" : field.key,
+    direction: direction === "none" ? "" : direction,
+  });
   closeMenu();
 }
 
@@ -422,9 +452,13 @@ function getThStyle(field, index) {
   } else if (field.key === "actions") {
     style.position = "sticky";
     style.right = "0px";
-    style.zIndex = 3;
-    style.backgroundColor = "transparent";
+    style.zIndex = 4;
+    style.backgroundColor = "#f9fafb";
     style.boxShadow = "-2px 0 6px -2px rgba(0,0,0,0.12)";
+    style.width = "50px";
+    style.minWidth = "50px";
+    style.maxWidth = "50px";
+    style.overflow = "visible";
   }
   return style;
 }
@@ -440,9 +474,13 @@ function getTdStyle(field, index) {
   } else if (field.key === "actions") {
     style.position = "sticky";
     style.right = "0px";
-    style.zIndex = 1;
-    style.backgroundColor = "transparent";
+    style.zIndex = 3;
+    style.backgroundColor = "#fff";
     style.boxShadow = "-2px 0 6px -2px rgba(0,0,0,0.08)";
+    style.width = "50px";
+    style.minWidth = "50px";
+    style.maxWidth = "50px";
+    style.overflow = "visible";
   }
   return style;
 }
@@ -455,6 +493,22 @@ function getTdStyle(field, index) {
   height: 100%;
   overflow: auto;
   position: relative;
+  scrollbar-width: thin;
+  scrollbar-color: #CBCBCB transparent;
+}
+
+.ms-table-wrapper::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.ms-table-wrapper::-webkit-scrollbar-thumb {
+  background-color: #CBCBCB;
+  border-radius: 6px;
+}
+
+.ms-table-wrapper::-webkit-scrollbar-track {
+  background: transparent;
 }
 
 /* ── Table base ── */
@@ -497,16 +551,41 @@ function getTdStyle(field, index) {
   position: sticky;
   top: 0;
   background-color: #f9fafb;
-  height: 40px;
-  z-index: 2;
+  height: 36px;
+  z-index: 10;
   border-top: 1.5px solid #e4e7ec;
-  font-weight: 500;
+  border-bottom: 1px solid #e4e7ec;
+  font-weight: 600;
   color: #374151;
   user-select: none;
 }
 
+.ms-table thead {
+  background-color: #f9fafb;
+  position: sticky;
+  top: 0;
+  z-index: 9;
+  box-shadow: 0 1px 0 #e4e7ec;
+}
+
+/* Short right divider for header cells */
+.ms-table th::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1.5px;
+  height: 18px;
+  background-color: #e4e7ec;
+}
+
+.ms-table th:last-child::after {
+  display: none;
+}
+
 .ms-table td {
-  height: 48px;
+  height: 36px;
 }
 
 /* ── Drag handle ── */
@@ -683,31 +762,52 @@ tbody tr:hover .btn__action {
   background-color: #7a8188;
 }
 
-/* ── Hover to show actions ── */
-.ms-table tbody tr :deep(.btn_action),
-.ms-table tbody tr :deep(.btn__action) {
+/* ── Actions column overrides & Hover to show actions ── */
+.ms-table td.col-actions {
+  /* Ensure overflow is visible so buttons can float leftwards */
+  /* overflow: visible !important; */
+}
+
+.col-actions{
+  background-color: transparent !important;
+}
+
+.ms-table td.col-actions :deep(.btn_action),
+.ms-table td.col-actions :deep(.btn__action) {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
   opacity: 0;
   transition: opacity 0.15s ease-in-out;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
+  z-index: 10;
 }
 
-.ms-table tbody tr:hover :deep(.btn_action),
-.ms-table tbody tr:hover :deep(.btn__action) {
+.ms-table tbody tr:hover td.col-actions :deep(.btn_action),
+.ms-table tbody tr:hover td.col-actions :deep(.btn__action) {
   opacity: 1;
 }
 
-/* Đảm bảo cột action không bị che khuất và có màu nền đồng bộ với dòng (tránh đè chữ khi cuộn) */
-.ms-table .col-actions {
-  min-width: 210px;
-  width: 210px;
+/* Style for action buttons to match the floating white blocks */
+.ms-table td.col-actions :deep(.btn_action .ms-button),
+.ms-table td.col-actions :deep(.btn__action .ms-button) {
+  background-color: #fff !important;
+  border: 1px solid #d9dee7 !important;
+  border-radius: 8px !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.ms-table td.col-actions {
-  background-color: transparent !important;
+.ms-table td.col-actions :deep(.btn_action .ms-button:hover),
+.ms-table td.col-actions :deep(.btn__action .ms-button:hover) {
+  background-color: #f3f4f6 !important;
 }
 
+/* ── Hover effect for actions column ── */
 .ms-table tbody tr:hover td.col-actions {
   background-color: transparent !important;
 }

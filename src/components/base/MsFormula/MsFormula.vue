@@ -47,6 +47,7 @@
 </template>
 
 <script setup>
+//dùng PrismEditor để highlight công thức
 import { ref, computed } from 'vue';
 import { PrismEditor } from 'vue-prism-editor';
 import 'vue-prism-editor/dist/prismeditor.min.css';
@@ -67,7 +68,7 @@ const props = defineProps({
   /** Placeholder hiển thị khi rỗng */
   placeholder: {
     type: String,
-    default: 'Nhập công thức, ví dụ: IF(DOANH_SO > 0, LUONG_CO_BAN * 1.1, LUONG_CO_BAN)',
+    default: 'Tự động gợi ý công thức khi gõ',
   },
   /** Label hiển thị */
   label: {

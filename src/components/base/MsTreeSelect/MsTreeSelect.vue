@@ -14,9 +14,16 @@
       @blur="emit('blur')"
       @focus="emit('focus')"
     >
-      <div class="ms-tree-select__chips">
+      <div class="ms-tree-select__chips" ref="chipsContainerRef">
+        <!-- Badge đếm số chip ẩn (cùng style với chip thường) -->
         <span
-          v-for="item in selectedItems"
+          v-if="hiddenCount > 0"
+          class="ms-tree-select__chip ms-tree-select__chip--count"
+        >
+          +{{ hiddenCount }}
+        </span>
+        <span
+          v-for="item in visibleItems"
           :key="item.id"
           class="ms-tree-select__chip"
         >
@@ -26,7 +33,7 @@
             @click.stop="removeItem(item.id)"
           >×</span>
         </span>
-        <span v-if="selectedItems.length === 0" class="ms-tree-select__placeholder">
+        <span v-if="displayItems.length === 0" class="ms-tree-select__placeholder">
           {{ placeholder }}
         </span>
       </div>
@@ -59,7 +66,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount, watch } from "vue";
+import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from "vue";
 import MsTreeNode from "./MsTreeNode.vue";
 
 const props = defineProps({
@@ -76,7 +83,12 @@ const emit = defineEmits(["update:modelValue", "focus", "blur"]);
 
 const isOpen = ref(false);
 const wrapperRef = ref(null);
+const chipsContainerRef = ref(null);
 const expandedIds = ref(new Set());
+
+// ── Chip overflow logic ──────────────────────────────────────────
+const hiddenCount = ref(0);
+const visibleItems = ref([]);
 
 // Flatten tree để lấy item theo id
 const flatMap = computed(() => {
@@ -91,13 +103,147 @@ const flatMap = computed(() => {
   return map;
 });
 
+/**
+ * Task 2: Smart chip display.
+ * Nếu cha đã được chọn thì không hiển thị chip con.
+ * Chỉ hiển thị node "topmost" đại diện cho selection đó.
+ */
+const displayItems = computed(() => {
+  if (props.modelValue.length === 0) return [];
+
+  const selectedSet = new Set(props.modelValue);
+
+  // Hàm kiểm tra xem node có ancestor nào đã được chọn không
+  // (để loại bỏ node con khi cha đã chọn)
+  const hasSelectedAncestor = (nodeId) => {
+    const node = flatMap.value[nodeId];
+    if (!node) return false;
+    // Tìm cha của node này trong cây
+    const findParent = (nodes, targetId, parent = null) => {
+      for (const n of nodes) {
+        if (n.id === targetId) return parent;
+        if (n.children?.length) {
+          const found = findParent(n.children, targetId, n);
+          if (found !== undefined) return found;
+        }
+      }
+      return undefined;
+    };
+    const parent = findParent(props.options, nodeId);
+    if (parent && selectedSet.has(parent.id)) return true;
+    // Check grandparent recursively
+    if (parent) return hasSelectedAncestor(parent.id);
+    return false;
+  };
+
+  // Chỉ giữ lại các node không có ancestor nào được chọn
+  return props.modelValue
+    .map((id) => flatMap.value[id])
+    .filter(Boolean)
+    .filter((item) => !hasSelectedAncestor(item.id));
+});
+
 const selectedItems = computed(() =>
   props.modelValue
     .map((id) => flatMap.value[id])
     .filter(Boolean)
 );
 
-// Auto mở tất cả node cha khi mount
+/**
+ * Tính toán bao nhiêu chip visible để không vượt chiều rộng container.
+ * Badge "+N" có cùng style với chip thường.
+ */
+async function recalculateOverflow() {
+  await nextTick();
+  const container = chipsContainerRef.value;
+  if (!container) {
+    visibleItems.value = displayItems.value;
+    hiddenCount.value = 0;
+    return;
+  }
+
+  const items = displayItems.value;
+  if (items.length === 0) {
+    visibleItems.value = [];
+    hiddenCount.value = 0;
+    return;
+  }
+
+  if (items.length === 1) {
+    visibleItems.value = items;
+    hiddenCount.value = 0;
+    return;
+  }
+
+  const containerWidth = container.offsetWidth;
+  const BADGE_WIDTH = 50;   // ước tính width của badge "+N"
+  const GAP = 4;            // gap giữa các chip
+  const ARROW_WIDTH = 32;   // arrow icon
+  const availableWidth = containerWidth - ARROW_WIDTH - GAP;
+
+  // Đo width chip ảo
+  const measureChip = (text) => {
+    const span = document.createElement('span');
+    span.style.cssText = `
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 2px 8px; font-size: 14px; white-space: nowrap;
+      position: absolute; visibility: hidden; top: -9999px;
+      border: 1px solid transparent;
+    `;
+    span.textContent = text + ' ×';
+    document.body.appendChild(span);
+    const w = span.offsetWidth + GAP;
+    document.body.removeChild(span);
+    return w;
+  };
+
+  const chipWidths = items.map((item) => measureChip(item.label));
+  const totalWidth = chipWidths.reduce((a, b) => a + b, 0);
+
+  if (totalWidth <= availableWidth) {
+    visibleItems.value = items;
+    hiddenCount.value = 0;
+    return;
+  }
+
+  // Dành chỗ cho badge
+  const widthWithBadge = availableWidth - BADGE_WIDTH - GAP;
+  let used = 0;
+  let fitCount = 0;
+  for (let i = 0; i < chipWidths.length; i++) {
+    if (used + chipWidths[i] <= widthWithBadge) {
+      used += chipWidths[i];
+      fitCount++;
+    } else {
+      break;
+    }
+  }
+
+  if (fitCount === 0) {
+    visibleItems.value = [items[0]];
+    hiddenCount.value = items.length - 1;
+  } else {
+    visibleItems.value = items.slice(0, fitCount);
+    hiddenCount.value = items.length - fitCount;
+  }
+}
+
+// Tính lại khi displayItems thay đổi
+watch(displayItems, recalculateOverflow, { immediate: true });
+
+// ResizeObserver để tính lại khi container thay đổi size
+let resizeObserver = null;
+onMounted(() => {
+  if (chipsContainerRef.value && typeof ResizeObserver !== 'undefined') {
+    resizeObserver = new ResizeObserver(() => recalculateOverflow());
+    resizeObserver.observe(chipsContainerRef.value);
+  }
+});
+onBeforeUnmount(() => {
+  resizeObserver?.disconnect();
+});
+
+// ── Auto mở tất cả node cha khi mount ──────────────────────────
 onMounted(() => {
   const walkExpand = (nodes) => {
     for (const n of nodes) {
@@ -115,20 +261,18 @@ const toggleDropdown = () => {
 };
 
 const removeItem = (id) => {
-  emit(
-    "update:modelValue",
-    props.modelValue.filter((v) => v !== id)
-  );
-};
-
-// Lấy tất cả leaf id trong subtree
-const getAllLeafIds = (node) => {
-  if (!node.children?.length) return [node.id];
-  const ids = [];
-  for (const child of node.children) {
-    ids.push(...getAllLeafIds(child));
-  }
-  return ids;
+  const node = flatMap.value[id];
+  const getAllIds = (n) => {
+    const ids = [n.id];
+    if (n.children?.length) {
+      for (const child of n.children) ids.push(...getAllIds(child));
+    }
+    return ids;
+  };
+  const idsToRemove = new Set(node ? getAllIds(node) : [id]);
+  const afterRemove = props.modelValue.filter((v) => !idsToRemove.has(v));
+  // Bubble-up để cập nhật trạng thái cha bậc cao hơn
+  emit("update:modelValue", bubbleUpSelection(afterRemove, props.options));
 };
 
 // Lấy tất cả id trong subtree (bao gồm cả node hiện tại)
@@ -142,6 +286,34 @@ const getAllIds = (node) => {
   return ids;
 };
 
+/**
+ * Bubble-up: sau khi toggle, nếu TẤT CẢ con trực tiếp của cha đều được
+ * chọn thì tự chọn cha; nếu không thì bỏ cha ra.
+ */
+function bubbleUpSelection(selected, nodes) {
+  const selectedSet = new Set(selected);
+
+  // Post-order traversal (con trước cha)
+  const visit = (node) => {
+    if (!node.children?.length) return;
+    for (const child of node.children) visit(child);
+
+    const allChildrenSelected = node.children.every((child) => selectedSet.has(child.id));
+    if (allChildrenSelected) {
+      selectedSet.add(node.id);
+    } else {
+      selectedSet.delete(node.id);
+    }
+  };
+
+  for (const node of nodes) visit(node);
+  return Array.from(selectedSet);
+}
+
+/**
+ * Khi toggle select một node, cập nhật selection của tất cả children,
+ * rồi bubble-up: nếu tất cả con của 1 cha được chọn → tự chọn cha.
+ */
 const handleToggleSelect = (nodeId) => {
   const node = flatMap.value[nodeId];
   if (!node) return;
@@ -158,6 +330,10 @@ const handleToggleSelect = (nodeId) => {
     const toAdd = allIds.filter((id) => !props.modelValue.includes(id));
     newSelected = [...props.modelValue, ...toAdd];
   }
+
+  // Bubble-up: nếu tất cả con của một node cha được chọn thì tự chọn cha;
+  // ngược lại nếu không đủ thì bỏ cha khỏi selection.
+  newSelected = bubbleUpSelection(newSelected, props.options);
 
   emit("update:modelValue", newSelected);
 };
@@ -280,6 +456,7 @@ onBeforeUnmount(() => {
   cursor: pointer;
   position: relative;
   transition: border-color 0.18s ease, box-shadow 0.18s ease;
+  overflow: hidden;
 }
 
 .ms-tree-select__control:hover {
@@ -294,12 +471,15 @@ onBeforeUnmount(() => {
 /* Chips area */
 .ms-tree-select__chips {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 4px;
   flex: 1;
   min-width: 0;
+  overflow: hidden;
+  align-items: center;
 }
 
+/* Chip thường */
 .ms-tree-select__chip {
   display: inline-flex;
   align-items: center;
@@ -312,9 +492,13 @@ onBeforeUnmount(() => {
   color: #111827;
   line-height: 20px;
   white-space: nowrap;
-  max-width: 400px;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  flex-shrink: 0;
+}
+
+/* Badge "+N" - cùng style với chip thường, chỉ khác là không có nút × */
+.ms-tree-select__chip--count {
+  cursor: default;
+  font-weight: 500;
 }
 
 .ms-tree-select__chip-remove {

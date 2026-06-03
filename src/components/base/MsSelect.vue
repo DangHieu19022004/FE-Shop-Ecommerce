@@ -196,9 +196,9 @@ defineExpose({
    Tags (ô input trigger)
 ══════════════════════════ */
 .ms-multiselect .multiselect__tags {
-  min-height: 36px;
+  min-height: 32px;
   /* padding-right nhường chỗ cho icon (36px) */
-  padding: 0 36px 0 12px;
+  padding: 0 32px 0 12px;
   border: 1.5px solid #d0d5dd;
   border-radius: 4px;
   background: #fff;
@@ -310,8 +310,7 @@ defineExpose({
 ══════════════════════════ */
 .ms-multiselect .multiselect__content-wrapper {
   border: 1.5px solid #2ab5a8;
-  border-top: none;
-  border-radius: 0 0 4px 4px;
+  border-radius: 8px;
   background: #fff;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
   overflow-y: auto;
