@@ -1,5 +1,12 @@
-<template lang="">
-  <FormSalaryComposition v-if="isShowForm" @close="isShowForm = false" @openAlert="$emit('openAlert', $event)"/>
+<template>
+  <FormSalaryComposition
+    v-if="isShowForm"
+    :editId="editId"
+    :viewId="viewId"
+    @close="handleCloseFormAndRefresh"
+    @saved="handleSavedRefresh"
+    @openAlert="$emit('openAlert', $event)"
+  />
   <div v-else class="content_bg">
     <div class="content">
       <div class="content_header">
@@ -19,16 +26,14 @@
             message="Thêm"
             type="green"
             :isTooltip="false"
-            lineStateRight
             iconLeft="mi-plus-white mg-r-8 fw-500"
-            @click="handleOpenForm"
+            @click="handleOpenForm(null)"
           />
           <MsButton
             class="btn-add-menu fw-500"
             iconLeft="mi-chevron-down-white"
             type="green"
             :isTooltip="false"
-            lineStateLeft
             @click="openSelectComposition"
           />
           <div v-if="toggleSelectComposition" class="select-composition">
@@ -43,12 +48,13 @@
       <div class="page-area">
         <div class="content_body_wrapper">
           <div v-if="selectedIds.length > 0" class="checkbox_function">
-            <p class="fz-14 m-r-8">Đã chọn </p>
-            <b class="fz-14">{{selectedIds.length}}</b>
+            <p class="fz-14 m-r-8">Đã chọn</p>
+            <b class="fz-14">{{ selectedIds.length }}</b>
             <MsButton
               message="Bỏ chọn"
               class="m-r-8 color-green fz-14 no-background"
               :isTooltip="false"
+              @click="selectedIds = []"
             />
             <MsButton
               :isTooltip="false"
@@ -56,6 +62,21 @@
               iconLeft="mi-trash-red"
               class="m-r-8 fz-14"
               type="border-danger"
+              @click="handleDeleteSelected"
+            />
+            <MsButton
+              :isTooltip="false"
+              message="Ngừng theo dõi"
+              class="m-r-8 fz-14"
+              type="border-secondary"
+              @click="handleBulkUpdateStatus(SalaryCompositionStatus.StoppedFollowing)"
+            />
+            <MsButton
+              :isTooltip="false"
+              message="Theo dõi"
+              class="fz-14"
+              type="border-secondary"
+              @click="handleBulkUpdateStatus(SalaryCompositionStatus.Following)"
             />
           </div>
           <div v-else class="content_body_header">
@@ -67,7 +88,12 @@
                   unActive
                   tooltipPosition="bottom"
                 />
-                <MsInput placeholder="Tìm kiếm" class="content_body_search-input" />
+                <MsInput
+                  placeholder="Tìm kiếm"
+                  class="content_body_search-input"
+                  v-model="searchKeyword"
+                  @input="handleSearchInput"
+                />
               </div>
               <div class="content_body_status">
                 <MsButton
@@ -88,7 +114,7 @@
                     position="bottom-start"
                     :offset="4"
                     class="status-dropdown"
-                    @select="statusMenuOpen = false"
+                    @select="handleStatusChange"
                   />
                 </Transition>
               </div>
@@ -97,6 +123,7 @@
                 :options="orgTreeData"
                 v-model="selectedOrgs"
                 class="m-l-8 h-32"
+                @update:modelValue="handleOrgChange"
               />
             </div>
             <div class="content_body_header_right">
@@ -106,7 +133,7 @@
                 shapeBtn="square"
                 tooltipPosition="bottom"
                 type="border-secondary"
-                class="mg-r-8"
+                class="pd-0 sz-32"
                 @click="isOpenFilter = !isOpenFilter"
               />
               <div class="setting-btn-wrapper" @click.stop>
@@ -116,6 +143,7 @@
                   shapeBtn="square"
                   tooltipPosition="bottom"
                   type="border-secondary"
+                  class="pd-0 sz-32"
                   @click="togglePopupSettingColumn"
                 />
                 <PopupSettingColumn
@@ -133,7 +161,10 @@
               </div>
 
               <!-- Trạng thái lỗi -->
-              <div v-else-if="errorMessage" class="table-state table-state--error">
+              <div
+                v-else-if="errorMessage"
+                class="table-state table-state--error"
+              >
                 <span>{{ errorMessage }}</span>
                 <MsButton
                   message="Thử lại"
@@ -149,9 +180,13 @@
                 v-else
                 :fields="fields"
                 :data-rows="salaryCompositions"
+                :sort-field="sortField"
+                :sort-direction="sortDirection"
                 table-class="candicate_table"
                 table-class-head="candicate_table_head"
                 table-class-body="candicate_table_body"
+                @row-click="handleRowClick"
+                @sort-change="handleSortChange"
               >
                 <template #header-checkbox>
                   <input
@@ -164,7 +199,7 @@
                     @click.stop
                   />
                 </template>
-<template #cell-checkbox="{ row }">
+                <template #cell-checkbox="{ row }">
                   <input
                     type="checkbox"
                     name="selectedCandidates"
@@ -176,60 +211,150 @@
                     @click.stop
                   />
                 </template>
-<template #cell-status="{ row }">
+                <template #cell-status="{ row }">
                   <span
                     class="status-badge"
-                    :class="row.status === 'Đang theo dõi' ? 'status-badge--active' : 'status-badge--inactive'"
+                    :class="
+                      row.status === SalaryCompositionStatus.Following
+                        ? 'status-badge--active'
+                        : 'status-badge--inactive'
+                    "
                   >
                     <span class="status-badge__dot"></span>
-                    {{ row.status }}
+                    {{ SalaryCompositionStatusLabel[row.status] ?? row.status }}
                   </span>
                 </template>
-<template #cell-actions="{ row }">
+                <template #cell-compositionType="{ row }">
+                  {{ SalaryCompositionTypeLabel[row.compositionType] ?? row.compositionType }}
+                </template>
+                <template #cell-compositionNature="{ row }">
+                  {{ SalaryCompositionNatureLabel[row.compositionNature] ?? row.compositionNature }}
+                </template>
+                <template #cell-taxable="{ row }">
+                  {{ SalaryCompositionTaxableLabel[row.taxable] ?? row.taxable }}
+                </template>
+                <template #cell-valueType="{ row }">
+                  {{ SalaryCompositionValueTypeLabel[row.valueType] ?? row.valueType }}
+                </template>
+                <template #cell-sourceType="{ row }">
+                  {{ SalaryCompositionSourceTypeLabel[row.sourceType] ?? row.sourceType }}
+                </template>
+                <template #cell-optionShowPaycheck="{ row }">
+                  {{ SalaryCompositionShowPaycheckLabel[row.optionShowPaycheck] ?? row.optionShowPaycheck }}
+                </template>
+                <template #cell-actions="{ row }">
                   <div class="btn_action">
-                    <MsButton iconLeft="mi-circle-check-green" type="border-none" shapeBtn="square" class="sz-32" />
-                    <MsButton iconLeft="mi-copy" type="border-none" shapeBtn="square" class="sz-32" />
-                    <MsButton iconLeft="mi-pencil" type="border-none" shapeBtn="square" class="sz-32" />
-                    <MsButton iconLeft="mi-trash-red" type="border-none" shapeBtn="square" class="sz-32" />
+                    <!-- Nút Toggle status: luôn cho phép -->
+                    <MsButton
+                      :iconLeft="row.status === SalaryCompositionStatus.Following ? 'mi-circle-minus-yellow' : 'mi-circle-check-green'"
+                      type="border-none"
+                      shapeBtn="square"
+                      class="sz-28 pd-0"
+                      :tooltipMessage="row.status === SalaryCompositionStatus.Following ? 'Ngưng theo dõi' : 'Theo dõi'"
+                      tooltipPosition="bottom"
+                      @click.stop="handleToggleStatus(row)"
+                    />
+                    <!-- Nút Nhân bản: không lock -->
+                    <MsButton
+                      iconLeft="mi-copy"
+                      type="border-none"
+                      shapeBtn="square"
+                      class="sz-28 pd-0"
+                      tooltipMessage="Nhân bản"
+                      tooltipPosition="bottom"
+                    />
+                    <!-- Nút Sửa: lock nếu có salaryCompositionSystemId (Req 1) -->
+                    <MsButton
+                      iconLeft="mi-pencil"
+                      type="border-none"
+                      shapeBtn="square"
+                      class="sz-28 pd-0"
+                      :tooltipMessage="row.salaryCompositionSystemId ? 'Không thể sửa dữ liệu từ danh mục hệ thống' : 'Sửa'"
+                      tooltipPosition="bottom"
+                      :disabled="!!row.salaryCompositionSystemId"
+                      :class="{ 'btn-disabled-sys': !!row.salaryCompositionSystemId }"
+                      @click.stop="!row.salaryCompositionSystemId && handleOpenForm(row.salaryCompositionId)"
+                    />
+                    <!-- Nút Xóa: lock nếu có salaryCompositionSystemId (Req 1) -->
+                    <MsButton
+                      iconLeft="mi-trash-red"
+                      type="border-none"
+                      shapeBtn="square"
+                      class="sz-28 pd-0"
+                      :tooltipMessage="row.salaryCompositionSystemId ? 'Không thể xóa dữ liệu từ danh mục hệ thống' : 'Xóa'"
+                      tooltipPosition="bottom"
+                      :disabled="!!row.salaryCompositionSystemId"
+                      :class="{ 'btn-disabled-sys': !!row.salaryCompositionSystemId }"
+                      @click.stop="!row.salaryCompositionSystemId && handleDeleteOne(row.salaryCompositionId)"
+                    />
                   </div>
                 </template>
-</MsTable>
-</div>
-</div>
-<div class="content_body_footer">
-  <div class="footer-left">
-    <span>Tổng số: <b>{{ salaryCompositions.length }}</b></span>
-  </div>
-  <div class="footer-right">
-    <span>Số dòng/trang</span>
-    <div class="page-size hvp">
-      <MsButton :isTooltip="false" iconRight="mi-chevron-down" class="btn-search-unit">
-        <span class="status-label">15</span>
-      </MsButton>
+              </MsTable>
+            </div>
+          </div>
+          <div class="content_body_footer">
+            <div class="footer-left">
+              <span>Tổng số: <b>{{ totalRecords }}</b></span>
+            </div>
+            <div class="footer-right">
+              <span>Số dòng/trang</span>
+              <div class="page-size hvp">
+                <MsSelect
+                  v-model="pageSize"
+                  :data="pageSizeOptions"
+                  :allow-empty="false"
+                  :searchable="false"
+                  class="page-size-select"
+                  @update:modelValue="handlePageSizeChange"
+                />
+              </div>
+              <span class="page-info">
+                <b>{{ pageStart }} - {{ pageEnd }}</b>
+              </span>
+              <div class="pagination-controls">
+                <span
+                  class="page-btn"
+                  :class="{ disabled: pageIndex <= 1 }"
+                  @click="goToPage(1)"
+                >
+                  <div class="mi-next-double-left"></div>
+                </span>
+                <span
+                  class="page-btn"
+                  :class="{ disabled: pageIndex <= 1 }"
+                  @click="goToPage(pageIndex - 1)"
+                >
+                  <div class="mi-next-left"></div>
+                </span>
+                <span
+                  class="page-btn"
+                  :class="{ disabled: pageIndex >= totalPages }"
+                  @click="goToPage(pageIndex + 1)"
+                >
+                  <div class="mi-next-right"></div>
+                </span>
+                <span
+                  class="page-btn"
+                  :class="{ disabled: pageIndex >= totalPages }"
+                  @click="goToPage(totalPages)"
+                >
+                  <div class="mi-next-double-right"></div>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Filter sidebar: bên cạnh content_body_wrapper -->
+        <FilterSalaryComposition
+          v-if="isOpenFilter"
+          @close="isOpenFilter = false"
+        />
+      </div>
     </div>
-    <span class="page-info"><b>1 - 15</b></span>
-    <div class="pagination-controls">
-      <span class="page-btn disabled">
-        <div class="mi-next-double-left"></div>
-      </span>
-      <span class="page-btn disabled">
-        <div class="mi-next-left"></div>
-      </span>
-      <span class="page-btn">
-        <div class="mi-next-right"></div>
-      </span>
-      <span class="page-btn">
-        <div class="mi-next-double-right"></div>
-      </span>
-    </div>
   </div>
-</div>
-</div>
-<!-- Filter sidebar: bên cạnh content_body_wrapper -->
-<FilterSalaryComposition v-if="isOpenFilter" @close="isOpenFilter = false" />
-</div>
-</div>
-</div>
+
+  <!-- Toast container (nội bộ, khi Req4 toast không qua MainLayout) -->
+  <MsToastContainer :toasts="toasts" @close="removeToast" />
 </template>
 <script setup>
 import MsButton from "@/components/base/MsButton.vue";
@@ -237,71 +362,202 @@ import MsInput from "@/components/base/MsInput.vue";
 import MsTable from "@/components/base/MsTable/MsTable.vue";
 import FormSalaryComposition from "./FormSalaryComposition.vue";
 import MsDropdownMenu from "@/components/base/MsDropdownMenu.vue";
+import MsSelect from "@/components/base/MsSelect.vue";
 import PopupSettingColumn from "./PopupSettingColumn.vue";
 import FilterSalaryComposition from "./FilterSalaryComposition.vue";
 import MsTreeSelect from "@/components/base/MsTreeSelect/MsTreeSelect.vue";
-import { ref, computed, onMounted } from "vue";
+import MsToastContainer from "@/components/overlay/MsToast/MsToastContainer.vue";
+import { ref, computed, onMounted, watch } from "vue";
 
-// ── Import service ──────────────────────────────────────────
+// ======================== Import services ========================
 import salaryCompositionApi from "@/services/salaryCompositionService";
+import organizationApi from "@/services/organizationService";
 
-const isOpenFilter = ref(false)
-const isOpenPopupSettingColumn = ref(false)
+// ======================== Import enum constants ========================
+import {
+  SalaryCompositionStatus,
+  SalaryCompositionStatusLabel,
+  SalaryCompositionNatureLabel,
+  SalaryCompositionTypeLabel,
+  SalaryCompositionTaxableLabel,
+  SalaryCompositionValueTypeLabel,
+  SalaryCompositionSourceTypeLabel,
+  SalaryCompositionShowPaycheckLabel,
+} from "@/constants/enums";
+
+// ======================== UI state ========================
+const isOpenFilter = ref(false);
+const isOpenPopupSettingColumn = ref(false);
+const toggleSelectComposition = ref(false);
+const isShowForm = ref(false);
+const editId = ref(null); // null = thêm mới, string = sửa
+const viewId = ref(null); // string = xem chi tiết (readonly)
+
 const togglePopupSettingColumn = () => {
-  isOpenPopupSettingColumn.value = !isOpenPopupSettingColumn.value
-}
+  isOpenPopupSettingColumn.value = !isOpenPopupSettingColumn.value;
+};
+
+const openSelectComposition = () => {
+  toggleSelectComposition.value = !toggleSelectComposition.value;
+};
+
+const handleOpenForm = (id) => {
+  editId.value = id;
+  viewId.value = null;
+  isShowForm.value = true;
+};
+
+// Task 2: click vào row để mở form xem chi tiết (readonly)
+const handleRowClick = (row) => {
+  viewId.value = row.salaryCompositionId;
+  editId.value = null;
+  isShowForm.value = true;
+};
+
+const handleCloseFormAndRefresh = () => {
+  isShowForm.value = false;
+  editId.value = null;
+  viewId.value = null;
+  fetchSalaryCompositions();
+};
+
+// Task 3: Khi Lưu và thêm - refresh list nhưng KHÔNG đóng form
+const handleSavedRefresh = () => {
+  fetchSalaryCompositions();
+};
+
+// ======================== Filter / search state ========================
 const selectedOrgs = ref([]);
-const selectedStatus = ref("all");
+const selectedStatus = ref(null); // null = Tất cả
 const statusMenuOpen = ref(false);
+const searchKeyword = ref("");
+const sortField = ref("");
+const sortDirection = ref("");
+let searchDebounceTimer = null;
+
 const statusItems = [
-  { label: "Tất cả", value: "all" },
-  { label: "Đang theo dõi", value: "active" },
-  { label: "Ngừng theo dõi", value: "inactive" },
+  { label: "Tất cả", value: null },
+  { label: "Đang theo dõi", value: SalaryCompositionStatus.Following },
+  { label: "Ngừng theo dõi", value: SalaryCompositionStatus.StoppedFollowing },
 ];
-/** Label hiển thị trên button trigger */
+
 const selectedStatusLabel = computed(
-  () => statusItems.find((i) => i.value === selectedStatus.value)?.label ?? "Tất cả"
+  () =>
+    statusItems.find((i) => i.value === selectedStatus.value)?.label ?? "Tất cả"
 );
 
-var toggleSelectComposition = ref(false)
-var isShowForm = ref(false)
-const handleOpenForm = () => {
-  isShowForm.value = !isShowForm.value
-}
-const openSelectComposition = () => {
-  toggleSelectComposition.value = !toggleSelectComposition.value
-}
+const handleStatusChange = (item) => {
+  // @select emit cả object { label, value }, cần lấy item.value
+  selectedStatus.value = item?.value ?? null;
+  statusMenuOpen.value = false;
+  pageIndex.value = 1;
+  fetchSalaryCompositions();
+};
 
-const emit = defineEmits(["openFormEdit", "deleteItem", "openAlert"]);
+const handleOrgChange = () => {
+  pageIndex.value = 1;
+  fetchSalaryCompositions();
+};
 
-// ── State dữ liệu ───────────────────────────────────────────
-const salaryCompositions = ref([]);  // Danh sách thành phần lương từ API
-const isLoading = ref(false);        // Đang gọi API
-const errorMessage = ref("");        // Thông báo lỗi (nếu có)
+const handleSearchInput = () => {
+  clearTimeout(searchDebounceTimer);
+  searchDebounceTimer = setTimeout(() => {
+    pageIndex.value = 1;
+    fetchSalaryCompositions();
+  }, 300);
+};
+
+// ======================== Paging state ========================
+const toSnakeCase = (value) =>
+  value.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
+
+const handleSortChange = ({ field, direction }) => {
+  sortField.value = field;
+  sortDirection.value = direction;
+  pageIndex.value = 1;
+  fetchSalaryCompositions();
+};
+
+const pageIndex = ref(1);
+const pageSize = ref(15);
+const totalRecords = ref(0);
+
+const pageSizeOptions = [
+  { label: "15", value: 15 },
+  { label: "25", value: 25 },
+  { label: "50", value: 50 },
+  { label: "100", value: 100 },
+];
+
+const totalPages = computed(() =>
+  Math.max(1, Math.ceil(totalRecords.value / pageSize.value))
+);
+
+const pageStart = computed(() => {
+  if (totalRecords.value === 0) return 0;
+  return (pageIndex.value - 1) * pageSize.value + 1;
+});
+
+const pageEnd = computed(() =>
+  Math.min(pageIndex.value * pageSize.value, totalRecords.value)
+);
+
+const goToPage = (page) => {
+  if (page < 1 || page > totalPages.value) return;
+  pageIndex.value = page;
+  fetchSalaryCompositions();
+};
+
+const handlePageSizeChange = () => {
+  pageIndex.value = 1;
+  fetchSalaryCompositions();
+};
+
+// ======================== Data state ========================
+const salaryCompositions = ref([]);
+const isLoading = ref(false);
+const errorMessage = ref("");
+const orgTreeData = ref([]);
 
 /**
- * Gọi API lấy toàn bộ danh sách thành phần lương
- * Endpoint: GET /api/SalaryComposition
- *
- * Backend trả về ServiceResponse:
- *   { isSuccess: true, code: 200, data: [...], userMessage: "", devMessage: "" }
- *
- * Vì axios interceptor đã unwrap response.data,
- * nên `result` ở đây chính là ServiceResponse object.
+ * Gọi API lấy danh sách thành phần lương có phân trang
+ * Endpoint: GET /api/SalaryComposition/Paging
  */
 async function fetchSalaryCompositions() {
   isLoading.value = true;
   errorMessage.value = "";
 
   try {
-    // result = ServiceResponse { isSuccess, code, data, userMessage, devMessage }
-    const result = await salaryCompositionApi.getAll();
+    const params = {
+      pageIndex: pageIndex.value,
+      pageSize: pageSize.value,
+      search: searchKeyword.value || undefined,
+      searchFields: searchKeyword.value
+        ? "salary_composition_code;salary_composition_name"
+        : undefined,
+    };
 
-    if (result.isSuccess) {
-      // result.data là mảng SalaryComposition[]
-      salaryCompositions.value = result.data;
+    // Filter theo trạng thái (null = Tất cả, 1 = Đang theo dõi, 2 = Ngừng theo dõi)
+    if (selectedStatus.value !== null && selectedStatus.value !== undefined) {
+      params.status = selectedStatus.value;
+    }
+
+    // Filter theo đơn vị: gửi mảng organizationId lên server
+    if (selectedOrgs.value && selectedOrgs.value.length > 0) {
+      params.organizationIds = selectedOrgs.value.join(",");
+    }
+
+    if (sortField.value && sortDirection.value) {
+      params.sort = `${toSnakeCase(sortField.value)} ${sortDirection.value.toUpperCase()}`;
+    }
+
+    const result = await salaryCompositionApi.getPaging(params);
+
+    if (result.isSuccess && result.data) {
+      salaryCompositions.value = result.data.data ?? [];
+      totalRecords.value = result.data.total ?? 0;
     } else {
-      errorMessage.value = result.userMessage || "Không thể tải dữ liệu";
+      errorMessage.value = result.data || "Không thể tải dữ liệu";
     }
   } catch (err) {
     errorMessage.value = err.message || "Có lỗi xảy ra khi tải dữ liệu";
@@ -311,27 +567,175 @@ async function fetchSalaryCompositions() {
   }
 }
 
+/**
+ * Gọi API lấy cây đơn vị cho TreeSelect
+ * Endpoint: GET /api/Organization/Tree
+ */
+async function fetchOrgTree() {
+  try {
+    const result = await organizationApi.getTree();
+    if (result.isSuccess && result.data) {
+      orgTreeData.value = mapOrgTree(result.data);
+    }
+  } catch (err) {
+    console.error("[SalaryComposition] fetchOrgTree:", err);
+  }
+}
+
+/**
+ * Map cây tổ chức từ API sang format { id, label, children } cho MsTreeSelect
+ */
+function mapOrgTree(nodes) {
+  return nodes.map((node) => ({
+    id: node.organizationId,
+    label: node.organizationName,
+    children: node.children ? mapOrgTree(node.children) : [],
+  }));
+}
+
 // Gọi API ngay khi component được mount
 onMounted(() => {
   fetchSalaryCompositions();
+  fetchOrgTree();
 });
 
+// ======================== Xóa một bản ghi ========================
+function handleDeleteOne(id) {
+  emit("openAlert", {
+    title: "Xác nhận xóa",
+    message: "Bạn có chắc chắn muốn xóa thành phần lương này không?",
+    confirmText: "Xóa",
+    confirmType: "red",
+    onConfirm: async () => {
+      try {
+        const result = await salaryCompositionApi.deleteById(id);
+        if (result.isSuccess) {
+          selectedIds.value = selectedIds.value.filter((sid) => sid !== id);
+          await fetchSalaryCompositions();
+          addToast("Xóa thành phần lương thành công", "success");
+        } else {
+          addToast(result.data || "Xóa thất bại", "error");
+        }
+      } catch (err) {
+        console.error("[SalaryComposition] deleteOne:", err);
+        addToast("Có lỗi xảy ra khi xóa", "error");
+      }
+    },
+  });
+}
+
+// ======================== Xóa nhiều bản ghi ========================
+function handleDeleteSelected() {
+  if (selectedIds.value.length === 0) return;
+
+  // Req 1: Lọc các row có salaryCompositionSystemId ra khỏi danh sách xóa
+  const deletableIds = selectedIds.value.filter((id) => {
+    const row = salaryCompositions.value.find((r) => r.salaryCompositionId === id);
+    return !row?.salaryCompositionSystemId;
+  });
+  const blockedCount = selectedIds.value.length - deletableIds.length;
+
+  if (deletableIds.length === 0) {
+    emit("openAlert", {
+      title: "Không thể xóa",
+      message: "Tất cả các thành phần lương đã chọn đều từ danh mục hệ thống và không thể xóa.",
+      showConfirmButton: false,
+      cancelText: "Đóng",
+    });
+    return;
+  }
+
+  const blockedNote = blockedCount > 0
+    ? ` (${blockedCount} mục từ hệ thống sẽ được bỏ qua)`
+    : "";
+
+  emit("openAlert", {
+    title: "Xác nhận xóa",
+    message: `Bạn có chắc chắn muốn xóa ${deletableIds.length} thành phần lương đã chọn không?${blockedNote}`,
+    confirmText: "Xóa",
+    confirmType: "red",
+    onConfirm: async () => {
+      try {
+        const result = await salaryCompositionApi.deleteBulk(deletableIds);
+        if (result.isSuccess) {
+          selectedIds.value = [];
+          await fetchSalaryCompositions();
+          addToast(`Đã xóa ${deletableIds.length} thành phần lương thành công`, "success");
+        } else {
+          addToast(result.data || "Xóa thất bại", "error");
+        }
+      } catch (err) {
+        console.error("[SalaryComposition] deleteSelected:", err);
+        addToast("Có lỗi xảy ra khi xóa một số bản ghi", "error");
+      }
+    },
+  });
+}
+
+// Task 4: Cập nhật trạng thái nhiều bản ghi
+async function handleBulkUpdateStatus(status) {
+  if (selectedIds.value.length === 0) return;
+  try {
+    const result = await salaryCompositionApi.updateStatusBulk(selectedIds.value, status);
+    if (result.isSuccess) {
+      selectedIds.value = [];
+      await fetchSalaryCompositions();
+      const label = status === SalaryCompositionStatus.Following ? "đang theo dõi" : "ngưng theo dõi";
+      addToast(`Cập nhật trạng thái thành công (${label})`, "success");
+    } else {
+      addToast(result.data || "Cập nhật trạng thái thất bại", "error");
+    }
+  } catch (err) {
+    console.error("[SalaryComposition] bulkUpdateStatus:", err);
+    addToast("Có lỗi xảy ra khi cập nhật trạng thái", "error");
+  }
+}
+
+// ======================== Toggle trạng thái theo dõi ========================
+async function handleToggleStatus(row) {
+  const newStatus =
+    row.status === SalaryCompositionStatus.Following
+      ? SalaryCompositionStatus.StoppedFollowing
+      : SalaryCompositionStatus.Following;
+
+  try {
+    const result = await salaryCompositionApi.update(row.salaryCompositionId, {
+      ...row,
+      status: newStatus,
+    });
+    if (result.isSuccess) {
+      await fetchSalaryCompositions();
+      const label = newStatus === SalaryCompositionStatus.Following ? "Đang theo dõi" : "Ngưng theo dõi";
+      addToast(`Đã chuyển sang "${label}"`, "success");
+    } else {
+      addToast(result.data || "Cập nhật trạng thái thất bại", "error");
+    }
+  } catch (err) {
+    console.error("[SalaryComposition] toggleStatus:", err);
+    addToast("Có lỗi xảy ra khi cập nhật trạng thái", "error");
+  }
+}
+
+// ======================== Checkbox selection ========================
 const selectedIds = ref([]);
 
-const isAllSelected = computed(() =>
-  salaryCompositions.value.length > 0 &&
-  selectedIds.value.length === salaryCompositions.value.length
+const isAllSelected = computed(
+  () =>
+    salaryCompositions.value.length > 0 &&
+    selectedIds.value.length === salaryCompositions.value.length
 );
 
-const isIndeterminate = computed(() =>
-  selectedIds.value.length > 0 &&
-  selectedIds.value.length < salaryCompositions.value.length
+const isIndeterminate = computed(
+  () =>
+    selectedIds.value.length > 0 &&
+    selectedIds.value.length < salaryCompositions.value.length
 );
 
 const toggleSelectAll = (event) => {
   if (event.target.checked) {
-    // Dùng field đúng theo API: salaryCompositionId (camelCase)
-    selectedIds.value = salaryCompositions.value.map((row) => row.salaryCompositionId);
+    selectedIds.value = salaryCompositions.value.map(
+      (row) => row.salaryCompositionId
+    );
   } else {
     selectedIds.value = [];
   }
@@ -347,83 +751,66 @@ const toggleRow = (id) => {
   }
 };
 
+// ======================== Emit + Toast ========================
+const emit = defineEmits(["openAlert"]);
+
+const toasts = ref([]);
+const addToast = (message, type = "success", duration = 3000) => {
+  toasts.value.push({ id: Date.now() + Math.random(), message, type, duration });
+};
+const removeToast = (id) => {
+  toasts.value = toasts.value.filter((t) => t.id !== id);
+};
+
+// ======================== Table fields ========================
 const fields = [
-  { key: "", label: "", slot: "checkbox", width: 48, draggable: false, pinnable: false, resizable: false },
+  {
+    key: "",
+    label: "",
+    slot: "checkbox",
+    width: 48,
+    draggable: false,
+    pinnable: false,
+    resizable: false,
+  },
   { key: "salaryCompositionCode", label: "Mã thành phần", width: 180 },
   { key: "salaryCompositionName", label: "Tên thành phần", width: 220 },
   { key: "organizationName", label: "Đơn vị áp dụng", width: 200 },
-  { key: "compositionType", label: "Loại thành phần", width: 180 },
-  { key: "compositionNature", label: "Tính chất", width: 160 },
-  { key: "taxable", label: "Chịu thuế", width: 130 },
+  { key: "compositionType", label: "Loại thành phần", slot: "compositionType", width: 180 },
+  { key: "compositionNature", label: "Tính chất", slot: "compositionNature", width: 160 },
+  { key: "taxable", label: "Chịu thuế", slot: "taxable", width: 160 },
   { key: "taxDeduction", label: "Giảm trừ khi tính thuế", width: 210 },
   { key: "quota", label: "Định mức", width: 140 },
-  { key: "valueType", label: "Kiểu giá trị", width: 160 },
+  { key: "valueType", label: "Kiểu giá trị", slot: "valueType", width: 160 },
   { key: "formula", label: "Giá trị", width: 160 },
   { key: "description", label: "Mô tả", width: 240 },
-  { key: "optionShowPaycheck", label: "Hiển thị trên phiếu lương", width: 230 },
-  { key: "sourceType", label: "Nguồn tạo", width: 150 },
+  { key: "optionShowPaycheck", label: "Hiển thị trên phiếu lương", slot: "optionShowPaycheck", width: 230 },
+  { key: "sourceType", label: "Nguồn tạo", slot: "sourceType", width: 150 },
   { key: "status", label: "Trạng thái", slot: "status", width: 160 },
+  {key: "ghost", label: "", width: 180},
   {
     key: "actions",
     label: "",
     slot: "actions",
-    classHead: "col_unhide",
-    classBody: "col_unhide",
-    width: 210,
+    width: 1,
     draggable: false,
     pinnable: false,
     resizable: false,
   },
 ];
-
-const orgTreeData = [
-  {
-    id: "root",
-    label: "Misa Test pdthien 2024",
-    children: [
-      {
-        id: "mb",
-        label: "Chi nhánh miền Bắc",
-        children: [
-          {
-            id: "ksx",
-            label: "Khối sản xuất",
-            children: [],
-          },
-          {
-            id: "ttkd_bac",
-            label: "Trung tâm kinh doanh",
-            children: [],
-          },
-          {
-            id: "tthtkh",
-            label: "Trung tâm hỗ trợ khách hàng",
-            children: [],
-          },
-        ],
-      },
-      {
-        id: "mn",
-        label: "Chi nhánh miền Nam",
-        children: [
-          {
-            id: "ttkd_nam",
-            label: "Trung tâm kinh doanh",
-            children: [],
-          },
-        ],
-      },
-    ],
-  },
-];
-
 </script>
 <style scoped>
 .btn_action {
   display: flex;
   align-items: center;
   gap: 16px !important;
-  background-color: transparent;
+}
+
+/* Nút bị khóa vì data từ hệ thống (Req 1) */
+.btn-disabled-sys {
+  opacity: 0.35 !important;
+  cursor: not-allowed !important;
+  pointer-events: none !important;
 }
 
 .status-label {
@@ -441,9 +828,7 @@ const orgTreeData = [
 .content_body {
   width: 100%;
   flex: 1;
-  /* Chiếm toàn bộ không gian còn lại */
   background-color: #f8f9fa;
-  /* Màu demo cho thấy vùng bảng */
   border-top: 1px solid #d9dee7;
   border-bottom: 1px solid #d9dee7;
   min-width: 0;
@@ -523,15 +908,16 @@ const orgTreeData = [
   display: flex;
   align-items: center;
   gap: 8px;
-  border: 1px solid #d9dee7;
-  border-radius: 4px;
-  cursor: pointer;
   color: #111;
 }
 
-.page-size:hover {
-  background-color: #ffffff;
-  border-color: #4ef731;
+.page-size :deep(.ms-select) {
+  width: 84px;
+}
+
+.page-size :deep(.ms-multiselect .multiselect__tags) {
+  /* min-height: 32px; */
+  height: 32px;
 }
 
 .pagination-controls {
@@ -544,19 +930,24 @@ const orgTreeData = [
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
   cursor: pointer;
   color: #666;
   font-weight: 500;
+  opacity: 1;
+  transition: opacity 0.15s ease, background-color 0.15s ease;
 }
 
 .page-btn.disabled {
-  color: #ccc;
+  opacity: 0.3;
   cursor: not-allowed;
+  pointer-events: none;
 }
 
 .page-btn:not(.disabled):hover {
+  background-color: #e8f5f0;
   color: #111;
 }
 
@@ -578,8 +969,6 @@ const orgTreeData = [
   padding: 0 12px;
   font-size: 14px;
   border-radius: 6px;
-  /* width: auto;
-  white-space: nowrap; */
 }
 
 .content_header_right .btn-system {
@@ -592,25 +981,31 @@ const orgTreeData = [
   background-color: #f1f2f1;
 }
 
-.content_header_composition_system {
-  display: flex;
-  align-items: center;
-  margin-right: 16px;
-  max-height: 32px;
-}
-
-.content_header_title_composition_system {
-  margin-left: 8px;
-  font-size: 14px;
-  color: #333;
-}
-
 .btn-add {
+  position: relative;
   width: 88px !important;
+  border-top-right-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+}
+
+.btn-add::after {
+  content: "";
+  position: absolute;
+  top: 6px;
+  bottom: 6px;
+  right: 0;
+  width: 1px;
+  background: #d9dee7;
+}
+
+.btn-add-menu{
+  border-top-left-radius: 0 !important;
+  border-bottom-left-radius: 0 !important;
 }
 
 .content_body_header {
   display: flex;
+  height: 56px;
   align-items: center;
   justify-content: space-between;
   padding: 16px;
@@ -632,24 +1027,9 @@ const orgTreeData = [
 
 .content_body_search:hover,
 .content_body_search:focus-within {
-  border-color: #34B057;
+  border-color: #34b057;
 }
 
-.btn-search-unit {
-  justify-content: space-between !important;
-  color: #111;
-}
-
-/* .content_body_search_unit {
-  margin-left: 8px;
-  display: flex;
-  align-items: center;
-  background-color: #fff;
-  border-radius: 8px;
-  width: 350px;
-  height: 32px;
-  border: 1px solid #d9dee7;
-} */
 .content_body_status {
   margin-left: 8px;
   display: flex;
@@ -658,6 +1038,7 @@ const orgTreeData = [
   border-radius: 8px;
   border: 1px solid #d9dee7;
   height: 32px;
+  position: relative;
 }
 
 :deep(.ms-input-in.content_body_search-input) {
@@ -688,24 +1069,6 @@ const orgTreeData = [
   margin-right: 0;
 }
 
-.border-icon {
-  border: 1px solid #d9dee7;
-  border-radius: 4px;
-  padding: 6px !important;
-  margin-left: 12px;
-  background-color: #fff;
-}
-
-.btn__delete_item {
-  width: 20px;
-  height: 20px;
-  min-width: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #7a8188;
-}
-
 .checkbox_function {
   display: flex;
   align-items: center;
@@ -716,11 +1079,7 @@ const orgTreeData = [
   border-top-right-radius: 4px;
 }
 
-/* ── Status dropdown trigger wrapper ── */
-.content_body_status {
-  position: relative;
-}
-
+/* 🔽 Status dropdown trigger wrapper 🔽 */
 .status-trigger {
   white-space: nowrap;
 }
@@ -747,7 +1106,9 @@ const orgTreeData = [
 /* Transition animation */
 .status-dropdown-enter-active,
 .status-dropdown-leave-active {
-  transition: opacity 0.15s ease, transform 0.15s ease;
+  transition:
+    opacity 0.15s ease,
+    transform 0.15s ease;
 }
 
 .status-dropdown-enter-from,
@@ -756,16 +1117,16 @@ const orgTreeData = [
   transform: translateY(-4px);
 }
 
-/* ── Setting popup wrapper ── */
+/* 🔧 Setting popup wrapper 🔧 */
 .setting-btn-wrapper {
   position: relative;
 }
 
 :deep(.ms-tree-select__control) {
-  width: 100%;
+  width: 350px;
 }
 
-/* ── Filter layout: table + filter panel side by side ── */
+/* 📐 Filter layout: table + filter panel side by side 📐 */
 .page-area {
   display: flex;
   flex-direction: row;
@@ -776,18 +1137,7 @@ const orgTreeData = [
   gap: 16px;
 }
 
-/* Filter button active state */
-.btn-filter--active {
-  background-color: #e6f4ec !important;
-  border-color: #34b057 !important;
-  color: #34b057 !important;
-}
-
-:deep(.ms-tree-select__control) {
-  width: 350px;
-}
-
-/* ── Dropdown Select Composition ── */
+/* 📋 Dropdown Select Composition 📋 */
 .select-composition {
   position: absolute;
   top: calc(100% + 4px);
@@ -816,15 +1166,24 @@ const orgTreeData = [
   border: none;
   border-radius: 0;
   cursor: pointer;
-  transition: background-color 0.12s ease, color 0.12s ease;
+  transition:
+    background-color 0.12s ease,
+    color 0.12s ease;
 }
 
+:deep(.ms-multiselect.multiselect){
+  min-height: 32px;
+}
 .select-composition :deep(.ms-button:hover) {
   background-color: #f3f4f6;
   color: #111827;
 }
 
-/* ── Trạng thái loading / error trong bảng ── */
+:deep(.multiselect__tags) {
+  border-radius: 8px !important;
+}
+
+/* 📊 Trạng thái loading / error trong bảng 📊 */
 .table-state {
   display: flex;
   flex-direction: column;
@@ -841,7 +1200,7 @@ const orgTreeData = [
   color: #dc2626;
 }
 
-/* ── Status badge trong cột Trạng thái ── */
+/* 🏷️ Status badge trong cột Trạng thái 🏷️ */
 .status-badge {
   display: inline-flex;
   align-items: center;

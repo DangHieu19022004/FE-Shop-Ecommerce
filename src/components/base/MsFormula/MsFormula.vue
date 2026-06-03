@@ -47,7 +47,6 @@
 </template>
 
 <script setup>
-//dùng PrismEditor để highlight công thức
 import { ref, computed } from 'vue';
 import { PrismEditor } from 'vue-prism-editor';
 import 'vue-prism-editor/dist/prismeditor.min.css';

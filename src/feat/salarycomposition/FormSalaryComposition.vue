@@ -10,12 +10,14 @@
               shapeBtn="circle"
               @click="handleCloseForm"
             />
-            <h2 class="content_header_left_title">Thêm thành phần</h2>
+            <h2 class="content_header_left_title">
+              {{ isViewMode ? 'Xem chi tiết' : isEditMode ? 'Sửa thành phần' : 'Thêm thành phần' }}
+            </h2>
           </div>
         </div>
       </div>
       <div class="content_body_wrapper">
-        <div class="content_body_wrapper_form">
+        <div :class="['content_body_wrapper_form', { 'is-view-mode': isViewMode }]">
           <!-- Tên thành phần -->
           <div class="form-field">
             <MsInput
@@ -29,6 +31,7 @@
               :errorMessages="isTouched('salaryCompositionName') ? errorMessages.salaryCompositionName : ''"
               @blur="markTouched('salaryCompositionName')"
               @focus="unMarkTouched('salaryCompositionName')"
+              :disabled="isViewMode"
             />
             <div class="validate-msg">
               {{ isTouched('salaryCompositionName') ? errorMessages.salaryCompositionName : '' }}
@@ -48,6 +51,7 @@
               :errorMessages="isTouched('salaryCompositionCode') ? errorMessages.salaryCompositionCode : ''"
               @blur="markTouched('salaryCompositionCode')"
               @focus="unMarkTouched('salaryCompositionCode')"
+              :disabled="isViewMode"
             />
             <div class="validate-msg">
               {{ isTouched('salaryCompositionCode') ? errorMessages.salaryCompositionCode : '' }}
@@ -91,7 +95,7 @@
             <div class="type_salary_wrapper">
               <MsSelect
                 ref="compositionNatureRef"
-                :data="typeOptions"
+                :data="SalaryCompositionNatureOptions"
                 labelText="Tính chất"
                 isRequired
                 horizontal
@@ -102,9 +106,9 @@
                 @focus="unMarkTouched('compositionNature')"
                 :errorMessages="isTouched('compositionNature') ? errorMessages.compositionNature : ''"
               />
-              <div v-if="formData.compositionNature !== 'khac'" class="type_salary">
+              <div v-if="formData.compositionNature !== SalaryCompositionNature.Other" class="type_salary">
                 <MsRadio
-                  v-if="formData.compositionNature === 'thu_nhap'"
+                  v-if="formData.compositionNature === SalaryCompositionNature.Income"
                   v-model="selectedTax"
                   name="tax-type"
                   :options="taxOptions"
@@ -112,7 +116,7 @@
                   horizontalInput
                 />
                 <MsCheckbox
-                  v-if="formData.compositionNature === 'khau_tru'"
+                  v-if="formData.compositionNature === SalaryCompositionNature.Deduction"
                   v-model="isDeductedTax"
                   label="Giảm trừ khi tính thuế"
                 />
@@ -124,7 +128,7 @@
           </div>
 
           <!-- Định mức -->
-          <div v-if="formData.compositionNature !== 'khac'" class="form-field">
+          <div v-if="formData.compositionNature !== SalaryCompositionNature.Other" class="form-field">
             <MsFormula
               ref="quotaRef"
               id="input_limit_salary"
@@ -137,13 +141,10 @@
               @blur="markTouched('quota')"
               @focus="unMarkTouched('quota')"
             />
-            <!-- <div class="validate-msg">
-              {{ isTouched('quota') ? errorMessages.quota : '' }}
-            </div> -->
           </div>
 
           <!-- Cho phép vượt định mức -->
-          <div v-if="formData.compositionNature !== 'khac'" class="is-over-limit">
+          <div v-if="formData.compositionNature !== SalaryCompositionNature.Other" class="is-over-limit">
             <MsCheckbox
               v-model="isOverLimit"
               label="Cho phép giá trị tính vượt qua định mức"
@@ -161,17 +162,20 @@
             <MsSelect
               labelText="Kiểu giá trị"
               v-model="formData.valueType"
-              :data="typeValues"
+              :data="SalaryCompositionValueTypeOptions"
               horizontal
               class="fz-14"
               :width="315"
-              :disabled="formData.compositionNature !== 'khac'"
+              :disabled="formData.compositionNature !== SalaryCompositionNature.Other"
             />
             <div class="validate-msg"></div>
           </div>
 
           <!-- Giá trị -->
-          <div v-if="formData.valueType === 'so' || formData.valueType === 'tien_te'" class="form-field">
+          <div
+            v-if="formData.valueType === SalaryCompositionValueType.Number || formData.valueType === SalaryCompositionValueType.Currency"
+            class="form-field"
+          >
             <MsRadio
               v-model="selectedOptionsValue"
               name="options-value"
@@ -183,7 +187,10 @@
           </div>
 
           <!-- Combobox chọn thành phần lương -->
-          <div v-if="formData.valueType === 'so' || formData.valueType === 'tien_te'" class="form-field">
+          <div
+            v-if="formData.valueType === SalaryCompositionValueType.Number || formData.valueType === SalaryCompositionValueType.Currency"
+            class="form-field"
+          >
             <div class="value-select-row">
               <MsSelect
                 class="fz-14 is-over-limit"
@@ -201,7 +208,7 @@
                     ></i>
                   </span>
                 </template>
-<template #singleLabel="{ option }">
+                <template #singleLabel="{ option }">
                   <span class="ms-multiselect__single-content">
                     <span>{{ option.label }}</span>
                     <i
@@ -210,186 +217,360 @@
                     ></i>
                   </span>
                 </template>
-</MsSelect>
-<MsSelect v-if="selectedOptionsValue !== optionsValue[1].value" v-model="selectedSalaryCoposition"
-  :data="salaryCompositionOptions" horizontal class="fz-14" placeholder="Chọn thành phần lương để cộng giá trị" />
-</div>
-<div class="validate-msg"></div>
-</div>
+              </MsSelect>
+              <MsSelect
+                v-if="selectedOptionsValue !== optionsValue[1].value"
+                v-model="selectedSalaryCoposition"
+                :data="salaryCompositionOptions"
+                horizontal
+                class="fz-14"
+                placeholder="Chọn thành phần lương để cộng giá trị"
+              />
+            </div>
+            <div class="validate-msg"></div>
+          </div>
 
-<!-- Công thức giá trị -->
-<div
-  v-if="formData.valueType !== 'so' && formData.valueType !== 'tien_te' || selectedOptionsValue === optionsValue[1].value"
-  class="form-field">
-  <MsFormula ref="formulaRef" id="input_value_salary"
-    :class="[{ 'is-over-limit': formData.valueType === 'so' || formData.valueType === 'tien_te' }, 'fz-14']" horizontal
-    :label="formData.valueType !== 'so' && formData.valueType !== 'tien_te' ? 'Giá trị' : ''"
-    placeholder="Tự động gợi ý công thức và tham số khi gõ" v-model="formData.formula" :variables="formulaVariables"
-    @validate="setCustomError('formula', $event[0] || '')" @blur="markTouched('formula')"
-    @focus="unMarkTouched('formula')" />
-  <div class="validate-msg">
-    {{ isTouched('formula') ? errorMessages.formula : '' }}
+          <!-- Công thức giá trị -->
+          <div
+            v-if="formData.valueType !== SalaryCompositionValueType.Number && formData.valueType !== SalaryCompositionValueType.Currency || selectedOptionsValue === optionsValue[1].value"
+            class="form-field"
+          >
+            <MsFormula
+              ref="formulaRef"
+              id="input_value_salary"
+              :class="[{ 'is-over-limit': formData.valueType === SalaryCompositionValueType.Number || formData.valueType === SalaryCompositionValueType.Currency }, 'fz-14']"
+              horizontal
+              :label="formData.valueType !== SalaryCompositionValueType.Number && formData.valueType !== SalaryCompositionValueType.Currency ? 'Giá trị' : ''"
+              placeholder="Tự động gợi ý công thức và tham số khi gõ"
+              v-model="formData.formula"
+              :variables="formulaVariables"
+              @validate="setCustomError('formula', $event[0] || '')"
+              @blur="markTouched('formula')"
+              @focus="unMarkTouched('formula')"
+            />
+            <div class="validate-msg">
+              {{ isTouched('formula') ? errorMessages.formula : '' }}
+            </div>
+          </div>
+
+          <!-- Mô tả -->
+          <div class="form-field">
+            <div class="ms-input ms-input--horizontal">
+              <label class="ms-input__label" for="input_desc">Mô tả</label>
+              <textarea
+                id="input_desc"
+                class="ms-input-in h-86 text-area"
+                v-model="formData.description"
+              ></textarea>
+            </div>
+            <div class="validate-msg"></div>
+          </div>
+
+          <!-- Hiển thị trên phiếu lương -->
+          <div class="form-field">
+            <MsRadio
+              v-model="formData.optionShowPaycheck"
+              name="options-display"
+              :options="SalaryCompositionShowPaycheckOptions"
+              labelText="Hiển thị trên phiếu lương"
+              class="fz-14"
+              horizontal
+              horizontalInput
+            />
+            <div class="validate-msg"></div>
+          </div>
+
+          <!-- Nguồn tạo -->
+          <div class="form-field">
+            <MsInput
+              type="text"
+              id="input_source"
+              label="Nguồn tạo"
+              horizontal
+              :placeholder="SalaryCompositionSourceTypeLabel[formData.sourceType] || 'Tự thêm'"
+              class="fz-14 wd-315"
+              disabled
+            />
+            <div class="validate-msg"></div>
+          </div>
+        </div>
+        <div class="content_body_footer">
+          <div class="footer-right">
+            <MsButton message="Hủy bỏ" :isTooltip="false" class="border-gray fz-14" @click="handleCloseForm" />
+            <template v-if="!isViewMode">
+              <MsButton message="Lưu và thêm" :isTooltip="false" class="fz-14" type="border-green" @click="handleSubmitAndAdd" :disabled="isSubmitting" />
+              <MsButton message="Lưu" :isTooltip="false" class="fz-14" type="green" @click="handleSubmit" :disabled="isSubmitting" />
+            </template>
+            <MsButton v-else message="Chỉnh sửa" :isTooltip="false" class="fz-14" type="green" @click="switchToEditMode" />
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
-</div>
 
-<!-- Mô tả -->
-<div class="form-field">
-  <div class="ms-input ms-input--horizontal">
-    <label class="ms-input__label" for="input_desc">Mô tả</label>
-    <textarea id="input_desc" class="ms-input-in h-86 text-area"></textarea>
-  </div>
-  <div class="validate-msg"></div>
-</div>
-
-<!-- Hiển thị trên phiếu lương -->
-<div class="form-field">
-  <MsRadio v-model="selectedOptionsDisplay" name="options-display" :options="optionsDisplay"
-    labelText="Hiển thị trên phiếu lương" class="fz-14" horizontal horizontalInput />
-  <div class="validate-msg"></div>
-</div>
-
-<!-- Nguồn tạo -->
-<div class="form-field">
-  <MsInput type="text" id="input_source" label="Nguồn tạo" horizontal placeholder="Tự thêm" class="fz-14 wd-315" />
-  <div class="validate-msg"></div>
-</div>
-</div>
-<div class="content_body_footer">
-  <div class="footer-right">
-    <MsButton message="Hủy bỏ" :isTooltip="false" class="border-gray fz-14" />
-    <MsButton message="Lưu và thêm" :isTooltip="false" class="fz-14" type="border-green" />
-    <MsButton message="Lưu" :isTooltip="false" class="fz-14" type="green" @click="handleSubmit" />
-  </div>
-</div>
-</div>
-</div>
-</div>
+  <!-- Toast n\u1ed9i b\u1ed9 form (Req 4) -->
+  <MsToastContainer :toasts="toasts" @close="removeToast" />
 </template>
 <script setup>
 import MsButton from "@/components/base/MsButton.vue";
 import MsInput from "@/components/base/MsInput.vue";
-import MsTable from "@/components/base/MsTable/MsTable.vue";
 import MsTreeSelect from "@/components/base/MsTreeSelect/MsTreeSelect.vue";
 import MsSelect from "@/components/base/MsSelect.vue";
 import MsRadio from "@/components/base/MsRadio.vue";
 import MsCheckbox from "@/components/base/MsCheckbox.vue";
 import MsFormula from "@/components/base/MsFormula/MsFormula.vue";
-import { nextTick, onMounted, ref } from "vue";
+import MsToastContainer from "@/components/overlay/MsToast/MsToastContainer.vue";
+import { nextTick, onMounted, ref, watch } from "vue";
 
-// VARIABLE:
+// ── Import services ──────────────────────────────────────────
+import salaryCompositionApi from "@/services/salaryCompositionService";
+import organizationApi from "@/services/organizationService";
+
+// ── Import enum constants ────────────────────────────────────
+import {
+  SalaryCompositionNature,
+  SalaryCompositionNatureOptions,
+  SalaryCompositionStatus,
+  SalaryCompositionSourceType,
+  SalaryCompositionSourceTypeLabel,
+  SalaryCompositionValueType,
+  SalaryCompositionValueTypeOptions,
+  SalaryCompositionShowPaycheck,
+  SalaryCompositionShowPaycheckOptions,
+  SalaryCompositionType,
+  SalaryCompositionTypeOptions,
+  SalaryCompositionTaxable,
+  SalaryCompositionTaxableOptions,
+} from "@/constants/enums";
+
+// ── Props & Emits ─────────────────────────────────────────────
+const props = defineProps({
+  /** Nếu có editId → mode sửa; không có → mode thêm mới */
+  editId: {
+    type: String,
+    default: null,
+  },
+  /** Nếu có viewId → mode xem chi tiết (readonly) */
+  viewId: {
+    type: String,
+    default: null,
+  },
+});
+
+const emit = defineEmits(["openAlert", "close", "saved"]);
+
+// ── Toast nội bộ form ────────────────────────────────────────────
+const toasts = ref([]);
+const addToast = (message, type = "success", duration = 3000) => {
+  toasts.value.push({ id: Date.now() + Math.random(), message, type, duration });
+};
+const removeToast = (id) => {
+  toasts.value = toasts.value.filter((t) => t.id !== id);
+};
+
+const isEditMode = ref(!!props.editId);
+const isViewMode = ref(!!props.viewId);
+const isSubmitting = ref(false);
+
+// Chuyển từ view mode sang edit mode
+function switchToEditMode() {
+  isViewMode.value = false;
+  isEditMode.value = true;
+}
+
+// ── Org Tree ─────────────────────────────────────────────────
+const orgTreeData = ref([]);
+const selectedOrgs = ref([]);
+
+async function fetchOrgTree() {
+  try {
+    const result = await organizationApi.getTree();
+    if (result.isSuccess && result.data) {
+      orgTreeData.value = mapOrgTree(result.data);
+      // Task 7: Tự chọn tất cả org đầu tiên khi thêm mới
+      if (!props.editId && !props.viewId && orgTreeData.value.length > 0) {
+        const firstNode = orgTreeData.value[0];
+        const getAllIds = (node) => {
+          const ids = [node.id];
+          if (node.children?.length) {
+            for (const child of node.children) ids.push(...getAllIds(child));
+          }
+          return ids;
+        };
+        selectedOrgs.value = getAllIds(firstNode);
+      }
+    }
+  } catch (err) {
+    console.error('[FormSalaryComposition] fetchOrgTree:', err);
+  }
+}
+
+function mapOrgTree(nodes) {
+  return nodes.map((node) => ({
+    id: node.organizationId,
+    label: node.organizationName,
+    children: node.children ? mapOrgTree(node.children) : [],
+  }));
+}
+
+/**
+ * Xây dựng flat map { id -> label } và { label -> id } từ orgTreeData
+ * Dùng để restore selectedOrgs khi backend trả về organizationName (string)
+ */
+function buildOrgFlatMap() {
+  const byId = {};
+  const byName = {};
+  const walk = (nodes) => {
+    for (const n of nodes) {
+      byId[n.id] = n.label;
+      byName[n.label.toLowerCase().trim()] = n.id;
+      if (n.children?.length) walk(n.children);
+    }
+  };
+  walk(orgTreeData.value);
+  return { byId, byName };
+}
+
+/**
+ * Restore selectedOrgs từ dữ liệu API:
+ * Ưu tiên dùng organizationIds (mảng GUID) nếu có;
+ * Nếu không có, parse organizationName (chuỗi, phân cách bởi ", ") và tìm ID tương ứng
+ */
+function restoreSelectedOrgs(data) {
+  // Trường hợp 1: backend trả về mảng organizationIds
+  if (Array.isArray(data.organizationIds) && data.organizationIds.length > 0) {
+    selectedOrgs.value = data.organizationIds;
+    return;
+  }
+  // Trường hợp 2: backend trả về chuỗi organizationId (single guid)
+  if (data.organizationId && typeof data.organizationId === 'string') {
+    selectedOrgs.value = [data.organizationId];
+    return;
+  }
+  // Trường hợp 3: chỉ có organizationName → tra ngược qua byName
+  if (data.organizationName && typeof data.organizationName === 'string') {
+    const { byName } = buildOrgFlatMap();
+    const names = data.organizationName.split(',').map((s) => s.trim().toLowerCase());
+    const ids = names.map((name) => byName[name]).filter(Boolean);
+    selectedOrgs.value = ids.length > 0 ? ids : [];
+    return;
+  }
+  selectedOrgs.value = [];
+}
+
+// ── Form data ────────────────────────────────────────────────
 const salaryCompositionNameRef = ref(null);
 const salaryCompositionCodeRef = ref(null);
 const compositionTypeRef = ref(null);
 const compositionNatureRef = ref(null);
 const quotaRef = ref(null);
 const formulaRef = ref(null);
-const selectedOrgs = ref([]);
-const selectedCategory = ref(null);
-const selectedTax = ref("chiu_thue");
+
+const selectedTax = ref(SalaryCompositionTaxable.Taxable);
 const isDeductedTax = ref(false);
 const isOverLimit = ref(false);
-const selectedType = ref(null);
 
 const optionsValue = [
   { value: "tu_dong_cong", label: "Tự động cộng tổng giá trị của các nhân viên" },
   { value: "cong_thuc_co_san", label: "Tính theo công thức tự đặt" },
 ];
-
 const selectedOptionsValue = ref(optionsValue[1].value);
 
 const optionsValueCombobox = [
-  { value: "option1", label: "Trong cùng đơn vị công tác ", iconClass: "mi-info-blue" },
+  { value: "option1", label: "Trong cùng đơn vị công tác", iconClass: "mi-info-blue" },
   { value: "option2", label: "Dưới quyền", iconClass: "mi-info-blue" },
   { value: "option3", label: "Thuộc cơ cấu tổ chức", iconClass: "mi-info-blue" },
 ];
-
 const selectedOptionsValueCombobox = ref(optionsValueCombobox[0].value);
 const selectedSalaryCoposition = ref(null);
-const selectedOptionsDisplay = ref(null);
 
 // Danh sách biến thành phần lương dùng trong công thức
 const formulaVariables = [
-  'LUONG_CO_BAN',
-  'DOANH_SO',
-  'THUONG_KPI',
-  'SO_NGAY_CONG',
-  'SO_GIO_LAM',
-  'PHAN_TRAM_HOAN_THANH',
-  'BAO_HIEM_XH',
-  'THUE_TNCN',
+  "LUONG_CO_BAN",
+  "DOANH_SO",
+  "THUONG_KPI",
+  "SO_NGAY_CONG",
+  "SO_GIO_LAM",
+  "PHAN_TRAM_HOAN_THANH",
+  "BAO_HIEM_XH",
+  "THUE_TNCN",
 ];
 
-const typeOptions = [
-  { value: "thu_nhap", label: "Thu nhập" },
-  { value: "khau_tru", label: "Khấu trừ" },
-  { value: "khac", label: "Khác" }
+// Dùng SalaryCompositionTypeOptions từ enums (số nguyên khớp backend)
+const categoryOptions = SalaryCompositionTypeOptions;
+
+// Dùng SalaryCompositionTaxableOptions từ enums (số nguyên khớp backend)
+const taxOptions = SalaryCompositionTaxableOptions;
+
+const salaryCompositionOptions = [
+  { value: "thanh_phan_a", label: "Thành phần A" },
+  { value: "thanh_phan_b", label: "Thành phần B" },
+  { value: "thanh_phan_c", label: "Thành phần C" },
 ];
 
-const typeValues = [
-  { value: "so", label: "Số" },
-  { value: "tien_te", label: "Tiền tệ" },
-  { value: "phan_tram", label: "Phần trăm" },
-  { value: "chu", label: "Chữ" },
-  { value: "ngay", label: "Ngày" },
-];
-
-// Lưu trạng thái đã tương tác với từng field để quyết định khi nào hiển thị message lỗi
-const touchedFields = ref({});
-
+// ── Form model ────────────────────────────────────────────────
 const formData = ref({
   salaryCompositionId: "",
-
-  // FK hệ thống
-  salaryCompositionSystemId: "",
-
-  // Mã / tên
+  salaryCompositionSystemId: null,
   salaryCompositionCode: "",
   salaryCompositionName: "",
-
-  // Đơn vị áp dụng
   organizationName: "",
-
-  // Loại thành phần
-  // employee_info / salary / product / attendance
-  compositionType: "",
-
-  // Tính chất
-  // income / deduction / other
-  compositionNature: typeOptions[0].value,
-
-  // Thuế
-  taxable: "",
-  taxDeduction: "",
-
-  // Định mức
+  compositionType: null,           // SalaryCompositionType enum (1-9), bắt buộc chọn
+  compositionNature: SalaryCompositionNature.Income,  // mặc định: Thu nhập (1)
+  taxable: null,                    // SalaryCompositionTaxable enum (1/2/3) hoặc null
+  taxDeduction: null,               // 0 hoặc 1 (Khấu trừ) hoặc null
   quota: null,
-
-  // Kiểu giá trị
-  valueType: typeValues[1].value,
-
-  // Công thức / giá trị
+  valueType: SalaryCompositionValueType.Currency,     // mặc định: Tiền tệ (2)
   formula: "",
-
-  // Mô tả
   description: "",
-
-  // Hiển thị trên phiếu lương
-  // always_show / hidden / conditional
-  optionShowPaycheck: "",
-
-  // Nguồn tạo
-  // default / custom
-  sourceType: "",
-
-  // Trạng thái
-  // following / stop_following
-  status: "",
-
-  // Thời gian
+  optionShowPaycheck: SalaryCompositionShowPaycheck.Show, // mặc định: Có (1)
+  sourceType: SalaryCompositionSourceType.Custom,     // mặc định: Tự thêm (1)
+  status: SalaryCompositionStatus.Following,          // mặc định: Đang theo dõi (1)
   createdDate: "",
   modifiedDate: "",
 });
 
+// ── Populate form khi edit ───────────────────────────────────
+async function loadEditData() {
+  if (!props.editId) return;
+  try {
+    const result = await salaryCompositionApi.getById(props.editId);
+    if (result.isSuccess && result.data) {
+      const data = result.data;
+      formData.value = {
+        salaryCompositionId: data.salaryCompositionId ?? "",
+        salaryCompositionSystemId: data.salaryCompositionSystemId ?? null,
+        salaryCompositionCode: data.salaryCompositionCode ?? "",
+        salaryCompositionName: data.salaryCompositionName ?? "",
+        organizationName: data.organizationName ?? "",
+        compositionType: data.compositionType ?? "",
+        compositionNature: data.compositionNature ?? SalaryCompositionNature.Income,
+        taxable: data.taxable ?? "",
+        taxDeduction: data.taxDeduction ?? "",
+        quota: data.quota ?? null,
+        valueType: data.valueType ?? SalaryCompositionValueType.Currency,
+        formula: data.formula ?? "",
+        description: data.description ?? "",
+        optionShowPaycheck: data.optionShowPaycheck ?? SalaryCompositionShowPaycheck.Show,
+        sourceType: data.sourceType ?? SalaryCompositionSourceType.Custom,
+        status: data.status ?? SalaryCompositionStatus.Following,
+        createdDate: data.createdDate ?? "",
+        modifiedDate: data.modifiedDate ?? "",
+      };
+      // Restore selectedTax từ taxable (integer enum) khi edit
+      if (data.taxable) selectedTax.value = data.taxable;
+      // Restore isDeductedTax từ taxDeduction khi edit
+      isDeductedTax.value = data.taxDeduction === 1 || data.taxDeduction === "1" || data.taxDeduction === true;
+      // Restore đơn vị áp dụng vào MsTreeSelect
+      restoreSelectedOrgs(data);
+    }
+  } catch (err) {
+    console.error("[FormSalaryComposition] loadEditData:", err);
+  }
+}
+
+// ── Validation ───────────────────────────────────────────────
+const touchedFields = ref({});
 const customErrorMessages = ref({});
 
 const isEmptyValue = (value) => {
@@ -401,24 +582,12 @@ const requiredRule = (message) => (value) => isEmptyValue(value) ? message : "";
 const customErrorRule = (field) => () => customErrorMessages.value[field] || "";
 
 const validationRules = {
-  salaryCompositionName: [
-    requiredRule("Vui lòng nhập tên thành phần lương"),
-  ],
-  salaryCompositionCode: [
-    requiredRule("Vui lòng nhập mã thành phần lương"),
-  ],
-  compositionNature: [
-    requiredRule("Vui lòng chọn tính chất"),
-  ],
-  compositionType: [
-    requiredRule("Vui lòng chọn loại thành phần lương"),
-  ],
-  quota: [
-    customErrorRule("quota"),
-  ],
-  formula: [
-    customErrorRule("formula"),
-  ],
+  salaryCompositionName: [requiredRule("Vui lòng nhập tên thành phần lương")],
+  salaryCompositionCode: [requiredRule("Vui lòng nhập mã thành phần lương")],
+  compositionNature: [requiredRule("Vui lòng chọn tính chất")],
+  compositionType: [requiredRule("Vui lòng chọn loại thành phần lương")],
+  quota: [customErrorRule("quota")],
+  formula: [customErrorRule("formula")],
 };
 
 const fieldRefs = {
@@ -437,108 +606,18 @@ const errorMessages = ref(
   }, {})
 );
 
-const optionsDisplay = [
-  { value: "co", label: "Có" },
-  { value: "khong", label: "Không" },
-  { value: "hien_thi_khac_0", label: "Chỉ hiển thị nếu giá trị khác 0" },
-];
-const salaryCompositionOptions = [
-  { value: "thanh_phan_a", label: "Thành phần A" },
-  { value: "thanh_phan_b", label: "Thành phần B" },
-  { value: "thanh_phan_c", label: "Thành phần C" },
-];
-
-const categoryOptions = [
-  { value: "nhan_vien", label: "Thông tin nhân viên" },
-  { value: "cham_cong", label: "Chấm công" },
-  { value: "doanh_so", label: "Doanh số" },
-  { value: "kpi", label: "KPI" },
-  { value: "san_pham", label: "Sản phẩm" },
-  { value: "luong", label: "Lương" },
-  { value: "thue_tncn", label: "Thuế TNCN" },
-  { value: "bao_hiem", label: "Bảo hiểm - Công đoàn" },
-  { value: "khac", label: "Khác" },
-];
-
-
-
-const taxOptions = [
-  { value: "chiu_thue", label: "Chịu thuế" },
-  { value: "mien_thue_toan", label: "Miễn thuế toàn phần" },
-  { value: "mien_thue_mot_phan", label: "Miễn thuế một phần" },
-];
-
-const orgTreeData = [
-  {
-    id: "root",
-    label: "Misa Test pdthien 2024",
-    children: [
-      {
-        id: "mb",
-        label: "Chi nhánh miền Bắc",
-        children: [
-          {
-            id: "ksx",
-            label: "Khối sản xuất",
-            children: [],
-          },
-          {
-            id: "ttkd_bac",
-            label: "Trung tâm kinh doanh",
-            children: [],
-          },
-          {
-            id: "tthtkh",
-            label: "Trung tâm hỗ trợ khách hàng",
-            children: [],
-          },
-        ],
-      },
-      {
-        id: "mn",
-        label: "Chi nhánh miền Nam",
-        children: [
-          {
-            id: "ttkd_nam",
-            label: "Trung tâm kinh doanh",
-            children: [],
-          },
-        ],
-      },
-    ],
-  },
-];
-
-//NOTICE: EMIT + PROPS
-const emit = defineEmits(["openAlert", "close"]);
-const handleCloseForm = () => {
-  emit("openAlert", {
-    title: "Thoát và không lưu?",
-    message: "Nếu bạn thoát, các dữ liệu đang nhập liệu sẽ không được lưu lại.",
-    showConfirmButton: true,
-    cancelText: "Ở lại",
-    confirmText: "Thoát, không lưu",
-    cancelType: "none",
-    confirmType: "red",
-    onConfirm: () => emit("close")  // ← gọi close để SalaryComposition ẩn form
-  })
-}
-
-
-// FUNCTION:
 const isTouched = (field) => Boolean(touchedFields.value[field]);
 
 const validateField = (field) => {
   const rules = validationRules[field] || [];
-  const message = rules
-    .map((rule) => rule(formData.value[field], formData.value))
-    .find(Boolean) || "";
-
+  const message =
+    rules
+      .map((rule) => rule(formData.value[field], formData.value))
+      .find(Boolean) || "";
   errorMessages.value[field] = message;
   return !message;
 };
 
-// validate full field in form
 const validateForm = () => {
   const results = Object.keys(validationRules).map(validateField);
   return results.every(Boolean);
@@ -552,7 +631,6 @@ const getFocusableElement = (fieldRef) => {
   const target = fieldRef?.value;
   if (!target) return null;
   if (typeof target.focus === "function") return target;
-
   return target.$el?.querySelector(
     "input, textarea, button, [tabindex]:not([tabindex='-1']), .multiselect"
   );
@@ -560,21 +638,13 @@ const getFocusableElement = (fieldRef) => {
 
 const focusFirstErrorField = async () => {
   await nextTick();
-
   const firstErrorField = getFirstErrorField();
   if (!firstErrorField) return;
-
   const focusableElement = getFocusableElement(fieldRefs[firstErrorField]);
   if (!focusableElement) return;
-
   focusableElement.$el?.scrollIntoView?.({ behavior: "smooth", block: "center" });
   focusableElement.scrollIntoView?.({ behavior: "smooth", block: "center" });
   focusableElement.focus?.();
-
-  if (!focusableElement.focus && typeof focusableElement.click === "function") {
-    focusableElement.click();
-  }
-
   await nextTick();
   touchedFields.value[firstErrorField] = true;
 };
@@ -594,29 +664,248 @@ const unMarkTouched = (field) => {
 };
 
 const touchAll = () => {
-  const fields = Object.keys(validationRules);
-  fields.forEach((field) => {
+  Object.keys(validationRules).forEach((field) => {
     touchedFields.value[field] = true;
   });
 };
 
-const handleSubmit = () => {
+// ── Build payload gửi API ────────────────────────────────────
+function buildPayload() {
+  // Map selectedOrgs (mảng ID) sang labels thông qua flatMap
+  const flatOrgMap = {};
+  const walkOrg = (nodes) => {
+    for (const n of nodes) {
+      flatOrgMap[n.id] = n.label;
+      if (n.children?.length) walkOrg(n.children);
+    }
+  };
+  walkOrg(orgTreeData.value);
+
+  const orgNames = selectedOrgs.value
+    .map((id) => flatOrgMap[id])
+    .filter(Boolean);
+
+  return {
+    salaryCompositionSystemId: formData.value.salaryCompositionSystemId || null,
+    salaryCompositionCode: formData.value.salaryCompositionCode.trim(),
+    salaryCompositionName: formData.value.salaryCompositionName.trim(),
+    organizationName: orgNames.length > 0
+      ? orgNames.join(", ")
+      : formData.value.organizationName || null,
+    compositionType: formData.value.compositionType, // số nguyên từ SalaryCompositionTypeOptions
+    compositionNature: formData.value.compositionNature,  // số nguyên (1/2/3)
+    taxable: formData.value.compositionNature === SalaryCompositionNature.Income
+      ? selectedTax.value   // số nguyên từ SalaryCompositionTaxableOptions
+      : null,
+    taxDeduction: formData.value.compositionNature === SalaryCompositionNature.Deduction
+      ? (isDeductedTax.value ? 1 : 0)
+      : null,
+    quota: formData.value.quota ?? null,
+    valueType: formData.value.valueType,                   // số nguyên (1-5)
+    formula: formData.value.formula || null,
+    description: formData.value.description || null,
+    optionShowPaycheck: formData.value.optionShowPaycheck, // số nguyên (1/2/3)
+    sourceType: SalaryCompositionSourceType.Custom,        // luôn là 1 (Tự thêm)
+    status: formData.value.status,                         // số nguyên (1/2)
+  };
+}
+
+// ── Submit handlers ─────────────────────────────────────────
+async function handleSubmit() {
   touchAll();
-  const isValid = validateForm();
-  if (!isValid) {
-    focusFirstErrorField();
+  if (!validateForm()) {
+    await focusFirstErrorField();
     return;
   }
+  await submitForm(false);
+}
 
-  // Xử lý submit form (call API, show toast, ...)
-  console.log("Form data:", formData.value);
+async function handleSubmitAndAdd() {
+  touchAll();
+  if (!validateForm()) {
+    await focusFirstErrorField();
+    return;
+  }
+  await submitForm(true);
+}
+
+async function submitForm(andAdd = false) {
+  isSubmitting.value = true;
+  try {
+    const payload = buildPayload();
+    let result;
+
+    if (isEditMode.value && formData.value.salaryCompositionId) {
+      // Cập nhật
+      result = await salaryCompositionApi.update(formData.value.salaryCompositionId, payload);
+    } else {
+      // Thêm mới
+      result = await salaryCompositionApi.create(payload);
+    }
+
+    if (result.isSuccess) {
+      if (andAdd) {
+        // Lưu và thêm: reset form để nhập tiếp, không đóng form
+        // Emit 'saved' để list bên ngoài biết refresh dữ liệu
+        emit("saved");
+        resetForm();
+        await nextTick();
+        salaryCompositionNameRef.value?.focus?.();
+        addToast("Đã lưu thành phần lương thành công", "success");
+      } else {
+        // Lưu: đóng form và quay lại danh sách
+        addToast(isEditMode.value ? "Cập nhật thành phần lương thành công" : "Thêm thành phần lương thành công", "success");
+        // Dạng delay nhỏ để toast hiển thị trước khi unmount
+        setTimeout(() => emit("close"), 600);
+      }
+    } else {
+      const errMsg = result.data || "Có lỗi xảy ra, vui lòng thử lại";
+      emit("openAlert", {
+        title: "Lưu không thành công",
+        message: errMsg,
+        showConfirmButton: false,
+        cancelText: "Đóng",
+      });
+    }
+  } catch (err) {
+    console.error("[FormSalaryComposition] submitForm:", err);
+    emit("openAlert", {
+      title: "Lỗi hệ thống",
+      message: "Có lỗi xảy ra khi lưu dữ liệu. Vui lòng thử lại.",
+      showConfirmButton: false,
+      cancelText: "Đóng",
+    });
+  } finally {
+    isSubmitting.value = false;
+  }
+}
+
+function resetForm() {
+  formData.value = {
+    salaryCompositionId: "",
+    salaryCompositionSystemId: null,
+    salaryCompositionCode: "",
+    salaryCompositionName: "",
+    organizationName: "",
+    compositionType: null,
+    compositionNature: SalaryCompositionNature.Income,
+    taxable: null,
+    taxDeduction: null,
+    quota: null,
+    valueType: SalaryCompositionValueType.Currency,
+    formula: "",
+    description: "",
+    optionShowPaycheck: SalaryCompositionShowPaycheck.Show,
+    sourceType: SalaryCompositionSourceType.Custom,
+    status: SalaryCompositionStatus.Following,
+    createdDate: "",
+    modifiedDate: "",
+  };
+  // Reset các biến phụ trợ
+  selectedTax.value = SalaryCompositionTaxable.Taxable;
+  isDeductedTax.value = false;
+  isOverLimit.value = false;
+  isCodeManuallyEdited.value = false;
+  // Restore default org selection (giống khi mới mở form)
+  if (orgTreeData.value.length > 0) {
+    const firstNode = orgTreeData.value[0];
+    const getAllIds = (node) => {
+      const ids = [node.id];
+      if (node.children?.length) {
+        for (const child of node.children) ids.push(...getAllIds(child));
+      }
+      return ids;
+    };
+    selectedOrgs.value = getAllIds(firstNode);
+  } else {
+    selectedOrgs.value = [];
+  }
+  touchedFields.value = {};
+  customErrorMessages.value = {};
+  isEditMode.value = false;
+}
+
+// ── Đóng form với confirm nếu đã nhập dữ liệu ───────────────
+const handleCloseForm = () => {
+  emit("openAlert", {
+    title: "Thoát và không lưu?",
+    message: "Nếu bạn thoát, các dữ liệu đang nhập liệu sẽ không được lưu lại.",
+    showConfirmButton: true,
+    cancelText: "Ở lại",
+    confirmText: "Thoát, không lưu",
+    cancelType: "none",
+    confirmType: "red",
+    onConfirm: () => emit("close"),
+  });
 };
 
-onMounted(async () => {
-  await nextTick();
-  salaryCompositionNameRef.value?.focus?.();
+// Task 6: Auto-fill mã thành phần khi nhập tên (chỉ khi chưa edit mode và chưa sửa mã thủ công)
+const isCodeManuallyEdited = ref(false);
+
+// Theo dõi nếu người dùng tự sửa mã
+watch(() => formData.value.salaryCompositionCode, (newCode, oldCode) => {
+  const autoCode = toCompositionCode(formData.value.salaryCompositionName);
+  if (newCode !== autoCode) {
+    isCodeManuallyEdited.value = true;
+  }
+}, { flush: 'sync' });
+
+// Watch tên thành phần → auto-fill mã
+watch(() => formData.value.salaryCompositionName, (newName) => {
+  if (!isEditMode.value && !isViewMode.value && !isCodeManuallyEdited.value) {
+    formData.value.salaryCompositionCode = toCompositionCode(newName);
+  }
 });
 
+function toCompositionCode(name) {
+  return (name || '')
+    .trim()
+    .toUpperCase()
+    .replace(/\s+/g, '_')
+    .replace(/[^A-Z0-9_]/g, '');
+}
+
+// ── Lifecycle ────────────────────────────────────────
+onMounted(async () => {
+  await fetchOrgTree();
+  if (props.editId) {
+    await loadEditData();
+  } else if (props.viewId) {
+    // Task 2: load dữ liệu để xem chi tiết
+    const result = await salaryCompositionApi.getById(props.viewId);
+    if (result.isSuccess && result.data) {
+      const data = result.data;
+      formData.value = {
+        salaryCompositionId: data.salaryCompositionId ?? '',
+        salaryCompositionSystemId: data.salaryCompositionSystemId ?? null,
+        salaryCompositionCode: data.salaryCompositionCode ?? '',
+        salaryCompositionName: data.salaryCompositionName ?? '',
+        organizationName: data.organizationName ?? '',
+        compositionType: data.compositionType ?? '',
+        compositionNature: data.compositionNature ?? SalaryCompositionNature.Income,
+        taxable: data.taxable ?? '',
+        taxDeduction: data.taxDeduction ?? '',
+        quota: data.quota ?? null,
+        valueType: data.valueType ?? SalaryCompositionValueType.Currency,
+        formula: data.formula ?? '',
+        description: data.description ?? '',
+        optionShowPaycheck: data.optionShowPaycheck ?? SalaryCompositionShowPaycheck.Show,
+        sourceType: data.sourceType ?? SalaryCompositionSourceType.Custom,
+        status: data.status ?? SalaryCompositionStatus.Following,
+        createdDate: data.createdDate ?? '',
+        modifiedDate: data.modifiedDate ?? '',
+      };
+      // Restore selectedTax và đơn vị áp dụng cho view mode
+      if (data.taxable) selectedTax.value = data.taxable;
+      isDeductedTax.value = data.taxDeduction === 1 || data.taxDeduction === '1' || data.taxDeduction === true;
+      restoreSelectedOrgs(data);
+    }
+  }
+  await nextTick();
+  if (!isViewMode.value) {
+    salaryCompositionNameRef.value?.focus?.();
+  }
+});
 </script>
 <style scoped>
 .content_body_wrapper {
@@ -637,6 +926,12 @@ onMounted(async () => {
   overflow: auto;
   padding: 40px 120px 40px 40px;
   border-bottom: 1px solid #d9dee7;
+}
+
+.content_body_wrapper_form.is-view-mode {
+  pointer-events: none;
+  user-select: text;
+  opacity: 0.92;
 }
 
 .content_header_left_icon {
@@ -729,12 +1024,12 @@ onMounted(async () => {
   flex-wrap: wrap;
 }
 
-.value-select-row>.ms-select:last-child {
+.value-select-row > .ms-select:last-child {
   flex: 1 1 0;
   min-width: 0;
 }
 
-.value-select-row>.ms-select:first-child {
+.value-select-row > .ms-select:first-child {
   flex: 0 0 315px;
 }
 
@@ -756,7 +1051,6 @@ onMounted(async () => {
   color: #f44336;
   line-height: 18px;
   padding-left: 200px;
-  /* căn thẳng với input trong layout horizontal */
 }
 
 .ms-multiselect__single-content {
