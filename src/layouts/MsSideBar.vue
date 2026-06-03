@@ -1,8 +1,8 @@
 <template lang="">
     <aside :class="[{ sidebar_hide: props.isCollapse },'sidebar']">
-            <div class="sbbg">
+            <div :class="[{ sbbg_hide: props.isCollapse },'sbbg']">
                 <div class="sb__top">
-                    <div class="sb__list">
+                    <div :class="[{ sidebar_hide: props.isCollapse },'sb__lis']">
 
                         <!-- Tổng quan (không có submenu) -->
                         <router-link to="/demo" class="hvp dpl menu__item">
@@ -129,11 +129,14 @@
 
                     </div>
                 </div>
-                <div class="sb__bottom">
-                    <div :class="['sb__btn_left hvp', { sb__btn_left_hide: props.isCollapse }]" @click="toggleCollapse">
-                        <div :class="['ms-icon-sidebar-collapse', { hide_sidebar_btn: props.isCollapse }]"></div>
-                        <div :class="['sb__left_title m-l-8', { sb__left_title_hide: props.isCollapse }]">Thu gọn</div>
-                    </div>
+                <div :class="[{ 'sb-bottom_hide': props.isCollapse }, 'sb-bottom']">
+                    <MsButton
+                        iconLeft="mi-sidebar-collapse"
+                        :tooltipMessage="props.isCollapse ? 'Hiện sidebar' : 'Ẩn sidebar'"
+                        :class="['sb__btn_left hvp', { sb__btn_left_hide: props.isCollapse }]"
+                        spreadIcon
+                        @click="toggleCollapse"
+                    />
                 </div>
 
             </div>
@@ -194,10 +197,15 @@ const paymentItems = [
 
 .sbbg {
     height: 100%;
-    padding-top: 32px;
-    padding-bottom: 16px;
+    padding-top: 24px;
+    padding-left: 12px;
     display: flex;
     flex-direction: column;
+}
+
+.sbbg_hide {
+    padding-left: 0;
+    align-items: center;
 }
 
 .sb__top {
@@ -209,7 +217,7 @@ const paymentItems = [
     flex-direction: column;
     gap: 8px;
     align-content: center;
-    height: calc(100% - 56px);
+    height: calc(100% - 60px);
     margin-left: 12px;
 }
 
@@ -271,18 +279,26 @@ const paymentItems = [
 /* ──────────────────────────
    Bottom collapse button
 ────────────────────────── */
-.sb__bottom {
+.sb-bottom {
     height: 40px;
     display: flex;
-    justify-content: center;
+    justify-content: flex-end;
+}
+
+.sb-bottom_hide {
+    border-top: 1px solid #E9EAEB !important;
 }
 
 .sb__btn_left {
     background-color: #fafafa;
-    border: 0.5px #D7D7D7 solid;
-    border-radius: 4px;
+    border-radius: 8px 0 0;
+    border-top: 1px solid #E9EAEB;
+    border-left: 1px solid #E9EAEB;
+    border-right: none;
+    border-bottom: none;
     padding: 8px;
-    width: 200px;
+    width: 40px;
+    height: 40px;
     color: #000000;
     display: flex;
 }
@@ -300,22 +316,27 @@ const paymentItems = [
    Collapsed state
 ────────────────────────── */
 .sidebar.sidebar_hide {
-    width: 80px;
+    width: 60px;
 }
 
 .sidebar.sidebar_hide .menu__item {
-    width: 56px;
+    width: 60px;
     justify-content: center;
 }
 
 .sidebar.sidebar_hide .menu__item-wrapper {
-    width: 56px;
+    width: 60px;
 }
 
 .sb__btn_left_hide {
-    width: 40px;
+    width: 60px;
+    border-radius: 0px;
+    transform: rotate(180deg);
 }
 
+/* ──────────────────────────
+   MsButton overrides (deep)
+────────────────────────── */
 /* ──────────────────────────
    MsButton overrides (deep)
 ────────────────────────── */
@@ -332,13 +353,20 @@ const paymentItems = [
     display: none;
 }
 
+/* Cập nhật lại class này */
 :deep(.ms-button.is-collapse) {
-    width: 40px;
+    width: 40px !important; /* Thêm !important để ghi đè hoàn toàn width: 100% của spread-icon */
+    max-width: 40px;
     justify-content: center !important;
-    padding-left: 0;
-    padding-right: 0;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
 }
 
+/* BỔ SUNG THÊM: Khử hoàn toàn margin-right của iconLeft khi collapse */
+:deep(.ms-button.is-collapse .ms-button__icon) {
+    margin-right: 0 !important;
+    margin-left: 0 !important;
+}
 /* ──────────────────────────
    Dropdown transition
 ────────────────────────── */
