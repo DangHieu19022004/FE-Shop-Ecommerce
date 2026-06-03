@@ -12,10 +12,10 @@ const emit = defineEmits(["click"]);
 	left: 0;
 	right: 0;
 	bottom: 0;
-	z-index: 2;
+	z-index: 9990;
 }
 
 .overlay.overlay--alert {
-	z-index: 4;
+	z-index: 9998;
 }
 </style>

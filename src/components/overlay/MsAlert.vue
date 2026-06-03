@@ -1,17 +1,15 @@
 <template>
   <div class="modal_alert">
     <div class="modal_alert_wrapper">
+      <MsButton
+        iconLeft="mi-close"
+        :isTooltip="false"
+        @click="emit('close')"
+        class="alert-close-btn"
+        shapeBtn="circle"
+      />
       <div class="modal_alert_text">
-        <div class="dpl sp-between">
-          <div class="modal_alert_title">{{ props.title }}</div>
-          <MsButton
-            iconLeft="mi-close"
-            :isTooltip="false"
-            @click="emit('close')"
-            class="alert-close-btn"
-            shapeBtn="circle"
-          />
-        </div>
+        <div class="modal_alert_title" v-if="props.title">{{ props.title }}</div>
         <div class="modal_alert_content"><slot>{{ props.message }}</slot></div>
       </div>
     </div>
@@ -78,15 +76,15 @@ const emit = defineEmits(["close", "confirm"]);
 .modal_alert {
   background-color: #fff;
   position: fixed;
-  width: 440px;
+  width: 415px;
   max-width: 90vw;
-  min-height: 180px;
+  min-height: 170px;
   height: auto;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 9999;
-  border-radius: 8px;
+  border-radius: 12px;
   display: flex;
   flex-direction: column;
   border: 1px solid #e5e7eb;
@@ -101,7 +99,7 @@ const emit = defineEmits(["close", "confirm"]);
   width: 100%;
   min-height: 100%;
   overflow: hidden;
-  padding: 24px;
+  padding: 18px 24px 0px 24px;
   gap: 20px;
 }
 
@@ -128,14 +126,14 @@ const emit = defineEmits(["close", "confirm"]);
 }
 
 .modal_alert_title {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 700;
   color: #111827;
 }
 
 .modal_alert_content {
   margin: 0;
-  font-size: 14px;
+  font-size: 13px;
   line-height: 1.6;
   color: #374151;
 }
@@ -147,24 +145,28 @@ const emit = defineEmits(["close", "confirm"]);
   gap: 8px;
   height: 60px;
   width: 100%;
-  padding: 0 16px;
-  background-color: #f3f3f3;
+  padding: 0 24px;
 }
+
 
 /* Custom styles for MsButton within MsAlert */
 .modal_alert_action :deep(.ms-button) {
   width: auto !important;
   height: 36px;
-  padding: 0 20px;
-  font-size: 14px;
+  padding: 0 12px;
+  font-size: 13px;
   font-weight: 500;
-  border-radius: 6px;
+  border-radius: 8px;
 }
 
 .modal_alert_action :deep(.btn-alert-cancel) {
   background-color: #fff !important;
   border: 1px solid #d9dee7 !important;
   color: #1f1f1f !important;
+}
+
+.modal_alert_action :deep(.btn-alert-cancel .ms-button__content) {
+  margin: 0 8px !important;
 }
 
 .modal_alert_action :deep(.btn-alert-cancel:hover) {
