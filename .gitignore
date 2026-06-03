@@ -41,3 +41,8 @@ __screenshots__/
 converticon.html
 
 .env
+
+dist/
+dist-check/
+dist-check-action/
+dist-check-sticky-actions/
