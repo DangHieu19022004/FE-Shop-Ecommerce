@@ -1,16 +1,19 @@
 <template>
   <div class="modal_alert">
     <div class="modal_alert_wrapper">
-      <MsButton
-        iconLeft="mi-close"
-        :isTooltip="false"
-        @click="emit('close')"
-        class="alert-close-btn"
-        shapeBtn="circle"
-      />
-      <div class="modal_alert_text">
+      <div class="modal_alert_wrap_head">
         <div class="modal_alert_title" v-if="props.title">{{ props.title }}</div>
-        <div class="modal_alert_content"><slot>{{ props.message }}</slot></div>
+        <MsButton
+          iconLeft="mi-close"
+          :isTooltip="false"
+          @click="emit('close')"
+          shapeBtn="circle"
+        />
+      </div>
+      <div class="modal_alert_content">
+        <slot>
+          <div v-html="props.message"></div>
+        </slot>
       </div>
     </div>
     <div v-if="props.showConfirmButton" class="modal_alert_action">
@@ -18,14 +21,14 @@
           :message="props.cancelText"
           :type="props.cancelType"
           :isTooltip="false"
-          class="btn-alert-cancel"
+          class="btn-alert-cancel sz-32 w-80"
           @click="emit('close')"
         />
         <MsButton
           :message="props.confirmText"
           :type="props.confirmType"
           :isTooltip="false"
-          class="btn-alert-confirm"
+          class="btn-alert-confirm sz-32 w-80"
           @click="emit('confirm')"
         />
       </div>
@@ -99,8 +102,8 @@ const emit = defineEmits(["close", "confirm"]);
   width: 100%;
   min-height: 100%;
   overflow: hidden;
-  padding: 18px 24px 0px 24px;
-  gap: 20px;
+  padding: 15px 24px 0px 24px;
+  gap: 8px;
 }
 
 .alert-close-btn {
@@ -119,10 +122,17 @@ const emit = defineEmits(["close", "confirm"]);
   background-color: #f1f2f5 !important;
 }
 
-.modal_alert_text {
+/* .modal_alert_text {
   display: flex;
   flex-direction: column;
   gap: 12px;
+} */
+
+.modal_alert_wrap_head{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  justify-items: center;
 }
 
 .modal_alert_title {
@@ -141,11 +151,11 @@ const emit = defineEmits(["close", "confirm"]);
 .modal_alert_action {
   display: flex;
   justify-content: flex-end;
-  align-items: center;
+  align-items: flex-end;
   gap: 8px;
   height: 60px;
   width: 100%;
-  padding: 0 24px;
+  padding: 0 24px 18px 0;
 }
 
 
@@ -168,7 +178,7 @@ const emit = defineEmits(["close", "confirm"]);
 .modal_alert_action :deep(.btn-alert-cancel .ms-button__content) {
   margin: 0 8px !important;
 }
-
+/* 
 .modal_alert_action :deep(.btn-alert-cancel:hover) {
   background-color: #f8f9fa !important;
 }
@@ -181,5 +191,10 @@ const emit = defineEmits(["close", "confirm"]);
 
 .modal_alert_action :deep(.btn-alert-confirm:hover) {
   background-color: #0A724B !important;
+} */
+
+.modal_alert_action :deep(.btn-alert-confirm .ms-button__content) {
+  margin: 0 8px !important;
 }
+
 </style>

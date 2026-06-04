@@ -151,7 +151,7 @@ const handleFocus = () => {
   /* height: 36px; */
   padding: 0 12px;
   border: 1px solid #d1d5db;
-  border-radius: 6px;
+  border-radius: 8px;
   font-size: 14px;
   color: #111827;
   background-color: #ffffff;

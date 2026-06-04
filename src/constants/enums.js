@@ -195,3 +195,25 @@ export const SalaryCompositionTaxableOptions = [
   { value: SalaryCompositionTaxable.FullExempt,    label: "Miễn thuế toàn phần" },
   { value: SalaryCompositionTaxable.PartialExempt, label: "Miễn thuế một phần" },
 ];
+
+// ─────────────────────────────────────────────────────────────
+
+/**
+ * SalaryCompositionTaxDeduction – Giảm trừ khi tính thuế
+ * Giá trị trong DB: 1 = Có giảm trừ, 0 = Không giảm trừ, null = N/A
+ */
+export const SalaryCompositionTaxDeduction = {
+  Yes: 1,
+  No: 0,
+};
+
+export const SalaryCompositionTaxDeductionLabel = {
+  [SalaryCompositionTaxDeduction.Yes]: "Có",
+  [SalaryCompositionTaxDeduction.No]: "Không",
+};
+
+ e x p o r t   c o n s t   S a l a r y C o m p o s i t i o n T a x D e d u c t i o n O p t i o n s   =   [ 
+     {   v a l u e :   S a l a r y C o m p o s i t i o n T a x D e d u c t i o n . Y e s ,   l a b e l :   " C � "   } , 
+     {   v a l u e :   S a l a r y C o m p o s i t i o n T a x D e d u c t i o n . N o ,   l a b e l :   " K h � n g "   } , 
+ ] ;  
+ 

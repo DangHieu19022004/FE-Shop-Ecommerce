@@ -64,13 +64,24 @@
               tooltipPosition="bottom"
               type="border-secondary"
             />
-            <MsButton
-              iconLeft="mi-setting"
-              tooltipMessage="Thiết lập"
-              shapeBtn="square"
-              tooltipPosition="bottom"
-              type="border-secondary"
-            />
+            <div class="setting-btn-wrapper" @click.stop>
+              <MsButton
+                iconLeft="mi-setting"
+                tooltipMessage="Thiết lập"
+                shapeBtn="square"
+                tooltipPosition="bottom"
+                type="border-secondary"
+                class="pd-0 sz-32"
+                @click="togglePopupSettingColumn"
+              />
+              <PopupSettingColumn
+                v-if="isOpenPopupSettingColumn"
+                :fields="configurableFields"
+                :defaultFields="defaultConfigurableFields"
+                @save="handleSaveColumnSettings"
+                @close="isOpenPopupSettingColumn = false"
+              />
+            </div>
           </div>
         </div>
         <div class="content_body">
@@ -95,7 +106,7 @@
             <!-- Bảng dữ liệu -->
             <MsTable
               v-else
-              :fields="fields"
+              :fields="visibleFields"
               :data-rows="salaryCompositions"
               :sort-field="sortField"
               :sort-direction="sortDirection"
@@ -103,6 +114,8 @@
               table-class-head="candicate_table_head"
               table-class-body="candicate_table_body"
               @sort-change="handleSortChange"
+              @update:fields="handleTableFieldsUpdate"
+              @column-resize="handleColumnResize"
             >
               <template #header-checkbox>
                 <input
@@ -222,11 +235,13 @@ import MsDropdownMenu from "@/components/base/MsDropdownMenu.vue";
 import MsAlert from "@/components/overlay/MsAlert.vue";
 import MsOverlay from "@/components/overlay/MsOverlay.vue";
 import MsToastContainer from "@/components/overlay/MsToast/MsToastContainer.vue";
+import PopupSettingColumn from "@/feat/salarycomposition/PopupSettingColumn.vue";
 import { ref, computed, onMounted } from "vue";
 
 // ── Import services ──────────────────────────────────────────
 import salaryCompositionSystemApi from "@/services/salaryCompositionSystemService";
 import salaryCompositionApi from "@/services/salaryCompositionService";
+import gridConfigApi from "@/services/gridConfigService";
 
 // ── Import enum constants ────────────────────────────────────
 import {
@@ -417,8 +432,8 @@ async function handleDeleteOne(id) {
 // ── Đưa vào danh sách sử dụng (Req 2) ───────────────────────
 async function handleAddToUsageList(row) {
   openAlert({
-    title: "Đưa vào danh sách sử dụng",
-    message: `Bạn có muốn thêm "${row.salaryCompositionName}" vào danh sách thành phần lương sử dụng không?`,
+    title: "Thông báo",
+    message: `Bạn có chắc chắn muốn đưa thành phần lương mặc định <strong>${row.salaryCompositionName}</strong> vào danh sách sử dụng không?`,
     confirmText: "Thêm vào",
     confirmType: "green",
     onConfirm: async () => {
@@ -441,7 +456,7 @@ async function handleAddToUsageList(row) {
         };
         const result = await salaryCompositionApi.create(payload);
         if (result.isSuccess) {
-          addToast(`Đã thêm "${row.salaryCompositionName}" vào danh sách sử dụng`, "success");
+          addToast(`Thêm thành công`, "success");
         } else {
           addToast(result.data || "Thêm vào danh sách thất bại", "error");
         }
@@ -455,6 +470,7 @@ async function handleAddToUsageList(row) {
 
 onMounted(() => {
   fetchData();
+  loadGridConfig();
 });
 
 // ── Checkbox selection ───────────────────────────────────────
@@ -490,7 +506,7 @@ const toggleRow = (id) => {
 
 // ── Table fields ─────────────────────────────────────────────
 // Req 3: Không có cột status
-const fields = [
+const DEFAULT_FIELDS = [
   {
     key: "",
     label: "",
@@ -499,16 +515,18 @@ const fields = [
     draggable: false,
     pinnable: false,
     resizable: false,
+    isSystemCol: true,
   },
-  { key: "salaryCompositionCode", label: "Mã thành phần", width: 180 },
-  { key: "salaryCompositionName", label: "Tên thành phần", width: 220 },
-  { key: "compositionType", label: "Loại thành phần", slot: "compositionType", width: 180 },
-  { key: "compositionNature", label: "Tính chất", slot: "compositionNature", width: 160 },
-  { key: "taxable", label: "Chịu thuế", slot: "taxable", width: 130 },
-  { key: "quota", label: "Định mức", width: 140 },
-  { key: "valueType", label: "Kiểu giá trị", slot: "valueType", width: 160 },
-  { key: "formula", label: "Giá trị", width: 160 },
-  { key: "description", label: "Mô tả", width: 240 },
+  { key: "salaryCompositionCode", label: "Mã thành phần", width: 180, isVisible: true },
+  { key: "salaryCompositionName", label: "Tên thành phần", width: 220, isVisible: true },
+  { key: "compositionType", label: "Loại thành phần", slot: "compositionType", width: 180, isVisible: true },
+  { key: "compositionNature", label: "Tính chất", slot: "compositionNature", width: 160, isVisible: true },
+  { key: "taxable", label: "Chịu thuế", slot: "taxable", width: 130, isVisible: true },
+  { key: "quota", label: "Định mức", width: 140, isVisible: true },
+  { key: "valueType", label: "Kiểu giá trị", slot: "valueType", width: 160, isVisible: true },
+  { key: "formula", label: "Giá trị", width: 160, isVisible: true },
+  { key: "description", label: "Mô tả", width: 240, isVisible: true },
+  { key: "ghost", label: "", width: 180, isSystemCol: true },
   {
     key: "actions",
     label: "",
@@ -517,9 +535,289 @@ const fields = [
     draggable: false,
     pinnable: false,
     resizable: false,
+    isSystemCol: true,
   },
 ];
+
+// Reactive fields – được cập nhật khi user kéo thả / resize / pin / ẩn hiện
+const fields = ref(DEFAULT_FIELDS.map((f) => ({ ...f })));
+
+// Chỉ các cột có thể tùy chỉnh (không phải cột hệ thống)
+const defaultConfigurableFields = computed(() =>
+  DEFAULT_FIELDS.filter((f) => !f.isSystemCol)
+);
+const configurableFields = computed(() =>
+  fields.value.filter((f) => !f.isSystemCol)
+);
+
+// Tất cả cột visible (bao gồm cột hệ thống) – truyền vào MsTable
+const visibleFields = computed(() =>
+  fields.value.filter((f) => f.isSystemCol || f.isVisible !== false)
+);
+
+// ── UI state cho Popup thiết lập cột ──────────────────────────────────
+const isOpenPopupSettingColumn = ref(false);
+const togglePopupSettingColumn = () => {
+  isOpenPopupSettingColumn.value = !isOpenPopupSettingColumn.value;
+};
+
+// ── GridConfig – Load & Save ──────────────────────────────────────────
+const GRID_NAME = "SalaryCompositionSystemGrid";
+
+/** Cache gridConfigId: { columnName -> gridConfigId } */
+const gridConfigIdMap = ref({});
+
+/** Cache full object từ DB: { columnName -> GridConfig } */
+const gridConfigDataMap = ref({});
+
+/**
+ * Load cấu hình cột từ pa_grid_config và áp dụng lên fields
+ */
+async function loadGridConfig() {
+  try {
+    const result = await gridConfigApi.getByGridName(GRID_NAME);
+    if (!result.isSuccess) return;
+
+    const configs = result.data || [];
+
+    // Tách system cols và non-system cols để giữ vị trí cột hệ thống
+    const firstSystemFields = fields.value.filter((f) => f.isSystemCol && f.key === "");
+    const lastSystemFields  = fields.value.filter((f) => f.isSystemCol && f.key !== "");
+    const nonSystemFields   = fields.value.filter((f) => !f.isSystemCol);
+
+    // Nếu số lượng cấu hình trả về từ DB ít hơn số lượng cột thực tế
+    // thì gọi initGridConfig để tự động bổ sung các cột còn thiếu.
+    if (configs.length < nonSystemFields.length) {
+      await initGridConfig(configs);
+      return;
+    }
+
+    // Build cả 2 cache
+    const idMap = {};
+    const dataMap = {};
+    configs.forEach((cfg) => {
+      idMap[cfg.columnName] = cfg.gridConfigId;
+      dataMap[cfg.columnName] = cfg;
+    });
+    gridConfigIdMap.value = idMap;
+    gridConfigDataMap.value = dataMap;
+
+    // Sắp xếp non-system cols theo displayOrder từ DB và áp dụng config
+    const orderedNonSystem = nonSystemFields
+      .map((field) => {
+        const cfg = dataMap[field.key];
+        if (!cfg) return field;
+        return {
+          ...field,
+          width: cfg.columnWidth ?? field.width,
+          isVisible: cfg.isVisible ?? field.isVisible,
+          pinned: cfg.pinnedPosition || null,
+        };
+      })
+      .sort((a, b) => {
+        const orderA = dataMap[a.key]?.displayOrder ?? 9999;
+        const orderB = dataMap[b.key]?.displayOrder ?? 9999;
+        return orderA - orderB;
+      });
+
+    // Ghép lại: checkbox → non-system (sorted) → ghost + actions
+    fields.value = [
+      ...firstSystemFields,
+      ...orderedNonSystem,
+      ...lastSystemFields,
+    ];
+  } catch (err) {
+    console.warn("[SalaryCompositionSystem] loadGridConfig:", err);
+  }
+}
+
+/**
+ * Khi DB thiếu records → INSERT những cột chưa có trong DB.
+ * Sau khi init xong gọi lại loadGridConfig để lấy data chuẩn nhất.
+ */
+async function initGridConfig(existingConfigs = []) {
+  const existingNames = new Set(existingConfigs.map((c) => c.columnName));
+  const nonSystemCols = fields.value.filter(
+    (f) => !f.isSystemCol && f.key && f.key !== "ghost" && f.key !== "actions" && f.key !== ""
+  );
+
+  // Chỉ lấy những cột chưa có trong DB
+  const missingCols = nonSystemCols.filter((f) => !existingNames.has(f.key));
+
+  if (missingCols.length > 0) {
+    await Promise.all(
+      missingCols.map(async (field) => {
+        const idx = fields.value.findIndex(f => f.key === field.key);
+        const payload = {
+          gridName: GRID_NAME,
+          columnName: field.key,
+          columnCaption: field.label ?? "",
+          columnWidth: field.width ?? 150,
+          isVisible: field.isVisible !== false,
+          pinnedPosition: field.pinned ?? null,
+          displayOrder: idx,
+          allowFilter: null,
+          filterType: null,
+        };
+        try {
+          await gridConfigApi.upsertColumn(payload);
+        } catch (err) {
+          console.error(`[GridConfig] initGridConfig error for "${field.key}":`, err);
+        }
+      })
+    );
+
+    // Gọi đệ quy load lại data sau khi insert xong
+    await loadGridConfig();
+  }
+}
+
+/** Debounce timer map per columnName */
+const _saveTimers = {};
+
+/**
+ * Build payload đầy đủ cho một cột
+ */
+function buildPayload(columnName, overrides = {}) {
+  const field = fields.value.find((f) => f.key === columnName);
+  const idx = fields.value.findIndex((f) => f.key === columnName);
+  const cached = gridConfigDataMap.value[columnName] || {};
+
+  const payload = {
+    gridName: GRID_NAME,
+    columnName,
+    columnCaption: field?.label ?? cached.columnCaption ?? "",
+    columnWidth: field?.width ?? cached.columnWidth ?? 150,
+    isVisible: field ? (field.isSystemCol ? true : field.isVisible !== false) : (cached.isVisible ?? true),
+    pinnedPosition: field?.pinned ?? cached.pinnedPosition ?? null,
+    displayOrder: idx !== -1 ? idx : (cached.displayOrder ?? 0),
+    allowFilter: cached.allowFilter ?? null,
+    filterType: cached.filterType ?? null,
+    ...overrides,
+  };
+
+  if (gridConfigIdMap.value[columnName]) {
+    payload.gridConfigId = gridConfigIdMap.value[columnName];
+  }
+
+  return payload;
+}
+
+/**
+ * Lưu cấu hình một cột lên BE (debounced 600ms)
+ */
+function saveColumnConfig(columnName, overrides = {}) {
+  if (!columnName || columnName === "ghost" || columnName === "actions" || columnName === "") return;
+
+  clearTimeout(_saveTimers[columnName]);
+  _saveTimers[columnName] = setTimeout(async () => {
+    try {
+      const payload = buildPayload(columnName, overrides);
+      const result = await gridConfigApi.upsertColumn(payload);
+
+      if (result.isSuccess && result.data) {
+        gridConfigIdMap.value[columnName] = result.data.gridConfigId;
+        gridConfigDataMap.value[columnName] = result.data;
+      }
+    } catch (err) {
+      console.warn("[SalaryCompositionSystem] saveColumnConfig:", err);
+    }
+  }, 600);
+}
+
+/**
+ * Xử lý khi resize cột
+ */
+const handleColumnResize = ({ field, width }) => {
+  const target = fields.value.find((f) => f.key === field.key);
+  if (target) target.width = width;
+  saveColumnConfig(field.key, { columnWidth: width });
+};
+
+/**
+ * Cập nhật fields khi MsTable emit update:fields (kéo thả, ghim)
+ */
+const handleTableFieldsUpdate = (updatedFields) => {
+  const hiddenFields = fields.value.filter(
+    (f) => !f.isSystemCol && f.isVisible === false
+  );
+  fields.value = [
+    ...updatedFields,
+    ...hiddenFields,
+  ];
+
+  // Lưu displayOrder và pinnedPosition lên BE với explicit overrides
+  fields.value.forEach((field, idx) => {
+    if (!field.isSystemCol) {
+      saveColumnConfig(field.key, {
+        pinnedPosition: field.pinned ?? null,
+        displayOrder: idx,
+      });
+    }
+  });
+};
+
+/**
+ * Lưu cấu hình cột từ PopupSettingColumn
+ */
+/**
+ * Lưu cấu hình cột từ PopupSettingColumn
+ * Dùng async/await trực tiếp (không qua debounce) để đảm bảo toàn bộ cấu hình được lưu
+ */
+const handleSaveColumnSettings = async (configurableSaved) => {
+  // Tách các cột system để giữ vị trí
+  const firstSystemFields = fields.value.filter((f) => f.isSystemCol && f.key === "");
+  const lastSystemFields  = fields.value.filter((f) => f.isSystemCol && f.key !== "");
+
+  // Update non-system cols theo ĐÚNG thứ tự từ configurableSaved (do user kéo thả)
+  const updatedNonSystem = configurableSaved.map((saved) => {
+    const originalField = fields.value.find((f) => f.key === saved.key);
+    const isVisible = saved.isVisible !== false;
+    return {
+      ...originalField,
+      ...saved,
+      pinned: isVisible ? originalField?.pinned : null,
+    };
+  });
+
+  // Ghép lại thành mảng fields mới với thứ tự đã được cập nhật
+  fields.value = [
+    ...firstSystemFields,
+    ...updatedNonSystem,
+    ...lastSystemFields,
+  ];
+
+  // Đóng popup ngay lập tức cho UX tốt
+  isOpenPopupSettingColumn.value = false;
+
+  // Lưu từng cột lên BE – dùng Promise.all để song song nhưng không qua debounce
+  const savableCols = configurableSaved.filter(
+    (f) => f.key && f.key !== "ghost" && f.key !== "actions" && f.key !== ""
+  );
+
+  await Promise.all(
+    savableCols.map(async (f) => {
+      const isVisible = f.isVisible !== false;
+      const overrides = { isVisible };
+      if (!isVisible) overrides.pinnedPosition = null;
+
+      try {
+        const payload = buildPayload(f.key, overrides);
+        const result = await gridConfigApi.upsertColumn(payload);
+        if (result.isSuccess && result.data) {
+          gridConfigIdMap.value[f.key] = result.data.gridConfigId;
+          gridConfigDataMap.value[f.key] = result.data;
+        } else {
+          console.error(`[GridConfig] Save non-success for "${f.key}":`, result);
+        }
+      } catch (err) {
+        console.error(`[GridConfig] Save error for "${f.key}":`, err);
+      }
+    })
+  );
+};
 </script>
+
 <style scoped>
 .status-label {
   color: #666;
@@ -753,5 +1051,9 @@ const fields = [
 }
 .table-state--error {
   color: #dc2626;
+}
+/* Wrapper cho nút thiết lập + popup */
+.setting-btn-wrapper {
+  position: relative;
 }
 </style>

@@ -726,7 +726,7 @@ CSS Header:
     height: 14px;
     background: url(https://testcdnamisapp.misacdn.net/apps/payroll/static/img/ICON_V3_2-SCCnlDIQ.svg) -129px -377px no-repeat;
 }
-
+/* 
 .mi-toast--info {
     background: url('/src/assets/icons/mi-many.svg') no-repeat -41px -89px;
     width: 18px;
@@ -749,7 +749,7 @@ CSS Header:
     background: url('/src/assets/icons/mi-many.svg') no-repeat -100px -89px;
     width: 20px;
     height: 18px;
-}
+} */
 
 .mi-update {
     width: 20px;

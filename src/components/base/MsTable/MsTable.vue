@@ -73,6 +73,7 @@
             :key="colIndex"
             :class="[field.classBody, { 'col-pinned-left': field.pinned === 'left', 'col-actions': field.key === 'actions' }]"
             :style="getTdStyle(field, colIndex)"
+            :title="(!field.slot && field.key !== 'actions' && field.key !== 'ghost') ? (String(row[field.key] ?? '').trim() || undefined) : undefined"
           >
             <slot :name="`cell-${field.slot || field.key}`" :row="row">
               <template v-if="field.key !== 'actions' && field.key !== 'ghost'">{{ row[field.key] || "--" }}</template>
@@ -170,7 +171,7 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(["row-click", "update:fields", "sort-change"]);
+const emit = defineEmits(["row-click", "update:fields", "sort-change", "column-resize"]);
 
 // ─── Refs ─────────────────────────────────────────────────────────────────────
 const tableRef = ref(null);
@@ -342,6 +343,14 @@ function onResizeMove(e) {
 }
 
 function onResizeEnd() {
+  if (resizing && resizeIndex !== -1) {
+    // Emit column-resize khi thả chuột để parent có thể save vào DB
+    const field = internalFields.value[resizeIndex];
+    const finalWidth = columnWidths.value[resizeIndex];
+    if (field && finalWidth) {
+      emit("column-resize", { field, width: Math.round(finalWidth) });
+    }
+  }
   resizing = false;
   resizeIndex = -1;
   document.removeEventListener("mousemove", onResizeMove);
@@ -446,7 +455,8 @@ function getThStyle(field, index) {
   if (field.pinned === "left") {
     style.position = "sticky";
     style.left = (pinnedLeftOffsets.value[index] ?? 0) + "px";
-    style.zIndex = 3;
+    // z-index phải cao hơn th thường (z-index: 10 từ CSS) để không bị đè khi scroll ngang
+    style.zIndex = 20;
     style.backgroundColor = "#f9fafb";
     style.boxShadow = "2px 0 6px -2px rgba(0,0,0,0.12)";
   } else if (field.key === "actions") {

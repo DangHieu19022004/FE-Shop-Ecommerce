@@ -21,15 +21,20 @@ const gridConfigApi = {
    * Lấy danh sách cấu hình lưới có phân trang
    * Endpoint: GET /api/GridConfig/Paging
    * @param {Object} params
-   * @param {number}  params.pageIndex      - Trang hiện tại (bắt đầu từ 1)
-   * @param {number}  params.pageSize       - Số dòng mỗi trang (default 10)
-   * @param {string}  [params.search]       - Từ khóa tìm kiếm
-   * @param {string}  [params.sort]         - Sắp xếp
-   * @param {string}  [params.searchFields] - Các field tìm kiếm
    * @returns {Promise<ServiceResponse<PagingResponse<GridConfig>>>}
    */
   getPaging(params = {}) {
     return axiosInstance.get(`${BASE}/Paging`, { params });
+  },
+
+  /**
+   * Lấy toàn bộ cấu hình cột theo tên grid
+   * Endpoint: GET /api/GridConfig/ByGridName?gridName=...
+   * @param {string} gridName - Tên grid (VD: "SalaryCompositionGrid")
+   * @returns {Promise<ServiceResponse<GridConfig[]>>}
+   */
+  getByGridName(gridName) {
+    return axiosInstance.get(`${BASE}/ByGridName`, { params: { gridName } });
   },
 
   /**
@@ -46,15 +51,6 @@ const gridConfigApi = {
    * Tạo mới một cấu hình cột trong lưới
    * Endpoint: POST /api/GridConfig
    * @param {Object} data
-   * @param {string}  data.gridName         - Tên grid (vd: "SalaryCompositionGrid")
-   * @param {string}  [data.columnName]     - Tên cột (vd: "SalaryCompositionCode")
-   * @param {string}  [data.columnCaption]  - Tiêu đề hiển thị (vd: "Mã thành phần")
-   * @param {number}  [data.columnWidth]    - Độ rộng cột (pixel)
-   * @param {boolean} [data.isVisible]      - Có hiển thị hay không
-   * @param {string}  [data.pinnedPosition] - Vị trí ghim: "left" | "right" | null
-   * @param {number}  [data.displayOrder]   - Thứ tự hiển thị
-   * @param {boolean} [data.allowFilter]    - Có cho phép lọc hay không
-   * @param {string}  [data.filterType]     - Kiểu lọc: "text" | "number" | "date"
    * @returns {Promise<ServiceResponse<GridConfig>>}
    */
   create(data) {
@@ -80,6 +76,18 @@ const gridConfigApi = {
    */
   deleteById(id) {
     return axiosInstance.delete(`${BASE}/${id}`);
+  },
+
+  /**
+   * Upsert một cột: PUT nếu đã có gridConfigId, POST nếu chưa có.
+   * @param {Object} data - Dữ liệu cột bao gồm gridConfigId (optional)
+   * @returns {Promise<ServiceResponse<GridConfig>>}
+   */
+  upsertColumn(data) {
+    if (data.gridConfigId) {
+      return axiosInstance.put(`${BASE}/${data.gridConfigId}`, data);
+    }
+    return axiosInstance.post(BASE, data);
   },
 };
 

@@ -51,6 +51,10 @@ a {
   font-size: 14px !important;
 }
 
+.fz-13 {
+  font-size: 13px !important;
+}
+
 .sp-between {
   justify-content: space-between;
   align-items: center;
@@ -257,4 +261,24 @@ a {
 {
   width: 32px !important;
   height: 32px !important;
+}
+
+.w-80{
+  width: 80px !important;
+}
+
+.m-t-8{
+  margin-top: 8px;
+}
+
+.fz-16{
+  font-size: 16px !important;
+}
+
+.fw-700{
+  font-weight: 700 !important;
+}
+
+.m-t-4{
+  margin-top: 4px !important;
 }
