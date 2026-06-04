@@ -43,7 +43,26 @@
               />
             </div>
 
-            <div class="content_body_status">
+            <div v-if="!isOverlay && selectedIds.length > 0" class="checkbox_function" style="display: flex; align-items: center; margin-left: 16px;">
+              <p class="fz-14" style="margin-right: 8px;">Đã chọn</p>
+              <b class="fz-14">{{ selectedIds.length }}</b>
+              <MsButton
+                message="Bỏ chọn"
+                class="color-green fz-14 no-background"
+                :isTooltip="false"
+                style="border: none; background: transparent; color: #16a34a; padding: 0; margin-left: 12px; margin-right: 12px;"
+                @click="selectedIds = []"
+              />
+              <MsButton
+                :isTooltip="false"
+                message="Đưa vào danh sách sử dụng"
+                iconLeft="mi-plus-primary"
+                type="border-secondary"
+                @click="handleConfirm"
+              />
+            </div>
+
+            <div v-else class="content_body_status">
               <MsButton
                 :isTooltip="false"
                 iconRight="mi-chevron-down mg-l-8"
@@ -484,11 +503,12 @@ async function handleAddToUsageList(row) {
         if (result.isSuccess) {
           addToast(`Thêm thành công`, "success");
         } else {
-          addToast(result.data || "Thêm vào danh sách thất bại", "error");
+          addToast("Thành phần lương đã tồn tại", "error");
         }
       } catch (err) {
         console.error("[SalaryCompositionSystem] addToUsageList:", err);
-        addToast("Có lỗi xảy ra khi thêm vào danh sách", "error");
+        const msg = err.data?.data || err.response?.data?.data || err.data?.devMessage || "Thành phần lương đã tồn tại";
+        addToast(msg, "error");
       }
     },
   });
@@ -521,12 +541,28 @@ const handleConfirm = async () => {
         sourceType: 2, // Default - từ hệ thống
         status: 1, // Đang theo dõi
       };
-      const res = await salaryCompositionApi.create(payload);
-      if (res.isSuccess) successCount++;
+      try {
+        const res = await salaryCompositionApi.create(payload);
+        if (res.isSuccess) {
+          successCount++;
+        } else {
+          addToast(`Thành phần lương "${row.salaryCompositionName}" đã tồn tại`, "error");
+        }
+      } catch (err) {
+        console.error("[SalaryCompositionSystem] create:", err);
+        const msg = err.data?.data || err.response?.data?.data || err.data?.devMessage || `Thành phần lương "${row.salaryCompositionName}" đã tồn tại`;
+        addToast(msg, "error");
+      }
     }));
 
-    emit("saved", successCount);
-    emit("close");
+    if (successCount > 0) {
+      addToast(`Thêm thành công ${successCount} bản ghi`, "success");
+      emit("saved", successCount);
+      if (props.isOverlay) {
+        emit("close");
+      }
+      selectedIds.value = []; // Bỏ chọn sau khi thêm thành công
+    }
   } catch (error) {
     console.error(error);
   } finally {
