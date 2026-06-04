@@ -1,7 +1,12 @@
 <template>
-  <div class="content_bg">
-    <div class="content">
-      <div class="content_header">
+  <!-- Nếu là Overlay -->
+  <MsOverlay v-if="isOverlay" class="overlay--system" @click="emit('close')" />
+
+  <div :class="isOverlay ? 'modal_system' : 'content_bg'">
+    <div :class="!isOverlay ? 'content' : 'modal_system_wrapper'">
+
+      <!-- Normal Header -->
+      <div v-if="!isOverlay" class="content_header">
         <div>
           <div class="content_header_left_icon">
             <MsButton
@@ -14,7 +19,13 @@
           </div>
         </div>
       </div>
-      <div class="content_body_wrapper">
+
+      <!-- Overlay Header -->
+      <div v-if="isOverlay" class="modal_system_header">
+        <div class="modal_system_title">Thêm từ danh mục của hệ thống</div>
+        <MsButton iconLeft="mi-close" :isTooltip="false" @click="emit('close')" shapeBtn="circle" class="btn-close" />
+      </div>
+      <div class="content_body_wrapper" :class="{ 'overlay-mode': isOverlay, 'modal_system_body': isOverlay }">
         <div class="content_body_header">
           <div class="content_body_header_left">
             <div class="content_body_search">
@@ -56,12 +67,13 @@
               </Transition>
             </div>
           </div>
-          <div class="content_body_header_right">
+          <div class="content_body_header_right" v-if="!isOverlay">
             <MsButton
               iconLeft="mi-filter"
               tooltipMessage="Bộ lọc"
               shapeBtn="square"
               tooltipPosition="bottom"
+              class="pd-0 sz-32"
               type="border-secondary"
             />
             <div class="setting-btn-wrapper" @click.stop>
@@ -201,6 +213,13 @@
           </div>
         </div>
       </div>
+
+      <!-- Overlay Footer -->
+      <div v-if="isOverlay" class="modal_system_footer">
+        <MsButton message="Hủy bỏ" type="border-secondary" @click="emit('close')" />
+        <MsButton message="Đồng ý" type="green" :disabled="selectedIds.length === 0 || isSaving" @click="handleConfirm" />
+      </div>
+
     </div>
   </div>
 
@@ -253,7 +272,14 @@ import {
   SalaryCompositionTaxableLabel,
 } from "@/constants/enums";
 
-const emit = defineEmits(["openAlert"]);
+const props = defineProps({
+  isOverlay: {
+    type: Boolean,
+    default: false
+  }
+});
+
+const emit = defineEmits(["openAlert", "close", "saved"]);
 
 // ── Toast state ──────────────────────────────────────────────
 const toasts = ref([]);
@@ -468,6 +494,46 @@ async function handleAddToUsageList(row) {
   });
 }
 
+// ── Xử lý lưu danh sách (Overlay Mode) ──────────────────────
+const isSaving = ref(false);
+const handleConfirm = async () => {
+  if (selectedIds.value.length === 0) return;
+  isSaving.value = true;
+  let successCount = 0;
+  try {
+    const itemsToAdd = salaryCompositions.value.filter(item => selectedIds.value.includes(item.salaryCompositionSystemId));
+
+    // Call API create cho từng item đã chọn
+    await Promise.all(itemsToAdd.map(async (row) => {
+      const payload = {
+        salaryCompositionSystemId: row.salaryCompositionSystemId,
+        salaryCompositionCode: row.salaryCompositionCode,
+        salaryCompositionName: row.salaryCompositionName,
+        compositionType: row.compositionType,
+        compositionNature: row.compositionNature,
+        taxable: row.taxable ?? null,
+        taxDeduction: row.taxDeduction ?? null,
+        quota: row.quota ?? null,
+        valueType: row.valueType,
+        formula: row.formula ?? null,
+        description: row.description ?? null,
+        optionShowPaycheck: row.optionShowPaycheck ?? null,
+        sourceType: 2, // Default - từ hệ thống
+        status: 1, // Đang theo dõi
+      };
+      const res = await salaryCompositionApi.create(payload);
+      if (res.isSuccess) successCount++;
+    }));
+
+    emit("saved", successCount);
+    emit("close");
+  } catch (error) {
+    console.error(error);
+  } finally {
+    isSaving.value = false;
+  }
+};
+
 onMounted(() => {
   fetchData();
   loadGridConfig();
@@ -551,9 +617,14 @@ const configurableFields = computed(() =>
 );
 
 // Tất cả cột visible (bao gồm cột hệ thống) – truyền vào MsTable
-const visibleFields = computed(() =>
-  fields.value.filter((f) => f.isSystemCol || f.isVisible !== false)
-);
+const visibleFields = computed(() => {
+  let filtered = fields.value.filter((f) => f.isSystemCol || f.isVisible !== false);
+  // Nếu là overlay, ẩn đi cột actions (thao tác từng dòng)
+  if (props.isOverlay) {
+    filtered = filtered.filter(f => f.key !== "actions");
+  }
+  return filtered;
+});
 
 // ── UI state cho Popup thiết lập cột ──────────────────────────────────
 const isOpenPopupSettingColumn = ref(false);
@@ -819,6 +890,59 @@ const handleSaveColumnSettings = async (configurableSaved) => {
 </script>
 
 <style scoped>
+/* Modal Overlay CSS */
+.overlay--system {
+  z-index: 1000;
+}
+.modal_system {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 900px;
+  max-width: 95vw;
+  height: 700px;
+  background-color: #fff;
+  z-index: 1001;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+.modal_system_wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.modal_system_header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px 0 24px;
+}
+.modal_system_title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #212121;
+}
+.modal_system_body {
+  flex: 1;
+  overflow: hidden;
+  /* border-top: 1px solid #e0e0e0; */
+  /* border-bottom: 1px solid #e0e0e0; */
+  margin: 16px 24px;
+}
+.modal_system_body .content_body_header {
+  padding: 0 0 12px 0;
+}
+.modal_system_footer {
+  border-top: 1px solid #e0e0e0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 24px;
+}
+/* Reusing normal styles below */
 .status-label {
   color: #666;
   margin-right: 4px;

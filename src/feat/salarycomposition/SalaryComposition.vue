@@ -40,6 +40,7 @@
             <MsButton
               message="Chọn từ danh mục của hệ thống"
               :isTooltip="false"
+              @click="openPopupSystem"
             />
           </div>
         </div>
@@ -372,6 +373,13 @@
     </div>
   </div>
 
+  <SalaryCompositionSystem
+    v-if="isShowPopupSystem"
+    :isOverlay="true"
+    @close="isShowPopupSystem = false"
+    @saved="handlePopupSystemSaved"
+  />
+
   <!-- Toast container (nội bộ, khi Req4 toast không qua MainLayout) -->
   <MsToastContainer :toasts="toasts" @close="removeToast" />
 </template>
@@ -383,6 +391,7 @@ import FormSalaryComposition from "./FormSalaryComposition.vue";
 import MsDropdownMenu from "@/components/base/MsDropdownMenu.vue";
 import MsSelect from "@/components/base/MsSelect.vue";
 import PopupSettingColumn from "./PopupSettingColumn.vue";
+import SalaryCompositionSystem from "../salarycompositionsystems/SalaryCompositionSystem.vue";
 import FilterSalaryComposition from "./FilterSalaryComposition.vue";
 import MsTreeSelect from "@/components/base/MsTreeSelect/MsTreeSelect.vue";
 import MsToastContainer from "@/components/overlay/MsToast/MsToastContainer.vue";
@@ -411,6 +420,7 @@ const isOpenFilter = ref(false);
 const isOpenPopupSettingColumn = ref(false);
 const toggleSelectComposition = ref(false);
 const isShowForm = ref(false);
+const isShowPopupSystem = ref(false);
 const editId = ref(null); // null = thêm mới, string = sửa
 const viewId = ref(null); // string = xem chi tiết (readonly)
 
@@ -420,6 +430,11 @@ const togglePopupSettingColumn = () => {
 
 const openSelectComposition = () => {
   toggleSelectComposition.value = !toggleSelectComposition.value;
+};
+
+const openPopupSystem = () => {
+  toggleSelectComposition.value = false;
+  isShowPopupSystem.value = true;
 };
 
 const handleOpenForm = (id) => {
@@ -469,6 +484,13 @@ const handleSavedRefresh = ({ data, isEdit } = {}) => {
   }
   // Sau đó sync lại với BE để đảm bảo chính xác
   fetchSalaryCompositions();
+};
+
+const handlePopupSystemSaved = (count) => {
+  if (count > 0) {
+    addToast(`Đã thêm ${count} thành phần lương từ hệ thống`, "success");
+    fetchSalaryCompositions();
+  }
 };
 
 const selectedOrgs = ref([]);
