@@ -212,8 +212,7 @@ export const SalaryCompositionTaxDeductionLabel = {
   [SalaryCompositionTaxDeduction.No]: "Kh√¥ng",
 };
 
- e x p o r t   c o n s t   S a l a r y C o m p o s i t i o n T a x D e d u c t i o n O p t i o n s   =   [ 
-     {   v a l u e :   S a l a r y C o m p o s i t i o n T a x D e d u c t i o n . Y e s ,   l a b e l :   " C Û "   } , 
-     {   v a l u e :   S a l a r y C o m p o s i t i o n T a x D e d u c t i o n . N o ,   l a b e l :   " K h Ù n g "   } , 
- ] ;  
- 
+export const SalaryCompositionTaxDeductionOptions = [
+  { value: SalaryCompositionTaxDeduction.Yes, label: "C√≥" },
+  { value: SalaryCompositionTaxDeduction.No, label: "Kh√¥ng" },
+];
