@@ -302,7 +302,11 @@
                 formData.valueType !== SalaryCompositionValueType.Currency) ||
               selectedOptionsValue === optionsValue[1].value
             "
-            class="form-field"
+            :class="[
+              'form-field',
+              'formula-field',
+              { 'formula-field--with-label': hasFormulaLabel },
+            ]"
           >
             <MsFormula
               ref="formulaRef"
@@ -333,6 +337,15 @@
             <div class="validate-msg">
               {{ isTouched("formula") ? errorMessages.formula : "" }}
             </div>
+            <MsButton
+              iconLeft="mi-agent-box"
+              :isTooltip="false"
+              :message="isHoverAgent ? 'Tạo công thức với AVA Tiền lương' : ''"
+              class="formula-btn fz-13"
+              shapeBtn="circle"
+              @mouseenter="isHoverAgent = true"
+              @mouseleave="isHoverAgent = false"
+            />
           </div>
 
           <!-- Mô tả -->
@@ -431,7 +444,7 @@ import MsRadio from "@/components/base/MsRadio.vue";
 import MsCheckbox from "@/components/base/MsCheckbox.vue";
 import MsFormula from "@/components/base/MsFormula/MsFormula.vue";
 import MsToastContainer from "@/components/overlay/MsToast/MsToastContainer.vue";
-import { nextTick, onMounted, ref, watch } from "vue";
+import { computed, nextTick, onMounted, ref, watch } from "vue";
 
 // ── Import services ──────────────────────────────────────────
 import salaryCompositionApi from "@/services/salaryCompositionService";
@@ -454,6 +467,8 @@ import {
   SalaryCompositionTaxableOptions,
   SalaryCompositionTaxDeduction,
 } from "@/constants/enums";
+
+const isHoverAgent = ref(false);
 
 // ── Props & Emits ─────────────────────────────────────────────
 const props = defineProps({
@@ -687,6 +702,12 @@ const formData = ref({
   createdDate: "",
   modifiedDate: "",
 });
+
+const hasFormulaLabel = computed(
+  () =>
+    formData.value.valueType !== SalaryCompositionValueType.Number &&
+    formData.value.valueType !== SalaryCompositionValueType.Currency,
+);
 
 // ── Populate form data (edit, view, or duplicate) ─────────────────
 async function loadData(id, isDuplicate = false) {
@@ -1053,7 +1074,7 @@ onMounted(async () => {
   await fetchOrgTree();
   // Load danh sách tham số cho popup công thức
   fetchFormulaParameters();
-  
+
   if (props.editId) {
     await loadData(props.editId, false);
   } else if (props.duplicateId) {
@@ -1063,7 +1084,7 @@ onMounted(async () => {
     // Task 2: load dữ liệu để xem chi tiết
     await loadData(props.viewId, false);
   }
-  
+
   await nextTick();
   if (!isViewMode.value) {
     salaryCompositionNameRef.value?.focus?.();
@@ -1192,6 +1213,29 @@ onMounted(async () => {
 
 .value-select-row > .ms-select:first-child {
   flex: 0 0 315px;
+}
+
+.formula-field {
+  position: relative;
+}
+
+.formula-btn {
+  position: absolute;
+  bottom: 26px;
+  right: 3px;
+  z-index: 2;
+background: linear-gradient(270deg, #efe9ff 7.74%, #f0f8ff 40.17%, #dff8ff 64.73%, #f3f3ff 84.04%);
+border: 1px solid #DAE5FF;
+border-radius: 14px;
+height:32px;
+}
+
+:deep(.ms-button--icon-only.ms-button--shape-circle){
+  width:39px !important;
+}
+
+.formula-field--with-label .formula-btn {
+  left: 208px;
 }
 
 :deep(.ms-input--horizontal .ms-input-in.wd-315) {
