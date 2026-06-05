@@ -3,6 +3,7 @@
     v-if="isShowForm"
     :editId="editId"
     :viewId="viewId"
+    :duplicateId="duplicateId"
     @close="handleCloseFormAndRefresh"
     @saved="handleSavedRefresh"
     @openAlert="$emit('openAlert', $event)"
@@ -78,7 +79,11 @@
                 <button
                   v-if="hasActiveSelected"
                   class="btn-status-badge status-badge status-badge--inactive m-r-8"
-                  @click="handleBulkUpdateStatus(SalaryCompositionStatus.StoppedFollowing)"
+                  @click="
+                    handleBulkUpdateStatus(
+                      SalaryCompositionStatus.StoppedFollowing,
+                    )
+                  "
                 >
                   <span class="status-badge__dot"></span>
                   Ngừng theo dõi
@@ -88,7 +93,9 @@
                 <button
                   v-if="hasInactiveSelected"
                   class="btn-status-badge status-badge status-badge--active m-r-8"
-                  @click="handleBulkUpdateStatus(SalaryCompositionStatus.Following)"
+                  @click="
+                    handleBulkUpdateStatus(SalaryCompositionStatus.Following)
+                  "
                 >
                   <span class="status-badge__dot"></span>
                   Đang theo dõi
@@ -134,7 +141,6 @@
                   class="m-l-8 h-32"
                   @update:modelValue="handleOrgChange"
                 />
-
               </div>
             </div>
             <div class="content_body_header_right">
@@ -241,19 +247,37 @@
                   </span>
                 </template>
                 <template #cell-compositionType="{ row }">
-                  {{ SalaryCompositionTypeLabel[row.compositionType] ?? row.compositionType }}
+                  {{
+                    SalaryCompositionTypeLabel[row.compositionType] ??
+                    row.compositionType
+                  }}
                 </template>
                 <template #cell-compositionNature="{ row }">
-                  {{ SalaryCompositionNatureLabel[row.compositionNature] ?? row.compositionNature }}
+                  {{
+                    SalaryCompositionNatureLabel[row.compositionNature] ??
+                    row.compositionNature
+                  }}
                 </template>
                 <template #cell-taxable="{ row }">
-                  {{ SalaryCompositionTaxableLabel[row.taxable] ?? row.taxable ?? '--' }}
+                  {{
+                    SalaryCompositionTaxableLabel[row.taxable] ??
+                    row.taxable ??
+                    "--"
+                  }}
                 </template>
                 <template #cell-taxDeduction="{ row }">
-                  {{ row.taxDeduction === null || row.taxDeduction === undefined ? '--' : (SalaryCompositionTaxDeductionLabel[row.taxDeduction] ?? '--') }}
+                  {{
+                    row.taxDeduction === null || row.taxDeduction === undefined
+                      ? "--"
+                      : (SalaryCompositionTaxDeductionLabel[row.taxDeduction] ??
+                        "--")
+                  }}
                 </template>
                 <template #cell-valueType="{ row }">
-                  {{ SalaryCompositionValueTypeLabel[row.valueType] ?? row.valueType }}
+                  {{
+                    SalaryCompositionValueTypeLabel[row.valueType] ??
+                    row.valueType
+                  }}
                 </template>
                 <template #cell-quota="{ row }">
                   <FormulaCell :value="row.quota" />
@@ -262,26 +286,45 @@
                   <FormulaCell :value="row.formula" />
                 </template>
                 <template #cell-sourceType="{ row }">
-                  {{ SalaryCompositionSourceTypeLabel[row.sourceType] ?? row.sourceType }}
+                  {{
+                    SalaryCompositionSourceTypeLabel[row.sourceType] ??
+                    row.sourceType
+                  }}
                 </template>
                 <template #cell-optionShowPaycheck="{ row }">
-                  {{ SalaryCompositionShowPaycheckLabel[row.optionShowPaycheck] ?? row.optionShowPaycheck }}
+                  {{
+                    SalaryCompositionShowPaycheckLabel[
+                      row.optionShowPaycheck
+                    ] ?? row.optionShowPaycheck
+                  }}
                 </template>
                 <template #cell-actions="{ row }">
                   <div class="btn_action">
                     <!-- Nút Toggle status: ẩn nếu là data hệ thống -->
                     <MsButton
                       v-if="!row.salaryCompositionSystemId"
-                      :iconLeft="row.status === SalaryCompositionStatus.Following ? 'mi-circle-minus-yellow' : 'mi-circle-check-green'"
+                      :iconLeft="
+                        row.status === SalaryCompositionStatus.Following
+                          ? 'mi-circle-minus-yellow'
+                          : 'mi-circle-check-green'
+                      "
                       type="border-none"
                       shapeBtn="square"
                       class="sz-28 pd-0"
-                      :tooltipMessage="row.status === SalaryCompositionStatus.Following ? 'Ngưng theo dõi' : 'Theo dõi'"
+                      :tooltipMessage="
+                        row.status === SalaryCompositionStatus.Following
+                          ? 'Ngưng theo dõi'
+                          : 'Theo dõi'
+                      "
                       tooltipPosition="bottom"
                       @click.stop="handleToggleStatus(row)"
                     />
                     <!-- Spacer để giữ layout các nút không bị lệch khi nút Toggle ẩn -->
-                    <div v-else class="sz-28" style="display: inline-block;"></div>
+                    <div
+                      v-else
+                      class="sz-28"
+                      style="display: inline-block"
+                    ></div>
                     <!-- Nút Nhân bản: không lock -->
                     <MsButton
                       iconLeft="mi-copy"
@@ -290,6 +333,7 @@
                       class="sz-28 pd-0"
                       tooltipMessage="Nhân bản"
                       tooltipPosition="bottom"
+                      @click.stop="handleDuplicate(row)"
                     />
                     <!-- Nút Sửa: hiện toast nếu có salaryCompositionSystemId -->
                     <MsButton
@@ -299,7 +343,14 @@
                       class="sz-28 pd-0"
                       tooltipMessage="Sửa"
                       tooltipPosition="bottom"
-                      @click.stop="row.salaryCompositionSystemId ? addToast('Bạn không có quyền thực hiện chức năng này', 'warning') : handleOpenForm(row.salaryCompositionId)"
+                      @click.stop="
+                        row.salaryCompositionSystemId
+                          ? addToast(
+                              'Bạn không có quyền thực hiện chức năng này',
+                              'warning',
+                            )
+                          : handleOpenForm(row.salaryCompositionId)
+                      "
                     />
                     <!-- Nút Xóa: hiện toast nếu có salaryCompositionSystemId -->
                     <MsButton
@@ -309,7 +360,14 @@
                       class="sz-28 pd-0"
                       tooltipMessage="Xóa"
                       tooltipPosition="bottom"
-                      @click.stop="row.salaryCompositionSystemId ? addToast('Bạn không có quyền thực hiện chức năng này', 'warning') : handleDeleteOne(row)"
+                      @click.stop="
+                        row.salaryCompositionSystemId
+                          ? addToast(
+                              'Bạn không có quyền thực hiện chức năng này',
+                              'warning',
+                            )
+                          : handleDeleteOne(row)
+                      "
                     />
                   </div>
                 </template>
@@ -318,7 +376,9 @@
           </div>
           <div class="content_body_footer">
             <div class="footer-left">
-              <span>Tổng số: <b>{{ totalRecords }}</b></span>
+              <span
+                >Tổng số: <b>{{ totalRecords }}</b></span
+              >
             </div>
             <div class="footer-right">
               <span>Số dòng/trang</span>
@@ -430,6 +490,7 @@ const isShowForm = ref(false);
 const isShowPopupSystem = ref(false);
 const editId = ref(null); // null = thêm mới, string = sửa
 const viewId = ref(null); // string = xem chi tiết (readonly)
+const duplicateId = ref(null); // string = nhân bản
 
 const togglePopupSettingColumn = () => {
   isOpenPopupSettingColumn.value = !isOpenPopupSettingColumn.value;
@@ -447,6 +508,7 @@ const openPopupSystem = () => {
 const handleOpenForm = (id) => {
   editId.value = id;
   viewId.value = null;
+  duplicateId.value = null;
   isShowForm.value = true;
 };
 
@@ -454,6 +516,14 @@ const handleOpenForm = (id) => {
 const handleRowClick = (row) => {
   viewId.value = row.salaryCompositionId;
   editId.value = null;
+  duplicateId.value = null;
+  isShowForm.value = true;
+};
+
+const handleDuplicate = (row) => {
+  duplicateId.value = row.salaryCompositionId;
+  editId.value = null;
+  viewId.value = null;
   isShowForm.value = true;
 };
 
@@ -461,6 +531,7 @@ const handleCloseFormAndRefresh = () => {
   isShowForm.value = false;
   editId.value = null;
   viewId.value = null;
+  duplicateId.value = null;
   fetchSalaryCompositions();
 };
 
@@ -475,7 +546,7 @@ const handleSavedRefresh = ({ data, isEdit } = {}) => {
     if (isEdit) {
       // Sửa: cập nhật tại chỗ, rồi move lên đầu
       const idx = salaryCompositions.value.findIndex(
-        (r) => r.salaryCompositionId === data.salaryCompositionId
+        (r) => r.salaryCompositionId === data.salaryCompositionId,
       );
       if (idx !== -1) {
         salaryCompositions.value.splice(idx, 1);
@@ -529,7 +600,8 @@ const statusItems = [
 
 const selectedStatusLabel = computed(
   () =>
-    statusItems.find((i) => i.value === selectedStatus.value)?.label ?? "Tất cả"
+    statusItems.find((i) => i.value === selectedStatus.value)?.label ??
+    "Tất cả",
 );
 
 const handleStatusChange = (item) => {
@@ -576,7 +648,7 @@ const pageSizeOptions = [
 ];
 
 const totalPages = computed(() =>
-  Math.max(1, Math.ceil(totalRecords.value / pageSize.value))
+  Math.max(1, Math.ceil(totalRecords.value / pageSize.value)),
 );
 
 const pageStart = computed(() => {
@@ -585,7 +657,7 @@ const pageStart = computed(() => {
 });
 
 const pageEnd = computed(() =>
-  Math.min(pageIndex.value * pageSize.value, totalRecords.value)
+  Math.min(pageIndex.value * pageSize.value, totalRecords.value),
 );
 
 const goToPage = (page) => {
@@ -719,9 +791,13 @@ async function loadGridConfig() {
     const configs = result.data || [];
 
     // Tách system cols và non-system cols
-    const firstSystemFields = fields.value.filter((f) => f.isSystemCol && f.key === "");
-    const lastSystemFields  = fields.value.filter((f) => f.isSystemCol && f.key !== "");
-    const nonSystemFields   = fields.value.filter((f) => !f.isSystemCol);
+    const firstSystemFields = fields.value.filter(
+      (f) => f.isSystemCol && f.key === "",
+    );
+    const lastSystemFields = fields.value.filter(
+      (f) => f.isSystemCol && f.key !== "",
+    );
+    const nonSystemFields = fields.value.filter((f) => !f.isSystemCol);
 
     // Nếu số lượng cấu hình trả về từ DB ít hơn số lượng cột thực tế (ví dụ: DB chỉ có 1 cột Mã thành phần)
     // thì gọi initGridConfig để tự động bổ sung các cột còn thiếu.
@@ -777,7 +853,12 @@ async function loadGridConfig() {
 async function initGridConfig(existingConfigs = []) {
   const existingNames = new Set(existingConfigs.map((c) => c.columnName));
   const nonSystemCols = fields.value.filter(
-    (f) => !f.isSystemCol && f.key && f.key !== "ghost" && f.key !== "actions" && f.key !== ""
+    (f) =>
+      !f.isSystemCol &&
+      f.key &&
+      f.key !== "ghost" &&
+      f.key !== "actions" &&
+      f.key !== "",
   );
 
   // Chỉ lấy những cột chưa có trong DB
@@ -786,7 +867,7 @@ async function initGridConfig(existingConfigs = []) {
   if (missingCols.length > 0) {
     await Promise.all(
       missingCols.map(async (field) => {
-        const idx = fields.value.findIndex(f => f.key === field.key);
+        const idx = fields.value.findIndex((f) => f.key === field.key);
         const payload = {
           gridName: GRID_NAME,
           columnName: field.key,
@@ -801,9 +882,12 @@ async function initGridConfig(existingConfigs = []) {
         try {
           await gridConfigApi.upsertColumn(payload);
         } catch (err) {
-          console.error(`[GridConfig] initGridConfig error for "${field.key}":`, err);
+          console.error(
+            `[GridConfig] initGridConfig error for "${field.key}":`,
+            err,
+          );
         }
-      })
+      }),
     );
 
     // Gọi đệ quy load lại data sau khi insert xong
@@ -832,7 +916,11 @@ function buildPayload(columnName, overrides = {}) {
     columnCaption: field?.label ?? cached.columnCaption ?? "",
     // Trạng thái hiện tại từ fields.value (source of truth)
     columnWidth: field?.width ?? cached.columnWidth ?? 150,
-    isVisible: field ? (field.isSystemCol ? true : field.isVisible !== false) : (cached.isVisible ?? true),
+    isVisible: field
+      ? field.isSystemCol
+        ? true
+        : field.isVisible !== false
+      : (cached.isVisible ?? true),
     pinnedPosition: field?.pinned ?? cached.pinnedPosition ?? null,
     displayOrder: idx !== -1 ? idx : (cached.displayOrder ?? 0),
     // Fields không quản lý qua UI, giữ nguyên từ cache DB
@@ -854,7 +942,13 @@ function buildPayload(columnName, overrides = {}) {
  * Luôn gửi full payload để tránh PUT overwrite field thành null
  */
 function saveColumnConfig(columnName, overrides = {}) {
-  if (!columnName || columnName === "ghost" || columnName === "actions" || columnName === "") return;
+  if (
+    !columnName ||
+    columnName === "ghost" ||
+    columnName === "actions" ||
+    columnName === ""
+  )
+    return;
 
   clearTimeout(_saveTimers[columnName]);
   _saveTimers[columnName] = setTimeout(async () => {
@@ -918,7 +1012,9 @@ function handleDeleteSelected() {
 
   // Req 1: Lọc các row có salaryCompositionSystemId ra khỏi danh sách xóa
   const deletableIds = selectedIds.value.filter((id) => {
-    const row = salaryCompositions.value.find((r) => r.salaryCompositionId === id);
+    const row = salaryCompositions.value.find(
+      (r) => r.salaryCompositionId === id,
+    );
     return !row?.salaryCompositionSystemId;
   });
   const blockedCount = selectedIds.value.length - deletableIds.length;
@@ -926,16 +1022,16 @@ function handleDeleteSelected() {
   if (deletableIds.length === 0) {
     emit("openAlert", {
       title: "Không thể xóa",
-      message: "Tất cả các thành phần lương đã chọn đều từ danh mục hệ thống và không thể xóa.",
+      message:
+        "Tất cả các thành phần lương đã chọn đều từ danh mục hệ thống và không thể xóa.",
       showConfirmButton: false,
       cancelText: "Đóng",
     });
     return;
   }
 
-  const blockedNote = blockedCount > 0
-    ? ` (${blockedCount} mục từ hệ thống sẽ được bỏ qua)`
-    : "";
+  const blockedNote =
+    blockedCount > 0 ? ` (${blockedCount} mục từ hệ thống sẽ được bỏ qua)` : "";
 
   emit("openAlert", {
     title: "Xác nhận xóa",
@@ -948,7 +1044,10 @@ function handleDeleteSelected() {
         if (result.isSuccess) {
           selectedIds.value = [];
           await fetchSalaryCompositions();
-          addToast(`Đã xóa ${deletableIds.length} thành phần lương thành công`, "success");
+          addToast(
+            `Đã xóa ${deletableIds.length} thành phần lương thành công`,
+            "success",
+          );
         } else {
           addToast(result.data || "Xóa thất bại", "error");
         }
@@ -966,7 +1065,9 @@ async function handleBulkUpdateStatus(status) {
 
   // Req: Không cho phép cập nhật trạng thái của data hệ thống
   const updatableIds = selectedIds.value.filter((id) => {
-    const row = salaryCompositions.value.find((r) => r.salaryCompositionId === id);
+    const row = salaryCompositions.value.find(
+      (r) => r.salaryCompositionId === id,
+    );
     return !row?.salaryCompositionSystemId;
   });
 
@@ -976,11 +1077,17 @@ async function handleBulkUpdateStatus(status) {
   }
 
   try {
-    const result = await salaryCompositionApi.updateStatusBulk(updatableIds, status);
+    const result = await salaryCompositionApi.updateStatusBulk(
+      updatableIds,
+      status,
+    );
     if (result.isSuccess) {
       selectedIds.value = [];
       await fetchSalaryCompositions();
-      const label = status === SalaryCompositionStatus.Following ? "đang theo dõi" : "ngưng theo dõi";
+      const label =
+        status === SalaryCompositionStatus.Following
+          ? "đang theo dõi"
+          : "ngưng theo dõi";
       addToast(`Cập nhật trạng thái thành công (${label})`, "success");
     } else {
       addToast(result.data || "Cập nhật trạng thái thất bại", "error");
@@ -1005,7 +1112,10 @@ async function handleToggleStatus(row) {
     });
     if (result.isSuccess) {
       await fetchSalaryCompositions();
-      const label = newStatus === SalaryCompositionStatus.Following ? "Đang theo dõi" : "Ngưng theo dõi";
+      const label =
+        newStatus === SalaryCompositionStatus.Following
+          ? "Đang theo dõi"
+          : "Ngưng theo dõi";
       addToast(`Cập nhật thành phần lương thành công`, "success");
     } else {
       addToast(result.data || "Cập nhật trạng thái thất bại", "error");
@@ -1022,31 +1132,46 @@ const selectedIds = ref([]);
 const isAllSelected = computed(
   () =>
     salaryCompositions.value.length > 0 &&
-    selectedIds.value.length === salaryCompositions.value.length
+    selectedIds.value.length === salaryCompositions.value.length,
 );
 
 const isIndeterminate = computed(() => {
-  return selectedIds.value.length > 0 && selectedIds.value.length < salaryCompositions.value.length;
+  return (
+    selectedIds.value.length > 0 &&
+    selectedIds.value.length < salaryCompositions.value.length
+  );
 });
 
 const hasActiveSelected = computed(() => {
-  return selectedIds.value.some(id => {
-    const item = salaryCompositions.value.find(s => s.salaryCompositionId === id);
-    return item && !item.salaryCompositionSystemId && item.status === SalaryCompositionStatus.Following;
+  return selectedIds.value.some((id) => {
+    const item = salaryCompositions.value.find(
+      (s) => s.salaryCompositionId === id,
+    );
+    return (
+      item &&
+      !item.salaryCompositionSystemId &&
+      item.status === SalaryCompositionStatus.Following
+    );
   });
 });
 
 const hasInactiveSelected = computed(() => {
-  return selectedIds.value.some(id => {
-    const item = salaryCompositions.value.find(s => s.salaryCompositionId === id);
-    return item && !item.salaryCompositionSystemId && item.status === SalaryCompositionStatus.StoppedFollowing;
+  return selectedIds.value.some((id) => {
+    const item = salaryCompositions.value.find(
+      (s) => s.salaryCompositionId === id,
+    );
+    return (
+      item &&
+      !item.salaryCompositionSystemId &&
+      item.status === SalaryCompositionStatus.StoppedFollowing
+    );
   });
 });
 
 const toggleSelectAll = (event) => {
   if (event.target.checked) {
     selectedIds.value = salaryCompositions.value.map(
-      (row) => row.salaryCompositionId
+      (row) => row.salaryCompositionId,
     );
   } else {
     selectedIds.value = [];
@@ -1068,7 +1193,12 @@ const emit = defineEmits(["openAlert"]);
 
 const toasts = ref([]);
 const addToast = (message, type = "success", duration = 3000) => {
-  toasts.value.push({ id: Date.now() + Math.random(), message, type, duration });
+  toasts.value.push({
+    id: Date.now() + Math.random(),
+    message,
+    type,
+    duration,
+  });
 };
 const removeToast = (id) => {
   toasts.value = toasts.value.filter((t) => t.id !== id);
@@ -1087,20 +1217,83 @@ const DEFAULT_FIELDS = [
     resizable: false,
     isSystemCol: true, // cột hệ thống, không được ẩn/hiện
   },
-  { key: "salaryCompositionCode", label: "Mã thành phần", width: 180, isVisible: true },
-  { key: "salaryCompositionName", label: "Tên thành phần", width: 220, isVisible: true },
-  { key: "organizationName", label: "Đơn vị áp dụng", width: 200, isVisible: true },
-  { key: "compositionType", label: "Loại thành phần", slot: "compositionType", width: 180, isVisible: true },
-  { key: "compositionNature", label: "Tính chất", slot: "compositionNature", width: 160, isVisible: true },
-  { key: "taxable", label: "Chịu thuế", slot: "taxable", width: 160, isVisible: true },
-  { key: "taxDeduction", label: "Giảm trừ khi tính thuế", slot: "taxDeduction", width: 210, isVisible: true },
+  {
+    key: "salaryCompositionCode",
+    label: "Mã thành phần",
+    width: 180,
+    isVisible: true,
+  },
+  {
+    key: "salaryCompositionName",
+    label: "Tên thành phần",
+    width: 220,
+    isVisible: true,
+  },
+  {
+    key: "organizationName",
+    label: "Đơn vị áp dụng",
+    width: 200,
+    isVisible: true,
+  },
+  {
+    key: "compositionType",
+    label: "Loại thành phần",
+    slot: "compositionType",
+    width: 180,
+    isVisible: true,
+  },
+  {
+    key: "compositionNature",
+    label: "Tính chất",
+    slot: "compositionNature",
+    width: 160,
+    isVisible: true,
+  },
+  {
+    key: "taxable",
+    label: "Chịu thuế",
+    slot: "taxable",
+    width: 160,
+    isVisible: true,
+  },
+  {
+    key: "taxDeduction",
+    label: "Giảm trừ khi tính thuế",
+    slot: "taxDeduction",
+    width: 210,
+    isVisible: true,
+  },
   { key: "quota", label: "Định mức", width: 140, isVisible: true },
-  { key: "valueType", label: "Kiểu giá trị", slot: "valueType", width: 160, isVisible: true },
+  {
+    key: "valueType",
+    label: "Kiểu giá trị",
+    slot: "valueType",
+    width: 160,
+    isVisible: true,
+  },
   { key: "formula", label: "Giá trị", width: 160, isVisible: true },
   { key: "description", label: "Mô tả", width: 240, isVisible: true },
-  { key: "optionShowPaycheck", label: "Hiển thị trên phiếu lương", slot: "optionShowPaycheck", width: 230, isVisible: true },
-  { key: "sourceType", label: "Nguồn tạo", slot: "sourceType", width: 150, isVisible: true },
-  { key: "status", label: "Trạng thái", slot: "status", width: 160, isVisible: true },
+  {
+    key: "optionShowPaycheck",
+    label: "Hiển thị trên phiếu lương",
+    slot: "optionShowPaycheck",
+    width: 230,
+    isVisible: true,
+  },
+  {
+    key: "sourceType",
+    label: "Nguồn tạo",
+    slot: "sourceType",
+    width: 150,
+    isVisible: true,
+  },
+  {
+    key: "status",
+    label: "Trạng thái",
+    slot: "status",
+    width: 160,
+    isVisible: true,
+  },
   { key: "ghost", label: "", width: 180, isSystemCol: true },
   {
     key: "actions",
@@ -1119,28 +1312,25 @@ const fields = ref(DEFAULT_FIELDS.map((f) => ({ ...f })));
 
 // Chỉ các cột có thể tùy chỉnh (không phải cột hệ thống)
 const defaultConfigurableFields = computed(() =>
-  DEFAULT_FIELDS.filter((f) => !f.isSystemCol)
+  DEFAULT_FIELDS.filter((f) => !f.isSystemCol),
 );
 const configurableFields = computed(() =>
-  fields.value.filter((f) => !f.isSystemCol)
+  fields.value.filter((f) => !f.isSystemCol),
 );
 
 // Tất cả cột visible (bao gồm cột hệ thống) – truyền vào MsTable
 const visibleFields = computed(() =>
-  fields.value.filter((f) => f.isSystemCol || f.isVisible !== false)
+  fields.value.filter((f) => f.isSystemCol || f.isVisible !== false),
 );
 
 // Cập nhật fields khi MsTable emit update:fields (kéo thả, ghim)
 const handleTableFieldsUpdate = (updatedFields) => {
   // MsTable chỉ biết visibleFields, cần merge lại với các cột ẩn
   const hiddenFields = fields.value.filter(
-    (f) => !f.isSystemCol && f.isVisible === false
+    (f) => !f.isSystemCol && f.isVisible === false,
   );
   // Rebuild fields: giữ thứ tự từ MsTable + append các cột ẩn
-  fields.value = [
-    ...updatedFields,
-    ...hiddenFields,
-  ];
+  fields.value = [...updatedFields, ...hiddenFields];
 
   // Lưu displayOrder và pinnedPosition lên BE với explicit overrides
   // để đảm bảo giá trị mới nhất (pinned, order) được ghi đúng lên DB
@@ -1158,8 +1348,12 @@ const handleTableFieldsUpdate = (updatedFields) => {
 // Dùng async/await trực tiếp (không qua debounce) để đảm bảo toàn bộ cấu hình được lưu
 const handleSaveColumnSettings = async (configurableSaved) => {
   // Tách các cột system để giữ vị trí
-  const firstSystemFields = fields.value.filter((f) => f.isSystemCol && f.key === "");
-  const lastSystemFields  = fields.value.filter((f) => f.isSystemCol && f.key !== "");
+  const firstSystemFields = fields.value.filter(
+    (f) => f.isSystemCol && f.key === "",
+  );
+  const lastSystemFields = fields.value.filter(
+    (f) => f.isSystemCol && f.key !== "",
+  );
 
   // Update non-system cols theo ĐÚNG thứ tự từ configurableSaved (do user kéo thả)
   const updatedNonSystem = configurableSaved.map((saved) => {
@@ -1185,7 +1379,7 @@ const handleSaveColumnSettings = async (configurableSaved) => {
   // Lưu từng cột lên BE – dùng Promise.all để song song nhưng không qua debounce
   // (debounce có thể bị clearTimeout bởi các sự kiện khác như handleTableFieldsUpdate)
   const savableCols = configurableSaved.filter(
-    (f) => f.key && f.key !== "ghost" && f.key !== "actions" && f.key !== ""
+    (f) => f.key && f.key !== "ghost" && f.key !== "actions" && f.key !== "",
   );
 
   await Promise.all(
@@ -1201,12 +1395,15 @@ const handleSaveColumnSettings = async (configurableSaved) => {
           gridConfigIdMap.value[f.key] = result.data.gridConfigId;
           gridConfigDataMap.value[f.key] = result.data;
         } else {
-          console.error(`[GridConfig] Save non-success for "${f.key}":`, result);
+          console.error(
+            `[GridConfig] Save non-success for "${f.key}":`,
+            result,
+          );
         }
       } catch (err) {
         console.error(`[GridConfig] Save error for "${f.key}":`, err);
       }
-    })
+    }),
   );
 };
 </script>
@@ -1348,7 +1545,9 @@ const handleSaveColumnSettings = async (configurableSaved) => {
   color: #666;
   font-weight: 500;
   opacity: 1;
-  transition: opacity 0.15s ease, background-color 0.15s ease;
+  transition:
+    opacity 0.15s ease,
+    background-color 0.15s ease;
 }
 
 .page-btn.disabled {
@@ -1409,7 +1608,7 @@ const handleSaveColumnSettings = async (configurableSaved) => {
   background: #d9dee7;
 }
 
-.btn-add-menu{
+.btn-add-menu {
   border-top-left-radius: 0 !important;
   border-bottom-left-radius: 0 !important;
 }
@@ -1582,7 +1781,7 @@ const handleSaveColumnSettings = async (configurableSaved) => {
     color 0.12s ease;
 }
 
-:deep(.ms-multiselect.multiselect){
+:deep(.ms-multiselect.multiselect) {
   min-height: 32px;
 }
 .select-composition :deep(.ms-button:hover) {
@@ -1635,7 +1834,9 @@ const handleSaveColumnSettings = async (configurableSaved) => {
   cursor: pointer;
   outline: none;
   font-family: inherit;
-  transition: opacity 0.2s, background-color 0.2s;
+  transition:
+    opacity 0.2s,
+    background-color 0.2s;
   height: 32px;
   padding: 0 12px;
 }
@@ -1665,25 +1866,25 @@ const handleSaveColumnSettings = async (configurableSaved) => {
   background-color: #d97706;
 }
 
-.content_body_filters{
+.content_body_filters {
   display: flex;
 }
 
 @media screen and (max-width: 1280px) {
-  .content_body_search{
+  .content_body_search {
     width: 200px;
   }
   :deep(.ms-tree-select__control) {
-  width: 250px;
-}
+    width: 250px;
+  }
 }
 
 @media screen and (max-width: 1081px) {
-  .content_body_search{
+  .content_body_search {
     width: 150px;
   }
   :deep(.ms-tree-select__control) {
-  width: 200px;
-}
+    width: 200px;
+  }
 }
 </style>

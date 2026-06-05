@@ -467,6 +467,11 @@ const props = defineProps({
     type: String,
     default: null,
   },
+  /** Nếu có duplicateId → mode nhân bản (copy data nhưng xóa mã/tên) */
+  duplicateId: {
+    type: String,
+    default: null,
+  },
 });
 
 const emit = defineEmits(["openAlert", "close", "saved"]);
@@ -683,18 +688,18 @@ const formData = ref({
   modifiedDate: "",
 });
 
-// ── Populate form khi edit ───────────────────────────────────
-async function loadEditData() {
-  if (!props.editId) return;
+// ── Populate form data (edit, view, or duplicate) ─────────────────
+async function loadData(id, isDuplicate = false) {
+  if (!id) return;
   try {
-    const result = await salaryCompositionApi.getById(props.editId);
+    const result = await salaryCompositionApi.getById(id);
     if (result.isSuccess && result.data) {
       const data = result.data;
       formData.value = {
-        salaryCompositionId: data.salaryCompositionId ?? "",
-        salaryCompositionSystemId: data.salaryCompositionSystemId ?? null,
-        salaryCompositionCode: data.salaryCompositionCode ?? "",
-        salaryCompositionName: data.salaryCompositionName ?? "",
+        salaryCompositionId: isDuplicate ? "" : (data.salaryCompositionId ?? ""),
+        salaryCompositionSystemId: isDuplicate ? null : (data.salaryCompositionSystemId ?? null),
+        salaryCompositionCode: isDuplicate ? "" : (data.salaryCompositionCode ?? ""),
+        salaryCompositionName: isDuplicate ? "" : (data.salaryCompositionName ?? ""),
         organizationName: data.organizationName ?? "",
         compositionType: data.compositionType ?? "",
         compositionNature:
@@ -708,21 +713,22 @@ async function loadEditData() {
         optionShowPaycheck:
           data.optionShowPaycheck ?? SalaryCompositionShowPaycheck.Show,
         sourceType: data.sourceType ?? SalaryCompositionSourceType.Custom,
-        status: data.status ?? SalaryCompositionStatus.Following,
-        createdDate: data.createdDate ?? "",
-        modifiedDate: data.modifiedDate ?? "",
+        status: isDuplicate ? SalaryCompositionStatus.Following : (data.status ?? SalaryCompositionStatus.Following),
+        createdDate: isDuplicate ? "" : (data.createdDate ?? ""),
+        modifiedDate: isDuplicate ? "" : (data.modifiedDate ?? ""),
       };
-      // Restore selectedTax từ taxable (integer enum) khi edit
+      // Restore selectedTax từ taxable (integer enum)
       if (data.taxable) selectedTax.value = data.taxable;
-      // Restore isDeductedTax từ taxDeduction enum khi edit
+      // Restore isDeductedTax từ taxDeduction enum
       isDeductedTax.value = data.taxDeduction === SalaryCompositionTaxDeduction.Yes;
       // Restore đơn vị áp dụng vào MsTreeSelect
       restoreSelectedOrgs(data);
     }
   } catch (err) {
-    console.error("[FormSalaryComposition] loadEditData:", err);
+    console.error("[FormSalaryComposition] loadData:", err);
   }
 }
+
 
 // ── Validation ───────────────────────────────────────────────
 const touchedFields = ref({});
@@ -1043,46 +1049,21 @@ function toCompositionCode(name) {
     .replace(/[^A-Z0-9_]/g, "");
 }
 
-// ── Lifecycle ────────────────────────────────────────
 onMounted(async () => {
   await fetchOrgTree();
   // Load danh sách tham số cho popup công thức
   fetchFormulaParameters();
+  
   if (props.editId) {
-    await loadEditData();
+    await loadData(props.editId, false);
+  } else if (props.duplicateId) {
+    // Mode nhân bản: load data nhưng cờ isDuplicate = true
+    await loadData(props.duplicateId, true);
   } else if (props.viewId) {
     // Task 2: load dữ liệu để xem chi tiết
-    const result = await salaryCompositionApi.getById(props.viewId);
-    if (result.isSuccess && result.data) {
-      const data = result.data;
-      formData.value = {
-        salaryCompositionId: data.salaryCompositionId ?? "",
-        salaryCompositionSystemId: data.salaryCompositionSystemId ?? null,
-        salaryCompositionCode: data.salaryCompositionCode ?? "",
-        salaryCompositionName: data.salaryCompositionName ?? "",
-        organizationName: data.organizationName ?? "",
-        compositionType: data.compositionType ?? "",
-        compositionNature:
-          data.compositionNature ?? SalaryCompositionNature.Income,
-        taxable: data.taxable ?? "",
-        taxDeduction: data.taxDeduction ?? "",
-        quota: data.quota ?? null,
-        valueType: data.valueType ?? SalaryCompositionValueType.Currency,
-        formula: data.formula ?? "",
-        description: data.description ?? "",
-        optionShowPaycheck:
-          data.optionShowPaycheck ?? SalaryCompositionShowPaycheck.Show,
-        sourceType: data.sourceType ?? SalaryCompositionSourceType.Custom,
-        status: data.status ?? SalaryCompositionStatus.Following,
-        createdDate: data.createdDate ?? "",
-        modifiedDate: data.modifiedDate ?? "",
-      };
-      // Restore selectedTax và đơn vị áp dụng cho view mode
-      if (data.taxable) selectedTax.value = data.taxable;
-      isDeductedTax.value = data.taxDeduction === SalaryCompositionTaxDeduction.Yes;
-      restoreSelectedOrgs(data);
-    }
+    await loadData(props.viewId, false);
   }
+  
   await nextTick();
   if (!isViewMode.value) {
     salaryCompositionNameRef.value?.focus?.();
@@ -1111,8 +1092,6 @@ onMounted(async () => {
 }
 
 .content_body_wrapper_form.is-view-mode {
-  pointer-events: none;
-  user-select: text;
   opacity: 0.92;
 }
 
