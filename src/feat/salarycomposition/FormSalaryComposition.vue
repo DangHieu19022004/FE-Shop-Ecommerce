@@ -190,6 +190,7 @@
               placeholder="Tự động gợi ý công thức và tham số khi gõ"
               v-model="formData.quota"
               :variables="formulaVariables"
+              :parameters="formulaParameters"
               @validate="setCustomError('quota', $event[0] || '')"
               @blur="markTouched('quota')"
               @focus="unMarkTouched('quota')"
@@ -324,6 +325,7 @@
               placeholder="Tự động gợi ý công thức và tham số khi gõ"
               v-model="formData.formula"
               :variables="formulaVariables"
+              :parameters="formulaParameters"
               @validate="setCustomError('formula', $event[0] || '')"
               @blur="markTouched('formula')"
               @focus="unMarkTouched('formula')"
@@ -629,6 +631,24 @@ const formulaVariables = [
   "THUE_TNCN",
 ];
 
+// Danh sách tham số (thành phần lương) cho popup Định mức
+const formulaParameters = ref([]);
+
+async function fetchFormulaParameters() {
+  try {
+    const result = await salaryCompositionApi.getAll();
+    if (result.isSuccess && Array.isArray(result.data)) {
+      formulaParameters.value = result.data.map((item) => ({
+        name: item.salaryCompositionName || "",
+        code: item.salaryCompositionCode || "",
+        description: item.description || "",
+      }));
+    }
+  } catch (err) {
+    console.error("[FormSalaryComposition] fetchFormulaParameters:", err);
+  }
+}
+
 // Dùng SalaryCompositionTypeOptions từ enums (số nguyên khớp backend)
 const categoryOptions = SalaryCompositionTypeOptions;
 
@@ -924,12 +944,7 @@ async function submitForm(andAdd = false) {
     }
   } catch (err) {
     console.error("[FormSalaryComposition] submitForm:", err);
-    emit("openAlert", {
-      title: "Lỗi hệ thống",
-      message: "Có lỗi xảy ra khi lưu dữ liệu. Vui lòng thử lại.",
-      showConfirmButton: false,
-      cancelText: "Đóng",
-    });
+    addToast("Có lỗi xảy ra, vui lòng thử lại", "error");
   } finally {
     isSubmitting.value = false;
   }
@@ -1031,6 +1046,8 @@ function toCompositionCode(name) {
 // ── Lifecycle ────────────────────────────────────────
 onMounted(async () => {
   await fetchOrgTree();
+  // Load danh sách tham số cho popup công thức
+  fetchFormulaParameters();
   if (props.editId) {
     await loadEditData();
   } else if (props.viewId) {
