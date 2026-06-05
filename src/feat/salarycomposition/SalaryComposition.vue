@@ -255,6 +255,12 @@
                 <template #cell-valueType="{ row }">
                   {{ SalaryCompositionValueTypeLabel[row.valueType] ?? row.valueType }}
                 </template>
+                <template #cell-quota="{ row }">
+                  <FormulaCell :value="row.quota" />
+                </template>
+                <template #cell-formula="{ row }">
+                  <FormulaCell :value="row.formula" />
+                </template>
                 <template #cell-sourceType="{ row }">
                   {{ SalaryCompositionSourceTypeLabel[row.sourceType] ?? row.sourceType }}
                 </template>
@@ -395,6 +401,7 @@ import SalaryCompositionSystem from "../salarycompositionsystems/SalaryCompositi
 import FilterSalaryComposition from "./FilterSalaryComposition.vue";
 import MsTreeSelect from "@/components/base/MsTreeSelect/MsTreeSelect.vue";
 import MsToastContainer from "@/components/overlay/MsToast/MsToastContainer.vue";
+import FormulaCell from "@/components/base/MsFormula/FormulaCell.vue";
 import { ref, computed, onMounted, watch } from "vue";
 
 // ======================== Import services ========================
