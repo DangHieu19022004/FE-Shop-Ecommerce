@@ -25,7 +25,9 @@
         <div class="modal_system_title">Thêm từ danh mục của hệ thống</div>
         <MsButton iconLeft="mi-close" :isTooltip="false" @click="emit('close')" shapeBtn="circle" class="btn-close" />
       </div>
-      <div class="content_body_wrapper" :class="{ 'overlay-mode': isOverlay, 'modal_system_body': isOverlay }">
+      <!-- page-area (normal) hoặc overlay-mode -->
+      <div :class="isOverlay ? 'content_body_wrapper overlay-mode modal_system_body' : 'page-area'">
+        <div :class="isOverlay ? '' : 'content_body_wrapper'">
         <div class="content_body_header">
           <div class="content_body_header_left">
             <div class="content_body_search">
@@ -43,14 +45,13 @@
               />
             </div>
 
-            <div v-if="!isOverlay && selectedIds.length > 0" class="checkbox_function" style="display: flex; align-items: center; margin-left: 16px;">
-              <p class="fz-14" style="margin-right: 8px;">Đã chọn</p>
+            <div v-if="!isOverlay && selectedIds.length > 0" class="checkbox_function">
+              <p class="fz-14 m-r-8">Đã chọn</p>
               <b class="fz-14">{{ selectedIds.length }}</b>
               <MsButton
                 message="Bỏ chọn"
-                class="color-green fz-14 no-background"
+                class="m-r-8 color-green fz-14 no-background"
                 :isTooltip="false"
-                style="border: none; background: transparent; color: #16a34a; padding: 0; margin-left: 12px; margin-right: 12px;"
                 @click="selectedIds = []"
               />
               <MsButton
@@ -86,14 +87,17 @@
               </Transition>
             </div>
           </div>
-          <div class="content_body_header_right" v-if="!isOverlay">
+
+          <!-- Header right: chỉ hiện khi không phải overlay -->
+          <div v-if="!isOverlay" class="content_body_header_right">
             <MsButton
               iconLeft="mi-filter"
               tooltipMessage="Bộ lọc"
               shapeBtn="square"
               tooltipPosition="bottom"
-              class="pd-0 sz-32"
               type="border-secondary"
+              class="pd-0 sz-32"
+              @click="isOpenFilter = !isOpenFilter"
             />
             <div class="setting-btn-wrapper" @click.stop>
               <MsButton
@@ -181,6 +185,12 @@
               <template #cell-valueType="{ row }">
                 {{ SalaryCompositionValueTypeLabel[row.valueType] ?? row.valueType }}
               </template>
+              <template #cell-quota="{ row }">
+                <FormulaCell :value="row.quota" />
+              </template>
+              <template #cell-formula="{ row }">
+                <FormulaCell :value="row.formula" />
+              </template>
               <!-- Cột status đã ẩn theo yêu cầu (Req 3) -->
               <template #cell-actions="{ row }">
                 <div class="btn__action">
@@ -231,6 +241,14 @@
             </div>
           </div>
         </div>
+        </div>
+        <!-- Filter sidebar (chỉ khi không phải overlay) -->
+        <FilterSalaryComposition
+          v-if="!isOverlay && isOpenFilter"
+          @close="isOpenFilter = false"
+          @apply="handleApplyAdvancedFilter"
+          @reset="handleResetAdvancedFilter"
+        />
       </div>
 
       <!-- Overlay Footer -->
@@ -274,6 +292,8 @@ import MsAlert from "@/components/overlay/MsAlert.vue";
 import MsOverlay from "@/components/overlay/MsOverlay.vue";
 import MsToastContainer from "@/components/overlay/MsToast/MsToastContainer.vue";
 import PopupSettingColumn from "@/feat/salarycomposition/PopupSettingColumn.vue";
+import FilterSalaryComposition from "@/feat/salarycomposition/FilterSalaryComposition.vue";
+import FormulaCell from "@/components/base/MsFormula/FormulaCell.vue";
 import { ref, computed, onMounted } from "vue";
 
 // ── Import services ──────────────────────────────────────────
@@ -288,6 +308,7 @@ import {
   SalaryCompositionNatureLabel,
   SalaryCompositionValueTypeLabel,
   SalaryCompositionTypeLabel,
+  SalaryCompositionTypeOptions,
   SalaryCompositionTaxableLabel,
 } from "@/constants/enums";
 
@@ -336,26 +357,39 @@ const handleConfirmAlert = () => {
 };
 
 // ── Filter / search state ────────────────────────────────────
+const isOpenFilter = ref(false);
 const searchKeyword = ref("");
 const selectedType = ref(null);
 const statusMenuOpen = ref(false);
 const sortField = ref("");
 const sortDirection = ref("");
+const advancedFilters = ref([]);
 let searchDebounceTimer = null;
+
+const handleApplyAdvancedFilter = (filters) => {
+  advancedFilters.value = filters;
+  pageIndex.value = 1;
+  fetchData();
+};
+
+const handleResetAdvancedFilter = () => {
+  advancedFilters.value = [];
+  pageIndex.value = 1;
+  fetchData();
+};
 
 const typeItems = [
   { label: "Tất cả", value: null },
-  { label: "Thu nhập", value: "thu_nhap" },
-  { label: "Khấu trừ", value: "khau_tru" },
-  { label: "Khác", value: "khac" },
+  ...SalaryCompositionTypeOptions,
 ];
 
 const selectedTypeLabel = computed(
   () => typeItems.find((i) => i.value === selectedType.value)?.label ?? "Tất cả"
 );
 
-const handleTypeChange = (value) => {
-  selectedType.value = value;
+const handleTypeChange = (item) => {
+  // @select emit object { label, value } — cần lấy item.value
+  selectedType.value = item?.value ?? null;
   statusMenuOpen.value = false;
   pageIndex.value = 1;
   fetchData();
@@ -433,6 +467,16 @@ async function fetchData() {
 
     if (sortField.value && sortDirection.value) {
       params.sort = `${toSnakeCase(sortField.value)} ${sortDirection.value.toUpperCase()}`;
+    }
+
+    // Filter theo loại thành phần
+    if (selectedType.value !== null && selectedType.value !== undefined) {
+      params.compositionType = selectedType.value;
+    }
+
+    // Bộ lọc nâng cao từ sidebar
+    if (advancedFilters.value && advancedFilters.value.length > 0) {
+      params.advancedFilters = JSON.stringify(advancedFilters.value);
     }
 
     const result = await salaryCompositionSystemApi.getPaging(params);
@@ -1212,8 +1256,65 @@ const handleSaveColumnSettings = async (configurableSaved) => {
 .table-state--error {
   color: #dc2626;
 }
+/* ── page-area layout: bảng + filter sidebar ── */
+.page-area {
+  display: flex;
+  flex-direction: row;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  gap: 16px;
+}
 /* Wrapper cho nút thiết lập + popup */
 .setting-btn-wrapper {
   position: relative;
 }
+
+/* Checkbox function toolbar */
+.checkbox_function {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0 8px;
+}
+
+/* Status trigger button */
+.status-trigger {
+  white-space: nowrap;
+}
+.status-trigger--open :deep(.ms-button__icon--right) {
+  transform: rotate(180deg);
+  transition: transform 0.2s ease;
+}
+.status-label {
+  font-size: 13px;
+  color: #6b7280;
+  margin-right: 4px;
+  flex-shrink: 0;
+}
+.status-value {
+  font-size: 13px;
+  font-weight: 500;
+  color: #111827;
+}
+@media screen and (max-width: 1280px) {
+  .content_body_search{
+    width: 200px;
+  }
+  :deep(.ms-tree-select__control) {
+  width: 250px;
+}
+}
+
+@media screen and (max-width: 1081px) {
+  .content_body_search{
+    width: 150px;
+  }
+  :deep(.ms-tree-select__control) {
+  width: 200px;
+}
+}
+
 </style>
+

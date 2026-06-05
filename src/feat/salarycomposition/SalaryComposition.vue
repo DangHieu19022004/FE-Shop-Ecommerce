@@ -64,7 +64,7 @@
                   @input="handleSearchInput"
                 />
               </div>
-              
+
               <div v-if="selectedIds.length > 0" class="checkbox_function">
                 <p class="fz-14 m-r-8">Đã chọn</p>
                 <b class="fz-14">{{ selectedIds.length }}</b>
@@ -1667,5 +1667,23 @@ const handleSaveColumnSettings = async (configurableSaved) => {
 
 .content_body_filters{
   display: flex;
+}
+
+@media screen and (max-width: 1280px) {
+  .content_body_search{
+    width: 200px;
+  }
+  :deep(.ms-tree-select__control) {
+  width: 250px;
+}
+}
+
+@media screen and (max-width: 1081px) {
+  .content_body_search{
+    width: 150px;
+  }
+  :deep(.ms-tree-select__control) {
+  width: 200px;
+}
 }
 </style>
