@@ -1,85 +1,75 @@
 import axiosInstance from "./axios";
 
-// ============================================================
-// API DANH MỤC THÀNH PHẦN LƯƠNG HỆ THỐNG (SalaryCompositionSystem)
-// Base: /api/SalaryCompositionSystem
-// ============================================================
-
+/**
+ * Mục đích: Quản lý gọi API danh mục thành phần lương hệ thống (SalaryCompositionSystem).
+ * Sử dụng trong trường hợp: Lấy dữ liệu danh mục chuẩn từ hệ thống để thêm vào danh sách sử dụng của doanh nghiệp.
+ * Hàm quan trọng: getPaging, getById, create.
+ * CREATED BY: TDHieu (08/06/2026)
+ */
 const BASE = "/SalaryCompositionSystem";
 
 const salaryCompositionSystemApi = {
   /**
-   * Lấy TOÀN BỘ danh sách thành phần lương hệ thống (không phân trang)
-   * Endpoint: GET /api/SalaryCompositionSystem
-   * @returns {Promise<ServiceResponse<SalaryCompositionSystem[]>>}
+   * Hàm dùng để: Lấy toàn bộ danh sách thành phần lương hệ thống.
+   * Dùng trong trường hợp: Nạp nhanh vào dropdown hoặc cache.
+   * @returns {Promise<ServiceResponse<SalaryCompositionSystem[]>>} - Danh sách chuẩn.
+   * CREATED BY: TDHieu (08/06/2026)
    */
   getAll() {
     return axiosInstance.get(BASE);
   },
 
   /**
-   * Lấy danh sách thành phần lương hệ thống có phân trang + tìm kiếm + sắp xếp
-   * Endpoint: GET /api/SalaryCompositionSystem/Paging
-   * @param {Object} params
-   * @param {number}  params.pageIndex      - Trang hiện tại (bắt đầu từ 1)
-   * @param {number}  params.pageSize       - Số dòng mỗi trang (default 10)
-   * @param {string}  [params.search]       - Từ khóa tìm kiếm
-   * @param {string}  [params.sort]         - Sắp xếp, vd: "SalaryCompositionCode DESC"
-   * @param {string}  [params.searchFields] - Các field tìm kiếm
-   * @returns {Promise<ServiceResponse<PagingResponse<SalaryCompositionSystem>>>}
-   *          data = { total: number, data: SalaryCompositionSystem[] }
+   * Hàm dùng để: Lấy danh sách thành phần lương hệ thống có phân trang, tìm kiếm, sắp xếp.
+   * Dùng trong trường hợp: Hiển thị bảng chọn thành phần lương hệ thống.
+   * @param {Object} params - Các tham số phân trang, tìm kiếm.
+   * @returns {Promise<ServiceResponse<PagingResponse<SalaryCompositionSystem>>>} - Dữ liệu phân trang.
+   * CREATED BY: TDHieu (08/06/2026)
    */
   getPaging(params = {}) {
     return axiosInstance.get(`${BASE}/Paging`, { params });
   },
 
   /**
-   * Lấy chi tiết một thành phần lương hệ thống theo ID
-   * Endpoint: GET /api/SalaryCompositionSystem/{id}
-   * @param {string} id - salaryCompositionSystemId (Guid)
-   * @returns {Promise<ServiceResponse<SalaryCompositionSystem>>}
+   * Hàm dùng để: Lấy chi tiết một thành phần lương hệ thống theo ID.
+   * Dùng trong trường hợp: Xem chi tiết trước khi quyết định chọn sử dụng.
+   * @param {string} id - salaryCompositionSystemId (Guid).
+   * @returns {Promise<ServiceResponse<SalaryCompositionSystem>>} - Dữ liệu chi tiết.
+   * CREATED BY: TDHieu (08/06/2026)
    */
   getById(id) {
     return axiosInstance.get(`${BASE}/${id}`);
   },
 
   /**
-   * Tạo mới thành phần lương hệ thống
-   * Endpoint: POST /api/SalaryCompositionSystem
-   * @param {Object} data
-   * @param {string} data.salaryCompositionCode   - Mã thành phần (bắt buộc)
-   * @param {string} data.salaryCompositionName   - Tên thành phần (bắt buộc)
-   * @param {string} data.compositionType         - Loại thành phần (bắt buộc)
-   * @param {number} data.compositionNature       - 1=Thu nhập | 2=Khấu trừ | 3=Khác (bắt buộc)
-   * @param {number} data.valueType               - 1=Số | 2=Tiền tệ | 3=% | 4=Chữ | 5=Ngày (bắt buộc)
-   * @param {string} [data.taxable]               - Trạng thái tính thuế
-   * @param {string} [data.taxDeduction]          - Trạng thái khấu trừ thuế
-   * @param {number} [data.quota]                 - Định mức
-   * @param {string} [data.formula]               - Công thức
-   * @param {string} [data.description]           - Mô tả
-   * @param {string} [data.optionShowPaycheck]    - Tùy chọn hiển thị phiếu lương
-   * @returns {Promise<ServiceResponse<SalaryCompositionSystem>>}
+   * Hàm dùng để: Tạo mới thành phần lương hệ thống.
+   * Dùng trong trường hợp: Quản trị viên hệ thống thêm danh mục chuẩn mới.
+   * @param {Object} data - Dữ liệu bản ghi.
+   * @returns {Promise<ServiceResponse<SalaryCompositionSystem>>} - Kết quả thêm mới.
+   * CREATED BY: TDHieu (08/06/2026)
    */
   create(data) {
     return axiosInstance.post(BASE, data);
   },
 
   /**
-   * Cập nhật thành phần lương hệ thống
-   * Endpoint: PUT /api/SalaryCompositionSystem/{id}
-   * @param {string} id   - salaryCompositionSystemId (Guid)
-   * @param {Object} data - Dữ liệu cập nhật
-   * @returns {Promise<ServiceResponse<SalaryCompositionSystem>>}
+   * Hàm dùng để: Cập nhật thành phần lương hệ thống.
+   * Dùng trong trường hợp: Quản trị viên cập nhật thông tin danh mục.
+   * @param {string} id - salaryCompositionSystemId (Guid).
+   * @param {Object} data - Dữ liệu bản ghi cập nhật.
+   * @returns {Promise<ServiceResponse<SalaryCompositionSystem>>} - Kết quả cập nhật.
+   * CREATED BY: TDHieu (08/06/2026)
    */
   update(id, data) {
     return axiosInstance.put(`${BASE}/${id}`, data);
   },
 
   /**
-   * Xóa một thành phần lương hệ thống
-   * Endpoint: DELETE /api/SalaryCompositionSystem/{id}
-   * @param {string} id - salaryCompositionSystemId (Guid)
-   * @returns {Promise<ServiceResponse<void>>}
+   * Hàm dùng để: Xóa một thành phần lương hệ thống.
+   * Dùng trong trường hợp: Quản trị viên loại bỏ danh mục lỗi.
+   * @param {string} id - salaryCompositionSystemId (Guid).
+   * @returns {Promise<ServiceResponse<void>>} - Trạng thái xóa.
+   * CREATED BY: TDHieu (08/06/2026)
    */
   deleteById(id) {
     return axiosInstance.delete(`${BASE}/${id}`);

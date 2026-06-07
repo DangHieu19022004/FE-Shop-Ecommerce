@@ -3,6 +3,12 @@ import MainLayout from "@/views/MainLayout.vue";
 import DemoView from "@/views/DemoView.vue";
 import SalaryComposition from "@/feat/salarycomposition/SalaryComposition.vue";
 import SalaryCompositionSystem from "@/feat/salarycompositionsystems/SalaryCompositionSystem.vue";
+
+/**
+ * Khai báo route
+ *
+ * CREATED BY: TDHieu (08/06/2026)
+ */
 const routes = [
   {
     path: "/",

@@ -1,94 +1,98 @@
 import axiosInstance from "./axios";
 
-// ============================================================
-// API THÀNH PHẦN LƯƠNG (SalaryComposition)
-// Base: /api/SalaryComposition
-// ============================================================
-
+/**
+ * Mục đích: Quản lý gọi API Thành phần lương (SalaryComposition).
+ * Sử dụng trong trường hợp: Lấy danh sách, thêm, sửa, xóa, và cập nhật trạng thái các thành phần lương doanh nghiệp đang sử dụng.
+ * Hàm quan trọng: getPaging, create, update, deleteBulk, updateStatusBulk.
+ * CREATED BY: TDHieu (08/06/2026)
+ */
 const BASE = "/SalaryComposition";
 
 const salaryCompositionApi = {
   /**
-   * Lấy TOÀN BỘ danh sách thành phần lương (không phân trang)
-   * Endpoint: GET /api/SalaryComposition
-   * @returns {Promise<ServiceResponse<SalaryComposition[]>>}
+   * Hàm dùng để: Lấy toàn bộ danh sách thành phần lương (không phân trang).
+   * Dùng trong trường hợp: Cần load tất cả thành phần lương vào dropdown hoặc bộ nhớ.
+   * @returns {Promise<ServiceResponse<SalaryComposition[]>>} - Dữ liệu danh sách.
+   * CREATED BY: TDHieu (08/06/2026)
    */
   getAll() {
     return axiosInstance.get(BASE);
   },
 
   /**
-   * Lấy danh sách thành phần lương có phân trang + tìm kiếm + sắp xếp
-   * Endpoint: GET /api/SalaryComposition/Paging
-   * @param {Object} params
-   * @param {number}  params.pageIndex    - Trang hiện tại (bắt đầu từ 1)
-   * @param {number}  params.pageSize     - Số dòng mỗi trang (default 10)
-   * @param {string}  [params.search]     - Từ khóa tìm kiếm
-   * @param {string}  [params.sort]       - Sắp xếp, vd: "SalaryCompositionCode DESC"
-   * @param {string}  [params.searchFields] - Các field tìm kiếm
-   * @returns {Promise<ServiceResponse<PagingResponse<SalaryComposition>>>}
+   * Hàm dùng để: Lấy danh sách thành phần lương có phân trang, tìm kiếm, sắp xếp.
+   * Dùng trong trường hợp: Hiển thị lên lưới dữ liệu (data grid) quản lý thành phần lương.
+   * @param {Object} params - Tham số truy vấn (pageIndex, pageSize, search, sort...).
+   * @returns {Promise<ServiceResponse<PagingResponse<SalaryComposition>>>} - Dữ liệu phân trang.
+   * CREATED BY: TDHieu (08/06/2026)
    */
   getPaging(params = {}) {
     return axiosInstance.get(`${BASE}/Paging`, { params });
   },
 
   /**
-   * Lấy chi tiết một thành phần lương theo ID
-   * Endpoint: GET /api/SalaryComposition/{id}
-   * @param {string} id - salaryCompositionId (Guid)
-   * @returns {Promise<ServiceResponse<SalaryComposition>>}
+   * Hàm dùng để: Lấy chi tiết một thành phần lương theo ID.
+   * Dùng trong trường hợp: Mở form xem chi tiết, sửa hoặc nhân bản bản ghi.
+   * @param {string} id - salaryCompositionId (Guid).
+   * @returns {Promise<ServiceResponse<SalaryComposition>>} - Dữ liệu chi tiết.
+   * CREATED BY: TDHieu (08/06/2026)
    */
   getById(id) {
     return axiosInstance.get(`${BASE}/${id}`);
   },
 
   /**
-   * Tạo mới thành phần lương
-   * Endpoint: POST /api/SalaryComposition
-   * @param {Object} data
-   * @returns {Promise<ServiceResponse<SalaryComposition>>}
+   * Hàm dùng để: Tạo mới thành phần lương.
+   * Dùng trong trường hợp: Người dùng nhập form và bấm cất (lưu) để thêm mới.
+   * @param {Object} data - Dữ liệu bản ghi cần thêm.
+   * @returns {Promise<ServiceResponse<SalaryComposition>>} - Kết quả tạo mới.
+   * CREATED BY: TDHieu (08/06/2026)
    */
   create(data) {
     return axiosInstance.post(BASE, data);
   },
 
   /**
-   * Cập nhật thành phần lương
-   * Endpoint: PUT /api/SalaryComposition/{id}
-   * @param {string} id   - salaryCompositionId (Guid)
-   * @param {Object} data - Dữ liệu cập nhật
-   * @returns {Promise<ServiceResponse<SalaryComposition>>}
+   * Hàm dùng để: Cập nhật thành phần lương.
+   * Dùng trong trường hợp: Người dùng sửa form và bấm cất.
+   * @param {string} id - salaryCompositionId (Guid).
+   * @param {Object} data - Dữ liệu cập nhật.
+   * @returns {Promise<ServiceResponse<SalaryComposition>>} - Kết quả cập nhật.
+   * CREATED BY: TDHieu (08/06/2026)
    */
   update(id, data) {
     return axiosInstance.put(`${BASE}/${id}`, data);
   },
 
   /**
-   * Xóa một thành phần lương
-   * Endpoint: DELETE /api/SalaryComposition/{id}
-   * @param {string} id - salaryCompositionId (Guid)
-   * @returns {Promise<ServiceResponse<void>>}
+   * Hàm dùng để: Xóa một thành phần lương.
+   * Dùng trong trường hợp: Bấm xóa một bản ghi trên danh sách.
+   * @param {string} id - salaryCompositionId (Guid).
+   * @returns {Promise<ServiceResponse<void>>} - Trạng thái xóa.
+   * CREATED BY: TDHieu (08/06/2026)
    */
   deleteById(id) {
     return axiosInstance.delete(`${BASE}/${id}`);
   },
 
   /**
-   * Xóa nhiều thành phần lương cùng lúc
-   * Endpoint: DELETE /api/SalaryComposition/bulk
-   * @param {string[]} ids - Danh sách salaryCompositionId (Guid[])
-   * @returns {Promise<ServiceResponse<number>>}
+   * Hàm dùng để: Xóa nhiều thành phần lương cùng lúc.
+   * Dùng trong trường hợp: Chọn nhiều bản ghi trên grid và bấm chức năng xóa hàng loạt.
+   * @param {string[]} ids - Danh sách salaryCompositionId.
+   * @returns {Promise<ServiceResponse<number>>} - Số lượng bản ghi đã xóa thành công.
+   * CREATED BY: TDHieu (08/06/2026)
    */
   deleteBulk(ids) {
     return axiosInstance.delete(`${BASE}/bulk`, { data: ids });
   },
 
   /**
-   * Cập nhật trạng thái nhiều thành phần lương
-   * Endpoint: PUT /api/SalaryComposition/bulk-status
-   * @param {string[]} ids    - Danh sách salaryCompositionId
-   * @param {number}   status - 1=Đang theo dõi | 2=Ngừng theo dõi
-   * @returns {Promise<ServiceResponse<number>>}
+   * Hàm dùng để: Cập nhật trạng thái nhiều thành phần lương.
+   * Dùng trong trường hợp: Bấm Ngừng theo dõi/Theo dõi hàng loạt cho các bản ghi đã chọn.
+   * @param {string[]} ids - Danh sách salaryCompositionId.
+   * @param {number} status - 1=Đang theo dõi | 2=Ngừng theo dõi.
+   * @returns {Promise<ServiceResponse<number>>} - Số lượng bản ghi cập nhật thành công.
+   * CREATED BY: TDHieu (08/06/2026)
    */
   updateStatusBulk(ids, status) {
     return axiosInstance.put(`${BASE}/bulk-status`, { ids, status });

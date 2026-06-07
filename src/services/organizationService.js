@@ -1,92 +1,85 @@
 import axiosInstance from "./axios";
 
-// ============================================================
-// API ĐƠN VỊ / PHÒNG BAN (Organization)
-// Base: /api/Organization
-// ============================================================
-
+/**
+ * Mục đích: Quản lý gọi API đơn vị / phòng ban (Organization).
+ * Sử dụng trong trường hợp: Lấy danh sách, thêm, sửa, xóa các đơn vị phòng ban.
+ * Hàm quan trọng: getAll, getTree, getPaging.
+ * CREATED BY: TDHieu (08/06/2026)
+ */
 const BASE = "/Organization";
 
 const organizationApi = {
   /**
-   * Lấy TOÀN BỘ danh sách đơn vị (không phân trang)
-   * Endpoint: GET /api/Organization
-   * Dùng khi cần load toàn bộ đơn vị cho dropdown / tree
-   * @returns {Promise<ServiceResponse<Organization[]>>}
+   * Hàm dùng để: Lấy toàn bộ danh sách đơn vị (không phân trang).
+   * Dùng trong trường hợp: Load toàn bộ đơn vị cho dropdown / tree.
+   * @returns {Promise<ServiceResponse<Organization[]>>} - Danh sách đơn vị.
+   * CREATED BY: TDHieu (08/06/2026)
    */
   getAll() {
     return axiosInstance.get(BASE);
   },
 
   /**
-   * Lấy danh sách đơn vị theo cấu trúc cây (cha – con)
-   * Endpoint: GET /api/Organization/Tree
-   * Root nodes ở cấp đầu, các node con nằm trong thuộc tính children
-   * @returns {Promise<ServiceResponse<Organization[]>>} - mảng cây root nodes
+   * Hàm dùng để: Lấy danh sách đơn vị theo cấu trúc cây (cha – con).
+   * Dùng trong trường hợp: Cần hiển thị sơ đồ tổ chức hoặc tree select.
+   * @returns {Promise<ServiceResponse<Organization[]>>} - Mảng cây root nodes.
+   * CREATED BY: TDHieu (08/06/2026)
    */
   getTree() {
     return axiosInstance.get(`${BASE}/Tree`);
   },
 
   /**
-   * Lấy danh sách đơn vị có phân trang + tìm kiếm + sắp xếp
-   * Endpoint: GET /api/Organization/Paging
-   * @param {Object} params
-   * @param {number}  params.pageIndex      - Trang hiện tại (bắt đầu từ 1)
-   * @param {number}  params.pageSize       - Số dòng mỗi trang (default 10)
-   * @param {string}  [params.search]       - Từ khóa tìm kiếm
-   * @param {string}  [params.sort]         - Sắp xếp, vd: "OrganizationCode DESC"
-   * @param {string}  [params.searchFields] - Các field tìm kiếm, vd: "OrganizationCode,OrganizationName"
-   * @returns {Promise<ServiceResponse<PagingResponse<Organization>>>}
-   *          data = { total: number, data: Organization[] }
-   *
-   * @example
-   * GET /api/Organization/Paging?search=HR&pageSize=10&pageIndex=1&sort=OrganizationCode DESC&searchFields=OrganizationCode,OrganizationName
+   * Hàm dùng để: Lấy danh sách đơn vị có phân trang, tìm kiếm, sắp xếp.
+   * Dùng trong trường hợp: Hiển thị lên lưới dữ liệu (data grid) quản lý đơn vị.
+   * @param {Object} params - Tham số truy vấn (pageIndex, pageSize, search, sort...).
+   * @returns {Promise<ServiceResponse<PagingResponse<Organization>>>} - Dữ liệu phân trang.
+   * CREATED BY: TDHieu (08/06/2026)
    */
   getPaging(params = {}) {
     return axiosInstance.get(`${BASE}/Paging`, { params });
   },
 
   /**
-   * Lấy chi tiết một đơn vị theo ID
-   * Endpoint: GET /api/Organization/{id}
-   * @param {string} id - organizationId (Guid)
-   * @returns {Promise<ServiceResponse<Organization>>}
+   * Hàm dùng để: Lấy chi tiết một đơn vị theo ID.
+   * Dùng trong trường hợp: Mở form xem chi tiết hoặc sửa đơn vị.
+   * @param {string} id - organizationId (Guid).
+   * @returns {Promise<ServiceResponse<Organization>>} - Dữ liệu chi tiết đơn vị.
+   * CREATED BY: TDHieu (08/06/2026)
    */
   getById(id) {
     return axiosInstance.get(`${BASE}/${id}`);
   },
 
   /**
-   * Tạo mới đơn vị
-   * Endpoint: POST /api/Organization
-   * @param {Object} data
-   * @param {string} data.organizationCode - Mã đơn vị (bắt buộc)
-   * @param {string} data.organizationName - Tên đơn vị (bắt buộc)
-   * @returns {Promise<ServiceResponse<Organization>>}
+   * Hàm dùng để: Tạo mới đơn vị.
+   * Dùng trong trường hợp: Người dùng nhập form và bấm lưu để thêm mới.
+   * @param {Object} data - Dữ liệu đơn vị cần thêm (organizationCode, organizationName...).
+   * @returns {Promise<ServiceResponse<Organization>>} - Kết quả tạo mới.
+   * CREATED BY: TDHieu (08/06/2026)
    */
   create(data) {
     return axiosInstance.post(BASE, data);
   },
 
   /**
-   * Cập nhật đơn vị
-   * Endpoint: PUT /api/Organization/{id}
-   * @param {string} id   - organizationId (Guid)
-   * @param {Object} data - Dữ liệu cập nhật
-   * @param {string} data.organizationCode - Mã đơn vị
-   * @param {string} data.organizationName - Tên đơn vị
-   * @returns {Promise<ServiceResponse<Organization>>}
+   * Hàm dùng để: Cập nhật thông tin đơn vị.
+   * Dùng trong trường hợp: Người dùng sửa form và bấm lưu.
+   * @param {string} id - organizationId (Guid).
+   * @param {Object} data - Dữ liệu cập nhật.
+   * @returns {Promise<ServiceResponse<Organization>>} - Kết quả cập nhật.
+   * CREATED BY: TDHieu (08/06/2026)
    */
   update(id, data) {
     return axiosInstance.put(`${BASE}/${id}`, data);
   },
 
   /**
-   * Xóa một đơn vị
-   * Endpoint: DELETE /api/Organization/{id}
-   * @param {string} id - organizationId (Guid)
-   * @returns {Promise<ServiceResponse<void>>}
+   * Hàm dùng để: Xóa một đơn vị.
+   * Dùng trong trường hợp: Người dùng chọn xóa một đơn vị khỏi hệ thống.
+   * @param {string} id - organizationId (Guid).
+   * @returns {Promise<ServiceResponse<void>>} - Trạng thái xóa.
+   * CREATED BY: TDHieu (08/06/2026)
    */
   deleteById(id) {
     return axiosInstance.delete(`${BASE}/${id}`);
