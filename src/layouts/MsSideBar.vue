@@ -144,19 +144,16 @@ import { ref } from "vue";
 import MsButton from "@/components/base/MsButton.vue";
 import MsDropdownMenu from "@/components/base/MsDropdownMenu.vue";
 
+//NOTICE: props + emit
 const props = defineProps(["isCollapse"]);
+//emit sự kiện toggleCollapse để component cha (MainLayout) cập nhật trạng thái isCollapse
 const emit = defineEmits(["update:isCollapse"]);
 
-/** ID của menu đang mở (hover), null = đóng hết */
+// VARIABLE:
+// ID của menu đang mở (hover), null = đóng hết
 const openMenuId = ref(null);
 
-const toggleCollapse = () => {
-  emit("update:isCollapse", !props.isCollapse);
-};
-
-/* ══════════════════════════
-   Dropdown data
-══════════════════════════ */
+// Dữ liệu menu con cho từng mục có submenu
 const salaryDataItems = [
   { label: "Chấm công", value: "attendance" },
   { label: "Doanh số", value: "sales" },
@@ -166,6 +163,7 @@ const salaryDataItems = [
   { label: "Khấu trừ khác", value: "other-deduction" },
 ];
 
+// Dữ liệu menu con cho mục Tính lương
 const salaryCalcItems = [
   { label: "Bảng lương", value: "payroll" },
   { label: "Tạm ứng", value: "advance-payment" },
@@ -176,10 +174,23 @@ const salaryCalcItems = [
   { label: "Quyết toán thuế", value: "tax-finalization" },
 ];
 
+// Dữ liệu menu con cho mục Chi trả
 const paymentItems = [
   { label: "Bảng chi trả", value: "payment-sheet" },
   { label: "Tổng hợp chi trả", value: "payment-summary" },
 ];
+
+// FUNCTION:
+/**
+ * Hàm đóng mở sidebar
+ *
+ * Sử dụng khi: Người dùng click vào nút collapse ở bottom sidebar
+ *
+ * CREATED BY: TDHieu (08/06/2026)
+ */
+const toggleCollapse = () => {
+  emit("update:isCollapse", !props.isCollapse);
+};
 </script>
 <style scoped>
 .sidebar {

@@ -1,29 +1,35 @@
 <template lang="">
   <div class="layout">
+    <!-- Thanh điều hướng trên cùng -->
     <MsNavBar/>
+
     <main class="container">
+      <!-- Thanh sidebar bên trái -->
       <MsSideBar v-model:isCollapse="isCollapse" />
-      
+
+       <!-- Khu vực nội dung chính, nơi các component con sẽ được hiển thị. VD: Thành phần lương, Thành phần lương hệ thống -->
       <router-view v-slot="{ Component }">
         <component
           :is="Component"
           :dataProp="data"
-          :currentData="currentCandidate"
+          :currentData="currentSalaryComposition"
           v-model:fieldsVisible="visibleColumns"
           @openFormAdd="handleOpenFormAdd"
           @openFormEdit="handleOpenFormEdit"
           @deleteItem="handleDeleteItem"
           @openAlert="openAlert"
-          @alertImportData="handleAlertImportData"
         />
       </router-view>
 
+      <!-- Overlay dùng chung cho toàn layout -->
       <MsOverlay v-if="isShowForm" @click="handleCloseForm" />
       <MsOverlay
         v-if="alertState.isShow"
         class="overlay--alert"
         @click="alertState.isShow = false"
       />
+
+      <!-- Component Alert dùng chung cho toàn layout -->
       <MsAlert
         v-if="alertState.isShow"
         :title="alertState.title"
@@ -37,6 +43,7 @@
         @confirm="handleConfirmAlert"
       />
 
+      <!-- Container hiển thị toast -->
       <MsToastContainer :toasts="toasts" @close="removeToast" />
     </main>
   </div>
@@ -50,17 +57,27 @@ import MsToastContainer from "@/components/overlay/MsToast/MsToastContainer.vue"
 import { onMounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 
+/**
+ * Hàm khởi tạo dữ liệu + trạng thái sidebar khi component được load lên
+ * Sử dụng khi: Component được load lên đầu tiên
+ * Created by: TDHieu (08/06/2026)
+ */
 onMounted(() => {
-  initCandidateData();
   stateSidebar();
 });
 
-// VARIABLE:
+// VARIABLE
+// Biến trạng thái sidebar (thu gọn/ mở rộng)
 const isCollapse = ref(false);
+// Biến trạng thái hiển thị form thêm/sửa
 const isShowForm = ref(false);
+// Biến lưu dữ liệu chính, dữ liệu đang thao tác (thêm/sửa), dữ liệu toast, trạng thái alert, dữ liệu đang chờ cập nhật/xóa/nhập, cột hiển thị
 const data = ref([]);
-const currentCandidate = ref(null);
+// Biến lưu dữ liệu đang thao tác (thêm/sửa)
+const currentSalaryComposition = ref(null);
+// Biến lưu dữ liệu toast
 const toasts = ref([]);
+// Biến trạng thái alert và thông tin alert
 const alertState = ref({
   isShow: false,
   title: "",
@@ -71,32 +88,25 @@ const alertState = ref({
   cancelType: "none",
   confirmType: "green"
 });
+// Biến lưu thông tin đang chờ cập nhật/xóa/nhập dữ liệu, dùng để phân biệt khi người dùng xác nhận alert là đang thực hiện hành động nào
 const pendingUpdate = ref(null);
 const pendingDelete = ref(null);
-const pendingImport = ref(null);
 const pendingAction = ref(null);
+// Biến lưu thông tin cột hiển thị, dùng để truyền vào component con để điều khiển cột nào được hiển thị
 const visibleColumns = ref({
 
 });
+// Biến lưu thông tin route hiện tại, dùng để điều hướng route
 const route = useRoute();
 
+// FUNCTION:
 /**
- * FUNCTION:
+ * Lấy trạng thái sidebar từ localStorage khi component được load lên, nếu chưa có thì khởi tạo mặc định và lưu vào localStorage
+ *
+ * Sử dụng khi: Component được load lên đầu tiên
+ *
+ * CREATED BY: TDHieu (08/06/2026)
  */
-const handleAlertImportData = (jsonData) => {
-  alertState.value = {
-    isShow: true,
-    title: "Xác nhận",
-    message: "Bạn có chắc muốn nhập dữ liệu từ file không?",
-    showConfirmButton: true,
-    cancelText: "Hủy",
-    confirmText: "Xác nhận",
-    cancelType: "none",
-    confirmType: "green"
-  };
-  //Lưu lại thông tin dữ liệu đang chờ nhập
-  pendingImport.value = { jsonData };
-};
 const stateSidebar = () => {
   const stored = localStorage.getItem("sidebarCollapse");
   if (stored === null) {
@@ -106,12 +116,27 @@ const stateSidebar = () => {
   isCollapse.value = JSON.parse(stored);
 };
 
+/**
+ * Hàm điều khiển trạng thái hiển thị form thêm/sửa/reset
+ *
+ * Sử dụng khi: Người dùng click vào nút thêm mới (handleOpenFormAdd), click vào nút sửa (handleOpenFormEdit)
+ *
+ * CREATED BY: TDHieu (08/06/2026)
+ */
 const handleOpenFormAdd = () => {
-  currentCandidate.value = null;
+  currentSalaryComposition.value = null;
   isShowForm.value = true;
 };
 
+/**
+ * Hàm xác nhận alert
+ *
+ * Sử dụng khi: alert được bật lên và click vào xác nhận
+ *
+ * CREATED BY: TDHieu (08/06/2026)
+ */
 const handleConfirmAlert = () => {
+  // Đóng alert
   alertState.value.isShow = false;
 
   // Nếu có callback onConfirm từ component con (vd: FormSalaryComposition)
@@ -121,10 +146,11 @@ const handleConfirmAlert = () => {
     return;
   }
 
+  // Đóng form
   isShowForm.value = false;
 
+  //Cập nhật dữ liệu
   if (pendingUpdate.value) {
-    //Cập nhật dữ liệu
     pendingUpdate.value = null;
     toasts.value.push({
       id: Date.now() + Math.random(),
@@ -133,8 +159,8 @@ const handleConfirmAlert = () => {
       duration: 3000,
     });
   }
+  //Xóa dữ liệu
   if (pendingDelete.value) {
-    //Xóa dữ liệu
     pendingDelete.value = null;
     toasts.value.push({
       id: Date.now() + Math.random(),
@@ -143,25 +169,45 @@ const handleConfirmAlert = () => {
       duration: 3000,
     });
   }
-  if (pendingImport.value) {
-    //Nhập dữ liệu xlsx
-    pendingImport.value = null;
-    toasts.value.push({
-      id: Date.now() + Math.random(),
-      message: "Nhập dữ liệu thành công",
-      type: "success",
-      duration: 3000,
-    });
-  }
 };
-const handleOpenFormEdit = (candidateData) => {
-  currentCandidate.value = candidateData;
+
+/**
+ * Hàm điều khiển mở form edit
+ *
+ * Sử dụng khi: Người dùng click vào nút sửa, đồng thời truyền dữ liệu cần sửa vào form thông qua biến currentSalaryComposition
+ *
+ * @param salaryData dữ liệu lương
+ *
+ * CREATED BY: TDHieu (08/06/2026)
+ */
+const handleOpenFormEdit = (salaryData) => {
+  currentSalaryComposition.value = salaryData;
   isShowForm.value = true;
 };
+
+/**
+ * Hàm điều khiển đóng form
+ *
+ * Sử dụng khi: Đóng form thêm/sửa, click vào overlay, hoặc sau khi xác nhận alert xong (handleConfirmAlert)
+ *
+ * CREATED BY: TDHieu (08/06/2026)
+ */
 const handleCloseForm = () => {
   isShowForm.value = false;
 };
-const handleDeleteItem = (candidateData) => {
+
+/**
+ * Hàm điều khiển xóa dữ liệu
+ *
+ * Sử dụng khi: Người dùng click vào nút xóa, đồng thời lưu thông tin đang chờ xóa
+ * vào biến pendingDelete để phân biệt khi người dùng xác nhận alert là đang thực hiện hành động nào
+ *
+ * @param salaryData dữ liệu lương
+ *
+ * CREATED BY: TDHieu (08/06/2026)
+ */
+const handleDeleteItem = (salaryData) => {
+  // Hiển thị alert xác nhận xóa
   alertState.value = {
     isShow: true,
     title: "Xác nhận",
@@ -173,11 +219,24 @@ const handleDeleteItem = (candidateData) => {
     confirmType: "green"
   };
   //Lưu lại thông tin đang chờ xóa
-  pendingDelete.value = { candidateData };
+  pendingDelete.value = { salaryData };
 };
+
+/**
+ * Hàm mở alert
+ *
+ * Sử dụng khi: Component con muốn mở alert với thông tin tiêu đề, nội dung, nút xác nhận/hủy, kiểu nút,...
+ * đồng thời có thể truyền callback onConfirm để thực hiện hành động sau khi người dùng xác nhận alert
+ * (vd: gọi API xóa dữ liệu trong FormSalaryComposition)
+ *
+ * @param payload là một object có thể chứa các thuộc tính để mở alert
+ *
+ * CREATED BY: TDHieu (08/06/2026)
+ */
 const openAlert = (payload) => {
   // Lưu callback onConfirm nếu component con truyền vào
   pendingAction.value = payload.onConfirm ?? null;
+  // Mở alert với thông tin từ payload, nếu không có thì sử dụng giá trị mặc định
   alertState.value = {
     isShow: true,
     title: payload.title,
@@ -189,20 +248,23 @@ const openAlert = (payload) => {
     confirmType: payload.confirmType ?? "green"
   };
 };
-const initCandidateData = () => {
-  // check localStorage trước, nếu có thì dùng luôn, không có thì gọi db
 
-};
-
-
+/**
+ * Hàm xóa toast
+ *
+ * Sử dụng khi: Người dùng click vào nút đóng của toast
+ *
+ * @param id ID của toast cần xóa
+ * @returns Mô tả kết quả trả về
+ *
+ * CREATED BY: TDHieu (08/06/2026)
+ */
 const removeToast = (id) => {
   toasts.value = toasts.value.filter((toast) => toast.id !== id);
 };
 
-/**
- * NOTICE: watch
- */
-
+// NOTICE: watch trạng thái isCollapse để lưu vào localStorage mỗi khi có sự thay đổi,
+// giúp duy trì trạng thái sidebar khi người dùng reload trang
 watch(isCollapse, () => {
   localStorage.setItem("sidebarCollapse", isCollapse.value);
 });
