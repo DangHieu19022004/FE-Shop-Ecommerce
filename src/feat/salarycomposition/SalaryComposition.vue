@@ -80,6 +80,7 @@
                 <!-- Nút Ngừng theo dõi: Hiển thị khi có ít nhất 1 dòng Đang theo dõi -->
                 <MsButton
                   v-if="hasActiveSelected"
+                  iconLeft="mi-circle-minus-yellow"
                   type="none"
                   class="btn-status-badge status-badge status-badge--inactive-border m-r-8"
                   :isTooltip="false"
@@ -96,6 +97,7 @@
                 <!-- Nút Đang theo dõi: Hiển thị khi có ít nhất 1 dòng Ngừng theo dõi -->
                 <MsButton
                   v-if="hasInactiveSelected"
+                  iconLeft="mi-circle-check-green"
                   type="none"
                   class="btn-status-badge status-badge status-badge--active-border m-r-8"
                   :isTooltip="false"
@@ -110,7 +112,7 @@
                   :isTooltip="false"
                   message="Xóa"
                   iconLeft="mi-trash-red"
-                  class="m-r-8 fz-14"
+                  class="m-r-8 fz-14 h-32"
                   type="border-danger"
                   @click="handleDeleteSelected"
                 />
@@ -1006,7 +1008,6 @@ function handleDeleteOne(row) {
   const { salaryCompositionId: id, salaryCompositionName } = row;
   emit("openAlert", {
     title: "Thông báo",
-    message: "Bạn có chắc chắn muốn xóa thành phần lương này không?",
     confirmText: "Xóa",
     confirmType: "danger",
     message: `Bạn có chắc chắn muốn xóa thành phần lương <strong>${salaryCompositionName}</strong> không?`,
@@ -1120,7 +1121,7 @@ async function handleToggleStatus(row) {
 
   alertStatusConfig.value = {
     isOpen: true,
-    title: "Cảnh báo",
+    title: "Chuyển trạng thái",
     message: `Bạn có chắc chắn muốn chuyển trạng thái thành phần lương <strong>${row.salaryCompositionName}</strong> sang ${statusLabel} không?`,
     confirmText: "Đồng ý",
     cancelText: "Không",
@@ -1149,7 +1150,7 @@ async function handleBulkUpdateStatus(status) {
   const statusLabel = status === SalaryCompositionStatus.Following ? "đang theo dõi" : "ngừng theo dõi";
   alertStatusConfig.value = {
     isOpen: true,
-    title: "Cảnh báo",
+    title: "Chuyển trạng thái",
     message: `Bạn có chắc chắn muốn chuyển trạng thái các thành phần lương đã chọn sang ${statusLabel} không?`,
     confirmText: "Đồng ý",
     cancelText: "Không",
@@ -1160,7 +1161,7 @@ async function handleBulkUpdateStatus(status) {
 
 const alertStatusConfig = ref({
   isOpen: false,
-  title: "Cảnh báo",
+  title: "Thông báo",
   message: "",
   confirmText: "Đồng ý",
   cancelText: "Không",
@@ -1898,6 +1899,12 @@ const handleSaveColumnSettings = async (configurableSaved) => {
   border: 1.5px solid;
 }
 
+.status-badge--inactive-border{
+  color: #f90 !important;
+  border: 1px solid #FF9900 !important;
+  border-radius: 8px;
+}
+
 .status-badge__dot {
   width: 6px;
   height: 6px;
@@ -1905,7 +1912,6 @@ const handleSaveColumnSettings = async (configurableSaved) => {
 }
 
 .btn-status-badge {
-  border: none;
   cursor: pointer;
   outline: none;
   font-family: inherit;
@@ -1924,6 +1930,12 @@ const handleSaveColumnSettings = async (configurableSaved) => {
   color: #16a34a;
   background-color: #f0fdf4;
   border-color: #86efac;
+}
+
+.status-badge--active-border{
+  color: #34b057 !important;
+  border: 1px solid #34b057;
+  border-radius: 8px;
 }
 
 .status-badge--active .status-badge__dot {
