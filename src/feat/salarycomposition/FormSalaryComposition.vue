@@ -20,6 +20,54 @@
             </h2>
           </div>
         </div>
+        <div class="content_header_right" v-if="isEditMode || isViewMode">
+          <MsButton
+            v-if="isEditMode"
+            message="Hủy bỏ"
+            class="border-gray fz-14 bg-white w-80 h-32"
+            style="margin-right: 8px;"
+            @click="handleCloseForm"
+            :isTooltip="false"
+          />
+          <template v-if="isEditMode">
+            <MsButton
+              message="Lưu"
+              type="green"
+              class="fz-14 w-80 h-32"
+              style="margin-right: 8px;"
+              @click="handleSubmit"
+              :disabled="isSubmitting"
+              :isTooltip="false"
+            />
+          </template>
+          <template v-else-if="isViewMode && !formData.salaryCompositionSystemId">
+            <MsButton
+              message="Sửa"
+              type="none"
+              iconLeft="mi-pencil"
+              class="fz-14 border-gray bg-white w-80 h-32"
+              style="margin-right: 8px;"
+              @click="switchToEditMode"
+              :isTooltip="false"
+            />
+          </template>
+          <div class="header_dropdown_wrapper" ref="actionDropdownRef" style="position: relative; display: inline-block;">
+            <MsButton
+              iconLeft="mi-threedot"
+              class="border-gray bg-white"
+              @click.stop="toggleActionDropdown"
+              :isTooltip="false"
+              style="padding: 10px 10px;"
+            />
+            <MsDropdownMenu
+              v-if="showActionDropdown"
+              :items="dropdownItems"
+              position="bottom-end"
+              @select="handleDropdownSelect"
+              style="margin-top: 8px;"
+            />
+          </div>
+        </div>
       </div>
       <div class="content_body_wrapper">
         <div
@@ -392,7 +440,7 @@
             <div class="validate-msg"></div>
           </div>
         </div>
-        <div class="content_body_footer">
+        <div class="content_body_footer" v-if="!isEditMode && !isViewMode">
           <div class="footer-right">
             <MsButton
               message="Hủy bỏ"
@@ -443,8 +491,9 @@ import MsSelect from "@/components/base/MsSelect.vue";
 import MsRadio from "@/components/base/MsRadio.vue";
 import MsCheckbox from "@/components/base/MsCheckbox.vue";
 import MsFormula from "@/components/base/MsFormula/MsFormula.vue";
+import MsDropdownMenu from "@/components/base/MsDropdownMenu.vue";
 import MsToastContainer from "@/components/overlay/MsToast/MsToastContainer.vue";
-import { computed, nextTick, onMounted, ref, watch } from "vue";
+import { computed, nextTick, onMounted, ref, watch, onUnmounted } from "vue";
 
 // ── Import services ──────────────────────────────────────────
 import salaryCompositionApi from "@/services/salaryCompositionService";
@@ -489,7 +538,45 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(["openAlert", "close", "saved"]);
+const emit = defineEmits(["openAlert", "close", "saved", "duplicate", "delete"]);
+
+const showActionDropdown = ref(false);
+const dropdownItems = [
+  { value: 'duplicate', label: 'Nhân bản', icon: 'mi-copy' },
+  { value: 'delete', label: 'Xóa', icon: 'mi-trash-red' }
+];
+const actionDropdownRef = ref(null);
+
+const toggleActionDropdown = () => {
+  showActionDropdown.value = !showActionDropdown.value;
+};
+
+const handleDropdownSelect = (item) => {
+  showActionDropdown.value = false;
+  const payload = {
+    salaryCompositionId: currentEditId.value,
+    salaryCompositionName: formData.value.salaryCompositionName
+  };
+  if (item.value === 'duplicate') {
+    emit('duplicate', payload);
+  } else if (item.value === 'delete') {
+    emit('delete', payload);
+  }
+};
+
+const handleClickOutside = (event) => {
+  if (actionDropdownRef.value && !actionDropdownRef.value.contains(event.target)) {
+    showActionDropdown.value = false;
+  }
+};
+
+onMounted(() => {
+  document.addEventListener('click', handleClickOutside);
+});
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside);
+});
 
 // ── Toast nội bộ form ────────────────────────────────────────────
 const toasts = ref([]);
@@ -1171,7 +1258,7 @@ onMounted(async () => {
 
 .content_header {
   display: flex;
-  justify-content: flex-start;
+  justify-content: space-between;
   align-items: center;
   margin-bottom: 16px;
 }
@@ -1207,6 +1294,9 @@ onMounted(async () => {
   flex-wrap: wrap;
 }
 
+:deep(.mi-pencil){
+  margin-right: 4px;
+}
 .value-select-row > .ms-select:last-child {
   flex: 1 1 0;
   min-width: 0;
@@ -1242,6 +1332,11 @@ height:32px;
 :deep(.ms-input--horizontal .ms-input-in.wd-315) {
   flex: 0 0 315px;
   width: 315px;
+}
+
+.content_header_right{
+  display: flex;
+  align-items: center;
 }
 
 /* ── Form field wrapper + validate message ── */
