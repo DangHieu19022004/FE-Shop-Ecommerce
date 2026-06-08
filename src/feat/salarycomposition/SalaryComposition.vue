@@ -6,6 +6,8 @@
     :duplicateId="duplicateId"
     @close="handleCloseFormAndRefresh"
     @saved="handleSavedRefresh"
+    @duplicate="handleDuplicate"
+    @delete="handleDeleteFromForm"
     @openAlert="$emit('openAlert', $event)"
   />
   <div v-else class="content_bg">
@@ -76,9 +78,11 @@
                   @click="selectedIds = []"
                 />
                 <!-- Nút Ngừng theo dõi: Hiển thị khi có ít nhất 1 dòng Đang theo dõi -->
-                <button
+                <MsButton
                   v-if="hasActiveSelected"
-                  class="btn-status-badge status-badge status-badge--inactive m-r-8"
+                  type="none"
+                  class="btn-status-badge status-badge status-badge--inactive-border m-r-8"
+                  :isTooltip="false"
                   @click="
                     handleBulkUpdateStatus(
                       SalaryCompositionStatus.StoppedFollowing,
@@ -87,19 +91,21 @@
                 >
                   <span class="status-badge__dot"></span>
                   Ngừng theo dõi
-                </button>
+                </MsButton>
 
                 <!-- Nút Đang theo dõi: Hiển thị khi có ít nhất 1 dòng Ngừng theo dõi -->
-                <button
+                <MsButton
                   v-if="hasInactiveSelected"
-                  class="btn-status-badge status-badge status-badge--active m-r-8"
+                  type="none"
+                  class="btn-status-badge status-badge status-badge--active-border m-r-8"
+                  :isTooltip="false"
                   @click="
                     handleBulkUpdateStatus(SalaryCompositionStatus.Following)
                   "
                 >
                   <span class="status-badge__dot"></span>
                   Đang theo dõi
-                </button>
+                </MsButton>
                 <MsButton
                   :isTooltip="false"
                   message="Xóa"
@@ -176,9 +182,7 @@
           <div class="content_body">
             <div class="content_body_table">
               <!-- Trạng thái đang tải -->
-              <div v-if="isLoading" class="table-state table-state--loading">
-                <span>Đang tải dữ liệu...</span>
-              </div>
+              <MsLoader v-if="isLoading" class="table-state table-state--loading" />
 
               <!-- Trạng thái lỗi -->
               <div
@@ -448,6 +452,20 @@
 
   <!-- Toast container (nội bộ, khi Req4 toast không qua MainLayout) -->
   <MsToastContainer :toasts="toasts" @close="removeToast" />
+
+  <!-- Alert Confirm Status -->
+  <Teleport to="body">
+    <MsOverlay v-if="alertStatusConfig.isOpen" class="overlay--alert" @click="closeAlertStatus" />
+    <MsAlert
+      v-if="alertStatusConfig.isOpen"
+      :title="alertStatusConfig.title"
+      :message="alertStatusConfig.message"
+      :confirmText="alertStatusConfig.confirmText"
+      :cancelText="alertStatusConfig.cancelText"
+      @close="closeAlertStatus"
+      @confirm="confirmUpdateStatus"
+    />
+  </Teleport>
 </template>
 <script setup>
 import MsButton from "@/components/base/MsButton.vue";
@@ -461,8 +479,12 @@ import SalaryCompositionSystem from "../salarycompositionsystems/SalaryCompositi
 import FilterSalaryComposition from "./FilterSalaryComposition.vue";
 import MsTreeSelect from "@/components/base/MsTreeSelect/MsTreeSelect.vue";
 import MsToastContainer from "@/components/overlay/MsToast/MsToastContainer.vue";
+// import MsTooltip from "@/components/base/MsTooltip.vue";
+import MsLoader from "@/components/base/MsLoader.vue";
+import MsOverlay from "@/components/overlay/MsOverlay.vue";
+import MsAlert from "@/components/overlay/MsAlert.vue";
 import FormulaCell from "@/components/base/MsFormula/FormulaCell.vue";
-import { ref, computed, onMounted, watch } from "vue";
+import { onMounted, onUnmounted, ref, computed, watch } from "vue";
 
 // ======================== Import services ========================
 import salaryCompositionApi from "@/services/salaryCompositionService";
@@ -1006,6 +1028,31 @@ function handleDeleteOne(row) {
   });
 }
 
+function handleDeleteFromForm(row) {
+  const { salaryCompositionId: id, salaryCompositionName } = row;
+  emit("openAlert", {
+    title: "Thông báo",
+    message: `Bạn có chắc chắn muốn xóa thành phần lương <strong>${salaryCompositionName}</strong> không?`,
+    confirmText: "Xóa",
+    confirmType: "danger",
+    onConfirm: async () => {
+      try {
+        const result = await salaryCompositionApi.deleteById(id);
+        if (result.isSuccess) {
+          selectedIds.value = selectedIds.value.filter((sid) => sid !== id);
+          addToast("Xóa thành công", "success");
+          handleCloseFormAndRefresh();
+        } else {
+          addToast(result.data || "Xóa thất bại", "error");
+        }
+      } catch (err) {
+        console.error("[SalaryComposition] deleteFromForm:", err);
+        addToast("Có lỗi xảy ra khi xóa", "error");
+      }
+    },
+  });
+}
+
 // ======================== Xóa nhiều bản ghi ========================
 function handleDeleteSelected() {
   if (selectedIds.value.length === 0) return;
@@ -1059,6 +1106,29 @@ function handleDeleteSelected() {
   });
 }
 
+// ======================== Toggle trạng thái theo dõi ========================
+async function handleToggleStatus(row) {
+  if (row.salaryCompositionSystemId) {
+    addToast("Không thể thay đổi trạng thái của dữ liệu hệ thống", "warning");
+    return;
+  }
+  const newStatus =
+    row.status === SalaryCompositionStatus.Following
+      ? SalaryCompositionStatus.StoppedFollowing
+      : SalaryCompositionStatus.Following;
+  const statusLabel = newStatus === SalaryCompositionStatus.Following ? "đang theo dõi" : "ngừng theo dõi";
+
+  alertStatusConfig.value = {
+    isOpen: true,
+    title: "Cảnh báo",
+    message: `Bạn có chắc chắn muốn chuyển trạng thái thành phần lương <strong>${row.salaryCompositionName}</strong> sang ${statusLabel} không?`,
+    confirmText: "Đồng ý",
+    cancelText: "Không",
+    pendingIds: [row.salaryCompositionId],
+    pendingStatus: newStatus,
+  };
+}
+
 // Task 4: Cập nhật trạng thái nhiều bản ghi
 async function handleBulkUpdateStatus(status) {
   if (selectedIds.value.length === 0) return;
@@ -1076,6 +1146,38 @@ async function handleBulkUpdateStatus(status) {
     return;
   }
 
+  const statusLabel = status === SalaryCompositionStatus.Following ? "đang theo dõi" : "ngừng theo dõi";
+  alertStatusConfig.value = {
+    isOpen: true,
+    title: "Cảnh báo",
+    message: `Bạn có chắc chắn muốn chuyển trạng thái các thành phần lương đã chọn sang ${statusLabel} không?`,
+    confirmText: "Đồng ý",
+    cancelText: "Không",
+    pendingIds: updatableIds,
+    pendingStatus: status,
+  };
+}
+
+const alertStatusConfig = ref({
+  isOpen: false,
+  title: "Cảnh báo",
+  message: "",
+  confirmText: "Đồng ý",
+  cancelText: "Không",
+  pendingIds: [],
+  pendingStatus: null,
+});
+
+const closeAlertStatus = () => {
+  alertStatusConfig.value.isOpen = false;
+};
+
+const confirmUpdateStatus = () => {
+  executeUpdateStatus(alertStatusConfig.value.pendingIds, alertStatusConfig.value.pendingStatus);
+  closeAlertStatus();
+};
+
+const executeUpdateStatus = async (updatableIds, status) => {
   try {
     const result = await salaryCompositionApi.updateStatusBulk(
       updatableIds,
@@ -1087,41 +1189,13 @@ async function handleBulkUpdateStatus(status) {
       const label =
         status === SalaryCompositionStatus.Following
           ? "đang theo dõi"
-          : "ngưng theo dõi";
+          : "ngừng theo dõi";
       addToast(`Cập nhật trạng thái thành công (${label})`, "success");
     } else {
       addToast(result.data || "Cập nhật trạng thái thất bại", "error");
     }
   } catch (err) {
-    console.error("[SalaryComposition] bulkUpdateStatus:", err);
-    addToast("Có lỗi xảy ra khi cập nhật trạng thái", "error");
-  }
-}
-
-// ======================== Toggle trạng thái theo dõi ========================
-async function handleToggleStatus(row) {
-  const newStatus =
-    row.status === SalaryCompositionStatus.Following
-      ? SalaryCompositionStatus.StoppedFollowing
-      : SalaryCompositionStatus.Following;
-
-  try {
-    const result = await salaryCompositionApi.update(row.salaryCompositionId, {
-      ...row,
-      status: newStatus,
-    });
-    if (result.isSuccess) {
-      await fetchSalaryCompositions();
-      const label =
-        newStatus === SalaryCompositionStatus.Following
-          ? "Đang theo dõi"
-          : "Ngưng theo dõi";
-      addToast(`Cập nhật thành phần lương thành công`, "success");
-    } else {
-      addToast(result.data || "Cập nhật trạng thái thất bại", "error");
-    }
-  } catch (err) {
-    console.error("[SalaryComposition] toggleStatus:", err);
+    console.error("[SalaryComposition] executeUpdateStatus:", err);
     addToast("Có lỗi xảy ra khi cập nhật trạng thái", "error");
   }
 }
@@ -1733,6 +1807,7 @@ const handleSaveColumnSettings = async (configurableSaved) => {
 }
 
 :deep(.ms-tree-select__control) {
+  height: 32px;
   width: 350px;
 }
 

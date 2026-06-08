@@ -59,6 +59,7 @@
                 message="Đưa vào danh sách sử dụng"
                 iconLeft="mi-plus-primary"
                 type="border-secondary"
+                class=" fz-14 h-32"
                 @click="handleConfirm"
               />
             </div>
@@ -122,9 +123,7 @@
         <div class="content_body">
           <div class="content_body_table">
             <!-- Trạng thái đang tải -->
-            <div v-if="isLoading" class="table-state table-state--loading">
-              <span>Đang tải dữ liệu...</span>
-            </div>
+            <MsLoader v-if="isLoading" text="Đang tải dữ liệu..." class="table-state table-state--loading" />
 
             <!-- Trạng thái lỗi -->
             <div v-else-if="errorMessage" class="table-state table-state--error">
@@ -283,6 +282,12 @@
   <MsToastContainer :toasts="toasts" @close="removeToast" />
 </template>
 <script setup>
+/**
+ * Mục đích: Hiển thị danh mục Thành phần lương của Hệ thống và cho phép thêm vào danh sách sử dụng (Overlay/Page).
+ * Sử dụng trong trường hợp: Truy cập vào trang Danh mục hệ thống hoặc mở Popup "Thêm từ danh mục hệ thống".
+ * Hàm quan trọng: fetchData, handleConfirm, loadGridConfig, initGridConfig.
+ * CREATED BY: TDHieu (08/06/2026)
+ */
 import MsButton from "@/components/base/MsButton.vue";
 import MsInput from "@/components/base/MsInput.vue";
 import MsTable from "@/components/base/MsTable/MsTable.vue";
@@ -294,7 +299,9 @@ import MsToastContainer from "@/components/overlay/MsToast/MsToastContainer.vue"
 import PopupSettingColumn from "@/feat/salarycomposition/PopupSettingColumn.vue";
 import FilterSalaryComposition from "@/feat/salarycomposition/FilterSalaryComposition.vue";
 import FormulaCell from "@/components/base/MsFormula/FormulaCell.vue";
+import MsLoader from "@/components/base/MsLoader.vue";
 import { ref, computed, onMounted } from "vue";
+import { useRouter } from "vue-router";
 
 // ── Import services ──────────────────────────────────────────
 import salaryCompositionSystemApi from "@/services/salaryCompositionSystemService";
@@ -320,12 +327,29 @@ const props = defineProps({
 });
 
 const emit = defineEmits(["openAlert", "close", "saved"]);
+const router = useRouter();
 
 // ── Toast state ──────────────────────────────────────────────
 const toasts = ref([]);
+
+/**
+ * Hàm dùng để: Hiển thị thông báo Toast.
+ * Dùng trong trường hợp: Lưu hoặc xử lý thao tác thành công/thất bại.
+ * @param {string} message - Nội dung.
+ * @param {string} type - Loại thông báo ("success", "error", ...).
+ * @param {number} duration - Thời gian hiển thị (ms).
+ * CREATED BY: TDHieu (08/06/2026)
+ */
 const addToast = (message, type = "success", duration = 3000) => {
   toasts.value.push({ id: Date.now() + Math.random(), message, type, duration });
 };
+
+/**
+ * Hàm dùng để: Ẩn thông báo Toast.
+ * Dùng trong trường hợp: Toast tự đóng hoặc user click đóng.
+ * @param {number} id - ID của toast.
+ * CREATED BY: TDHieu (08/06/2026)
+ */
 const removeToast = (id) => {
   toasts.value = toasts.value.filter((t) => t.id !== id);
 };
@@ -334,6 +358,12 @@ const removeToast = (id) => {
 const alertState = ref({ isShow: false, title: "", message: "", showConfirmButton: true, cancelText: "Hủy", confirmText: "Xác nhận", cancelType: "none", confirmType: "green" });
 const pendingAlertAction = ref(null);
 
+/**
+ * Hàm dùng để: Mở Dialog Alert xác nhận thao tác.
+ * Dùng trong trường hợp: Xác nhận xóa hoặc đưa vào danh sách sử dụng.
+ * @param {Object} payload - Thông tin cấu hình Alert (title, message, callback...).
+ * CREATED BY: TDHieu (08/06/2026)
+ */
 const openAlert = (payload) => {
   pendingAlertAction.value = payload.onConfirm ?? null;
   alertState.value = {
@@ -348,6 +378,11 @@ const openAlert = (payload) => {
   };
 };
 
+/**
+ * Hàm dùng để: Thực thi hành động khi người dùng nhấn "Xác nhận" trên Alert.
+ * Dùng trong trường hợp: Alert Dialog trả về event confirm.
+ * CREATED BY: TDHieu (08/06/2026)
+ */
 const handleConfirmAlert = () => {
   alertState.value.isShow = false;
   if (pendingAlertAction.value) {
@@ -366,12 +401,23 @@ const sortDirection = ref("");
 const advancedFilters = ref([]);
 let searchDebounceTimer = null;
 
+/**
+ * Hàm dùng để: Lưu trữ filter nâng cao và gọi API filter dữ liệu.
+ * Dùng trong trường hợp: Nhấn "Áp dụng" trên Sidebar Filter.
+ * @param {Array} filters - Danh sách điều kiện lọc.
+ * CREATED BY: TDHieu (08/06/2026)
+ */
 const handleApplyAdvancedFilter = (filters) => {
   advancedFilters.value = filters;
   pageIndex.value = 1;
   fetchData();
 };
 
+/**
+ * Hàm dùng để: Đưa các filter nâng cao về mặc định và gọi API tải lại bảng.
+ * Dùng trong trường hợp: Nhấn "Bỏ lọc" trên Sidebar Filter.
+ * CREATED BY: TDHieu (08/06/2026)
+ */
 const handleResetAdvancedFilter = () => {
   advancedFilters.value = [];
   pageIndex.value = 1;
@@ -387,6 +433,12 @@ const selectedTypeLabel = computed(
   () => typeItems.find((i) => i.value === selectedType.value)?.label ?? "Tất cả"
 );
 
+/**
+ * Hàm dùng để: Cập nhật type được chọn từ combobox và tải lại bảng.
+ * Dùng trong trường hợp: User chọn Loại thành phần trên header Toolbar.
+ * @param {Object} item - Item được select.
+ * CREATED BY: TDHieu (08/06/2026)
+ */
 const handleTypeChange = (item) => {
   // @select emit object { label, value } — cần lấy item.value
   selectedType.value = item?.value ?? null;
@@ -395,6 +447,11 @@ const handleTypeChange = (item) => {
   fetchData();
 };
 
+/**
+ * Hàm dùng để: Gọi debounce timeout chờ user gõ xong rồi mới filter text.
+ * Dùng trong trường hợp: User nhập ký tự vào ô Tìm kiếm.
+ * CREATED BY: TDHieu (08/06/2026)
+ */
 const handleSearchInput = () => {
   clearTimeout(searchDebounceTimer);
   searchDebounceTimer = setTimeout(() => {
@@ -403,9 +460,22 @@ const handleSearchInput = () => {
   }, 300);
 };
 
+/**
+ * Hàm dùng để: Chuyển đổi tên field từ CamelCase sang snake_case (phù hợp BE).
+ * Dùng trong trường hợp: Build payload sort.
+ * @param {string} value - Chuỗi tên field CamelCase.
+ * @returns {string} Chuỗi định dạng snake_case.
+ * CREATED BY: TDHieu (08/06/2026)
+ */
 const toSnakeCase = (value) =>
   value.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
 
+/**
+ * Hàm dùng để: Cập nhật trạng thái Sort và tải lại danh sách.
+ * Dùng trong trường hợp: User click vào header của 1 cột có sort.
+ * @param {Object} param - Chứa field và direction.
+ * CREATED BY: TDHieu (08/06/2026)
+ */
 const handleSortChange = ({ field, direction }) => {
   sortField.value = field;
   sortDirection.value = direction;
@@ -436,12 +506,23 @@ const pageEnd = computed(() =>
   Math.min(pageIndex.value * pageSize.value, totalRecords.value)
 );
 
+/**
+ * Hàm dùng để: Nhảy tới trang chỉ định và gọi lại dữ liệu.
+ * Dùng trong trường hợp: User nhấn nút phân trang ở Footer.
+ * @param {number} page - Số trang cần nhảy tới.
+ * CREATED BY: TDHieu (08/06/2026)
+ */
 const goToPage = (page) => {
   if (page < 1 || page > totalPages.value) return;
   pageIndex.value = page;
   fetchData();
 };
 
+/**
+ * Hàm dùng để: Đổi số lượng bản ghi hiển thị trên 1 trang.
+ * Dùng trong trường hợp: Chọn Combobox Số dòng/trang.
+ * CREATED BY: TDHieu (08/06/2026)
+ */
 const handlePageSizeChange = () => {
   pageIndex.value = 1;
   fetchData();
@@ -452,6 +533,12 @@ const salaryCompositions = ref([]);
 const isLoading = ref(false);
 const errorMessage = ref("");
 
+/**
+ * Hàm dùng để: Tải danh sách thành phần lương hệ thống từ Backend.
+ * Dùng trong trường hợp: Mở trang, phân trang, lọc, sort dữ liệu.
+ * @returns {Promise<void>}
+ * CREATED BY: TDHieu (08/06/2026)
+ */
 async function fetchData() {
   isLoading.value = true;
   errorMessage.value = "";
@@ -494,31 +581,14 @@ async function fetchData() {
   }
 }
 
-async function handleDeleteOne(id) {
-  openAlert({
-    title: "Xác nhận xóa",
-    message: "Bạn có chắc chắn muốn xóa thành phần lương hệ thống này?",
-    confirmText: "Xóa",
-    confirmType: "red",
-    onConfirm: async () => {
-      try {
-        const result = await salaryCompositionSystemApi.deleteById(id);
-        if (result.isSuccess) {
-          selectedIds.value = selectedIds.value.filter((sid) => sid !== id);
-          await fetchData();
-          addToast("Xóa thành phần lương hệ thống thành công", "success");
-        } else {
-          addToast(result.data || "Xóa thất bại", "error");
-        }
-      } catch (err) {
-        console.error("[SalaryCompositionSystem] deleteOne:", err);
-        addToast("Có lỗi xảy ra khi xóa", "error");
-      }
-    },
-  });
-}
-
 // ── Đưa vào danh sách sử dụng (Req 2) ───────────────────────
+/**
+ * Hàm dùng để: Copy 1 thành phần lương từ hệ thống vào danh sách sử dụng của khách hàng.
+ * Dùng trong trường hợp: Nhấn nút dấu '+' ở cột thao tác từng dòng.
+ * @param {Object} row - Thông tin dòng (bản ghi) cần thêm.
+ * @returns {Promise<void>}
+ * CREATED BY: TDHieu (08/06/2026)
+ */
 async function handleAddToUsageList(row) {
   openAlert({
     title: "Thông báo",
@@ -527,24 +597,11 @@ async function handleAddToUsageList(row) {
     confirmType: "green",
     onConfirm: async () => {
       try {
-        const payload = {
-          salaryCompositionSystemId: row.salaryCompositionSystemId,
-          salaryCompositionCode: row.salaryCompositionCode,
-          salaryCompositionName: row.salaryCompositionName,
-          compositionType: row.compositionType,
-          compositionNature: row.compositionNature,
-          taxable: row.taxable ?? null,
-          taxDeduction: row.taxDeduction ?? null,
-          quota: row.quota ?? null,
-          valueType: row.valueType,
-          formula: row.formula ?? null,
-          description: row.description ?? null,
-          optionShowPaycheck: row.optionShowPaycheck ?? null,
-          sourceType: 2, // Default – từ hệ thống
-          status: 1,     // Đang theo dõi
-        };
+        const payload = await buildUsagePayload(row.salaryCompositionSystemId);
         const result = await salaryCompositionApi.create(payload);
         if (result.isSuccess) {
+          await salaryCompositionSystemApi.deleteById(row.salaryCompositionSystemId);
+          router.push("/salarycomposition");
           addToast(`Thêm thành công`, "success");
         } else {
           addToast("Thành phần lương đã tồn tại", "error");
@@ -560,59 +617,89 @@ async function handleAddToUsageList(row) {
 
 // ── Xử lý lưu danh sách (Overlay Mode) ──────────────────────
 const isSaving = ref(false);
+
+/**
+ * Hàm dùng để: Lưu nhiều bản ghi đã chọn (checkbox) vào danh sách sử dụng.
+ * Dùng trong trường hợp: Bấm "Đồng ý" ở footer popup overlay hoặc nút "Đưa vào danh sách sử dụng" ở header (khi select checkbox).
+ * @returns {Promise<void>}
+ * CREATED BY: TDHieu (08/06/2026)
+ */
 const handleConfirm = async () => {
-  if (selectedIds.value.length === 0) return;
-  isSaving.value = true;
-  let successCount = 0;
-  try {
-    const itemsToAdd = salaryCompositions.value.filter(item => selectedIds.value.includes(item.salaryCompositionSystemId));
+  openAlert({
+      title: "Thông báo",
+      message: `Bạn có chắc chắn muốn đưa các thành phần lương mặc định đã chọn vào danh sách sử dụng không?`,
+      confirmText: "Thêm vào",
+      confirmType: "green",
+      onConfirm: async () => {
+        if (selectedIds.value.length === 0) return;
+        isSaving.value = true;
+        let successCount = 0;
+        try {
+          const itemsToAdd = salaryCompositions.value.filter(item => selectedIds.value.includes(item.salaryCompositionSystemId));
 
-    // Call API create cho từng item đã chọn
-    await Promise.all(itemsToAdd.map(async (row) => {
-      const payload = {
-        salaryCompositionSystemId: row.salaryCompositionSystemId,
-        salaryCompositionCode: row.salaryCompositionCode,
-        salaryCompositionName: row.salaryCompositionName,
-        compositionType: row.compositionType,
-        compositionNature: row.compositionNature,
-        taxable: row.taxable ?? null,
-        taxDeduction: row.taxDeduction ?? null,
-        quota: row.quota ?? null,
-        valueType: row.valueType,
-        formula: row.formula ?? null,
-        description: row.description ?? null,
-        optionShowPaycheck: row.optionShowPaycheck ?? null,
-        sourceType: 2, // Default - từ hệ thống
-        status: 1, // Đang theo dõi
-      };
-      try {
-        const res = await salaryCompositionApi.create(payload);
-        if (res.isSuccess) {
-          successCount++;
-        } else {
-          addToast(`Thành phần lương "${row.salaryCompositionName}" đã tồn tại`, "error");
+          // Call API create cho từng item đã chọn
+          await Promise.all(itemsToAdd.map(async (row) => {
+            const payload = await buildUsagePayload(row.salaryCompositionSystemId);
+            try {
+              const res = await salaryCompositionApi.create(payload);
+              if (res.isSuccess) {
+                successCount++;
+                // Xóa khỏi Danh mục thành phần lương hệ thống sau khi chuyển sang sử dụng thành công
+                await salaryCompositionSystemApi.deleteById(row.salaryCompositionSystemId);
+              } else {
+                addToast(`Thêm thất bại`, "error");
+              }
+            } catch (err) {
+              console.error("[SalaryCompositionSystem] create:", err);
+              const msg = err.data?.data || err.response?.data?.data || err.data?.devMessage || `Thành phần lương "${row.salaryCompositionName}" đã tồn tại`;
+              addToast(msg, "error");
+            }
+          }));
+
+          if (successCount > 0) {
+            addToast(`Thêm thành công`, "success");
+            emit("saved", successCount);
+            if (props.isOverlay) {
+              emit("close");
+              return;
+            } else {
+              await fetchData();
+            }
+            selectedIds.value = []; // Bỏ chọn sau khi thêm thành công
+            fetchData(); // Cập nhật lại danh sách hệ thống
+          }
+        } catch (error) {
+          console.error(error);
+        } finally {
+          isSaving.value = false;
         }
-      } catch (err) {
-        console.error("[SalaryCompositionSystem] create:", err);
-        const msg = err.data?.data || err.response?.data?.data || err.data?.devMessage || `Thành phần lương "${row.salaryCompositionName}" đã tồn tại`;
-        addToast(msg, "error");
-      }
-    }));
-
-    if (successCount > 0) {
-      addToast(`Thêm thành công ${successCount} bản ghi`, "success");
-      emit("saved", successCount);
-      if (props.isOverlay) {
-        emit("close");
-      }
-      selectedIds.value = []; // Bỏ chọn sau khi thêm thành công
-    }
-  } catch (error) {
-    console.error(error);
-  } finally {
-    isSaving.value = false;
-  }
+      },
+    });
 };
+
+async function buildUsagePayload(salaryCompositionSystemId) {
+  const result = await salaryCompositionSystemApi.getById(salaryCompositionSystemId);
+  const data = result?.data;
+
+  return {
+    salaryCompositionSystemId: data.salaryCompositionSystemId,
+    salaryCompositionCode: data.salaryCompositionCode,
+    salaryCompositionName: data.salaryCompositionName,
+    organizationIds: Array.isArray(data.organizationIds) ? data.organizationIds : [],
+    organizationName: data.organizationName ?? null,
+    compositionType: data.compositionType,
+    compositionNature: data.compositionNature,
+    taxable: data.taxable ?? null,
+    taxDeduction: data.taxDeduction ?? null,
+    quota: data.quota ?? null,
+    valueType: data.valueType,
+    formula: data.formula ?? null,
+    description: data.description ?? null,
+    optionShowPaycheck: data.optionShowPaycheck ?? null,
+    sourceType: 2,
+    status: 1,
+  };
+}
 
 onMounted(() => {
   fetchData();
@@ -633,6 +720,12 @@ const isIndeterminate = computed(
     selectedIds.value.length < salaryCompositions.value.length
 );
 
+/**
+ * Hàm dùng để: Chọn hoặc bỏ chọn tất cả bản ghi trên bảng hiện tại.
+ * Dùng trong trường hợp: Click checkbox ở header bảng.
+ * @param {Event} event - Sự kiện change từ thẻ input checkbox.
+ * CREATED BY: TDHieu (08/06/2026)
+ */
 const toggleSelectAll = (event) => {
   if (event.target.checked) {
     selectedIds.value = salaryCompositions.value.map((r) => r.salaryCompositionSystemId);
@@ -641,7 +734,21 @@ const toggleSelectAll = (event) => {
   }
 };
 
+/**
+ * Hàm dùng để: Kiểm tra dòng (bản ghi) có đang được chọn hay không.
+ * Dùng trong trường hợp: Binding trạng thái checked của checkbox từng dòng.
+ * @param {string} id - ID bản ghi.
+ * @returns {boolean}
+ * CREATED BY: TDHieu (08/06/2026)
+ */
 const isRowSelected = (id) => selectedIds.value.includes(id);
+
+/**
+ * Hàm dùng để: Chọn hoặc bỏ chọn 1 dòng cụ thể.
+ * Dùng trong trường hợp: Click checkbox của từng dòng.
+ * @param {string} id - ID bản ghi.
+ * CREATED BY: TDHieu (08/06/2026)
+ */
 const toggleRow = (id) => {
   if (selectedIds.value.includes(id)) {
     selectedIds.value = selectedIds.value.filter((item) => item !== id);
@@ -722,7 +829,10 @@ const gridConfigIdMap = ref({});
 const gridConfigDataMap = ref({});
 
 /**
- * Load cấu hình cột từ pa_grid_config và áp dụng lên fields
+ * Hàm dùng để: Load cấu hình cột từ API (pa_grid_config) và áp dụng hiển thị lên fields.
+ * Dùng trong trường hợp: Mở trang lần đầu (onMounted) hoặc sau khi lưu config.
+ * @returns {Promise<void>}
+ * CREATED BY: TDHieu (08/06/2026)
  */
 async function loadGridConfig() {
   try {
@@ -783,8 +893,11 @@ async function loadGridConfig() {
 }
 
 /**
- * Khi DB thiếu records → INSERT những cột chưa có trong DB.
- * Sau khi init xong gọi lại loadGridConfig để lấy data chuẩn nhất.
+ * Hàm dùng để: Khởi tạo các cột chưa có config trên DB vào DB.
+ * Dùng trong trường hợp: Cấu hình trên hệ thống chưa có bản ghi GridConfig tương ứng với frontend.
+ * @param {Array} existingConfigs - Mảng cấu hình cột đã có trên DB.
+ * @returns {Promise<void>}
+ * CREATED BY: TDHieu (08/06/2026)
  */
 async function initGridConfig(existingConfigs = []) {
   const existingNames = new Set(existingConfigs.map((c) => c.columnName));
@@ -827,7 +940,12 @@ async function initGridConfig(existingConfigs = []) {
 const _saveTimers = {};
 
 /**
- * Build payload đầy đủ cho một cột
+ * Hàm dùng để: Trích xuất 1 object payload đẩy đủ cho grid config của 1 cột.
+ * Dùng trong trường hợp: Chuẩn bị data gọi API lưu grid_config.
+ * @param {string} columnName - Tên cột (key).
+ * @param {Object} overrides - Giá trị ghi đè.
+ * @returns {Object} Payload.
+ * CREATED BY: TDHieu (08/06/2026)
  */
 function buildPayload(columnName, overrides = {}) {
   const field = fields.value.find((f) => f.key === columnName);
@@ -855,7 +973,11 @@ function buildPayload(columnName, overrides = {}) {
 }
 
 /**
- * Lưu cấu hình một cột lên BE (debounced 600ms)
+ * Hàm dùng để: Gọi API lưu cấu hình (chỉnh kích thước, ẩn hiện, vv). Hỗ trợ debounce.
+ * Dùng trong trường hợp: Khi có thay đổi kích thước cột, ghim, v.v.
+ * @param {string} columnName - Mã cột.
+ * @param {Object} overrides - Cấu hình thay đổi.
+ * CREATED BY: TDHieu (08/06/2026)
  */
 function saveColumnConfig(columnName, overrides = {}) {
   if (!columnName || columnName === "ghost" || columnName === "actions" || columnName === "") return;
@@ -877,7 +999,10 @@ function saveColumnConfig(columnName, overrides = {}) {
 }
 
 /**
- * Xử lý khi resize cột
+ * Hàm dùng để: Bắt event thay đổi kích thước cột từ bảng và lưu vào cấu hình.
+ * Dùng trong trường hợp: Người dùng kéo thả resize header trên bảng.
+ * @param {Object} payload - { field, width }
+ * CREATED BY: TDHieu (08/06/2026)
  */
 const handleColumnResize = ({ field, width }) => {
   const target = fields.value.find((f) => f.key === field.key);
@@ -886,7 +1011,10 @@ const handleColumnResize = ({ field, width }) => {
 };
 
 /**
- * Cập nhật fields khi MsTable emit update:fields (kéo thả, ghim)
+ * Hàm dùng để: Cập nhật thứ tự cột và ghim cột do event từ bảng.
+ * Dùng trong trường hợp: Người dùng kéo thả vị trí cột trực tiếp.
+ * @param {Array} updatedFields - Mảng cấu hình fields mới từ component con.
+ * CREATED BY: TDHieu (08/06/2026)
  */
 const handleTableFieldsUpdate = (updatedFields) => {
   const hiddenFields = fields.value.filter(
@@ -909,11 +1037,11 @@ const handleTableFieldsUpdate = (updatedFields) => {
 };
 
 /**
- * Lưu cấu hình cột từ PopupSettingColumn
- */
-/**
- * Lưu cấu hình cột từ PopupSettingColumn
- * Dùng async/await trực tiếp (không qua debounce) để đảm bảo toàn bộ cấu hình được lưu
+ * Hàm dùng để: Cập nhật config của các cột từ Popup Tùy chỉnh cột.
+ * Dùng trong trường hợp: Nhấn nút "Lưu" ở Popup Tùy chỉnh cột.
+ * @param {Array} configurableSaved - Cấu hình đã được người dùng tinh chỉnh.
+ * @returns {Promise<void>}
+ * CREATED BY: TDHieu (08/06/2026)
  */
 const handleSaveColumnSettings = async (configurableSaved) => {
   // Tách các cột system để giữ vị trí
@@ -1010,7 +1138,7 @@ const handleSaveColumnSettings = async (configurableSaved) => {
   overflow: hidden;
   /* border-top: 1px solid #e0e0e0; */
   /* border-bottom: 1px solid #e0e0e0; */
-  margin: 16px 24px;
+  margin: 24px 24px;
 }
 .modal_system_body .content_body_header {
   padding: 0 0 12px 0;
@@ -1068,6 +1196,9 @@ const handleSaveColumnSettings = async (configurableSaved) => {
   min-width: 0;
   min-height: 0;
 }
+/* .overlay_mode{
+
+} */
 .content {
   display: flex;
   flex-direction: column;
@@ -1277,6 +1408,10 @@ const handleSaveColumnSettings = async (configurableSaved) => {
   align-items: center;
   justify-content: flex-start;
   padding: 0 8px;
+}
+
+:deep(.mi-plus-primary){
+  margin-right: 4px;
 }
 
 /* Status trigger button */

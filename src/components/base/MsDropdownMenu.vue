@@ -146,7 +146,7 @@ const handleSelect = (item) => {
   flex-direction: column;
   padding: 4px 0;
   background: #fff;
-  border-radius: 6px;
+  border-radius: 8px;
   min-width: 180px;
   box-shadow: 0 4px 20px rgba(17, 24, 39, 0.14);
   border: 1px solid #e5e7eb;

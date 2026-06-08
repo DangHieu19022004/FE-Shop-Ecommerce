@@ -47,6 +47,14 @@ a {
   border: 1px solid #e0e0e0 !important;
 }
 
+.w-80{
+  width: 80px !important;
+}
+
+.bg-white {
+  background-color: #fff !important;
+}
+
 .fz-14 {
   font-size: 14px !important;
 }

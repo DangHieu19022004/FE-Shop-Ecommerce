@@ -53,6 +53,12 @@
 </template>
 
 <script setup>
+/**
+ * Mục đích: Component hiển thị bộ lọc bên phải bảng Thành phần lương.
+ * Sử dụng trong trường hợp: Người dùng nhấn nút Bộ lọc để lọc nâng cao dữ liệu.
+ * Hàm quan trọng: handleApply, handleReset.
+ * CREATED BY: TDHieu (08/06/2026)
+ */
 import { reactive, ref, computed, watch } from 'vue';
 import MsCheckbox from '@/components/base/MsCheckbox.vue';
 import MsButton from '@/components/base/MsButton.vue';
@@ -111,6 +117,11 @@ const filteredItems = computed(() => {
     return filterItems.filter(item => item.label.toLowerCase().includes(lowerKeyword));
 });
 
+/**
+ * Hàm dùng để: Bỏ lọc và thiết lập lại các điều kiện lọc về mặc định.
+ * Dùng trong trường hợp: Người dùng nhấn nút "Bỏ lọc" ở dưới cùng sidebar.
+ * CREATED BY: TDHieu (08/06/2026)
+ */
 const handleReset = () => {
     filterItems.forEach((item) => {
         item.checked = false;
@@ -121,6 +132,11 @@ const handleReset = () => {
     emit('close');
 };
 
+/**
+ * Hàm dùng để: Áp dụng điều kiện lọc và gọi sự kiện lên component cha.
+ * Dùng trong trường hợp: Người dùng cấu hình xong các cột lọc và nhấn "Áp dụng".
+ * CREATED BY: TDHieu (08/06/2026)
+ */
 const handleApply = () => {
     const selected = filterItems
         .filter((i) => i.checked)

@@ -12,15 +12,13 @@
         Vui lòng quay lại sau để trải nghiệm phiên bản mới nhất.
       </p>
 
-      <button class="back-btn" @click="goBack">
-        <i class="fa-solid fa-arrow-left m-r-8"></i>
-        Quay lại
-      </button>
+      <MsButton class="back-btn" @click="goBack" message="Quay lại" iconLeft="fa-solid fa-arrow-left m-r-8" :isTooltip="false" />
     </div>
   </div>
 </template>
 
 <script setup>
+import MsButton from "@/components/base/MsButton.vue";
 const goBack = () => {
   window.history.back()
 }

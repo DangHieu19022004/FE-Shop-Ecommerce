@@ -171,7 +171,7 @@ const hideTooltip = () => {
   justify-content: center;
   padding: 0.5rem 1rem;
   border: none;
-  border-radius: 4px;
+  border-radius: 8px;
   cursor: pointer;
   font-size: 1rem;
   transition: background-color 0.3s ease;

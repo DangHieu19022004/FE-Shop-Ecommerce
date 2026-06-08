@@ -54,12 +54,7 @@
 
       <tbody :class="tableClassBody" :id="tableIdBody">
         <tr v-if="dataRows.length === 0" class="ms-empty-row">
-          <td :colspan="internalFields.length" class="ms-empty">
-            <div class="ms-empty-content">
-              <div class="mi-table-nodata"></div>
-              <span>{{ emptyText }}</span>
-            </div>
-          </td>
+          <td :colspan="internalFields.length" class="ms-empty"></td>
         </tr>
 
         <tr
@@ -82,6 +77,13 @@
         </tr>
       </tbody>
     </table>
+
+    <!-- Empty state overlay: positioned relative to wrapper visual width, not table scroll width -->
+    <!-- Điều này đảm bảo icon luôn hiển thị ở giữa vùng nhìn thấy mà không cần scroll ngang -->
+    <div v-if="dataRows.length === 0" class="ms-empty-overlay">
+      <div class="mi-table-nodata"></div>
+      <span>{{ emptyText }}</span>
+    </div>
 
     <!-- MsMenuTable dropdown -->
     <MsMenuTable
@@ -709,23 +711,27 @@ function getTdStyle(field, index) {
 
 /* ── Empty state ── */
 .ms-empty {
-  height: 100%;          /* tr/td chiếm hết tbody */
-  text-align: center;
-  color: #9ca3af;
-  font-size: 14px;
-  vertical-align: middle;
+  height: 100%;          /* tr/td chiếm hết tbody, không có nội dung */
+  border: none !important;
 }
 
-/* Nội dung căn giữa cả ngang lẫn dọc */
-.ms-empty-content {
+/* Overlay căn giữa theo vùng nhìn thấy (wrapper), không theo chiều rộng table */
+.ms-empty-overlay {
+  position: absolute;
+  /* Đặt top bằng chiều cao thead (36px border-top + 36px height ≈ 40px) */
+  top: 40px;
+  left: 0;
+  right: 0;
+  bottom: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 12px;
-  height: 100%;
-  min-height: 200px;
-  padding: 24px 0;
+  min-height: 160px;
+  color: #9ca3af;
+  font-size: 14px;
+  pointer-events: none; /* không chặn click vào thead */
 }
 
 /* ── Sticky action column ── */

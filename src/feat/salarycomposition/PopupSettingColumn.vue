@@ -3,9 +3,15 @@
     <!-- Header -->
     <div class="psc-header">
       <span class="psc-title">Tùy chỉnh cột</span>
-      <button class="psc-reset-btn" title="Lấy lại mặc định" @click="handleReset">
-        <i class="mi-update" />
-      </button>
+      <MsButton
+        type="none"
+        shapeBtn="square"
+        iconLeft="mi-update"
+        tooltipMessage="Lấy lại mặc định"
+        tooltipPosition="bottom"
+        class="psc-reset-btn"
+        @click="handleReset"
+      />
     </div>
 
     <!-- Search box -->
@@ -73,13 +79,20 @@
 
     <!-- Actions -->
     <div class="psc-actions">
-      <button class="psc-btn psc-btn--cancel" @click="$emit('close')">Hủy</button>
-      <button class="psc-btn psc-btn--save" @click="handleSave">Lưu</button>
+      <MsButton message="Hủy" type="border-secondary" @click="$emit('close')" :isTooltip="false" class="psc-btn psc-btn--cancel" />
+      <MsButton message="Lưu" type="green" @click="handleSave" :isTooltip="false" class="psc-btn psc-btn--save" />
     </div>
   </div>
 </template>
 
 <script setup>
+/**
+ * Mục đích: Component popup dùng để tùy chỉnh hiển thị và thứ tự các cột trên bảng.
+ * Sử dụng trong trường hợp: Người dùng click vào icon cài đặt (răng cưa) trên bảng danh sách.
+ * Hàm quan trọng: handleSave, handleReset, onDrop.
+ * CREATED BY: TDHieu (08/06/2026)
+ */
+import MsButton from "@/components/base/MsButton.vue";
 import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue';
 
 // ─── Props & Emits ────────────────────────────────────────────────────────────
@@ -111,16 +124,37 @@ watch(
 const dragIndex     = ref(null);
 const dragOverIndex = ref(null);
 
+/**
+ * Hàm dùng để: Bắt đầu quá trình kéo 1 dòng cột.
+ * Dùng trong trường hợp: Sự kiện dragstart trên thẻ HTML.
+ * @param {Event} e - Sự kiện kéo.
+ * @param {number} index - Vị trí của phần tử đang được kéo.
+ * CREATED BY: TDHieu (08/06/2026)
+ */
 function onDragStart(e, index) {
   dragIndex.value = index;
   e.dataTransfer.effectAllowed = 'move';
 }
 
+/**
+ * Hàm dùng để: Xử lý khi phần tử kéo đi qua các phần tử khác.
+ * Dùng trong trường hợp: Sự kiện dragover trên thẻ HTML.
+ * @param {Event} e - Sự kiện drag.
+ * @param {number} index - Vị trí của phần tử bên dưới đang bị kéo qua.
+ * CREATED BY: TDHieu (08/06/2026)
+ */
 function onDragOver(e, index) {
   if (dragIndex.value === null || dragIndex.value === index) return;
   dragOverIndex.value = index;
 }
 
+/**
+ * Hàm dùng để: Xử lý khi thả phần tử xuống vị trí mới.
+ * Dùng trong trường hợp: Sự kiện drop. Hoán đổi vị trí của phần tử trong mảng.
+ * @param {Event} e - Sự kiện drop.
+ * @param {number} toIndex - Vị trí mới cần chèn phần tử vào.
+ * CREATED BY: TDHieu (08/06/2026)
+ */
 function onDrop(e, toIndex) {
   if (dragIndex.value === null || dragIndex.value === toIndex) return;
   const arr = [...localFields.value];
@@ -131,12 +165,23 @@ function onDrop(e, toIndex) {
   dragOverIndex.value = null;
 }
 
+/**
+ * Hàm dùng để: Kết thúc quá trình kéo thả, dọn dẹp state.
+ * Dùng trong trường hợp: Sự kiện dragend.
+ * CREATED BY: TDHieu (08/06/2026)
+ */
 function onDragEnd() {
   dragIndex.value     = null;
   dragOverIndex.value = null;
 }
 
-/** Lấy index trong localFields theo key (dùng khi filteredFields có search) */
+/**
+ * Hàm dùng để: Lấy index trong localFields theo key.
+ * Dùng trong trường hợp: Cần index thật trong danh sách gốc thay vì danh sách đã filter do tìm kiếm.
+ * @param {string} key - Mã cột.
+ * @returns {number} - Vị trí index.
+ * CREATED BY: TDHieu (08/06/2026)
+ */
 function getLocalIndex(key) {
   return localFields.value.findIndex((f) => f.key === key);
 }
@@ -155,21 +200,43 @@ const visibleCount = computed(
 );
 
 // ─── Handlers ─────────────────────────────────────────────────────────────────
+/**
+ * Hàm dùng để: Đổi trạng thái ẩn/hiện của 1 cột.
+ * Dùng trong trường hợp: Tick/untick checkbox của 1 cột.
+ * @param {string} key - Key của cột.
+ * @param {boolean} val - Giá trị ẩn hay hiện.
+ * CREATED BY: TDHieu (08/06/2026)
+ */
 function handleToggleField(key, val) {
   const field = localFields.value.find((f) => f.key === key);
   if (field) field.isVisible = val;
 }
 
+/**
+ * Hàm dùng để: Reset cấu hình hiển thị cột về trạng thái mặc định của hệ thống.
+ * Dùng trong trường hợp: Người dùng click vào icon Reset trên Header popup.
+ * CREATED BY: TDHieu (08/06/2026)
+ */
 function handleReset() {
   // Reset lại toàn bộ thứ tự và state dựa trên defaultFields
   localFields.value = props.defaultFields.map((f) => ({ ...f, isVisible: true }));
 }
 
+/**
+ * Hàm dùng để: Lưu lại các thiết lập cột.
+ * Dùng trong trường hợp: Nhấn nút "Lưu".
+ * CREATED BY: TDHieu (08/06/2026)
+ */
 function handleSave() {
   emit('save', localFields.value.map((f) => ({ ...f })));
 }
 
 // ─── Click outside để đóng ────────────────────────────────────────────────────
+/**
+ * Hàm dùng để: Đóng popup khi click ra ngoài vùng popup.
+ * Dùng trong trường hợp: Xử lý event listener click document.
+ * CREATED BY: TDHieu (08/06/2026)
+ */
 const handleClickOutside = () => emit('close');
 
 onMounted(() => {

@@ -57,20 +57,24 @@
       >
         <!-- Tabs -->
         <div class="ms-formula-popup__tabs">
-          <button
+          <MsButton
+            type="none"
             class="ms-formula-popup__tab"
             :class="{ 'ms-formula-popup__tab--active': activeTab === 'formula' }"
             @mousedown.stop.prevent="switchTab('formula')"
+            :isTooltip="false"
           >
             Công thức
-          </button>
-          <button
+          </MsButton>
+          <MsButton
+            type="none"
             class="ms-formula-popup__tab"
             :class="{ 'ms-formula-popup__tab--active': activeTab === 'param' }"
             @mousedown.stop.prevent="switchTab('param')"
+            :isTooltip="false"
           >
             Tham số
-          </button>
+          </MsButton>
         </div>
 
         <!-- Search box inside popup -->
@@ -149,6 +153,7 @@ import { PrismEditor } from "vue-prism-editor";
 import "vue-prism-editor/dist/prismeditor.min.css";
 import { highlightFormula } from "./formula-prism.js";
 import { EXCEL_FORMULAS } from "@/constants/formulaTemplate.js";
+import MsButton from "@/components/base/MsButton.vue";
 
 // ── Props ─────────────────────────────────────────────────────────────────────
 const props = defineProps({
