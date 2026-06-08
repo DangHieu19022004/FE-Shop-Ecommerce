@@ -90,7 +90,7 @@
             class="ms-formula-popup__search-input"
             v-model="searchText"
             placeholder="Tìm kiếm..."
-            @mousedown.stop
+            @mousedown.stop="handlePopupMousedown"
             @click.stop
           />
         </div>
