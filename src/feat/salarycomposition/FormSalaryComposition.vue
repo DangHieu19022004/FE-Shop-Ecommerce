@@ -877,6 +877,7 @@ function buildPayload() {
     salaryCompositionSystemId: formData.value.salaryCompositionSystemId || null,
     salaryCompositionCode: formData.value.salaryCompositionCode.trim(),
     salaryCompositionName: formData.value.salaryCompositionName.trim(),
+    organizationIds: [...selectedOrgs.value],
     organizationName:
       orgNames.length > 0
         ? orgNames.join(", ")

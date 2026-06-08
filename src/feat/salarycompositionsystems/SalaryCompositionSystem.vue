@@ -1181,6 +1181,7 @@ const handleSaveColumnSettings = async (configurableSaved) => {
   font-size: 14px;
 }
 .content_body {
+  height: 100%;
   width: 100%;
   flex: 1;
   background-color: #f8f9fa;
