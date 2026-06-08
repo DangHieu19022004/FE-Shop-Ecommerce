@@ -181,6 +181,14 @@
               <template #cell-taxable="{ row }">
                 {{ SalaryCompositionTaxableLabel[row.taxable] ?? row.taxable }}
               </template>
+              <template #cell-taxDeduction="{ row }">
+                {{
+                  row.taxDeduction === null || row.taxDeduction === undefined
+                    ? "--"
+                    : (SalaryCompositionTaxDeductionLabel[row.taxDeduction] ??
+                      "--")
+                }}
+              </template>
               <template #cell-valueType="{ row }">
                 {{ SalaryCompositionValueTypeLabel[row.valueType] ?? row.valueType }}
               </template>
@@ -189,6 +197,13 @@
               </template>
               <template #cell-formula="{ row }">
                 <FormulaCell :value="row.formula" />
+              </template>
+              <template #cell-optionShowPaycheck="{ row }">
+                {{
+                  SalaryCompositionShowPaycheckLabel[
+                    row.optionShowPaycheck
+                  ] ?? row.optionShowPaycheck
+                }}
               </template>
               <!-- Cột status đã ẩn theo yêu cầu (Req 3) -->
               <template #cell-actions="{ row }">
@@ -317,6 +332,8 @@ import {
   SalaryCompositionTypeLabel,
   SalaryCompositionTypeOptions,
   SalaryCompositionTaxableLabel,
+  SalaryCompositionTaxDeductionLabel,
+  SalaryCompositionShowPaycheckLabel,
 } from "@/constants/enums";
 
 const props = defineProps({
@@ -775,10 +792,12 @@ const DEFAULT_FIELDS = [
   { key: "compositionType", label: "Loại thành phần", slot: "compositionType", width: 180, isVisible: true },
   { key: "compositionNature", label: "Tính chất", slot: "compositionNature", width: 160, isVisible: true },
   { key: "taxable", label: "Chịu thuế", slot: "taxable", width: 130, isVisible: true },
+  { key: "taxDeduction", label: "Giảm trừ khi tính thuế", slot: "taxDeduction", width: 210, isVisible: true },
   { key: "quota", label: "Định mức", width: 140, isVisible: true },
   { key: "valueType", label: "Kiểu giá trị", slot: "valueType", width: 160, isVisible: true },
   { key: "formula", label: "Giá trị", width: 160, isVisible: true },
   { key: "description", label: "Mô tả", width: 240, isVisible: true },
+  { key: "optionShowPaycheck", label: "Hiển thị trên phiếu lương", slot: "optionShowPaycheck", width: 230, isVisible: true },
   { key: "ghost", label: "", width: 180, isSystemCol: true },
   {
     key: "actions",
