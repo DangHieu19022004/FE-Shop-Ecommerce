@@ -218,7 +218,7 @@ const hideTooltip = () => {
   border: 1px solid transparent;
 }
 .ms-button--border-none:hover {
-  background-color: #B6B5B5;
+  background-color: #dfdfdf;
 }
 .ms-button--unactive,
 .ms-button--unactive:hover {
@@ -243,7 +243,7 @@ const hideTooltip = () => {
 .ms-button--border-secondary {
   background-color: #fff;
   color: #6c757d;
-  border: 1px solid #6c757d;
+  border: 1px solid #D5D7DA;
 }
 .ms-button--border-secondary:hover {
   background-color: #e2e6ea;
