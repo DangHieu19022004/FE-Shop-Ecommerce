@@ -965,13 +965,23 @@ const isEmptyValue = (value) => {
 const requiredRule = (message) => (value) =>
   isEmptyValue(value) ? message : "";
 
+// Hàm tạo rule giới hạn độ dài
+const maxLengthRule = (maxLength, message) => (value) =>
+  (value && value.length > maxLength) ? message : "";
+
 // Hàm tạo rule lấy lỗi tùy chỉnh từ customErrorMessages
 const customErrorRule = (field) => () => customErrorMessages.value[field] || "";
 
 // Định nghĩa các rule validation cho từng trường, có thể có nhiều rule cho 1 trường
 const validationRules = {
-  salaryCompositionName: [requiredRule("Không được để trống")],
-  salaryCompositionCode: [requiredRule("Không được để trống")],
+  salaryCompositionName: [
+    requiredRule("Không được để trống"),
+    maxLengthRule(255, "Tên không được vượt quá 255 ký tự")
+  ],
+  salaryCompositionCode: [
+    requiredRule("Không được để trống"),
+    maxLengthRule(255, "Mã không được vượt quá 255 ký tự")
+  ],
   compositionNature: [requiredRule("Không được để trống")],
   compositionType: [requiredRule("Không được để trống")],
   quota: [customErrorRule("quota")],
@@ -1001,7 +1011,9 @@ const isTouched = (field) => Boolean(touchedFields.value[field]);
 
 // Hàm validate 1 trường cụ thể, trả về true nếu hợp lệ, false nếu có lỗi
 const validateField = (field) => {
+  // Lấy các rule của trường, kết quả sẽ lấy được mảng các rule của field
   const rules = validationRules[field] || [];
+  // Chạy qua các rule, lấy message lỗi đầu tiên nếu có, hoặc "" nếu hợp lệ
   const message =
     rules
       .map((rule) => rule(formData.value[field], formData.value))
@@ -1187,11 +1199,13 @@ async function handleSubmitAndAdd() {
  * CREATED BY: TDHieu (09/06/2026)
  */
 async function submitForm(andAdd = false) {
+  // Set trạng thái đang submit để disable nút và tránh submit trùng
   isSubmitting.value = true;
   try {
+    // Build payload từ formData để gửi lên API
     const payload = buildPayload();
     let result;
-
+    // Nếu đang ở edit mode và có currentEditId thì gọi API update, ngược lại gọi API create
     if (isEditMode.value && currentEditId.value) {
       // Cập nhật
       result = await salaryCompositionApi.update(
@@ -1209,7 +1223,10 @@ async function submitForm(andAdd = false) {
         // Emit 'saved' kèm data API + flag để list unshift/update ngay
         emit("saved", { data: result.data, isEdit: isEditMode.value && !!currentEditId.value });
         resetForm();
+        // Sau khi reset form, cần đợi nextTick để DOM cập nhật trước khi focus vào input
         await nextTick();
+        // Focus vào tên thành phần sau khi reset form
+        // Nếu có lỗi validate thì sẽ focus vào trường đó, nếu không thì focus vào tên thành phần
         salaryCompositionNameRef.value?.focus?.();
         addToast("Lưu thành công", "success");
       } else {
@@ -1316,14 +1333,14 @@ const handleCloseForm = () => {
   });
 };
 
-// Task 6: Auto-fill mã thành phần khi nhập tên (chỉ khi chưa edit mode và chưa sửa mã thủ công)
+// Auto-fill mã thành phần khi nhập tên (chỉ khi chưa edit mode và chưa sửa mã thủ công)
 // trạng thái kiểm tra xem người dùng có tự sửa mã thành phần lương không
 const isCodeManuallyEdited = ref(false);
 
 // Theo dõi nếu người dùng tự sửa mã
 watch(
   () => formData.value.salaryCompositionCode,
-  (newCode, oldCode) => {
+  (newCode) => {
     const autoCode = toCompositionCode(formData.value.salaryCompositionName);
     if (newCode !== autoCode) {
       isCodeManuallyEdited.value = true;
@@ -1344,6 +1361,7 @@ watch(
 
 /**
  * Tạo mã thành phần tự động từ tên thành phần
+ * convert dấu cách thành _, bỏ dấu tiếng Việt, chuyển thành chữ hoa
  *
  * Sử dụng khi: Auto-fill mã dựa vào tên khi người dùng chưa sửa mã thủ công
  *
@@ -1361,6 +1379,7 @@ function toCompositionCode(name) {
 }
 
 onMounted(async () => {
+  // Load dữ liệu cây đơn vị để hiển thị trong MsTreeSelect
   await fetchOrgTree();
   // Load danh sách tham số cho popup công thức
   fetchFormulaParameters();
