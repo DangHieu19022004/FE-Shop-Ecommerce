@@ -330,6 +330,13 @@
                 </template>
               </MsSelect>
               <MsSelect
+                v-if="selectedOptionsValueCombobox === 'option3'"
+                v-model="selectedLevel"
+                :data="levelOptions"
+                class="fz-14 w-120"
+                style="margin-right: 8px; width: 120px;"
+              />
+              <MsSelect
                 v-if="selectedOptionsValue !== optionsValue[1].value"
                 v-model="selectedSalaryCoposition"
                 :data="formulaParameters"
@@ -824,6 +831,15 @@ const optionsValueCombobox = [
   },
 ];
 const selectedOptionsValueCombobox = ref(optionsValueCombobox[0].value);
+
+const levelOptions = [
+  { value: "cap1", label: "Cấp 1" },
+  { value: "cap2", label: "Cấp 2" },
+  { value: "cap3", label: "Cấp 3" },
+  { value: "cap4", label: "Cấp 4" },
+];
+const selectedLevel = ref(levelOptions[3].value);
+
 const selectedSalaryCoposition = ref(null);
 
 // Danh sách tham số (thành phần lương) cho popup Định mức
