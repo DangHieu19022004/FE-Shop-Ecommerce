@@ -148,7 +148,13 @@
                   v-model="selectedOrgs"
                   class="m-l-8 h-32"
                   @update:modelValue="handleOrgChange"
-                />
+                >
+                  <template #footer>
+                    <div style="padding: 10px 16px; background-color: #eafbf2; border-bottom-left-radius: 6px; border-bottom-right-radius: 6px;">
+                      <MsCheckbox v-model="showInactiveOrgs" label="Hiển thị đơn vị ngừng theo dõi" />
+                    </div>
+                  </template>
+                </MsTreeSelect>
               </div>
             </div>
             <div class="content_body_header_right">
@@ -470,6 +476,7 @@ import PopupSettingColumn from "./PopupSettingColumn.vue";
 import SalaryCompositionSystem from "../salarycompositionsystems/SalaryCompositionSystem.vue";
 import FilterSalaryComposition from "./FilterSalaryComposition.vue";
 import MsTreeSelect from "@/components/base/MsTreeSelect/MsTreeSelect.vue";
+import MsCheckbox from "@/components/base/MsCheckbox.vue";
 import MsToastContainer from "@/components/overlay/MsToast/MsToastContainer.vue";
 import MsLoader from "@/components/base/MsLoader.vue";
 import MsOverlay from "@/components/overlay/MsOverlay.vue";
@@ -798,6 +805,9 @@ const advancedFilters = ref([]); // Bộ lọc nâng cao từ sidebar
 // timer cho debounce khi gõ tìm kiếm
 let searchDebounceTimer = null;
 // options cho dropdown trạng thái
+
+// trạng thái hiển thị đơn vị ngừng theo dõi
+const showInactiveOrgs = ref(false);
 const statusItems = [
   { label: "Tất cả", value: null },
   { label: "Đang theo dõi", value: SalaryCompositionStatus.Following },

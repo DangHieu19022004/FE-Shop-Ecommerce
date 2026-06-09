@@ -2,7 +2,7 @@
   <aside :class="[{ sidebar_hide: props.isCollapse }, 'sidebar']">
     <div :class="[{ sbbg_hide: props.isCollapse }, 'sbbg']">
       <div class="sb__top">
-        <div :class="[{ sidebar_hide: props.isCollapse }, 'sb__lis']">
+        <div :class="[{ sidebar_hide: props.isCollapse }, 'sb__list']">
           <!-- Tổng quan (không có submenu) -->
           <router-link to="/demo" class="hvp dpl menu__item">
             <MsButton
@@ -228,6 +228,11 @@ const toggleCollapse = () => {
   margin-left: 12px;
 }
 
+.sb__list.sidebar_hide {
+  margin-left: 0;
+  align-items: center;
+}
+
 /* ──────────────────────────
    Menu item đơn (router-link)
 ────────────────────────── */
@@ -242,8 +247,14 @@ const toggleCollapse = () => {
   width: 206px;
 }
 
+.menu__item.router-link-active,
+.menu__item:active {
+  background-color: #E6F5EF;
+  color: #0E9A62;
+}
+
 .menu__item:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background-color: #0E9A62;
   color: #ffffff;
 }
 
@@ -262,7 +273,7 @@ const toggleCollapse = () => {
 }
 
 .menu__item-wrapper:hover .menu__item {
-  background: rgba(255, 255, 255, 0.08);
+  background-color: #0E9A62;
   color: #ffffff;
 }
 
@@ -327,12 +338,16 @@ const toggleCollapse = () => {
 }
 
 .sidebar.sidebar_hide .menu__item {
-  width: 60px;
+  width: 40px;
+  height: 40px;
   justify-content: center;
+  margin: 0 auto;
 }
 
 .sidebar.sidebar_hide .menu__item-wrapper {
   width: 60px;
+  display: flex;
+  justify-content: center;
 }
 
 .sb__btn_left_hide {

@@ -174,7 +174,7 @@ const handleChange = (e) => {
    Label text
 ══════════════════════════════════ */
 .ms-checkbox__label {
-  font-size: 14px;
+  font-size: 13px;
   color: #1d2939;
   line-height: 1;
 }
