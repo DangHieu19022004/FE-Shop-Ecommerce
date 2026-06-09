@@ -120,7 +120,7 @@
             </div>
           </div>
         </div>
-        <div class="content_body">
+        <div :class="['content_body', isOverlay ? 'overlay-content_body' : '']">
           <div class="content_body_table">
             <!-- Trạng thái đang tải -->
             <MsLoader v-if="isLoading" text="Đang tải dữ liệu..." class="table-state table-state--loading" />
@@ -274,24 +274,7 @@
     </div>
   </div>
 
-  <!-- Alert overlay + dialog (dùng nội bộ, không qua MainLayout) -->
-  <MsOverlay
-    v-if="alertState.isShow"
-    class="overlay--alert"
-    @click="alertState.isShow = false"
-  />
-  <MsAlert
-    v-if="alertState.isShow"
-    :title="alertState.title"
-    :message="alertState.message"
-    :showConfirmButton="alertState.showConfirmButton"
-    :cancelText="alertState.cancelText"
-    :confirmText="alertState.confirmText"
-    :cancelType="alertState.cancelType"
-    :confirmType="alertState.confirmType"
-    @close="alertState.isShow = false"
-    @confirm="handleConfirmAlert"
-  />
+
 
   <!-- Toast container -->
   <MsToastContainer :toasts="toasts" @close="removeToast" />
@@ -372,44 +355,7 @@ const removeToast = (id) => {
   toasts.value = toasts.value.filter((t) => t.id !== id);
 };
 
-// ── Alert state ───────────────────────────────────────────────
-// Trạng thái cấu hình của hộp thoại Alert (Cảnh báo)
-const alertState = ref({ isShow: false, title: "", message: "", showConfirmButton: true, cancelText: "Hủy", confirmText: "Xác nhận", cancelType: "none", confirmType: "green" });
-// Hành động sẽ được thực thi khi nhấn "Xác nhận" trên Alert
-const pendingAlertAction = ref(null);
 
-/**
- * Hàm dùng để: Mở Dialog Alert xác nhận thao tác.
- * Dùng trong trường hợp: Xác nhận xóa hoặc đưa vào danh sách sử dụng.
- * @param {Object} payload - Thông tin cấu hình Alert (title, message, callback...).
- * CREATED BY: TDHieu (08/06/2026)
- */
-const openAlert = (payload) => {
-  pendingAlertAction.value = payload.onConfirm ?? null;
-  alertState.value = {
-    isShow: true,
-    title: payload.title ?? "Xác nhận",
-    message: payload.message ?? "",
-    showConfirmButton: payload.showConfirmButton ?? true,
-    cancelText: payload.cancelText ?? "Hủy",
-    confirmText: payload.confirmText ?? "Xác nhận",
-    cancelType: payload.cancelType ?? "none",
-    confirmType: payload.confirmType ?? "green",
-  };
-};
-
-/**
- * Hàm dùng để: Thực thi hành động khi người dùng nhấn "Xác nhận" trên Alert.
- * Dùng trong trường hợp: Alert Dialog trả về event confirm.
- * CREATED BY: TDHieu (08/06/2026)
- */
-const handleConfirmAlert = () => {
-  alertState.value.isShow = false;
-  if (pendingAlertAction.value) {
-    pendingAlertAction.value();
-    pendingAlertAction.value = null;
-  }
-};
 
 // ── Filter / search state ────────────────────────────────────
 // Trạng thái hiển thị bộ lọc nâng cao
@@ -626,7 +572,7 @@ async function fetchData() {
  * CREATED BY: TDHieu (08/06/2026)
  */
 async function handleAddToUsageList(row) {
-  openAlert({
+  emit("openAlert", {
     title: "Thông báo",
     message: `Bạn có chắc chắn muốn đưa thành phần lương mặc định <strong>${row.salaryCompositionName}</strong> vào danh sách sử dụng không?`,
     confirmText: "Thêm vào",
@@ -636,9 +582,9 @@ async function handleAddToUsageList(row) {
         const payload = await buildUsagePayload(row.salaryCompositionSystemId);
         const result = await salaryCompositionApi.create(payload);
         if (result.isSuccess) {
-          await salaryCompositionSystemApi.deleteById(row.salaryCompositionSystemId);
+
+          localStorage.setItem('pendingToast', JSON.stringify({ message: "Thêm thành công", type: "success" }));
           router.push("/salarycomposition");
-          addToast(`Thêm thành công`, "success");
         } else {
           addToast("Thành phần lương đã tồn tại", "error");
         }
@@ -662,7 +608,7 @@ const isSaving = ref(false);
  * CREATED BY: TDHieu (08/06/2026)
  */
 const handleConfirm = async () => {
-  openAlert({
+  emit("openAlert", {
       title: "Thông báo",
       message: `Bạn có chắc chắn muốn đưa các thành phần lương mặc định đã chọn vào danh sách sử dụng không?`,
       confirmText: "Thêm vào",
@@ -681,8 +627,7 @@ const handleConfirm = async () => {
               const res = await salaryCompositionApi.create(payload);
               if (res.isSuccess) {
                 successCount++;
-                // Xóa khỏi Danh mục thành phần lương hệ thống sau khi chuyển sang sử dụng thành công
-                await salaryCompositionSystemApi.deleteById(row.salaryCompositionSystemId);
+
               } else {
                 addToast(`Thêm thất bại`, "error");
               }
@@ -694,16 +639,15 @@ const handleConfirm = async () => {
           }));
 
           if (successCount > 0) {
-            addToast(`Thêm thành công`, "success");
-            emit("saved", successCount);
             if (props.isOverlay) {
+              addToast(`Thêm thành công`, "success");
+              emit("saved", successCount);
               emit("close");
               return;
             } else {
-              await fetchData();
+              localStorage.setItem('pendingToast', JSON.stringify({ message: "Thêm thành công", type: "success" }));
+              router.push("/salarycomposition");
             }
-            selectedIds.value = []; // Bỏ chọn sau khi thêm thành công
-            fetchData(); // Cập nhật lại danh sách hệ thống
           }
         } catch (error) {
           console.error(error);
@@ -1151,6 +1095,9 @@ const handleSaveColumnSettings = async (configurableSaved) => {
 </script>
 
 <style scoped>
+.overlay-content_body  {
+  height: 440px !important;
+}
 /* Modal Overlay CSS */
 .overlay--system {
   z-index: 1000;

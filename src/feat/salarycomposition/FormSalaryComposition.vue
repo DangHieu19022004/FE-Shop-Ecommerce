@@ -576,7 +576,7 @@ const toggleActionDropdown = () => {
 const handleDropdownSelect = (item) => {
   showActionDropdown.value = false;
   const payload = {
-    salaryCompositionId: currentEditId.value,
+    salaryCompositionId: currentEditId.value || props.viewId || formData.value.salaryCompositionId,
     salaryCompositionName: formData.value.salaryCompositionName
   };
   if (item.value === 'duplicate') {
@@ -1205,16 +1205,13 @@ async function submitForm(andAdd = false) {
         salaryCompositionNameRef.value?.focus?.();
         addToast("Đã lưu thành phần lương thành công", "success");
       } else {
-        // Lưu: emit saved trước khi đóng để list cập nhật ngay (optimistic)
-        emit("saved", { data: result.data, isEdit: isEditMode.value && !!currentEditId.value });
-        addToast(
-          isEditMode.value
-            ? "Cập nhật thành phần lương thành công"
-            : "Thêm thành phần lương thành công",
-          "success",
-        );
-        // Dạng delay nhỏ để toast hiển thị trước khi unmount
-        setTimeout(() => emit("close"), 600);
+        // Lưu: emit saved kèm cờ showToast để component cha hiển thị trước khi form bị đóng
+        emit("saved", { 
+          data: result.data, 
+          isEdit: isEditMode.value && !!currentEditId.value,
+          showToast: true
+        });
+        emit("close");
       }
     } else {
       const errMsg = result.data || "Có lỗi xảy ra, vui lòng thử lại";

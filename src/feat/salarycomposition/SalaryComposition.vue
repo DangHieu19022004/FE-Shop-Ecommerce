@@ -353,7 +353,7 @@
                         row.salaryCompositionSystemId
                           ? addToast(
                               'Bạn không có quyền thực hiện chức năng này',
-                              'warning',
+                              'error',
                             )
                           : handleOpenForm(row.salaryCompositionId)
                       "
@@ -370,7 +370,7 @@
                         row.salaryCompositionSystemId
                           ? addToast(
                               'Bạn không có quyền thực hiện chức năng này',
-                              'warning',
+                              'error',
                             )
                           : handleDeleteOne(row)
                       "
@@ -450,24 +450,13 @@
     :isOverlay="true"
     @close="isShowPopupSystem = false"
     @saved="handlePopupSystemSaved"
+    @openAlert="$emit('openAlert', $event)"
   />
 
   <!-- Toast container (nội bộ, khi Req4 toast không qua MainLayout) -->
   <MsToastContainer :toasts="toasts" @close="removeToast" />
 
-  <!-- Alert Confirm Status -->
-  <Teleport to="body">
-    <MsOverlay v-if="alertStatusConfig.isOpen" class="overlay--alert" @click="closeAlertStatus" />
-    <MsAlert
-      v-if="alertStatusConfig.isOpen"
-      :title="alertStatusConfig.title"
-      :message="alertStatusConfig.message"
-      :confirmText="alertStatusConfig.confirmText"
-      :cancelText="alertStatusConfig.cancelText"
-      @close="closeAlertStatus"
-      @confirm="confirmUpdateStatus"
-    />
-  </Teleport>
+
 </template>
 <script setup>
 import MsButton from "@/components/base/MsButton.vue";
@@ -641,7 +630,7 @@ const handleCloseFormAndRefresh = () => {
  *
  * CREATED BY: TDHieu (09/06/2026)
  */
-const handleSavedRefresh = ({ data, isEdit } = {}) => {
+const handleSavedRefresh = ({ data, isEdit, showToast } = {}) => {
   if (data) {
     if (isEdit) {
       // Sửa: cập nhật tại chỗ, rồi move lên đầu
@@ -654,10 +643,18 @@ const handleSavedRefresh = ({ data, isEdit } = {}) => {
       } else {
         salaryCompositions.value.unshift(data);
       }
+
+      if (showToast) {
+        addToast("Cập nhật thành công", "success");
+      }
     } else {
       // Thêm mới: unshift lên đầu
       salaryCompositions.value.unshift(data);
       totalRecords.value += 1;
+
+      if (showToast) {
+        addToast("Thêm thành công", "success");
+      }
     }
   }
   // Sau đó sync lại với BE để đảm bảo chính xác
@@ -1008,6 +1005,18 @@ onMounted(() => {
   fetchSalaryCompositions();
   fetchOrgTree();
   loadGridConfig();
+
+  // Kiểm tra xem có toast nào đang chờ hiển thị từ trang khác chuyển sang không
+  const pendingToast = localStorage.getItem('pendingToast');
+  if (pendingToast) {
+    try {
+      const toastData = JSON.parse(pendingToast);
+      addToast(toastData.message, toastData.type);
+    } catch (e) {
+      console.error("Parse pending toast error:", e);
+    }
+    localStorage.removeItem('pendingToast');
+  }
 });
 
 
@@ -1043,12 +1052,14 @@ async function loadGridConfig() {
     const configs = result.data || [];
 
     // Tách system cols và non-system cols
+    // System cols: key = "" (checkbox), key = "ghost", key = "actions"S
     const firstSystemFields = fields.value.filter(
       (f) => f.isSystemCol && f.key === "",
     );
     const lastSystemFields = fields.value.filter(
       (f) => f.isSystemCol && f.key !== "",
     );
+    // Non-system cols là những cột thực tế có key và không phải là cột hệ thống
     const nonSystemFields = fields.value.filter((f) => !f.isSystemCol);
 
     // Nếu số lượng cấu hình trả về từ DB ít hơn số lượng cột thực tế (ví dụ: DB chỉ có 1 cột Mã thành phần)
@@ -1058,21 +1069,24 @@ async function loadGridConfig() {
       return;
     }
 
-    // Build cả 2 cache
+    // Build 2 map để dễ lookup khi áp dụng config và khi build payload
     const idMap = {};
     const dataMap = {};
+    // Duyệt qua configs từ DB, map columnName → gridConfigId và columnName → full config object
     configs.forEach((cfg) => {
       idMap[cfg.columnName] = cfg.gridConfigId;
       dataMap[cfg.columnName] = cfg;
     });
+    // Lưu vào ref để các function khác có thể sử dụng khi cần (vd: buildPayload)
     gridConfigIdMap.value = idMap;
     gridConfigDataMap.value = dataMap;
 
     // Sắp xếp non-system cols theo displayOrder từ DB và áp dụng config
     const orderedNonSystem = nonSystemFields
       .map((field) => {
-        // Áp dụng config từ DB nếu có, nếu không có thì giữ nguyên
+        // Duyệt qua từng cột, nếu có config trong DB thì áp dụng các thuộc tính width, isVisible, pinned
         const cfg = dataMap[field.key];
+        // Nếu không có config, giữ nguyên như mặc định trong fields
         if (!cfg) return field;
         // Nếu có config, áp dụng các thuộc tính: width, isVisible, pinned
         return {
@@ -1172,10 +1186,14 @@ async function initGridConfig(existingConfigs = []) {
  * CREATED BY: TDHieu (09/06/2026)
  */
 function buildPayload(columnName, overrides = {}) {
+  // Tìm cột tương ứng trong fields hiện tại
   const field = fields.value.find((f) => f.key === columnName);
+  // Tìm index của cột trong fields để xác định displayOrder
   const idx = fields.value.findIndex((f) => f.key === columnName);
+  // Lấy cấu hình đã lưu trong DB nếu có, để giữ lại các giá trị mà BE quản lý (vd: allowFilter, filterType)
   const cached = gridConfigDataMap.value[columnName] || {};
 
+  // Build payload với các giá trị được ưu tiên: overrides > fields hiện tại > cache DB > mặc định
   const payload = {
     // Fields Grid
     gridName: GRID_NAME,
@@ -1197,6 +1215,8 @@ function buildPayload(columnName, overrides = {}) {
     ...overrides,
   };
 
+  // Nếu đã có gridConfigId trong cache, nghĩa là đã từng lưu trước đó, thì gửi kèm để API biết là update (PUT),
+  // nếu không có thì API sẽ hiểu là insert (POST)
   if (gridConfigIdMap.value[columnName]) {
     payload.gridConfigId = gridConfigIdMap.value[columnName];
   }
@@ -1231,6 +1251,7 @@ function saveColumnConfig(columnName, overrides = {}) {
     try {
       // Build payload đầy đủ dựa trên state hiện tại của fields và cache DB, cộng với các giá trị override cụ thể cho lần lưu này
       const payload = buildPayload(columnName, overrides);
+      // Gọi API để lưu cấu hình cột, nếu có gridConfigId sẽ là update, nếu không sẽ là insert
       const result = await gridConfigApi.upsertColumn(payload);
       // Nếu lưu thành công, cập nhật lại cache với gridConfigId mới (nếu là insert) và data mới
       if (result.isSuccess && result.data) {
@@ -1241,7 +1262,7 @@ function saveColumnConfig(columnName, overrides = {}) {
     } catch (err) {
       console.warn("[SalaryComposition] saveColumnConfig:", err);
     }
-  }, 600);
+  }, 500);
 }
 
 /**
@@ -1255,6 +1276,7 @@ function saveColumnConfig(columnName, overrides = {}) {
  * CREATED BY: TDHieu (09/06/2026)
  */
 const handleColumnResize = ({ field, width }) => {
+  // tìm ra cột tương ứng trong fields để cập nhật width mới ngay lập tức trên UI
   const target = fields.value.find((f) => f.key === field.key);
   if (target) target.width = width;
   // Gọi hàm lưu cấu hình cột với giá trị width mới, các giá trị khác sẽ được lấy từ state hiện tại và cache DB trong hàm buildPayload
@@ -1273,6 +1295,8 @@ const handleColumnResize = ({ field, width }) => {
  */
 function handleDeleteOne(row) {
   const { salaryCompositionId: id, salaryCompositionName } = row;
+  // Hiển thị popup xác nhận trước khi xóa
+  // emit lên component cha để mở Alert
   emit("openAlert", {
     title: "Thông báo",
     confirmText: "Xóa",
@@ -1280,13 +1304,16 @@ function handleDeleteOne(row) {
     message: `Bạn có chắc chắn muốn xóa thành phần lương <strong>${salaryCompositionName}</strong> không?`,
     onConfirm: async () => {
       try {
+        // Gọi API để xóa bản ghi theo id
         const result = await salaryCompositionApi.deleteById(id);
         if (result.isSuccess) {
+          // Loại bỏ id khỏi selectedIds để đảm bảo UI cập nhật đúng trạng thái checkbox
           selectedIds.value = selectedIds.value.filter((sid) => sid !== id);
+          // Gọi API để làm mới lại danh sách sau khi xóa thành công
           await fetchSalaryCompositions();
           addToast("Xóa thành công", "success");
         } else {
-          addToast(result.data || "Xóa thất bại", "error");
+          addToast("Xóa thất bại", "error");
         }
       } catch (err) {
         console.error("[SalaryComposition] deleteOne:", err);
@@ -1315,13 +1342,15 @@ function handleDeleteFromForm(row) {
     confirmType: "danger",
     onConfirm: async () => {
       try {
+        // Gọi API để xóa bản ghi theo id
         const result = await salaryCompositionApi.deleteById(id);
         if (result.isSuccess) {
+          // Nếu xóa thành công, đóng form và làm mới lại danh sách
           selectedIds.value = selectedIds.value.filter((sid) => sid !== id);
           addToast("Xóa thành công", "success");
           handleCloseFormAndRefresh();
         } else {
-          addToast(result.data || "Xóa thất bại", "error");
+          addToast("Xóa thất bại", "error");
         }
       } catch (err) {
         console.error("[SalaryComposition] deleteFromForm:", err);
@@ -1331,7 +1360,6 @@ function handleDeleteFromForm(row) {
   });
 }
 
-// ======================== Xóa nhiều bản ghi ========================
 /**
  * Xử lý xóa nhiều bản ghi đã chọn
  *
@@ -1344,20 +1372,22 @@ function handleDeleteFromForm(row) {
 function handleDeleteSelected() {
   if (selectedIds.value.length === 0) return;
 
-  // Req 1: Lọc các row có salaryCompositionSystemId ra khỏi danh sách xóa
+  // Lọc các row có salaryCompositionSystemId ra khỏi danh sách xóa
   const deletableIds = selectedIds.value.filter((id) => {
     const row = salaryCompositions.value.find(
       (r) => r.salaryCompositionId === id,
     );
     return !row?.salaryCompositionSystemId;
   });
+  // Đếm số lượng bản ghi bị chặn do là data hệ thống
   const blockedCount = selectedIds.value.length - deletableIds.length;
 
+  // Nếu không còn id nào có thể xóa, hiển thị thông báo và không làm gì thêm
   if (deletableIds.length === 0) {
     emit("openAlert", {
       title: "Không thể xóa",
       message:
-        "Tất cả các thành phần lương đã chọn đều từ danh mục hệ thống và không thể xóa.",
+        "Dữ liệu của hệ thống bạn không thể xóa.",
       showConfirmButton: false,
       cancelText: "Đóng",
     });
@@ -1379,11 +1409,11 @@ function handleDeleteSelected() {
           selectedIds.value = [];
           await fetchSalaryCompositions();
           addToast(
-            `Đã xóa ${deletableIds.length} thành phần lương thành công`,
+            `Xóa thành công`,
             "success",
           );
         } else {
-          addToast(result.data || "Xóa thất bại", "error");
+          addToast("Xóa thất bại", "error");
         }
       } catch (err) {
         console.error("[SalaryComposition] deleteSelected:", err);
@@ -1414,15 +1444,15 @@ async function handleToggleStatus(row) {
       : SalaryCompositionStatus.Following;
   const statusLabel = newStatus === SalaryCompositionStatus.Following ? "đang theo dõi" : "ngừng theo dõi";
 
-  alertStatusConfig.value = {
-    isOpen: true,
+  emit("openAlert", {
     title: "Chuyển trạng thái",
     message: `Bạn có chắc chắn muốn chuyển trạng thái thành phần lương <strong>${row.salaryCompositionName}</strong> sang ${statusLabel} không?`,
     confirmText: "Đồng ý",
     cancelText: "Không",
-    pendingIds: [row.salaryCompositionId],
-    pendingStatus: newStatus,
-  };
+    onConfirm: async () => {
+      await executeUpdateStatus([row.salaryCompositionId], newStatus);
+    },
+  });
 }
 
 /**
@@ -1452,54 +1482,18 @@ async function handleBulkUpdateStatus(status) {
   }
 
   const statusLabel = status === SalaryCompositionStatus.Following ? "đang theo dõi" : "ngừng theo dõi";
-  alertStatusConfig.value = {
-    isOpen: true,
+  emit("openAlert", {
     title: "Chuyển trạng thái",
     message: `Bạn có chắc chắn muốn chuyển trạng thái các thành phần lương đã chọn sang ${statusLabel} không?`,
     confirmText: "Đồng ý",
     cancelText: "Không",
-    pendingIds: updatableIds,
-    pendingStatus: status,
-  };
+    onConfirm: async () => {
+      await executeUpdateStatus(updatableIds, status);
+    },
+  });
 }
 
-// cấu hình hộp thoại xác nhận đổi trạng thái
-const alertStatusConfig = ref({
-  isOpen: false,
-  title: "Thông báo",
-  message: "",
-  confirmText: "Đồng ý",
-  cancelText: "Không",
-  pendingIds: [],
-  pendingStatus: null,
-});
 
-/**
- * Đóng hộp thoại xác nhận đổi trạng thái
- *
- * Sử dụng khi: Người dùng click Hủy hoặc đóng popup
- *
- * @returns {void}
- *
- * CREATED BY: TDHieu (09/06/2026)
- */
-const closeAlertStatus = () => {
-  alertStatusConfig.value.isOpen = false;
-};
-
-/**
- * Xác nhận thực hiện đổi trạng thái
- *
- * Sử dụng khi: Người dùng click Đồng ý trên hộp thoại xác nhận
- *
- * @returns {void}
- *
- * CREATED BY: TDHieu (09/06/2026)
- */
-const confirmUpdateStatus = () => {
-  executeUpdateStatus(alertStatusConfig.value.pendingIds, alertStatusConfig.value.pendingStatus);
-  closeAlertStatus();
-};
 
 /**
  * Thực thi gọi API đổi trạng thái
@@ -1525,7 +1519,7 @@ const executeUpdateStatus = async (updatableIds, status) => {
         status === SalaryCompositionStatus.Following
           ? "đang theo dõi"
           : "ngừng theo dõi";
-      addToast(`Cập nhật trạng thái thành công (${label})`, "success");
+      addToast(`Cập nhật trạng thái thành công`, "success");
     } else {
       addToast(result.data || "Cập nhật trạng thái thất bại", "error");
     }
