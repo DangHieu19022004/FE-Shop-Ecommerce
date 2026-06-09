@@ -176,12 +176,19 @@ const props = defineProps({
 const emit = defineEmits(["update:modelValue", "blur", "focus"]);
 
 // ── Refs ──────────────────────────────────────────────────────────────────────
+// Trạng thái focus của editor
 const isFocused = ref(false);
+// Trạng thái hiển thị popup gợi ý
 const showPopup = ref(false);
+// Tab đang active trong popup ('formula' hoặc 'param')
 const activeTab = ref("formula");
+// Từ khóa tìm kiếm trong popup
 const searchText = ref("");
+// Tham chiếu đến DOM element bọc editor
 const controlRef = ref(null);
+// Tham chiếu đến DOM element của popup
 const popupRef = ref(null);
+// Tham chiếu đến input tìm kiếm trong popup
 const searchInputRef = ref(null);
 
 /**
@@ -196,6 +203,16 @@ const editorId = computed(
 );
 
 // ── Highlight ─────────────────────────────────────────────────────────────────
+/**
+ * Xử lý highlight cú pháp cho công thức.
+ *
+ * Sử dụng khi: PrismEditor yêu cầu chuỗi HTML đã được highlight.
+ *
+ * @param {string} code Đoạn mã công thức hiện tại
+ * @returns {string} Chuỗi HTML đã được tô màu cú pháp
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 function highlightCode(code) {
   return highlightFormula(code);
 }
@@ -223,15 +240,43 @@ const filteredParams = computed(() => {
 });
 
 // ── Popup open/close ──────────────────────────────────────────────────────────
+/**
+ * Mở popup gợi ý.
+ *
+ * Sử dụng khi: Người dùng gõ dấu "=" hoặc focus vào công thức.
+ *
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 function openPopup() {
   showPopup.value = true;
 }
 
+/**
+ * Đóng popup gợi ý.
+ *
+ * Sử dụng khi: Người dùng click ra ngoài hoặc gõ phím Esc.
+ *
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 function closePopup() {
   showPopup.value = false;
   isMouseInsidePopup.value = false;
 }
 
+/**
+ * Chuyển đổi tab trong popup.
+ *
+ * Sử dụng khi: Người dùng click vào tab Công thức hoặc Tham số.
+ *
+ * @param {string} tab Tên tab cần chuyển tới
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 function switchTab(tab) {
   activeTab.value = tab;
   // Đảm bảo popup vẫn mở sau khi đổi tab
@@ -239,8 +284,16 @@ function switchTab(tab) {
 }
 
 /**
+ * Xử lý sự kiện mousedown bên trong popup.
  * Khi mousedown xảy ra bên trong popup → đánh dấu flag
  * để handleBlur biết không được đóng popup.
+ *
+ * Sử dụng khi: Người dùng click vào các item trong popup để không bị mất focus.
+ *
+ * @param {Event} e Sự kiện mousedown
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
  */
 function handlePopupMousedown(e) {
   isMouseInsidePopup.value = true;
@@ -251,6 +304,16 @@ function handlePopupMousedown(e) {
 }
 
 // ── Event handlers ────────────────────────────────────────────────────────────
+/**
+ * Xử lý sự kiện khi nội dung công thức thay đổi.
+ *
+ * Sử dụng khi: Người dùng gõ phím vào editor, cập nhật v-model và tự động mở popup tìm kiếm.
+ *
+ * @param {string} value Giá trị mới của công thức
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 function handleInput(value) {
   emit("update:modelValue", value);
   if (value && value.startsWith("=")) {
@@ -265,6 +328,16 @@ function handleInput(value) {
   }
 }
 
+/**
+ * Xử lý sự kiện focus vào editor.
+ *
+ * Sử dụng khi: Người dùng click vào input công thức. Tự động mở popup nếu có dấu '='.
+ *
+ * @param {Event} e Sự kiện focus
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 function handleFocus(e) {
   isFocused.value = true;
   emit("focus", e);
@@ -273,6 +346,16 @@ function handleFocus(e) {
   }
 }
 
+/**
+ * Xử lý sự kiện blur (mất focus) khỏi editor.
+ *
+ * Sử dụng khi: Người dùng click ra ngoài khu vực công thức.
+ *
+ * @param {Event} e Sự kiện blur
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 function handleBlur(e) {
   isFocused.value = false;
   emit("blur", e);
@@ -281,6 +364,16 @@ function handleBlur(e) {
   closePopup();
 }
 
+/**
+ * Xử lý sự kiện nhấn phím trong editor.
+ *
+ * Sử dụng khi: Bắt phím Esc để đóng nhanh popup.
+ *
+ * @param {Event} e Sự kiện keydown
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 function handleKeydown(e) {
   if (e.key === "Escape") {
     closePopup();
@@ -288,6 +381,16 @@ function handleKeydown(e) {
 }
 
 // ── Insert formula ─────────────────────────────────────────────────────────────
+/**
+ * Chèn một công thức toán học từ danh sách gợi ý vào vị trí con trỏ hiện tại.
+ *
+ * Sử dụng khi: Người dùng click chọn một item ở tab "Công thức" trong popup.
+ *
+ * @param {Object} item Thông tin công thức (name, insertText)
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 function insertFormula(item) {
   const textarea = getTextarea();
   if (!textarea) {
@@ -321,6 +424,16 @@ function insertFormula(item) {
 }
 
 // ── Insert param ───────────────────────────────────────────────────────────────
+/**
+ * Chèn một tham số lương từ danh sách gợi ý vào vị trí con trỏ hiện tại.
+ *
+ * Sử dụng khi: Người dùng click chọn một item ở tab "Tham số" trong popup.
+ *
+ * @param {Object} item Thông tin tham số (code, name)
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 function insertParam(item) {
   const textarea = getTextarea();
   const codeText = item.code;
@@ -351,6 +464,15 @@ function insertParam(item) {
 }
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
+/**
+ * Lấy tham chiếu đến textarea bên trong editor.
+ *
+ * Sử dụng khi: Cần can thiệp vào vị trí con trỏ (selectionStart, selectionEnd) của thẻ textarea gốc.
+ *
+ * @returns {HTMLTextAreaElement|null} DOM element textarea
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 function getTextarea() {
   const container = document.getElementById(editorId.value);
   return container
@@ -358,6 +480,16 @@ function getTextarea() {
     : null;
 }
 
+/**
+ * Chèn một biến bất kỳ (không nằm trong danh sách param) vào công thức.
+ *
+ * Sử dụng khi: Có tính năng chèn tham số từ bên ngoài (ví dụ từ component cha) truyền vào.
+ *
+ * @param {string} varName Tên biến cần chèn
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 function insertVariable(varName) {
   const textarea = getTextarea();
   if (textarea) {
@@ -375,11 +507,30 @@ function insertVariable(varName) {
   }
 }
 
+/**
+ * Focus thủ công vào ô nhập công thức.
+ *
+ * Sử dụng khi: Component cha gọi hàm này qua ref để yêu cầu focus.
+ *
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 function focus() {
   getTextarea()?.focus();
 }
 
 // ── Click outside → close popup ────────────────────────────────────────────────
+/**
+ * Xử lý khi click ngoài để đóng popup, lắng nghe toàn trang.
+ *
+ * Sử dụng khi: Người dùng click ra khỏi editor để ẩn danh sách tìm kiếm.
+ *
+ * @param {Event} e Sự kiện mousedown
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 function handleDocumentMousedown(e) {
   if (!showPopup.value) return;
   const control = controlRef.value;

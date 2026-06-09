@@ -20,6 +20,15 @@ const props = defineProps({
   },
 });
 
+/**
+ * Chuỗi HTML được tô màu cú pháp.
+ *
+ * Sử dụng khi: Cần render công thức với highlight màu sắc.
+ *
+ * @returns {string} Chuỗi HTML
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 const highlighted = computed(() => {
   if (!props.value) return "";
   return highlightFormula(props.value);

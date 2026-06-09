@@ -106,8 +106,11 @@ const props = defineProps({
 const emit = defineEmits(['close', 'save']);
 
 // ─── State ────────────────────────────────────────────────────────────────────
+// Từ khóa tìm kiếm cột
 const searchText    = ref('');
+// Trạng thái focus của ô tìm kiếm
 const searchFocused = ref(false);
+// Tham chiếu đến DOM element chứa danh sách cột
 const listBodyRef   = ref(null);
 
 /** Bản copy local của fields để chỉnh sửa trước khi Lưu */
@@ -121,15 +124,21 @@ watch(
 );
 
 // ─── Drag & Drop ──────────────────────────────────────────────────────────────
+// Vị trí index của cột đang được kéo
 const dragIndex     = ref(null);
+// Vị trí index của cột đang bị kéo đè lên
 const dragOverIndex = ref(null);
 
 /**
- * Hàm dùng để: Bắt đầu quá trình kéo 1 dòng cột.
- * Dùng trong trường hợp: Sự kiện dragstart trên thẻ HTML.
- * @param {Event} e - Sự kiện kéo.
- * @param {number} index - Vị trí của phần tử đang được kéo.
- * CREATED BY: TDHieu (08/06/2026)
+ * Bắt đầu quá trình kéo 1 dòng cột.
+ *
+ * Sử dụng khi: Xảy ra sự kiện dragstart trên phần tử cột.
+ *
+ * @param {Event} e Sự kiện kéo
+ * @param {number} index Vị trí của phần tử đang được kéo
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
  */
 function onDragStart(e, index) {
   dragIndex.value = index;
@@ -137,11 +146,15 @@ function onDragStart(e, index) {
 }
 
 /**
- * Hàm dùng để: Xử lý khi phần tử kéo đi qua các phần tử khác.
- * Dùng trong trường hợp: Sự kiện dragover trên thẻ HTML.
- * @param {Event} e - Sự kiện drag.
- * @param {number} index - Vị trí của phần tử bên dưới đang bị kéo qua.
- * CREATED BY: TDHieu (08/06/2026)
+ * Xử lý khi phần tử kéo đi qua các phần tử khác.
+ *
+ * Sử dụng khi: Xảy ra sự kiện dragover trên phần tử cột.
+ *
+ * @param {Event} e Sự kiện drag
+ * @param {number} index Vị trí của phần tử bên dưới đang bị kéo qua
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
  */
 function onDragOver(e, index) {
   if (dragIndex.value === null || dragIndex.value === index) return;
@@ -149,11 +162,15 @@ function onDragOver(e, index) {
 }
 
 /**
- * Hàm dùng để: Xử lý khi thả phần tử xuống vị trí mới.
- * Dùng trong trường hợp: Sự kiện drop. Hoán đổi vị trí của phần tử trong mảng.
- * @param {Event} e - Sự kiện drop.
- * @param {number} toIndex - Vị trí mới cần chèn phần tử vào.
- * CREATED BY: TDHieu (08/06/2026)
+ * Xử lý khi thả phần tử xuống vị trí mới.
+ *
+ * Sử dụng khi: Xảy ra sự kiện drop để hoán đổi vị trí của cột.
+ *
+ * @param {Event} e Sự kiện drop
+ * @param {number} toIndex Vị trí mới cần chèn phần tử vào
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
  */
 function onDrop(e, toIndex) {
   if (dragIndex.value === null || dragIndex.value === toIndex) return;
@@ -166,9 +183,13 @@ function onDrop(e, toIndex) {
 }
 
 /**
- * Hàm dùng để: Kết thúc quá trình kéo thả, dọn dẹp state.
- * Dùng trong trường hợp: Sự kiện dragend.
- * CREATED BY: TDHieu (08/06/2026)
+ * Kết thúc quá trình kéo thả, dọn dẹp state.
+ *
+ * Sử dụng khi: Xảy ra sự kiện dragend.
+ *
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
  */
 function onDragEnd() {
   dragIndex.value     = null;
@@ -176,17 +197,21 @@ function onDragEnd() {
 }
 
 /**
- * Hàm dùng để: Lấy index trong localFields theo key.
- * Dùng trong trường hợp: Cần index thật trong danh sách gốc thay vì danh sách đã filter do tìm kiếm.
- * @param {string} key - Mã cột.
- * @returns {number} - Vị trí index.
- * CREATED BY: TDHieu (08/06/2026)
+ * Lấy index trong localFields theo key.
+ *
+ * Sử dụng khi: Cần lấy index thật trong danh sách gốc thay vì danh sách đã filter do tìm kiếm.
+ *
+ * @param {string} key Mã cột
+ * @returns {number} Vị trí index
+ *
+ * CREATED BY: TDHieu (09/06/2026)
  */
 function getLocalIndex(key) {
   return localFields.value.findIndex((f) => f.key === key);
 }
 
 // ─── Computed ─────────────────────────────────────────────────────────────────
+// Danh sách cột hiển thị sau khi đã lọc theo từ khóa tìm kiếm
 const filteredFields = computed(() => {
   const kw = searchText.value.trim().toLowerCase();
   if (!kw) return localFields.value;
@@ -195,17 +220,22 @@ const filteredFields = computed(() => {
   );
 });
 
+// Số lượng cột đang được thiết lập là hiển thị
 const visibleCount = computed(
   () => localFields.value.filter((f) => f.isVisible !== false).length,
 );
 
 // ─── Handlers ─────────────────────────────────────────────────────────────────
 /**
- * Hàm dùng để: Đổi trạng thái ẩn/hiện của 1 cột.
- * Dùng trong trường hợp: Tick/untick checkbox của 1 cột.
- * @param {string} key - Key của cột.
- * @param {boolean} val - Giá trị ẩn hay hiện.
- * CREATED BY: TDHieu (08/06/2026)
+ * Đổi trạng thái ẩn/hiện của 1 cột.
+ *
+ * Sử dụng khi: Người dùng tick/untick checkbox của 1 cột trong popup.
+ *
+ * @param {string} key Key của cột
+ * @param {boolean} val Giá trị ẩn hay hiện
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
  */
 function handleToggleField(key, val) {
   const field = localFields.value.find((f) => f.key === key);
@@ -213,9 +243,13 @@ function handleToggleField(key, val) {
 }
 
 /**
- * Hàm dùng để: Reset cấu hình hiển thị cột về trạng thái mặc định của hệ thống.
- * Dùng trong trường hợp: Người dùng click vào icon Reset trên Header popup.
- * CREATED BY: TDHieu (08/06/2026)
+ * Reset cấu hình hiển thị cột về trạng thái mặc định của hệ thống.
+ *
+ * Sử dụng khi: Người dùng click vào icon Reset (tải lại mặc định) trên Header popup.
+ *
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
  */
 function handleReset() {
   // Reset lại toàn bộ thứ tự và state dựa trên defaultFields
@@ -223,9 +257,13 @@ function handleReset() {
 }
 
 /**
- * Hàm dùng để: Lưu lại các thiết lập cột.
- * Dùng trong trường hợp: Nhấn nút "Lưu".
- * CREATED BY: TDHieu (08/06/2026)
+ * Lưu lại các thiết lập tùy chỉnh cột.
+ *
+ * Sử dụng khi: Người dùng nhấn nút "Lưu".
+ *
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
  */
 function handleSave() {
   emit('save', localFields.value.map((f) => ({ ...f })));
@@ -233,9 +271,13 @@ function handleSave() {
 
 // ─── Click outside để đóng ────────────────────────────────────────────────────
 /**
- * Hàm dùng để: Đóng popup khi click ra ngoài vùng popup.
- * Dùng trong trường hợp: Xử lý event listener click document.
- * CREATED BY: TDHieu (08/06/2026)
+ * Đóng popup khi click ra ngoài vùng popup.
+ *
+ * Sử dụng khi: Xử lý event listener click trên toàn document.
+ *
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
  */
 const handleClickOutside = () => emit('close');
 

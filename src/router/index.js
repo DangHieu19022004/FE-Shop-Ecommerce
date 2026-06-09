@@ -5,9 +5,11 @@ import SalaryComposition from "@/feat/salarycomposition/SalaryComposition.vue";
 import SalaryCompositionSystem from "@/feat/salarycompositionsystems/SalaryCompositionSystem.vue";
 
 /**
- * Khai báo route
+ * Khai báo danh sách các tuyến đường (routes) của ứng dụng.
  *
- * CREATED BY: TDHieu (08/06/2026)
+ * Sử dụng khi: Khởi tạo router để Vue biết cách điều hướng.
+ *
+ * CREATED BY: TDHieu (09/06/2026)
  */
 const routes = [
   {

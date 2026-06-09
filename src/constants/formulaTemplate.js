@@ -1,3 +1,4 @@
+// Danh sách các mẫu công thức hàm (tương tự Excel) dùng cho việc lập công thức tính lương
 export const EXCEL_FORMULAS = [
     // --- Nhóm hàm Logic ---
     {

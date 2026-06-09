@@ -74,10 +74,13 @@ import {
     SalaryCompositionTaxDeductionOptions
 } from '@/constants/enums.js';
 
+// Khai báo emit cho các sự kiện của component
 const emit = defineEmits(['close', 'apply', 'reset']);
 
+// Từ khóa tìm kiếm để lọc nhanh danh sách các trường
 const searchKeyword = ref('');
 
+// Danh sách các phép toán so sánh cho input text
 const conditionsCompare = [
     { label: 'Chứa', value: 'contains' },
     { label: 'Không chứa', value: 'not_contains' },
@@ -89,6 +92,7 @@ const conditionsCompare = [
     { label: 'Không trống', value: 'not_empty' },
 ];
 
+// Danh sách các phép toán so sánh cho select box
 const conditionsSelect = [
     { label: 'Bằng', value: 'equal' },
     { label: 'Khác', value: 'not_equal' },
@@ -96,6 +100,7 @@ const conditionsSelect = [
     { label: 'Không trống', value: 'not_empty' },
 ];
 
+// Danh sách các mục cấu hình bộ lọc ban đầu
 const filterItems = reactive([
     { key: 'salary_composition_code', label: 'Mã thành phần', checked: false, condition: 'contains', value: '' },
     { key: 'salary_composition_name', label: 'Tên thành phần', checked: false, condition: 'contains', value: '' },
@@ -111,6 +116,7 @@ const filterItems = reactive([
     { key: 'option_show_paycheck', label: 'Hiển thị trên phiếu lương', checked: false, condition: 'equal', value: '', isSelect: true, options: SalaryCompositionShowPaycheckOptions },
 ]);
 
+// Danh sách các mục cấu hình sau khi đã áp dụng lọc tìm kiếm
 const filteredItems = computed(() => {
     if (!searchKeyword.value) return filterItems;
     const lowerKeyword = searchKeyword.value.toLowerCase();
@@ -118,9 +124,13 @@ const filteredItems = computed(() => {
 });
 
 /**
- * Hàm dùng để: Bỏ lọc và thiết lập lại các điều kiện lọc về mặc định.
- * Dùng trong trường hợp: Người dùng nhấn nút "Bỏ lọc" ở dưới cùng sidebar.
- * CREATED BY: TDHieu (08/06/2026)
+ * Bỏ lọc và thiết lập lại các điều kiện lọc về mặc định.
+ *
+ * Sử dụng khi: Người dùng nhấn nút "Bỏ lọc" ở dưới cùng sidebar.
+ *
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
  */
 const handleReset = () => {
     filterItems.forEach((item) => {
@@ -133,9 +143,13 @@ const handleReset = () => {
 };
 
 /**
- * Hàm dùng để: Áp dụng điều kiện lọc và gọi sự kiện lên component cha.
- * Dùng trong trường hợp: Người dùng cấu hình xong các cột lọc và nhấn "Áp dụng".
- * CREATED BY: TDHieu (08/06/2026)
+ * Áp dụng điều kiện lọc và gọi sự kiện lên component cha.
+ *
+ * Sử dụng khi: Người dùng cấu hình xong các cột lọc và nhấn "Áp dụng".
+ *
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
  */
 const handleApply = () => {
     const selected = filterItems

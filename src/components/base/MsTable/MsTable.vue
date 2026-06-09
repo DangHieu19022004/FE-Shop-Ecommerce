@@ -194,6 +194,17 @@ const activeFieldSort = computed(() => {
   return props.sortDirection || "none";
 });
 
+/**
+ * Mở menu context tại cột tương ứng.
+ *
+ * Sử dụng khi: Người dùng click vào biểu tượng menu trên header của cột.
+ *
+ * @param {Event} e Sự kiện click
+ * @param {number} index Vị trí cột trong mảng internalFields
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 function openMenu(e, index) {
   // Toggle: nếu đang mở đúng cột này thì đóng lại
   if (menuOpen.value && activeColIndex.value === index) {
@@ -217,11 +228,29 @@ function openMenu(e, index) {
   menuOpen.value = true;
 }
 
+/**
+ * Đóng menu context.
+ *
+ * Sử dụng khi: Chọn xong action trên menu hoặc click ra ngoài.
+ *
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 function closeMenu() {
   menuOpen.value = false;
   activeColIndex.value = -1;
 }
 
+/**
+ * Xử lý sự kiện ghim cột từ menu.
+ *
+ * Sử dụng khi: Người dùng chọn action ghim cột.
+ *
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 function onMenuPin() {
   const field = internalFields.value[activeColIndex.value];
   if (field) {
@@ -231,6 +260,15 @@ function onMenuPin() {
   closeMenu();
 }
 
+/**
+ * Xử lý sự kiện bỏ ghim cột từ menu.
+ *
+ * Sử dụng khi: Người dùng chọn action bỏ ghim cột.
+ *
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 function onMenuUnpin() {
   const field = internalFields.value[activeColIndex.value];
   if (field) {
@@ -240,6 +278,16 @@ function onMenuUnpin() {
   closeMenu();
 }
 
+/**
+ * Xử lý sự kiện sắp xếp cột từ menu.
+ *
+ * Sử dụng khi: Người dùng chọn action sắp xếp tăng/giảm dần trên menu.
+ *
+ * @param {string} direction Chiều sắp xếp ('asc', 'desc', 'none')
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 function onMenuSort(direction) {
   const field = internalFields.value[activeColIndex.value];
   if (!field || !field.key) {
@@ -254,7 +302,16 @@ function onMenuSort(direction) {
   closeMenu();
 }
 
-// Đóng menu khi click bên ngoài
+/**
+ * Đóng menu khi click bên ngoài vùng menu.
+ *
+ * Sử dụng khi: Lắng nghe sự kiện click trên toàn document để ẩn dropdown.
+ *
+ * @param {Event} e Sự kiện click
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 function onClickOutside(e) {
   if (!menuOpen.value) return;
   const wrapper = wrapperRef.value;
@@ -276,17 +333,48 @@ watch(
 );
 
 // ─── Column widths (resize) ───────────────────────────────────────────────────
+// Lưu trữ độ rộng thực tế của các cột (key là index cột)
 const columnWidths = ref({});
 
+/**
+ * Chuẩn hóa giá trị độ rộng cột thành số.
+ *
+ * Sử dụng khi: Cần đảm bảo độ rộng lấy từ cấu hình hoặc style là một số hợp lệ.
+ *
+ * @param {string|number} width Giá trị độ rộng đầu vào
+ * @returns {number|null} Giá trị độ rộng dạng số hoặc null nếu không hợp lệ
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 function normalizeColumnWidth(width) {
   const parsedWidth = typeof width === "number" ? width : parseFloat(width);
   return Number.isFinite(parsedWidth) && parsedWidth > 0 ? parsedWidth : null;
 }
 
+/**
+ * Lấy độ rộng khởi tạo cho một cột dựa vào cấu hình.
+ *
+ * Sử dụng khi: Thiết lập độ rộng mặc định lúc mới render cột.
+ *
+ * @param {Object} field Cấu hình của cột
+ * @returns {number} Độ rộng khởi tạo của cột
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 function getInitialColumnWidth(field) {
   return normalizeColumnWidth(field?.width) || props.defaultColumnWidth;
 }
 
+/**
+ * Tạo object chứa độ rộng khởi tạo cho tất cả các cột.
+ *
+ * Sử dụng khi: Khởi tạo dữ liệu độ rộng lúc component mounted hoặc fields thay đổi.
+ *
+ * @param {Array} fields Mảng cấu hình các cột
+ * @returns {Object} Đối tượng chứa độ rộng các cột { index: width }
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 function buildInitialColumnWidths(fields) {
   const widths = {};
   fields.forEach((field, index) => {
@@ -295,10 +383,29 @@ function buildInitialColumnWidths(fields) {
   return widths;
 }
 
+/**
+ * Lấy độ rộng hiện tại của một cột.
+ *
+ * Sử dụng khi: Bind style width cho các thẻ <col> trong bảng.
+ *
+ * @param {number} index Vị trí cột
+ * @returns {number} Độ rộng cột bằng px
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 function getColumnWidth(index) {
   return columnWidths.value[index] || getInitialColumnWidth(internalFields.value[index]);
 }
 
+/**
+ * Khởi tạo state columnWidths từ internalFields.
+ *
+ * Sử dụng khi: Component được mount hoặc fields thay đổi.
+ *
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 function initColumnWidths() {
   columnWidths.value = buildInitialColumnWidths(internalFields.value);
 }
@@ -318,6 +425,17 @@ let resizeIndex = -1;
 let resizeStartX = 0;
 let resizeStartWidth = 0;
 
+/**
+ * Bắt đầu quá trình thay đổi độ rộng cột.
+ *
+ * Sử dụng khi: Người dùng mousedown vào thanh resize của cột.
+ *
+ * @param {Event} e Sự kiện chuột
+ * @param {number} index Vị trí cột
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 function onResizeStart(e, index) {
   resizing = true;
   resizeIndex = index;
@@ -337,6 +455,16 @@ function onResizeStart(e, index) {
   document.body.style.userSelect = "none";
 }
 
+/**
+ * Thay đổi độ rộng cột khi đang kéo chuột.
+ *
+ * Sử dụng khi: Cập nhật lại độ rộng khi người dùng rê chuột (mousemove).
+ *
+ * @param {Event} e Sự kiện chuột
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 function onResizeMove(e) {
   if (!resizing) return;
   const delta = e.clientX - resizeStartX;
@@ -344,6 +472,15 @@ function onResizeMove(e) {
   columnWidths.value = { ...columnWidths.value, [resizeIndex]: newWidth };
 }
 
+/**
+ * Kết thúc quá trình thay đổi độ rộng cột.
+ *
+ * Sử dụng khi: Người dùng thả chuột (mouseup) sau khi resize. Emit sự kiện cho cha.
+ *
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 function onResizeEnd() {
   if (resizing && resizeIndex !== -1) {
     // Emit column-resize khi thả chuột để parent có thể save vào DB
@@ -367,13 +504,36 @@ onBeforeUnmount(() => {
 });
 
 // ─── Column drag-to-reorder (HTML5 native drag API) ───────────────────────────
+// Vị trí cột đang được kéo
 let dragSrcIndex = -1;
+// Vị trí cột đang được hover (kéo ngang qua)
 const dragOverIndex = ref(-1);
 
+/**
+ * Kiểm tra xem một cột có được phép kéo thả hay không.
+ *
+ * Sử dụng khi: Cần kiểm tra quyền drag trước khi bắt đầu kéo.
+ *
+ * @param {number} index Vị trí cột
+ * @returns {boolean} True nếu được phép kéo
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 function isColumnDraggable(index) {
   return internalFields.value[index]?.draggable !== false;
 }
 
+/**
+ * Bắt đầu quá trình kéo thả cột.
+ *
+ * Sử dụng khi: Sự kiện dragstart xảy ra trên thẻ chứa cột.
+ *
+ * @param {Event} e Sự kiện drag
+ * @param {number} index Vị trí cột bắt đầu kéo
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 function onColDragStart(e, index) {
   // Không cho drag nếu field tắt draggable
   if (!isColumnDraggable(index)) {
@@ -389,6 +549,17 @@ function onColDragStart(e, index) {
   }
 }
 
+/**
+ * Xử lý khi cột đang kéo di chuyển qua một cột khác.
+ *
+ * Sử dụng khi: Sự kiện dragover xảy ra để cập nhật UI báo hiệu vị trí thả.
+ *
+ * @param {Event} e Sự kiện drag
+ * @param {number} index Vị trí cột đang được hover
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 function onColDragOver(e, index) {
   if (dragSrcIndex === -1 || dragSrcIndex === index || !isColumnDraggable(index)) {
     dragOverIndex.value = -1;
@@ -400,6 +571,17 @@ function onColDragOver(e, index) {
   dragOverIndex.value = index;
 }
 
+/**
+ * Xử lý khi người dùng thả cột vào vị trí mới.
+ *
+ * Sử dụng khi: Sự kiện drop xảy ra, cập nhật lại thứ tự cột và width.
+ *
+ * @param {Event} e Sự kiện drag
+ * @param {number} index Vị trí mới của cột
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 function onColDrop(e, index) {
   if (dragSrcIndex === -1 || dragSrcIndex === index || !isColumnDraggable(index)) {
     dragOverIndex.value = -1;
@@ -427,12 +609,31 @@ function onColDrop(e, index) {
   emit("update:fields", newFields.map((f) => ({ ...f })));
 }
 
+/**
+ * Kết thúc quá trình kéo thả.
+ *
+ * Sử dụng khi: Sự kiện dragend xảy ra, dọn dẹp state drag.
+ *
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 function onColDragEnd() {
   dragSrcIndex = -1;
   dragOverIndex.value = -1;
 }
 
 // ─── Pin logic ────────────────────────────────────────────────────────────────
+/**
+ * Thay đổi trạng thái ghim/bỏ ghim cột.
+ *
+ * Sử dụng khi: Cần thao tác ghim cột vào bên trái màn hình.
+ *
+ * @param {number} index Vị trí cột
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 function togglePin(index) {
   const field = internalFields.value[index];
   if (!field) return;
@@ -440,6 +641,7 @@ function togglePin(index) {
   emit("update:fields", internalFields.value.map((f) => ({ ...f })));
 }
 
+// Tính toán khoảng cách (offset) từ lề trái cho các cột đang được ghim
 const pinnedLeftOffsets = computed(() => {
   const offsets = {};
   let accumulated = 0;
@@ -452,6 +654,17 @@ const pinnedLeftOffsets = computed(() => {
   return offsets;
 });
 
+/**
+ * Tính toán style cho header (th) của cột.
+ *
+ * Sử dụng khi: Render thead để thiết lập position, độ rộng cho cột ghim.
+ *
+ * @param {Object} field Dữ liệu cột
+ * @param {number} index Vị trí cột
+ * @returns {Object} Style object
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 function getThStyle(field, index) {
   const style = {};
   if (field.pinned === "left") {
@@ -475,6 +688,17 @@ function getThStyle(field, index) {
   return style;
 }
 
+/**
+ * Tính toán style cho ô dữ liệu (td) của cột.
+ *
+ * Sử dụng khi: Render tbody để thiết lập position, độ rộng cho cột ghim.
+ *
+ * @param {Object} field Dữ liệu cột
+ * @param {number} index Vị trí cột
+ * @returns {Object} Style object
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 function getTdStyle(field, index) {
   const style = {};
   if (field.pinned === "left") {

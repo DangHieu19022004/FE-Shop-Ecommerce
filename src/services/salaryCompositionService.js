@@ -10,89 +10,113 @@ const BASE = "/SalaryComposition";
 
 const salaryCompositionApi = {
   /**
-   * Hàm dùng để: Lấy toàn bộ danh sách thành phần lương (không phân trang).
-   * Dùng trong trường hợp: Cần load tất cả thành phần lương vào dropdown hoặc bộ nhớ.
-   * @returns {Promise<ServiceResponse<SalaryComposition[]>>} - Dữ liệu danh sách.
-   * CREATED BY: TDHieu (08/06/2026)
+   * Lấy toàn bộ danh sách thành phần lương (không phân trang).
+   *
+   * Sử dụng khi: Cần load tất cả thành phần lương vào dropdown hoặc bộ nhớ.
+   *
+   * @returns {Promise<ServiceResponse<SalaryComposition[]>>} Dữ liệu danh sách
+   *
+   * CREATED BY: TDHieu (09/06/2026)
    */
   getAll() {
     return axiosInstance.get(BASE);
   },
 
   /**
-   * Hàm dùng để: Lấy danh sách thành phần lương có phân trang, tìm kiếm, sắp xếp.
-   * Dùng trong trường hợp: Hiển thị lên lưới dữ liệu (data grid) quản lý thành phần lương.
-   * @param {Object} params - Tham số truy vấn (pageIndex, pageSize, search, sort...).
-   * @returns {Promise<ServiceResponse<PagingResponse<SalaryComposition>>>} - Dữ liệu phân trang.
-   * CREATED BY: TDHieu (08/06/2026)
+   * Lấy danh sách thành phần lương có phân trang, tìm kiếm, sắp xếp.
+   *
+   * Sử dụng khi: Hiển thị lên lưới dữ liệu (data grid) quản lý thành phần lương.
+   *
+   * @param {Object} params Tham số truy vấn (pageIndex, pageSize, search, sort...)
+   * @returns {Promise<ServiceResponse<PagingResponse<SalaryComposition>>>} Dữ liệu phân trang
+   *
+   * CREATED BY: TDHieu (09/06/2026)
    */
   getPaging(params = {}) {
     return axiosInstance.get(`${BASE}/Paging`, { params });
   },
 
   /**
-   * Hàm dùng để: Lấy chi tiết một thành phần lương theo ID.
-   * Dùng trong trường hợp: Mở form xem chi tiết, sửa hoặc nhân bản bản ghi.
-   * @param {string} id - salaryCompositionId (Guid).
-   * @returns {Promise<ServiceResponse<SalaryComposition>>} - Dữ liệu chi tiết.
-   * CREATED BY: TDHieu (08/06/2026)
+   * Lấy chi tiết một thành phần lương theo ID.
+   *
+   * Sử dụng khi: Mở form xem chi tiết, sửa hoặc nhân bản bản ghi.
+   *
+   * @param {string} id salaryCompositionId (Guid)
+   * @returns {Promise<ServiceResponse<SalaryComposition>>} Dữ liệu chi tiết
+   *
+   * CREATED BY: TDHieu (09/06/2026)
    */
   getById(id) {
     return axiosInstance.get(`${BASE}/${id}`);
   },
 
   /**
-   * Hàm dùng để: Tạo mới thành phần lương.
-   * Dùng trong trường hợp: Người dùng nhập form và bấm cất (lưu) để thêm mới.
-   * @param {Object} data - Dữ liệu bản ghi cần thêm.
-   * @returns {Promise<ServiceResponse<SalaryComposition>>} - Kết quả tạo mới.
-   * CREATED BY: TDHieu (08/06/2026)
+   * Tạo mới thành phần lương.
+   *
+   * Sử dụng khi: Người dùng nhập form và bấm cất (lưu) để thêm mới.
+   *
+   * @param {Object} data Dữ liệu bản ghi cần thêm
+   * @returns {Promise<ServiceResponse<SalaryComposition>>} Kết quả tạo mới
+   *
+   * CREATED BY: TDHieu (09/06/2026)
    */
   create(data) {
     return axiosInstance.post(BASE, data);
   },
 
   /**
-   * Hàm dùng để: Cập nhật thành phần lương.
-   * Dùng trong trường hợp: Người dùng sửa form và bấm cất.
-   * @param {string} id - salaryCompositionId (Guid).
-   * @param {Object} data - Dữ liệu cập nhật.
-   * @returns {Promise<ServiceResponse<SalaryComposition>>} - Kết quả cập nhật.
-   * CREATED BY: TDHieu (08/06/2026)
+   * Cập nhật thành phần lương.
+   *
+   * Sử dụng khi: Người dùng sửa form và bấm cất.
+   *
+   * @param {string} id salaryCompositionId (Guid)
+   * @param {Object} data Dữ liệu cập nhật
+   * @returns {Promise<ServiceResponse<SalaryComposition>>} Kết quả cập nhật
+   *
+   * CREATED BY: TDHieu (09/06/2026)
    */
   update(id, data) {
     return axiosInstance.put(`${BASE}/${id}`, data);
   },
 
   /**
-   * Hàm dùng để: Xóa một thành phần lương.
-   * Dùng trong trường hợp: Bấm xóa một bản ghi trên danh sách.
-   * @param {string} id - salaryCompositionId (Guid).
-   * @returns {Promise<ServiceResponse<void>>} - Trạng thái xóa.
-   * CREATED BY: TDHieu (08/06/2026)
+   * Xóa một thành phần lương.
+   *
+   * Sử dụng khi: Bấm xóa một bản ghi trên danh sách.
+   *
+   * @param {string} id salaryCompositionId (Guid)
+   * @returns {Promise<ServiceResponse<void>>} Trạng thái xóa
+   *
+   * CREATED BY: TDHieu (09/06/2026)
    */
   deleteById(id) {
     return axiosInstance.delete(`${BASE}/${id}`);
   },
 
   /**
-   * Hàm dùng để: Xóa nhiều thành phần lương cùng lúc.
-   * Dùng trong trường hợp: Chọn nhiều bản ghi trên grid và bấm chức năng xóa hàng loạt.
-   * @param {string[]} ids - Danh sách salaryCompositionId.
-   * @returns {Promise<ServiceResponse<number>>} - Số lượng bản ghi đã xóa thành công.
-   * CREATED BY: TDHieu (08/06/2026)
+   * Xóa nhiều thành phần lương cùng lúc.
+   *
+   * Sử dụng khi: Chọn nhiều bản ghi trên grid và bấm chức năng xóa hàng loạt.
+   *
+   * @param {string[]} ids Danh sách salaryCompositionId
+   * @returns {Promise<ServiceResponse<number>>} Số lượng bản ghi đã xóa thành công
+   *
+   * CREATED BY: TDHieu (09/06/2026)
    */
   deleteBulk(ids) {
     return axiosInstance.delete(`${BASE}/bulk`, { data: ids });
   },
 
   /**
-   * Hàm dùng để: Cập nhật trạng thái nhiều thành phần lương.
-   * Dùng trong trường hợp: Bấm Ngừng theo dõi/Theo dõi hàng loạt cho các bản ghi đã chọn.
-   * @param {string[]} ids - Danh sách salaryCompositionId.
-   * @param {number} status - 1=Đang theo dõi | 2=Ngừng theo dõi.
-   * @returns {Promise<ServiceResponse<number>>} - Số lượng bản ghi cập nhật thành công.
-   * CREATED BY: TDHieu (08/06/2026)
+   * Cập nhật trạng thái nhiều thành phần lương.
+   *
+   * Sử dụng khi: Bấm Ngừng theo dõi/Theo dõi hàng loạt cho các bản ghi đã chọn.
+   *
+   * @param {string[]} ids Danh sách salaryCompositionId
+   * @param {number} status 1=Đang theo dõi | 2=Ngừng theo dõi
+   * @returns {Promise<ServiceResponse<number>>} Số lượng bản ghi cập nhật thành công
+   *
+   * CREATED BY: TDHieu (09/06/2026)
    */
   updateStatusBulk(ids, status) {
     return axiosInstance.put(`${BASE}/bulk-status`, { ids, status });

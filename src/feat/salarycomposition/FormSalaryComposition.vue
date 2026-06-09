@@ -540,17 +540,39 @@ const props = defineProps({
 
 const emit = defineEmits(["openAlert", "close", "saved", "duplicate", "delete"]);
 
+// trạng thái hiển thị dropdown menu
 const showActionDropdown = ref(false);
+// danh sách các mục trong dropdown menu
 const dropdownItems = [
   { value: 'duplicate', label: 'Nhân bản', icon: 'mi-copy' },
   { value: 'delete', label: 'Xóa', icon: 'mi-trash-red' }
 ];
+// ref của dropdown menu để xử lý click outside
 const actionDropdownRef = ref(null);
 
+/**
+ * Toggle trạng thái hiển thị dropdown menu
+ *
+ * Sử dụng khi: Người dùng click vào icon 3 chấm ở chế độ View/Edit
+ *
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 const toggleActionDropdown = () => {
   showActionDropdown.value = !showActionDropdown.value;
 };
 
+/**
+ * Xử lý sự kiện khi chọn 1 item trong dropdown menu
+ *
+ * Sử dụng khi: Người dùng chọn Nhân bản hoặc Xóa từ dropdown
+ *
+ * @param {Object} item Item được chọn
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 const handleDropdownSelect = (item) => {
   showActionDropdown.value = false;
   const payload = {
@@ -564,6 +586,16 @@ const handleDropdownSelect = (item) => {
   }
 };
 
+/**
+ * Xử lý click ra ngoài dropdown menu
+ *
+ * Sử dụng khi: Cần đóng dropdown khi người dùng click bên ngoài
+ *
+ * @param {Object} event Sự kiện click
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 const handleClickOutside = (event) => {
   if (actionDropdownRef.value && !actionDropdownRef.value.contains(event.target)) {
     showActionDropdown.value = false;
@@ -579,7 +611,21 @@ onUnmounted(() => {
 });
 
 // ── Toast nội bộ form ────────────────────────────────────────────
+// danh sách các thông báo toast
 const toasts = ref([]);
+
+/**
+ * Thêm một thông báo toast
+ *
+ * Sử dụng khi: Cần hiển thị thông báo thành công/lỗi
+ *
+ * @param {string} message Nội dung thông báo
+ * @param {string} type Loại thông báo
+ * @param {number} duration Thời gian hiển thị (ms)
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 const addToast = (message, type = "success", duration = 3000) => {
   toasts.value.push({
     id: Date.now() + Math.random(),
@@ -588,18 +634,39 @@ const addToast = (message, type = "success", duration = 3000) => {
     duration,
   });
 };
+/**
+ * Xóa một thông báo toast
+ *
+ * Sử dụng khi: Toast hết hạn hoặc bị người dùng đóng
+ *
+ * @param {number|string} id ID của toast cần xóa
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 const removeToast = (id) => {
   toasts.value = toasts.value.filter((t) => t.id !== id);
 };
 
+// trạng thái form có phải đang sửa không
 const isEditMode = ref(!!props.editId);
+// trạng thái form có phải đang xem không
 const isViewMode = ref(!!props.viewId);
+// trạng thái form đang gọi API submit
 const isSubmitting = ref(false);
 
 // ID của bản ghi đang edit (tách riêng khỏi formData để không bị mất khi resetForm)
 const currentEditId = ref(props.editId || null);
 
-// Chuyển từ view mode sang edit mode
+/**
+ * Chuyển form từ chế độ xem chi tiết sang chế độ chỉnh sửa
+ *
+ * Sử dụng khi: Người dùng click nút Sửa
+ *
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 function switchToEditMode() {
   isViewMode.value = false;
   isEditMode.value = true;
@@ -608,9 +675,20 @@ function switchToEditMode() {
 }
 
 // ── Org Tree ─────────────────────────────────────────────────
+// dữ liệu cây đơn vị
 const orgTreeData = ref([]);
+// danh sách id đơn vị được chọn
 const selectedOrgs = ref([]);
 
+/**
+ * Gọi API lấy dữ liệu cây đơn vị
+ *
+ * Sử dụng khi: Component được mount
+ *
+ * @returns {Promise<void>}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 async function fetchOrgTree() {
   try {
     const result = await organizationApi.getTree();
@@ -634,6 +712,16 @@ async function fetchOrgTree() {
   }
 }
 
+/**
+ * Đổi format dữ liệu cây đơn vị để tương thích với MsTreeSelect
+ *
+ * Sử dụng khi: Có dữ liệu trả về từ API getTree
+ *
+ * @param {Array} nodes Danh sách node
+ * @returns {Array} Danh sách đã map
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 function mapOrgTree(nodes) {
   return nodes.map((node) => ({
     id: node.organizationId,
@@ -644,7 +732,12 @@ function mapOrgTree(nodes) {
 
 /**
  * Xây dựng flat map { id -> label } và { label -> id } từ orgTreeData
- * Dùng để restore selectedOrgs khi backend trả về organizationName (string)
+ *
+ * Sử dụng khi: Cần restore selectedOrgs khi backend trả về organizationName
+ *
+ * @returns {Object} Object chứa byId và byName
+ *
+ * CREATED BY: TDHieu (09/06/2026)
  */
 function buildOrgFlatMap() {
   const byId = {};
@@ -661,9 +754,14 @@ function buildOrgFlatMap() {
 }
 
 /**
- * Restore selectedOrgs từ dữ liệu API:
- * Ưu tiên dùng organizationIds (mảng GUID) nếu có;
- * Nếu không có, parse organizationName (chuỗi, phân cách bởi ", ") và tìm ID tương ứng
+ * Restore danh sách đơn vị đã chọn từ dữ liệu API
+ *
+ * Sử dụng khi: Tải dữ liệu chi tiết của 1 bản ghi
+ *
+ * @param {Object} data Dữ liệu từ API chứa organizationIds hoặc organizationName
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
  */
 function restoreSelectedOrgs(data) {
   // Trường hợp 1: backend trả về mảng organizationIds
@@ -690,6 +788,7 @@ function restoreSelectedOrgs(data) {
 }
 
 // ── Form data ────────────────────────────────────────────────
+// các ref để focus vào input khi có lỗi
 const salaryCompositionNameRef = ref(null);
 const salaryCompositionCodeRef = ref(null);
 const compositionTypeRef = ref(null);
@@ -697,8 +796,11 @@ const compositionNatureRef = ref(null);
 const quotaRef = ref(null);
 const formulaRef = ref(null);
 
+// loại thuế (chịu thuế, không chịu thuế, giảm trừ thuế)
 const selectedTax = ref(SalaryCompositionTaxable.Taxable);
+// có giảm trừ thuế không
 const isDeductedTax = ref(false);
+// có cho phép vượt định mức không
 const isOverLimit = ref(false);
 
 const optionsValue = [
@@ -741,6 +843,15 @@ const formulaVariables = [
 // Danh sách tham số (thành phần lương) cho popup Định mức
 const formulaParameters = ref([]);
 
+/**
+ * Lấy danh sách thành phần lương dùng làm tham số cho công thức
+ *
+ * Sử dụng khi: Component được mount
+ *
+ * @returns {Promise<void>}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 async function fetchFormulaParameters() {
   try {
     const result = await salaryCompositionApi.getAll();
@@ -797,6 +908,17 @@ const hasFormulaLabel = computed(
 );
 
 // ── Populate form data (edit, view, or duplicate) ─────────────────
+/**
+ * Tải dữ liệu bản ghi vào form
+ *
+ * Sử dụng khi: Form được mở ở chế độ xem, sửa hoặc nhân bản
+ *
+ * @param {string} id ID bản ghi
+ * @param {boolean} isDuplicate True nếu đang ở chế độ nhân bản
+ * @returns {Promise<void>}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 async function loadData(id, isDuplicate = false) {
   if (!id) return;
   try {
@@ -888,6 +1010,15 @@ const validateField = (field) => {
   return !message;
 };
 
+/**
+ * Kiểm tra tính hợp lệ của toàn bộ form
+ *
+ * Sử dụng khi: Người dùng click nút Lưu
+ *
+ * @returns {boolean} True nếu form hợp lệ
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 const validateForm = () => {
   const results = Object.keys(validationRules).map(validateField);
   return results.every(Boolean);
@@ -945,6 +1076,15 @@ const touchAll = () => {
 };
 
 // ── Build payload gửi API ────────────────────────────────────
+/**
+ * Tạo payload chứa dữ liệu form để gửi lên API
+ *
+ * Sử dụng khi: Chuẩn bị gửi dữ liệu lên BE khi nhấn Lưu
+ *
+ * @returns {Object} Dữ liệu payload
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 function buildPayload() {
   // Map selectedOrgs (mảng ID) sang labels thông qua flatMap
   const flatOrgMap = {};
@@ -992,6 +1132,15 @@ function buildPayload() {
 }
 
 // ── Submit handlers ─────────────────────────────────────────
+/**
+ * Xử lý sự kiện lưu form
+ *
+ * Sử dụng khi: Người dùng click nút Lưu
+ *
+ * @returns {Promise<void>}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 async function handleSubmit() {
   touchAll();
   if (!validateForm()) {
@@ -1001,6 +1150,15 @@ async function handleSubmit() {
   await submitForm(false);
 }
 
+/**
+ * Xử lý sự kiện lưu và tiếp tục thêm mới
+ *
+ * Sử dụng khi: Người dùng click nút Lưu và thêm
+ *
+ * @returns {Promise<void>}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 async function handleSubmitAndAdd() {
   touchAll();
   if (!validateForm()) {
@@ -1010,6 +1168,16 @@ async function handleSubmitAndAdd() {
   await submitForm(true);
 }
 
+/**
+ * Thực thi quá trình submit form (gọi API Create/Update)
+ *
+ * Sử dụng khi: Có yêu cầu lưu form sau khi đã qua bước validate
+ *
+ * @param {boolean} andAdd Cờ xác định có tiếp tục thêm mới sau khi lưu thành công không
+ * @returns {Promise<void>}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 async function submitForm(andAdd = false) {
   isSubmitting.value = true;
   try {
@@ -1065,6 +1233,15 @@ async function submitForm(andAdd = false) {
   }
 }
 
+/**
+ * Reset form về trạng thái ban đầu
+ *
+ * Sử dụng khi: Lưu và thêm thành công, cần làm mới các trường để nhập tiếp
+ *
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 function resetForm() {
   formData.value = {
     salaryCompositionId: "",
@@ -1112,6 +1289,15 @@ function resetForm() {
 }
 
 // ── Đóng form với confirm nếu đã nhập dữ liệu ───────────────
+/**
+ * Xử lý sự kiện đóng form
+ *
+ * Sử dụng khi: Người dùng nhấn nút Hủy hoặc nút Quay lại
+ *
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 const handleCloseForm = () => {
   emit("openAlert", {
     title: "Thoát và không lưu?",
@@ -1126,6 +1312,7 @@ const handleCloseForm = () => {
 };
 
 // Task 6: Auto-fill mã thành phần khi nhập tên (chỉ khi chưa edit mode và chưa sửa mã thủ công)
+// trạng thái kiểm tra xem người dùng có tự sửa mã thành phần lương không
 const isCodeManuallyEdited = ref(false);
 
 // Theo dõi nếu người dùng tự sửa mã
@@ -1150,6 +1337,16 @@ watch(
   },
 );
 
+/**
+ * Tạo mã thành phần tự động từ tên thành phần
+ *
+ * Sử dụng khi: Auto-fill mã dựa vào tên khi người dùng chưa sửa mã thủ công
+ *
+ * @param {string} name Tên thành phần lương
+ * @returns {string} Mã được tạo tự động
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 function toCompositionCode(name) {
   return (name || "")
     .trim()

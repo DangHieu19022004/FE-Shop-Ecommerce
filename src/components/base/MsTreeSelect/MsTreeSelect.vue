@@ -81,16 +81,31 @@ const props = defineProps({
 
 const emit = defineEmits(["update:modelValue", "focus", "blur"]);
 
+// Trạng thái mở dropdown
 const isOpen = ref(false);
+// Tham chiếu wrapper DOM
 const wrapperRef = ref(null);
+// Tham chiếu container chứa các chip đã chọn
 const chipsContainerRef = ref(null);
+// Set lưu các id của node đang được mở rộng (expand)
 const expandedIds = ref(new Set());
 
 // ── Chip overflow logic ──────────────────────────────────────────
+// Số lượng chip bị ẩn khi không đủ chỗ trống
 const hiddenCount = ref(0);
+// Danh sách các chip đang hiển thị trên giao diện
 const visibleItems = ref([]);
 
 // Flatten tree để lấy item theo id
+/**
+ * Flatten tree để lấy item theo id nhanh chóng (Dictionary {id: node}).
+ *
+ * Sử dụng khi: Cần tra cứu nhanh thông tin node từ id.
+ *
+ * @returns {Object} Dictionary map theo id
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 const flatMap = computed(() => {
   const map = {};
   const walk = (nodes) => {
@@ -104,9 +119,15 @@ const flatMap = computed(() => {
 });
 
 /**
- * Task 2: Smart chip display.
+ * Danh sách item được hiển thị dưới dạng chip (Smart chip display).
  * Nếu cha đã được chọn thì không hiển thị chip con.
  * Chỉ hiển thị node "topmost" đại diện cho selection đó.
+ *
+ * Sử dụng khi: Lấy danh sách chip để render ở thanh input.
+ *
+ * @returns {Array} Mảng các node được hiển thị
+ *
+ * CREATED BY: TDHieu (09/06/2026)
  */
 const displayItems = computed(() => {
   if (props.modelValue.length === 0) return [];
@@ -143,6 +164,15 @@ const displayItems = computed(() => {
     .filter((item) => !hasSelectedAncestor(item.id));
 });
 
+/**
+ * Danh sách item hiện đang được chọn đầy đủ (chứa toàn bộ node ứng với id trong modelValue).
+ *
+ * Sử dụng khi: Cần map mảng id sang mảng object node.
+ *
+ * @returns {Array} Mảng các object node
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 const selectedItems = computed(() =>
   props.modelValue
     .map((id) => flatMap.value[id])
@@ -150,8 +180,14 @@ const selectedItems = computed(() =>
 );
 
 /**
- * Tính toán bao nhiêu chip visible để không vượt chiều rộng container.
- * Badge "+N" có cùng style với chip thường.
+ * Tính toán số lượng chip hiển thị để không bị tràn thanh input.
+ * Các chip bị tràn sẽ gom vào một badge kiểu "+N".
+ *
+ * Sử dụng khi: Container thay đổi kích thước hoặc danh sách item thay đổi.
+ *
+ * @returns {Promise<void>}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
  */
 async function recalculateOverflow() {
   await nextTick();
@@ -256,10 +292,29 @@ onMounted(() => {
   walkExpand(props.options);
 });
 
+/**
+ * Toggle đóng/mở dropdown.
+ *
+ * Sử dụng khi: Người dùng click vào input.
+ *
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 const toggleDropdown = () => {
   isOpen.value = !isOpen.value;
 };
 
+/**
+ * Xóa một item đang được chọn (click vào dấu X trên chip).
+ *
+ * Sử dụng khi: Người dùng bỏ chọn một node trực tiếp từ thanh input.
+ *
+ * @param {string|number} id ID của node cần xóa
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 const removeItem = (id) => {
   const node = flatMap.value[id];
   const getAllIds = (n) => {
@@ -275,7 +330,16 @@ const removeItem = (id) => {
   emit("update:modelValue", bubbleUpSelection(afterRemove, props.options));
 };
 
-// Lấy tất cả id trong subtree (bao gồm cả node hiện tại)
+/**
+ * Lấy tất cả ID của một subtree bao gồm cả node gốc truyền vào.
+ *
+ * Sử dụng khi: Cần chọn/bỏ chọn toàn bộ nhánh con.
+ *
+ * @param {Object} node Node gốc
+ * @returns {Array} Mảng các ID trong subtree
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 const getAllIds = (node) => {
   const ids = [node.id];
   if (node.children?.length) {
@@ -287,8 +351,17 @@ const getAllIds = (node) => {
 };
 
 /**
- * Bubble-up: sau khi toggle, nếu TẤT CẢ con trực tiếp của cha đều được
- * chọn thì tự chọn cha; nếu không thì bỏ cha ra.
+ * Xử lý lan truyền sự lựa chọn từ dưới lên (Bubble-up).
+ * Duyệt theo post-order (con trước cha), nếu tất cả con của cha được chọn
+ * thì tự động chọn cha, ngược lại thì bỏ chọn cha.
+ *
+ * Sử dụng khi: Sau mỗi lần chọn/bỏ chọn để đồng bộ state các node cha-con.
+ *
+ * @param {Array} selected Mảng các ID đang được chọn
+ * @param {Array} nodes Cây dữ liệu hiện tại
+ * @returns {Array} Mảng các ID sau khi bubble-up
+ *
+ * CREATED BY: TDHieu (09/06/2026)
  */
 function bubbleUpSelection(selected, nodes) {
   const selectedSet = new Set(selected);
@@ -311,8 +384,15 @@ function bubbleUpSelection(selected, nodes) {
 }
 
 /**
- * Khi toggle select một node, cập nhật selection của tất cả children,
- * rồi bubble-up: nếu tất cả con của 1 cha được chọn → tự chọn cha.
+ * Xử lý toggle chọn/bỏ chọn một node trên cây dropdown.
+ * Tự động chọn/bỏ chọn toàn bộ con và lan truyền bubble-up lên cha.
+ *
+ * Sử dụng khi: Component MsTreeNode phát ra sự kiện toggle-select.
+ *
+ * @param {string|number} nodeId ID của node bị tương tác
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
  */
 const handleToggleSelect = (nodeId) => {
   const node = flatMap.value[nodeId];
@@ -338,6 +418,16 @@ const handleToggleSelect = (nodeId) => {
   emit("update:modelValue", newSelected);
 };
 
+/**
+ * Xử lý mở rộng/thu gọn (expand/collapse) một nhánh trên cây.
+ *
+ * Sử dụng khi: Người dùng click vào icon chevron bên cạnh một folder.
+ *
+ * @param {string|number} nodeId ID của node cần mở rộng/thu gọn
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 const handleToggleExpand = (nodeId) => {
   if (expandedIds.value.has(nodeId)) {
     expandedIds.value.delete(nodeId);
@@ -346,7 +436,16 @@ const handleToggleExpand = (nodeId) => {
   }
 };
 
-// Click outside
+/**
+ * Đóng dropdown khi người dùng click ra ngoài khu vực component.
+ *
+ * Sử dụng khi: Sự kiện mousedown diễn ra trên document.
+ *
+ * @param {Event} e Sự kiện mousedown
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 const onClickOutside = (e) => {
   if (wrapperRef.value && !wrapperRef.value.contains(e.target)) {
     isOpen.value = false;

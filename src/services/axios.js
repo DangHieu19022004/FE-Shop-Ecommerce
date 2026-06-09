@@ -1,9 +1,11 @@
 import axios from "axios";
 
 /**
- * Mục đích: Quản lý khởi tạo instance axios và cấu hình các interceptor.
- * Sử dụng trong trường hợp: Các API service cần một client HTTP đã được cấu hình sẵn baseURL và xử lý lỗi.
- * CREATED BY: TDHieu (08/06/2026)
+ * Khởi tạo instance axios và cấu hình các interceptor.
+ *
+ * Sử dụng khi: Các API service cần một client HTTP đã được cấu hình sẵn baseURL và xử lý lỗi.
+ *
+ * CREATED BY: TDHieu (09/06/2026)
  */
 const axiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || "https://localhost:7173/api",
@@ -15,17 +17,21 @@ const axiosInstance = axios.create({
 });
 
 /**
- * Mục đích: Cấu hình interceptor cho request và response để xử lý token và lỗi toàn cục.
- * Tự động gắn token vào header trước mỗi request
- * CREATED BY: TDHieu (08/06/2026)
+ * Cấu hình interceptor cho request và response để xử lý token và lỗi toàn cục.
+ * Tự động gắn token vào header trước mỗi request.
+ *
+ * CREATED BY: TDHieu (09/06/2026)
  */
 axiosInstance.interceptors.request.use(
   /**
-   * Hàm dùng để: Chặn request trước khi gửi đi để đính kèm token hoặc config cần thiết.
-   * Dùng trong trường hợp: Cần thêm header xác thực cho toàn bộ các call API.
-   * @param {Object} config - Cấu hình của request.
-   * @returns {Object} - Cấu hình request đã được sửa đổi.
-   * CREATED BY: TDHieu (08/06/2026)
+   * Chặn request trước khi gửi đi để đính kèm token hoặc config cần thiết.
+   *
+   * Sử dụng khi: Cần thêm header xác thực cho toàn bộ các call API.
+   *
+   * @param {Object} config Cấu hình của request
+   * @returns {Object} Cấu hình request đã được sửa đổi
+   *
+   * CREATED BY: TDHieu (09/06/2026)
    */
   (config) => {
     // TODO: Thay "access_token" bằng key lưu token thật trong localStorage/sessionStorage
@@ -42,28 +48,34 @@ axiosInstance.interceptors.request.use(
 );
 
 /**
- * Xử lý lỗi toàn cục (200, 400,...)
+ * Xử lý lỗi toàn cục (200, 400, 500...)
  *
- * CREATED BY: TDHieu (08/06/2026)
+ * CREATED BY: TDHieu (09/06/2026)
  */
 axiosInstance.interceptors.response.use(
   // Trường hợp thành công: trả thẳng data để component không cần .data.data
   /**
-   * Hàm dùng để: Trích xuất trực tiếp payload data từ HTTP response.
-   * Dùng trong trường hợp: API call thành công, bỏ qua vỏ bọc của axios.
-   * @param {Object} response - Phản hồi thành công từ axios.
-   * @returns {any} - Phần data thực sự từ API trả về.
-   * CREATED BY: TDHieu (08/06/2026)
+   * Trích xuất trực tiếp payload data từ HTTP response.
+   *
+   * Sử dụng khi: API call thành công, bỏ qua vỏ bọc của axios.
+   *
+   * @param {Object} response Phản hồi thành công từ axios
+   * @returns {any} Phần data thực sự từ API trả về
+   *
+   * CREATED BY: TDHieu (09/06/2026)
    */
   (response) => response.data,
 
   // Trường hợp lỗi
   /**
-   * Hàm dùng để: Xử lý tập trung các lỗi HTTP phổ biến.
-   * Dùng trong trường hợp: Server trả về lỗi (4xx, 5xx) hoặc lỗi mạng.
-   * @param {Object} error - Đối tượng lỗi từ axios.
-   * @returns {Promise<any>} - Promise bị reject mang cấu trúc lỗi đã chuẩn hóa.
-   * CREATED BY: TDHieu (08/06/2026)
+   * Xử lý tập trung các lỗi HTTP phổ biến.
+   *
+   * Sử dụng khi: Server trả về lỗi (4xx, 5xx) hoặc lỗi mạng.
+   *
+   * @param {Object} error Đối tượng lỗi từ axios
+   * @returns {Promise<any>} Promise bị reject mang cấu trúc lỗi đã chuẩn hóa
+   *
+   * CREATED BY: TDHieu (09/06/2026)
    */
   (error) => {
     // Lấy status code nếu có, mặc định 0 nếu lỗi không có response (network error)

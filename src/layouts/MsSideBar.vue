@@ -153,7 +153,7 @@ const emit = defineEmits(["update:isCollapse"]);
 // ID của menu đang mở (hover), null = đóng hết
 const openMenuId = ref(null);
 
-// Dữ liệu menu con cho từng mục có submenu
+// Dữ liệu menu con cho từng mục có submenu: Dữ liệu tính lương
 const salaryDataItems = [
   { label: "Chấm công", value: "attendance" },
   { label: "Doanh số", value: "sales" },
@@ -182,11 +182,11 @@ const paymentItems = [
 
 // FUNCTION:
 /**
- * Hàm đóng mở sidebar
+ * Đóng mở sidebar.
  *
- * Sử dụng khi: Người dùng click vào nút collapse ở bottom sidebar
+ * Sử dụng khi: Người dùng click vào nút collapse ở bottom sidebar.
  *
- * CREATED BY: TDHieu (08/06/2026)
+ * CREATED BY: TDHieu (09/06/2026)
  */
 const toggleCollapse = () => {
   emit("update:isCollapse", !props.isCollapse);

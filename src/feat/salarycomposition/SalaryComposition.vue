@@ -481,19 +481,15 @@ import SalaryCompositionSystem from "../salarycompositionsystems/SalaryCompositi
 import FilterSalaryComposition from "./FilterSalaryComposition.vue";
 import MsTreeSelect from "@/components/base/MsTreeSelect/MsTreeSelect.vue";
 import MsToastContainer from "@/components/overlay/MsToast/MsToastContainer.vue";
-// import MsTooltip from "@/components/base/MsTooltip.vue";
 import MsLoader from "@/components/base/MsLoader.vue";
 import MsOverlay from "@/components/overlay/MsOverlay.vue";
 import MsAlert from "@/components/overlay/MsAlert.vue";
 import FormulaCell from "@/components/base/MsFormula/FormulaCell.vue";
 import { onMounted, onUnmounted, ref, computed, watch } from "vue";
-
-// ======================== Import services ========================
 import salaryCompositionApi from "@/services/salaryCompositionService";
 import organizationApi from "@/services/organizationService";
 import gridConfigApi from "@/services/gridConfigService";
-
-// ======================== Import enum constants ========================
+import { LocalStorageStore } from "@/stores/localStorageStore";
 import {
   SalaryCompositionStatus,
   SalaryCompositionStatusLabel,
@@ -506,29 +502,76 @@ import {
   SalaryCompositionShowPaycheckLabel,
 } from "@/constants/enums";
 
-// ======================== UI state ========================
+
+// VARIABLE:
+// trạng thái đóng/mở filter sidebar
 const isOpenFilter = ref(false);
+// trạng thái đóng/mở popup thiết lập cột
 const isOpenPopupSettingColumn = ref(false);
+// trạng thái đóng/mở dropdown chọn thêm thành phần lương từ hệ thống
 const toggleSelectComposition = ref(false);
+// trạng thái đóng/mở form thêm/sửa thành phần lương
 const isShowForm = ref(false);
+// trạng thái đóng/mở popup chọn thành phần lương từ hệ thống
 const isShowPopupSystem = ref(false);
+// id của thành phần lương đang sửa hoặc xem (null = thêm mới)
 const editId = ref(null); // null = thêm mới, string = sửa
 const viewId = ref(null); // string = xem chi tiết (readonly)
+// id của thành phần lương đang nhân bản (null = không nhân bản)
 const duplicateId = ref(null); // string = nhân bản
 
+
+//FUNCTION:
+/**
+ * Toggle trạng thái popup thiết lập cột
+ *
+ * Sử dụng khi: Người dùng click vào icon thiết lập cột
+ *
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 const togglePopupSettingColumn = () => {
   isOpenPopupSettingColumn.value = !isOpenPopupSettingColumn.value;
 };
 
+/**
+ * Mở dropdown chọn thêm thành phần lương từ hệ thống
+ *
+ * Sử dụng khi: Người dùng click vào icon dropdown cạnh nút Thêm
+ *
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 const openSelectComposition = () => {
   toggleSelectComposition.value = !toggleSelectComposition.value;
 };
 
+/**
+ * Mở popup chọn thành phần lương từ hệ thống
+ *
+ * Sử dụng khi: Người dùng click vào nút Chọn từ danh mục của hệ thống
+ *
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 const openPopupSystem = () => {
   toggleSelectComposition.value = false;
   isShowPopupSystem.value = true;
 };
 
+/**
+ * Mở form thêm/sửa thành phần lương
+ *
+ * Sử dụng khi: Người dùng click nút Thêm hoặc icon Sửa trên từng dòng
+ *
+ * @param {string|null} id ID của thành phần lương cần sửa (null nếu thêm mới)
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 const handleOpenForm = (id) => {
   editId.value = id;
   viewId.value = null;
@@ -536,7 +579,16 @@ const handleOpenForm = (id) => {
   isShowForm.value = true;
 };
 
-// Task 2: click vào row để mở form xem chi tiết (readonly)
+/**
+ * Mở form xem chi tiết thành phần lương (readonly)
+ *
+ * Sử dụng khi: Người dùng click vào một dòng trong bảng (Task 2)
+ *
+ * @param {Object} row Dữ liệu của dòng được click
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 const handleRowClick = (row) => {
   viewId.value = row.salaryCompositionId;
   editId.value = null;
@@ -544,6 +596,16 @@ const handleRowClick = (row) => {
   isShowForm.value = true;
 };
 
+/**
+ * Mở form nhân bản thành phần lương
+ *
+ * Sử dụng khi: Người dùng click icon Nhân bản trên một dòng
+ *
+ * @param {Object} row Dữ liệu của dòng cần nhân bản
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 const handleDuplicate = (row) => {
   duplicateId.value = row.salaryCompositionId;
   editId.value = null;
@@ -551,19 +613,33 @@ const handleDuplicate = (row) => {
   isShowForm.value = true;
 };
 
+/**
+ * Đóng form và làm mới danh sách dữ liệu
+ *
+ * Sử dụng khi: Người dùng click Hủy hoặc đóng form
+ *
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 const handleCloseFormAndRefresh = () => {
   isShowForm.value = false;
   editId.value = null;
   viewId.value = null;
   duplicateId.value = null;
+  // Sau khi đóng form, gọi API để làm mới dữ liệu, đảm bảo chính xác nhất
   fetchSalaryCompositions();
 };
 
 /**
- * Khi Lưu (andAdd=false) hoặc Lưu và thêm (andAdd=true):
- * - Nếu thêm mới: unshift data lên đầu mảng ngay (optimistic UX)
- * - Nếu sửa: cập nhật tại chỗ + move lên đầu
- * - Sau đó vẫn gọi fetch để đồng bộ với BE
+ * Cập nhật danh sách sau khi lưu từ form
+ *
+ * Sử dụng khi: Form emit sự kiện saved
+ *
+ * @param {Object} payload Dữ liệu trả về từ form chứa data và isEdit
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
  */
 const handleSavedRefresh = ({ data, isEdit } = {}) => {
   if (data) {
@@ -588,71 +664,186 @@ const handleSavedRefresh = ({ data, isEdit } = {}) => {
   fetchSalaryCompositions();
 };
 
+/**
+ * Làm mới danh sách sau khi thêm từ hệ thống
+ *
+ * Sử dụng khi: Popup hệ thống emit sự kiện saved
+ *
+ * @param {number} count Số lượng bản ghi đã thêm
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 const handlePopupSystemSaved = (count) => {
   if (count > 0) {
-    addToast(`Đã thêm ${count} thành phần lương từ hệ thống`, "success");
+    addToast(`Thêm thành công`, "success");
     fetchSalaryCompositions();
   }
 };
 
+// VARIABLE:
+// danh sách id đơn vị được chọn trong filter
 const selectedOrgs = ref([]);
+// trạng thái lọc (null = Tất cả, 1 = Đang theo dõi, 2 = Ngừng theo dõi)
 const selectedStatus = ref(null); // null = Tất cả
+// trạng thái đóng/mở dropdown chọn trạng thái
 const statusMenuOpen = ref(false);
+// từ khóa tìm kiếm
 const searchKeyword = ref("");
+// trường đang được sắp xếp
 const sortField = ref("");
+// chiều sắp xếp (asc/desc)
 const sortDirection = ref("");
+// danh sách bộ lọc nâng cao từ filter sidebar
 const advancedFilters = ref([]); // Bộ lọc nâng cao từ sidebar
+// timer cho debounce khi gõ tìm kiếm
 let searchDebounceTimer = null;
-
-const handleApplyAdvancedFilter = (filters) => {
-  advancedFilters.value = filters;
-  pageIndex.value = 1;
-  fetchSalaryCompositions();
-};
-
-const handleResetAdvancedFilter = () => {
-  advancedFilters.value = [];
-  pageIndex.value = 1;
-  fetchSalaryCompositions();
-};
-
+// options cho dropdown trạng thái
 const statusItems = [
   { label: "Tất cả", value: null },
   { label: "Đang theo dõi", value: SalaryCompositionStatus.Following },
   { label: "Ngừng theo dõi", value: SalaryCompositionStatus.StoppedFollowing },
 ];
+// Các trường có thể cấu hình hiển thị trên bảng
+const pageIndex = ref(1);
+const pageSize = ref(15);
+const totalRecords = ref(0);
+const pageSizeOptions = [
+  { label: "15", value: 15 },
+  { label: "25", value: 25 },
+  { label: "50", value: 50 },
+  { label: "100", value: 100 },
+];
+// danh sách thành phần lương hiển thị trên bảng
+const salaryCompositions = ref([]);
+// trạng thái đang tải dữ liệu bảng
+const isLoading = ref(false);
+// thông báo lỗi khi lấy dữ liệu bảng
+const errorMessage = ref("");
+// dữ liệu cây đơn vị cho TreeSelect
+const orgTreeData = ref([]);
+// Biến localstorage để lưu cấu hình cột của grid vào trình duyệt mỗi người dùng
+const GRID_NAME = LocalStorageStore.GRID_SALARY_COMPOSITION;
+/** Debounce timer map per columnName */
+const _saveTimers = {};
 
+
+// NOTICE: Computed này dùng để hiển thị label của trạng thái đã chọn trên dropdown, tránh việc hiển thị raw value (vd: 1, 2
 const selectedStatusLabel = computed(
   () =>
     statusItems.find((i) => i.value === selectedStatus.value)?.label ??
     "Tất cả",
 );
 
+// FUNCTION:
+/**
+ * Áp dụng bộ lọc nâng cao và tải lại dữ liệu
+ *
+ * Sử dụng khi: Người dùng nhấn Áp dụng trong filter sidebar
+ *
+ * @param {Array} filters Mảng các điều kiện lọc
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
+const handleApplyAdvancedFilter = (filters) => {
+  advancedFilters.value = filters;
+  pageIndex.value = 1;
+  fetchSalaryCompositions();
+};
+
+/**
+ * Bỏ lọc nâng cao và tải lại dữ liệu
+ *
+ * Sử dụng khi: Người dùng nhấn Đặt lại trong filter sidebar
+ *
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
+const handleResetAdvancedFilter = () => {
+  advancedFilters.value = [];
+  pageIndex.value = 1;
+  fetchSalaryCompositions();
+};
+
+/**
+ * Thay đổi lọc trạng thái
+ *
+ * Sử dụng khi: Người dùng chọn một trạng thái trong dropdown
+ *
+ * @param {Object} item Mục trạng thái được chọn
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 const handleStatusChange = (item) => {
-  // @select emit cả object { label, value }, cần lấy item.value
+  // item.value có thể là null (Tất cả), 1 (Đang theo dõi) hoặc 2 (Ngừng theo dõi)
   selectedStatus.value = item?.value ?? null;
   statusMenuOpen.value = false;
   pageIndex.value = 1;
+  // Khi thay đổi trạng thái, gọi API để lấy lại dữ liệu đã được filter theo trạng thái mới
   fetchSalaryCompositions();
 };
 
+/**
+ * Thay đổi lọc đơn vị
+ *
+ * Sử dụng khi: Người dùng chọn/bỏ chọn đơn vị trong TreeSelect
+ *
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 const handleOrgChange = () => {
+  // Khi thay đổi đơn vị, gọi API để lấy lại dữ liệu đã được filter theo đơn vị mới
   pageIndex.value = 1;
   fetchSalaryCompositions();
 };
 
+/**
+ * Tìm kiếm theo từ khóa có debounce
+ *
+ * Sử dụng khi: Người dùng gõ vào ô tìm kiếm
+ *
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 const handleSearchInput = () => {
+  // Xóa timer cũ nếu người dùng gõ tiếp trước khi debounce kết thúc
   clearTimeout(searchDebounceTimer);
+  // Đặt lại timer mới
   searchDebounceTimer = setTimeout(() => {
     pageIndex.value = 1;
     fetchSalaryCompositions();
-  }, 300);
+  }, 500);
 };
 
-// ======================== Paging state ========================
+/**
+ * Chuyển đổi chuỗi sang định dạng snake_case
+ *
+ * Sử dụng khi: Cần chuyển đổi tên trường (vd: columnName) để gửi lên API sắp xếp
+ *
+ * @param {string} value Chuỗi cần chuyển đổi
+ * @returns {string} Chuỗi sau khi chuyển sang snake_case
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 const toSnakeCase = (value) =>
   value.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
 
+/**
+ * Xử lý khi thay đổi sắp xếp trên bảng
+ *
+ * Sử dụng khi: Người dùng click vào tiêu đề cột để sắp xếp
+ * Là sự kiện để sort giảm dần tăng dần ở MsMenuTable
+ *
+ * @param {Object} payload Chứa field và direction (asc/desc)
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 const handleSortChange = ({ field, direction }) => {
   sortField.value = field;
   sortDirection.value = direction;
@@ -660,17 +851,7 @@ const handleSortChange = ({ field, direction }) => {
   fetchSalaryCompositions();
 };
 
-const pageIndex = ref(1);
-const pageSize = ref(15);
-const totalRecords = ref(0);
-
-const pageSizeOptions = [
-  { label: "15", value: 15 },
-  { label: "25", value: 25 },
-  { label: "50", value: 50 },
-  { label: "100", value: 100 },
-];
-
+// NOTICE: Các computed này dùng để hiển thị thông tin phân trang ở footer, giúp người dùng biết đang xem bản ghi nào trên tổng số bao nhiêu bản ghi, và tổng số trang là bao nhiêu
 const totalPages = computed(() =>
   Math.max(1, Math.ceil(totalRecords.value / pageSize.value)),
 );
@@ -684,32 +865,53 @@ const pageEnd = computed(() =>
   Math.min(pageIndex.value * pageSize.value, totalRecords.value),
 );
 
+//FUNCTION:
+/**
+ * Chuyển đến trang cụ thể
+ *
+ * Sử dụng khi: Người dùng click các nút phân trang (Next, Prev, First, Last)
+ *
+ * @param {number} page Số trang cần chuyển đến
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 const goToPage = (page) => {
   if (page < 1 || page > totalPages.value) return;
   pageIndex.value = page;
   fetchSalaryCompositions();
 };
 
+/**
+ * Thay đổi số bản ghi trên một trang
+ *
+ * Sử dụng khi: Người dùng chọn lại pageSize trong dropdown
+ *
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 const handlePageSizeChange = () => {
   pageIndex.value = 1;
   fetchSalaryCompositions();
 };
 
-// ======================== Data state ========================
-const salaryCompositions = ref([]);
-const isLoading = ref(false);
-const errorMessage = ref("");
-const orgTreeData = ref([]);
-
 /**
  * Gọi API lấy danh sách thành phần lương có phân trang
- * Endpoint: GET /api/SalaryComposition/Paging
+ *
+ * Sử dụng khi: Component mounted, hoặc khi thay đổi trang, lọc, sắp xếp, tìm kiếm
+ *
+ * @returns {Promise<void>}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
  */
 async function fetchSalaryCompositions() {
+  // Khi bắt đầu gọi API, đặt trạng thái loading và xóa lỗi cũ
   isLoading.value = true;
   errorMessage.value = "";
 
   try {
+    // Xây dựng params cho API dựa trên các trạng thái hiện tại: phân trang, tìm kiếm, lọc, sắp xếp
     const params = {
       pageIndex: pageIndex.value,
       pageSize: pageSize.value,
@@ -729,24 +931,30 @@ async function fetchSalaryCompositions() {
       params.organizationIds = selectedOrgs.value.join(",");
     }
 
+    // Sắp xếp: gửi theo format "column_name ASC/DESC"
     if (sortField.value && sortDirection.value) {
       params.sort = `${toSnakeCase(sortField.value)} ${sortDirection.value.toUpperCase()}`;
     }
 
+    // Bộ lọc nâng cao: gửi dưới dạng JSON nếu có
     if (advancedFilters.value && advancedFilters.value.length > 0) {
       params.advancedFilters = JSON.stringify(advancedFilters.value);
     }
 
+    // Gọi API với params đã xây dựng
     const result = await salaryCompositionApi.getPaging(params);
 
+    // Xử lý kết quả trả về: nếu thành công thì cập nhật danh sách và tổng số bản ghi, nếu lỗi thì hiển thị thông báo lỗi
     if (result.isSuccess && result.data) {
+      // Cập nhật danh sách thành phần lương và tổng số bản ghi từ kết quả trả về
       salaryCompositions.value = result.data.data ?? [];
       totalRecords.value = result.data.total ?? 0;
     } else {
-      errorMessage.value = result.data || "Không thể tải dữ liệu";
+      // Nếu API trả về lỗi (isSuccess = false), hiển thị thông báo lỗi từ server hoặc mặc định
+      errorMessage.value = result.data || "Có lỗi xảy ra, vui lòng liên hệ với MISA!";
     }
   } catch (err) {
-    errorMessage.value = err.message || "Có lỗi xảy ra khi tải dữ liệu";
+    errorMessage.value = err.message || "Có lỗi xảy ra, vui lòng liên hệ với MISA!";
     console.error("[SalaryComposition] fetchSalaryCompositions:", err);
   } finally {
     isLoading.value = false;
@@ -755,23 +963,39 @@ async function fetchSalaryCompositions() {
 
 /**
  * Gọi API lấy cây đơn vị cho TreeSelect
- * Endpoint: GET /api/Organization/Tree
+ *
+ * Sử dụng khi: Component mounted để khởi tạo dữ liệu cho bộ lọc
+ *
+ * @returns {Promise<void>}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
  */
 async function fetchOrgTree() {
   try {
+    // Gọi API để lấy dữ liệu cây tổ chức
     const result = await organizationApi.getTree();
+    // Nếu thành công và có dữ liệu, map lại format cho TreeSelect
     if (result.isSuccess && result.data) {
       orgTreeData.value = mapOrgTree(result.data);
     }
   } catch (err) {
+    errorMessage.value = err.message || "Có lỗi xảy ra, vui lòng liên hệ với MISA!";
     console.error("[SalaryComposition] fetchOrgTree:", err);
   }
 }
 
 /**
- * Map cây tổ chức từ API sang format { id, label, children } cho MsTreeSelect
+ * Map cây tổ chức từ API sang format cho MsTreeSelect
+ *
+ * Sử dụng khi: Nhận được dữ liệu cây đơn vị từ API
+ *
+ * @param {Array} nodes Danh sách node từ API
+ * @returns {Array} Danh sách node đã được format
+ *
+ * CREATED BY: TDHieu (09/06/2026)
  */
 function mapOrgTree(nodes) {
+  // Đệ quy để map từng node và con của nó sang format { id, label, children }
   return nodes.map((node) => ({
     id: node.organizationId,
     label: node.organizationName,
@@ -779,15 +1003,13 @@ function mapOrgTree(nodes) {
   }));
 }
 
-// Gọi API ngay khi component được mount
+// NOTICE: OnMounted - Gọi API ngay khi component được mount
 onMounted(() => {
   fetchSalaryCompositions();
   fetchOrgTree();
   loadGridConfig();
 });
 
-// ======================== pa_grid_config – Load & Save ========================
-const GRID_NAME = "SalaryCompositionGrid";
 
 /**
  * Cache gridConfigId: { columnName -> gridConfigId }
@@ -803,15 +1025,21 @@ const gridConfigIdMap = ref({});
 const gridConfigDataMap = ref({});
 
 /**
- * Load cấu hình cột từ pa_grid_config và áp dụng lên fields.
- * Nếu chưa có records nào trong DB → tự động INSERT tất cả cột (initGridConfig)
- * để đảm bảo các lần save sau chỉ dùng PUT (không bị lỗi POST)
+ * Load cấu hình cột từ API và áp dụng lên bảng
+ *
+ * Sử dụng khi: Component mounted
+ *
+ * @returns {Promise<void>}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
  */
 async function loadGridConfig() {
   try {
+    // Gọi API lấy cấu hình cột theo gridName: salary_composition_id
     const result = await gridConfigApi.getByGridName(GRID_NAME);
     if (!result.isSuccess) return;
 
+    // Lấy data trả về, nếu không có thì mặc định là mảng rỗng
     const configs = result.data || [];
 
     // Tách system cols và non-system cols
@@ -843,8 +1071,10 @@ async function loadGridConfig() {
     // Sắp xếp non-system cols theo displayOrder từ DB và áp dụng config
     const orderedNonSystem = nonSystemFields
       .map((field) => {
+        // Áp dụng config từ DB nếu có, nếu không có thì giữ nguyên
         const cfg = dataMap[field.key];
         if (!cfg) return field;
+        // Nếu có config, áp dụng các thuộc tính: width, isVisible, pinned
         return {
           ...field,
           width: cfg.columnWidth ?? field.width,
@@ -870,12 +1100,19 @@ async function loadGridConfig() {
 }
 
 /**
- * Khi DB thiếu records (ví dụ: mới thêm cột mới vào UI hoặc DB mới có 1 record)
- * → INSERT những cột chưa có trong DB.
- * Sau khi init xong gọi lại loadGridConfig để lấy data chuẩn nhất.
+ * Khởi tạo cấu hình cột mặc định nếu chưa có
+ *
+ * Sử dụng khi: loadGridConfig phát hiện thiếu cấu hình trong DB
+ *
+ * @param {Array} existingConfigs Danh sách cấu hình hiện có
+ * @returns {Promise<void>}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
  */
 async function initGridConfig(existingConfigs = []) {
+  // Tạo một Set chứa tên cột đã có trong DB để dễ dàng kiểm tra
   const existingNames = new Set(existingConfigs.map((c) => c.columnName));
+  // Lọc ra các cột thực tế (non-system) cần kiểm tra, bỏ qua các cột đặc biệt như ghost, actions, và cột không có key
   const nonSystemCols = fields.value.filter(
     (f) =>
       !f.isSystemCol &&
@@ -888,9 +1125,11 @@ async function initGridConfig(existingConfigs = []) {
   // Chỉ lấy những cột chưa có trong DB
   const missingCols = nonSystemCols.filter((f) => !existingNames.has(f.key));
 
+  // Nếu có cột nào thiếu, gọi API để insert cấu hình mặc định cho những cột đó
   if (missingCols.length > 0) {
     await Promise.all(
       missingCols.map(async (field) => {
+        // Build payload mặc định cho cột này, có thể tùy chỉnh lại nếu muốn
         const idx = fields.value.findIndex((f) => f.key === field.key);
         const payload = {
           gridName: GRID_NAME,
@@ -904,6 +1143,7 @@ async function initGridConfig(existingConfigs = []) {
           filterType: null,
         };
         try {
+          // Gọi API để insert cấu hình cột mới vào DB
           await gridConfigApi.upsertColumn(payload);
         } catch (err) {
           console.error(
@@ -919,14 +1159,17 @@ async function initGridConfig(existingConfigs = []) {
   }
 }
 
-/** Debounce timer map per columnName */
-const _saveTimers = {};
 
 /**
- * Build payload đầy đủ cho một cột (lấy từ fields.value hiện tại + cache DB).
- * Luôn gửi full entity để tránh BE overwrite các field thành null.
- * @param {string} columnName
- * @param {Object} overrides - các field muốn override (VD: { isVisible: false })
+ * Tạo payload đầy đủ để gửi lên API khi lưu cấu hình cột
+ *
+ * Sử dụng khi: Cần lưu lại cấu hình của một cột
+ *
+ * @param {string} columnName Tên cột
+ * @param {Object} overrides Các giá trị muốn ghi đè
+ * @returns {Object} Payload để gửi API
+ *
+ * CREATED BY: TDHieu (09/06/2026)
  */
 function buildPayload(columnName, overrides = {}) {
   const field = fields.value.find((f) => f.key === columnName);
@@ -962,10 +1205,18 @@ function buildPayload(columnName, overrides = {}) {
 }
 
 /**
- * Lưu cấu hình một cột lên BE (debounced 600ms)
- * Luôn gửi full payload để tránh PUT overwrite field thành null
+ * Lưu cấu hình một cột (có debounce)
+ *
+ * Sử dụng khi: Resize cột, kéo thả cột, ẩn hiện cột
+ *
+ * @param {string} columnName Tên cột
+ * @param {Object} overrides Các giá trị ghi đè
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
  */
 function saveColumnConfig(columnName, overrides = {}) {
+  // Bỏ qua các cột đặc biệt không cần lưu cấu hình
   if (
     !columnName ||
     columnName === "ghost" ||
@@ -973,13 +1224,15 @@ function saveColumnConfig(columnName, overrides = {}) {
     columnName === ""
   )
     return;
-
+  // Clear debounce timer cũ nếu có
   clearTimeout(_saveTimers[columnName]);
+  // Đặt timer mới để thực hiện lưu sau 600ms, nếu trong thời gian đó có thay đổi tiếp thì sẽ reset timer, tránh gọi API quá nhiều lần
   _saveTimers[columnName] = setTimeout(async () => {
     try {
+      // Build payload đầy đủ dựa trên state hiện tại của fields và cache DB, cộng với các giá trị override cụ thể cho lần lưu này
       const payload = buildPayload(columnName, overrides);
       const result = await gridConfigApi.upsertColumn(payload);
-
+      // Nếu lưu thành công, cập nhật lại cache với gridConfigId mới (nếu là insert) và data mới
       if (result.isSuccess && result.data) {
         // Cập nhật cả 2 cache sau khi lưu thành công
         gridConfigIdMap.value[columnName] = result.data.gridConfigId;
@@ -992,18 +1245,32 @@ function saveColumnConfig(columnName, overrides = {}) {
 }
 
 /**
- * Xử lý khi resize cột:
- * 1. Cập nhật width trong fields.value ngay (source of truth)
- * 2. Sau đó save lên BE với payload đầy đủ (bao gồm width mới)
+ * Xử lý khi người dùng resize kích thước cột
+ *
+ * Sử dụng khi: Resize xong một cột trên bảng
+ *
+ * @param {Object} payload Chứa field và width mới
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
  */
 const handleColumnResize = ({ field, width }) => {
   const target = fields.value.find((f) => f.key === field.key);
   if (target) target.width = width;
-  // Pass columnWidth override rõ ràng để đảm bảo payload dùng đúng width mới
+  // Gọi hàm lưu cấu hình cột với giá trị width mới, các giá trị khác sẽ được lấy từ state hiện tại và cache DB trong hàm buildPayload
   saveColumnConfig(field.key, { columnWidth: width });
 };
 
-// ======================== Xóa một bản ghi ========================
+/**
+ * Xử lý xóa một bản ghi
+ *
+ * Sử dụng khi: Người dùng click icon Xóa trên một dòng
+ *
+ * @param {Object} row Dữ liệu của dòng cần xóa
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 function handleDeleteOne(row) {
   const { salaryCompositionId: id, salaryCompositionName } = row;
   emit("openAlert", {
@@ -1029,6 +1296,16 @@ function handleDeleteOne(row) {
   });
 }
 
+/**
+ * Xóa bản ghi từ form chi tiết
+ *
+ * Sử dụng khi: Người dùng click nút Xóa trong form chi tiết
+ *
+ * @param {Object} row Dữ liệu đang được mở trong form
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 function handleDeleteFromForm(row) {
   const { salaryCompositionId: id, salaryCompositionName } = row;
   emit("openAlert", {
@@ -1055,6 +1332,15 @@ function handleDeleteFromForm(row) {
 }
 
 // ======================== Xóa nhiều bản ghi ========================
+/**
+ * Xử lý xóa nhiều bản ghi đã chọn
+ *
+ * Sử dụng khi: Người dùng click nút Xóa trên thanh công cụ
+ *
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 function handleDeleteSelected() {
   if (selectedIds.value.length === 0) return;
 
@@ -1107,7 +1393,16 @@ function handleDeleteSelected() {
   });
 }
 
-// ======================== Toggle trạng thái theo dõi ========================
+/**
+ * Đổi trạng thái theo dõi của một bản ghi
+ *
+ * Sử dụng khi: Người dùng click icon Đổi trạng thái trên một dòng
+ *
+ * @param {Object} row Dữ liệu của dòng cần đổi trạng thái
+ * @returns {Promise<void>}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 async function handleToggleStatus(row) {
   if (row.salaryCompositionSystemId) {
     addToast("Không thể thay đổi trạng thái của dữ liệu hệ thống", "warning");
@@ -1130,7 +1425,16 @@ async function handleToggleStatus(row) {
   };
 }
 
-// Task 4: Cập nhật trạng thái nhiều bản ghi
+/**
+ * Cập nhật trạng thái nhiều bản ghi
+ *
+ * Sử dụng khi: Người dùng click Đang theo dõi / Ngừng theo dõi trên thanh công cụ
+ *
+ * @param {number} status Trạng thái mới cần cập nhật
+ * @returns {Promise<void>}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 async function handleBulkUpdateStatus(status) {
   if (selectedIds.value.length === 0) return;
 
@@ -1159,6 +1463,7 @@ async function handleBulkUpdateStatus(status) {
   };
 }
 
+// cấu hình hộp thoại xác nhận đổi trạng thái
 const alertStatusConfig = ref({
   isOpen: false,
   title: "Thông báo",
@@ -1169,15 +1474,44 @@ const alertStatusConfig = ref({
   pendingStatus: null,
 });
 
+/**
+ * Đóng hộp thoại xác nhận đổi trạng thái
+ *
+ * Sử dụng khi: Người dùng click Hủy hoặc đóng popup
+ *
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 const closeAlertStatus = () => {
   alertStatusConfig.value.isOpen = false;
 };
 
+/**
+ * Xác nhận thực hiện đổi trạng thái
+ *
+ * Sử dụng khi: Người dùng click Đồng ý trên hộp thoại xác nhận
+ *
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 const confirmUpdateStatus = () => {
   executeUpdateStatus(alertStatusConfig.value.pendingIds, alertStatusConfig.value.pendingStatus);
   closeAlertStatus();
 };
 
+/**
+ * Thực thi gọi API đổi trạng thái
+ *
+ * Sử dụng khi: Xác nhận đổi trạng thái thành công
+ *
+ * @param {Array} updatableIds Danh sách ID bản ghi cần đổi
+ * @param {number} status Trạng thái mới
+ * @returns {Promise<void>}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 const executeUpdateStatus = async (updatableIds, status) => {
   try {
     const result = await salaryCompositionApi.updateStatusBulk(
@@ -1202,6 +1536,7 @@ const executeUpdateStatus = async (updatableIds, status) => {
 }
 
 // ======================== Checkbox selection ========================
+// danh sách id của các bản ghi được chọn trong bảng
 const selectedIds = ref([]);
 
 const isAllSelected = computed(
@@ -1243,6 +1578,16 @@ const hasInactiveSelected = computed(() => {
   });
 });
 
+/**
+ * Toggle chọn tất cả bản ghi trên trang hiện tại
+ *
+ * Sử dụng khi: Người dùng click checkbox trên tiêu đề bảng
+ *
+ * @param {Object} event Sự kiện DOM
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 const toggleSelectAll = (event) => {
   if (event.target.checked) {
     selectedIds.value = salaryCompositions.value.map(
@@ -1253,8 +1598,28 @@ const toggleSelectAll = (event) => {
   }
 };
 
+/**
+ * Kiểm tra xem một dòng có đang được chọn không
+ *
+ * Sử dụng khi: Render trạng thái checked của checkbox từng dòng
+ *
+ * @param {string} id ID của bản ghi
+ * @returns {boolean} True nếu đang được chọn
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 const isRowSelected = (id) => selectedIds.value.includes(id);
 
+/**
+ * Toggle trạng thái chọn của một dòng
+ *
+ * Sử dụng khi: Người dùng click vào checkbox của một dòng
+ *
+ * @param {string} id ID của bản ghi
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 const toggleRow = (id) => {
   if (selectedIds.value.includes(id)) {
     selectedIds.value = selectedIds.value.filter((item) => item !== id);
@@ -1266,7 +1631,21 @@ const toggleRow = (id) => {
 // ======================== Emit + Toast ========================
 const emit = defineEmits(["openAlert"]);
 
+// danh sách các thông báo toast
 const toasts = ref([]);
+
+/**
+ * Thêm một thông báo toast
+ *
+ * Sử dụng khi: Cần hiển thị thông báo thành công/lỗi cho người dùng
+ *
+ * @param {string} message Nội dung thông báo
+ * @param {string} type Loại thông báo (success, error, warning)
+ * @param {number} duration Thời gian hiển thị (ms)
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 const addToast = (message, type = "success", duration = 3000) => {
   toasts.value.push({
     id: Date.now() + Math.random(),
@@ -1275,6 +1654,16 @@ const addToast = (message, type = "success", duration = 3000) => {
     duration,
   });
 };
+/**
+ * Xóa một thông báo toast
+ *
+ * Sử dụng khi: Toast hết thời gian hiển thị hoặc người dùng chủ động đóng
+ *
+ * @param {number|string} id ID của toast cần xóa
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 const removeToast = (id) => {
   toasts.value = toasts.value.filter((t) => t.id !== id);
 };

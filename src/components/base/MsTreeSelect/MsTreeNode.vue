@@ -76,10 +76,21 @@ const props = defineProps({
 
 defineEmits(["toggle-select", "toggle-expand"]);
 
+// Trạng thái mở rộng (expand) của node hiện tại
 const isExpanded = computed(() => props.expandedIds.has(props.node.id));
+// Trạng thái được chọn (checked) của node hiện tại
 const isSelected = computed(() => props.selectedIds.includes(props.node.id));
 
-// Indeterminate: node có children, một số children được chọn, nhưng không phải tất cả
+/**
+ * Trạng thái indeterminate của checkbox (chọn một phần).
+ * Node có children, một số children được chọn, nhưng không phải tất cả.
+ *
+ * Sử dụng khi: Cần hiển thị icon gạch ngang trên checkbox của thư mục cha.
+ *
+ * @returns {boolean} True nếu trạng thái là indeterminate
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 const isIndeterminate = computed(() => {
   if (!props.node.children?.length) return false;
   if (isSelected.value) return false;
@@ -89,6 +100,16 @@ const isIndeterminate = computed(() => {
   return someSelected && !allSelected;
 });
 
+/**
+ * Lấy tất cả ID của một danh sách các node và các node con của chúng.
+ *
+ * Sử dụng khi: Cần gom nhóm ID để kiểm tra trạng thái chọn/bỏ chọn đồng loạt.
+ *
+ * @param {Array} nodes Danh sách node
+ * @returns {Array} Mảng các ID thu được
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 const getAllIds = (nodes) => {
   const ids = [];
   for (const n of nodes) {

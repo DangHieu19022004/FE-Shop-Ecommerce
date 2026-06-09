@@ -347,6 +347,7 @@ const emit = defineEmits(["openAlert", "close", "saved"]);
 const router = useRouter();
 
 // ── Toast state ──────────────────────────────────────────────
+// Danh sách các thông báo toast
 const toasts = ref([]);
 
 /**
@@ -372,7 +373,9 @@ const removeToast = (id) => {
 };
 
 // ── Alert state ───────────────────────────────────────────────
+// Trạng thái cấu hình của hộp thoại Alert (Cảnh báo)
 const alertState = ref({ isShow: false, title: "", message: "", showConfirmButton: true, cancelText: "Hủy", confirmText: "Xác nhận", cancelType: "none", confirmType: "green" });
+// Hành động sẽ được thực thi khi nhấn "Xác nhận" trên Alert
 const pendingAlertAction = ref(null);
 
 /**
@@ -409,13 +412,21 @@ const handleConfirmAlert = () => {
 };
 
 // ── Filter / search state ────────────────────────────────────
+// Trạng thái hiển thị bộ lọc nâng cao
 const isOpenFilter = ref(false);
+// Từ khóa tìm kiếm theo tên hoặc mã
 const searchKeyword = ref("");
+// Loại thành phần đang được chọn lọc trên toolbar
 const selectedType = ref(null);
+// Trạng thái hiển thị dropdown chọn Loại thành phần
 const statusMenuOpen = ref(false);
+// Tên trường đang được chọn để sắp xếp
 const sortField = ref("");
+// Chiều sắp xếp (asc/desc)
 const sortDirection = ref("");
+// Danh sách các điều kiện lọc nâng cao từ sidebar bộ lọc
 const advancedFilters = ref([]);
+// Timer dùng để debounce khi người dùng gõ phím tìm kiếm
 let searchDebounceTimer = null;
 
 /**
@@ -441,6 +452,7 @@ const handleResetAdvancedFilter = () => {
   fetchData();
 };
 
+// Danh sách tuỳ chọn cho Loại thành phần
 const typeItems = [
   { label: "Tất cả", value: null },
   ...SalaryCompositionTypeOptions,
@@ -501,10 +513,14 @@ const handleSortChange = ({ field, direction }) => {
 };
 
 // ── Paging state ─────────────────────────────────────────────
+// Trang hiện tại
 const pageIndex = ref(1);
+// Số bản ghi trên một trang
 const pageSize = ref(15);
+// Tổng số bản ghi
 const totalRecords = ref(0);
 
+// Các tùy chọn số bản ghi trên một trang
 const pageSizeOptions = [
   { label: "15", value: 15 },
   { label: "25", value: 25 },
@@ -546,8 +562,11 @@ const handlePageSizeChange = () => {
 };
 
 // ── Data state ───────────────────────────────────────────────
+// Danh sách dữ liệu Thành phần lương hệ thống
 const salaryCompositions = ref([]);
+// Trạng thái đang tải dữ liệu
 const isLoading = ref(false);
+// Thông báo lỗi nếu gọi API thất bại
 const errorMessage = ref("");
 
 /**
@@ -633,6 +652,7 @@ async function handleAddToUsageList(row) {
 }
 
 // ── Xử lý lưu danh sách (Overlay Mode) ──────────────────────
+// Trạng thái đang lưu khi đưa nhiều thành phần lương vào danh sách sử dụng
 const isSaving = ref(false);
 
 /**
@@ -694,6 +714,16 @@ const handleConfirm = async () => {
     });
 };
 
+/**
+ * Chuẩn bị payload (dữ liệu) để tạo mới một thành phần lương sử dụng từ danh mục hệ thống.
+ *
+ * Sử dụng khi: Chuẩn bị dữ liệu trước khi gọi API `create` để đưa thành phần lương vào danh sách sử dụng.
+ *
+ * @param {string} salaryCompositionSystemId ID của thành phần lương trên hệ thống
+ * @returns {Promise<Object>} Object payload
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 async function buildUsagePayload(salaryCompositionSystemId) {
   const result = await salaryCompositionSystemApi.getById(salaryCompositionSystemId);
   const data = result?.data;
@@ -724,6 +754,7 @@ onMounted(() => {
 });
 
 // ── Checkbox selection ───────────────────────────────────────
+// Danh sách ID các bản ghi đang được chọn (checkbox)
 const selectedIds = ref([]);
 
 const isAllSelected = computed(
@@ -812,6 +843,7 @@ const DEFAULT_FIELDS = [
 ];
 
 // Reactive fields – được cập nhật khi user kéo thả / resize / pin / ẩn hiện
+// Các cấu hình trường dữ liệu hiển thị (Reactive, được cập nhật qua thao tác)
 const fields = ref(DEFAULT_FIELDS.map((f) => ({ ...f })));
 
 // Chỉ các cột có thể tùy chỉnh (không phải cột hệ thống)
@@ -833,12 +865,14 @@ const visibleFields = computed(() => {
 });
 
 // ── UI state cho Popup thiết lập cột ──────────────────────────────────
+// Trạng thái hiển thị Popup thiết lập cột
 const isOpenPopupSettingColumn = ref(false);
 const togglePopupSettingColumn = () => {
   isOpenPopupSettingColumn.value = !isOpenPopupSettingColumn.value;
 };
 
 // ── GridConfig – Load & Save ──────────────────────────────────────────
+// Tên Grid (dùng làm key lưu trữ cấu hình bảng trên database)
 const GRID_NAME = "SalaryCompositionSystemGrid";
 
 /** Cache gridConfigId: { columnName -> gridConfigId } */

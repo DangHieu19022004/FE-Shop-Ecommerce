@@ -58,7 +58,9 @@
 import Multiselect from "vue-multiselect";
 import { ref, watch } from "vue";
 
+// Trạng thái đóng/mở dropdown của multiselect
 const isOpen = ref(false);
+// Tham chiếu đến component Multiselect để gọi các method nội tại (như focus, activate)
 const multiselectRef = ref(null);
 
 const props = defineProps({
@@ -91,6 +93,7 @@ const props = defineProps({
 
 const emit = defineEmits(["update:modelValue", "blur", "change", "focus"]);
 
+// State lưu giá trị đã chọn (object chứa data tương ứng với modelValue)
 const selected = ref(
   props.data.find((item) => item[props.trackBy] === props.modelValue) ?? null
 );
@@ -103,15 +106,55 @@ watch(
   }
 );
 
+/**
+ * Xử lý sự kiện khi chọn một option.
+ *
+ * Sử dụng khi: Người dùng click vào một dòng trong dropdown list.
+ *
+ * @param {Object} option Option vừa được chọn
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 const handleSelect = (option) => {
   emit("update:modelValue", option?.[props.trackBy] ?? null);
   emit("change", option);
 };
+
+/**
+ * Xử lý sự kiện khi xóa option đã chọn.
+ *
+ * Sử dụng khi: Người dùng xóa dữ liệu trong ô select.
+ *
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 const handleRemove = () => {
   emit("update:modelValue", null);
   emit("change", null);
 };
+
+/**
+ * Xử lý sự kiện mất focus (blur) khỏi input select.
+ *
+ * Sử dụng khi: Đóng dropdown và emit sự kiện blur ra bên ngoài.
+ *
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 const handleBlur = () => { isOpen.value = false; emit("blur"); };
+
+/**
+ * Xử lý sự kiện focus vào input select.
+ *
+ * Sử dụng khi: Mở dropdown và emit sự kiện focus ra bên ngoài.
+ *
+ * @returns {void}
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 const handleFocus = () => { isOpen.value = true; emit("focus"); };
 
 defineExpose({
