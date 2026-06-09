@@ -123,7 +123,7 @@
                   <MsButton
                     :isTooltip="false"
                     iconRight="mi-chevron-down mg-l-8"
-                    class="status-trigger"
+                    class="status-trigger h-32"
                     :class="{ 'status-trigger--open': statusMenuOpen }"
                     @click.stop="statusMenuOpen = !statusMenuOpen"
                   >
@@ -184,7 +184,10 @@
           <div class="content_body">
             <div class="content_body_table">
               <!-- Trạng thái đang tải -->
-              <MsLoader v-if="isLoading" class="table-state table-state--loading" />
+              <MsLoader
+                v-if="isLoading"
+                class="table-state table-state--loading"
+              />
 
               <!-- Trạng thái lỗi -->
               <div
@@ -455,8 +458,6 @@
 
   <!-- Toast container (nội bộ, khi Req4 toast không qua MainLayout) -->
   <MsToastContainer :toasts="toasts" @close="removeToast" />
-
-
 </template>
 <script setup>
 import MsButton from "@/components/base/MsButton.vue";
@@ -491,7 +492,6 @@ import {
   SalaryCompositionShowPaycheckLabel,
 } from "@/constants/enums";
 
-
 // VARIABLE:
 // trạng thái đóng/mở filter sidebar
 const isOpenFilter = ref(false);
@@ -508,7 +508,109 @@ const editId = ref(null); // null = thêm mới, string = sửa
 const viewId = ref(null); // string = xem chi tiết (readonly)
 // id của thành phần lương đang nhân bản (null = không nhân bản)
 const duplicateId = ref(null); // string = nhân bản
-
+// các trường có thể cấu hình hiển thị trên bảng mặc định
+const DEFAULT_FIELDS = [
+  {
+    key: "",
+    label: "",
+    slot: "checkbox",
+    width: 48,
+    draggable: false,
+    pinnable: false,
+    resizable: false,
+    isSystemCol: true, // cột hệ thống, không được ẩn/hiện
+  },
+  {
+    key: "salaryCompositionCode",
+    label: "Mã thành phần",
+    width: 220,
+    isVisible: true,
+  },
+  {
+    key: "salaryCompositionName",
+    label: "Tên thành phần",
+    width: 220,
+    isVisible: true,
+  },
+  {
+    key: "organizationName",
+    label: "Đơn vị áp dụng",
+    width: 200,
+    isVisible: true,
+  },
+  {
+    key: "compositionType",
+    label: "Loại thành phần",
+    slot: "compositionType",
+    width: 180,
+    isVisible: true,
+  },
+  {
+    key: "compositionNature",
+    label: "Tính chất",
+    slot: "compositionNature",
+    width: 160,
+    isVisible: true,
+  },
+  {
+    key: "taxable",
+    label: "Chịu thuế",
+    slot: "taxable",
+    width: 160,
+    isVisible: true,
+  },
+  {
+    key: "taxDeduction",
+    label: "Giảm trừ khi tính thuế",
+    slot: "taxDeduction",
+    width: 210,
+    isVisible: true,
+  },
+  { key: "quota", label: "Định mức", width: 140, isVisible: true },
+  {
+    key: "valueType",
+    label: "Kiểu giá trị",
+    slot: "valueType",
+    width: 160,
+    isVisible: true,
+  },
+  { key: "formula", label: "Giá trị", width: 160, isVisible: true },
+  { key: "description", label: "Mô tả", width: 240, isVisible: true },
+  {
+    key: "optionShowPaycheck",
+    label: "Hiển thị trên phiếu lương",
+    slot: "optionShowPaycheck",
+    width: 230,
+    isVisible: true,
+  },
+  {
+    key: "sourceType",
+    label: "Nguồn tạo",
+    slot: "sourceType",
+    width: 150,
+    isVisible: true,
+  },
+  {
+    key: "status",
+    label: "Trạng thái",
+    slot: "status",
+    width: 160,
+    isVisible: true,
+  },
+  { key: "ghost", label: "", width: 180, isSystemCol: true },
+  {
+    key: "actions",
+    label: "",
+    slot: "actions",
+    width: 1,
+    draggable: false,
+    pinnable: false,
+    resizable: false,
+    isSystemCol: true,
+  },
+];
+// Reactive fields – được cập nhật khi user kéo thả / resize / pin / ẩn hiện
+const fields = ref(DEFAULT_FIELDS.map((f) => ({ ...f })));
 
 //FUNCTION:
 /**
@@ -723,7 +825,10 @@ const orgTreeData = ref([]);
 const GRID_NAME = LocalStorageStore.GRID_SALARY_COMPOSITION;
 /** Debounce timer map per columnName */
 const _saveTimers = {};
-
+// danh sách id của các bản ghi được chọn trong bảng
+const selectedIds = ref([]);
+// danh sách các thông báo toast
+const toasts = ref([]);
 
 // NOTICE: Computed này dùng để hiển thị label của trạng thái đã chọn trên dropdown, tránh việc hiển thị raw value (vd: 1, 2
 const selectedStatusLabel = computed(
@@ -948,10 +1053,12 @@ async function fetchSalaryCompositions() {
       totalRecords.value = result.data.total ?? 0;
     } else {
       // Nếu API trả về lỗi (isSuccess = false), hiển thị thông báo lỗi từ server hoặc mặc định
-      errorMessage.value = result.data || "Có lỗi xảy ra, vui lòng liên hệ với MISA!";
+      errorMessage.value =
+        result.data || "Có lỗi xảy ra, vui lòng liên hệ với MISA!";
     }
   } catch (err) {
-    errorMessage.value = err.message || "Có lỗi xảy ra, vui lòng liên hệ với MISA!";
+    errorMessage.value =
+      err.message || "Có lỗi xảy ra, vui lòng liên hệ với MISA!";
     console.error("[SalaryComposition] fetchSalaryCompositions:", err);
   } finally {
     isLoading.value = false;
@@ -976,7 +1083,8 @@ async function fetchOrgTree() {
       orgTreeData.value = mapOrgTree(result.data);
     }
   } catch (err) {
-    errorMessage.value = err.message || "Có lỗi xảy ra, vui lòng liên hệ với MISA!";
+    errorMessage.value =
+      err.message || "Có lỗi xảy ra, vui lòng liên hệ với MISA!";
     console.error("[SalaryComposition] fetchOrgTree:", err);
   }
 }
@@ -1007,7 +1115,7 @@ onMounted(() => {
   loadGridConfig();
 
   // Kiểm tra xem có toast nào đang chờ hiển thị từ trang khác chuyển sang không
-  const pendingToast = localStorage.getItem('pendingToast');
+  const pendingToast = localStorage.getItem("pendingToast");
   if (pendingToast) {
     try {
       const toastData = JSON.parse(pendingToast);
@@ -1015,10 +1123,9 @@ onMounted(() => {
     } catch (e) {
       console.error("Parse pending toast error:", e);
     }
-    localStorage.removeItem('pendingToast');
+    localStorage.removeItem("pendingToast");
   }
 });
-
 
 /**
  * Cache gridConfigId: { columnName -> gridConfigId }
@@ -1172,7 +1279,6 @@ async function initGridConfig(existingConfigs = []) {
     await loadGridConfig();
   }
 }
-
 
 /**
  * Tạo payload đầy đủ để gửi lên API khi lưu cấu hình cột
@@ -1384,40 +1490,31 @@ function handleDeleteSelected() {
 
   // Nếu không còn id nào có thể xóa, hiển thị thông báo và không làm gì thêm
   if (deletableIds.length === 0) {
-    emit("openAlert", {
-      title: "Không thể xóa",
-      message:
-        "Dữ liệu của hệ thống bạn không thể xóa.",
-      showConfirmButton: false,
-      cancelText: "Đóng",
-    });
+    addToast("Bạn không có quyền thực hiện chức năng này.", "error");
     return;
   }
 
-  const blockedNote =
-    blockedCount > 0 ? ` (${blockedCount} mục từ hệ thống sẽ được bỏ qua)` : "";
-
+  // Hiển thị popup xác nhận trước khi xóa, kèm theo thông báo nếu có bản ghi nào bị chặn do là data hệ thống
   emit("openAlert", {
     title: "Xác nhận xóa",
-    message: `Bạn có chắc chắn muốn xóa ${deletableIds.length} thành phần lương đã chọn không?${blockedNote}`,
+    message: `Bạn có chắc chắn muốn xóa ${deletableIds.length} thành phần lương đã chọn không?`,
     confirmText: "Xóa",
-    confirmType: "red",
+    confirmType: "danger",
     onConfirm: async () => {
       try {
+        // Gọi API để xóa hàng loạt các bản ghi có thể xóa
         const result = await salaryCompositionApi.deleteBulk(deletableIds);
         if (result.isSuccess) {
+          // reset selectedIds để cập nhật lại trạng thái checkbox và làm mới lại danh sách
           selectedIds.value = [];
           await fetchSalaryCompositions();
-          addToast(
-            `Xóa thành công`,
-            "success",
-          );
+          addToast(`Xóa thành công`, "success");
         } else {
           addToast("Xóa thất bại", "error");
         }
       } catch (err) {
         console.error("[SalaryComposition] deleteSelected:", err);
-        addToast("Có lỗi xảy ra khi xóa một số bản ghi", "error");
+        addToast("Xóa thất bại", "error");
       }
     },
   });
@@ -1434,22 +1531,29 @@ function handleDeleteSelected() {
  * CREATED BY: TDHieu (09/06/2026)
  */
 async function handleToggleStatus(row) {
+  // Không cho phép cập nhật trạng thái của data hệ thống
   if (row.salaryCompositionSystemId) {
-    addToast("Không thể thay đổi trạng thái của dữ liệu hệ thống", "warning");
+    addToast("Bạn không có quyền thực hiện chức năng này", "error");
     return;
   }
+  // Xác định trạng thái mới cần cập nhật: nếu đang là Đang theo dõi thì chuyển thành Ngừng theo dõi, và ngược lại
   const newStatus =
     row.status === SalaryCompositionStatus.Following
       ? SalaryCompositionStatus.StoppedFollowing
       : SalaryCompositionStatus.Following;
-  const statusLabel = newStatus === SalaryCompositionStatus.Following ? "đang theo dõi" : "ngừng theo dõi";
+  const statusLabel =
+    newStatus === SalaryCompositionStatus.Following
+      ? "đang theo dõi"
+      : "ngừng theo dõi";
 
+  // Hiển thị popup xác nhận trước khi đổi trạng thái
   emit("openAlert", {
     title: "Chuyển trạng thái",
     message: `Bạn có chắc chắn muốn chuyển trạng thái thành phần lương <strong>${row.salaryCompositionName}</strong> sang ${statusLabel} không?`,
     confirmText: "Đồng ý",
     cancelText: "Không",
     onConfirm: async () => {
+      // Gọi hàm thực thi đổi trạng thái với id của bản ghi và trạng thái mới
       await executeUpdateStatus([row.salaryCompositionId], newStatus);
     },
   });
@@ -1468,7 +1572,7 @@ async function handleToggleStatus(row) {
 async function handleBulkUpdateStatus(status) {
   if (selectedIds.value.length === 0) return;
 
-  // Req: Không cho phép cập nhật trạng thái của data hệ thống
+  // Không cho phép cập nhật trạng thái của data hệ thống bằng cách check salaryCompositionSystemId
   const updatableIds = selectedIds.value.filter((id) => {
     const row = salaryCompositions.value.find(
       (r) => r.salaryCompositionId === id,
@@ -1477,11 +1581,15 @@ async function handleBulkUpdateStatus(status) {
   });
 
   if (updatableIds.length === 0) {
-    addToast("Không thể thay đổi trạng thái của dữ liệu hệ thống", "warning");
+    addToast("Bạn không có quyền thực hiện chức năng này", "error");
     return;
   }
 
-  const statusLabel = status === SalaryCompositionStatus.Following ? "đang theo dõi" : "ngừng theo dõi";
+  // Hiển thị popup xác nhận trước khi đổi trạng thái hàng loạt, kèm theo thông báo nếu có bản ghi nào bị chặn do là data hệ thống
+  const statusLabel =
+    status === SalaryCompositionStatus.Following
+      ? "đang theo dõi"
+      : "ngừng theo dõi";
   emit("openAlert", {
     title: "Chuyển trạng thái",
     message: `Bạn có chắc chắn muốn chuyển trạng thái các thành phần lương đã chọn sang ${statusLabel} không?`,
@@ -1492,8 +1600,6 @@ async function handleBulkUpdateStatus(status) {
     },
   });
 }
-
-
 
 /**
  * Thực thi gọi API đổi trạng thái
@@ -1508,44 +1614,46 @@ async function handleBulkUpdateStatus(status) {
  */
 const executeUpdateStatus = async (updatableIds, status) => {
   try {
+    // Gọi API để cập nhật trạng thái hàng loạt với danh sách ID và trạng thái mới
     const result = await salaryCompositionApi.updateStatusBulk(
       updatableIds,
       status,
     );
     if (result.isSuccess) {
+      // Sau khi cập nhật thành công, reset selectedIds để cập nhật lại trạng thái checkbox
       selectedIds.value = [];
+      // Gọi API để làm mới lại danh sách sau khi cập nhật trạng thái
       await fetchSalaryCompositions();
+      // Hiển thị thông báo thành công, cập nhật nội dung tùy theo trạng thái mới
       const label =
         status === SalaryCompositionStatus.Following
           ? "đang theo dõi"
           : "ngừng theo dõi";
       addToast(`Cập nhật trạng thái thành công`, "success");
     } else {
-      addToast(result.data || "Cập nhật trạng thái thất bại", "error");
+      addToast("Cập nhật trạng thái thất bại", "error");
     }
   } catch (err) {
     console.error("[SalaryComposition] executeUpdateStatus:", err);
     addToast("Có lỗi xảy ra khi cập nhật trạng thái", "error");
   }
-}
+};
 
-// ======================== Checkbox selection ========================
-// danh sách id của các bản ghi được chọn trong bảng
-const selectedIds = ref([]);
-
+// NOTICE: Computed
+// isAllSelected là trạng thái khi tất cả các dòng trên trang hiện tại đều được chọn, dùng để hiển thị trạng thái checked trên checkbox chọn tất cả
 const isAllSelected = computed(
   () =>
     salaryCompositions.value.length > 0 &&
     selectedIds.value.length === salaryCompositions.value.length,
 );
-
+// isIndeterminate là trạng thái khi có một số dòng được chọn nhưng không phải tất cả, dùng để hiển thị dấu gạch ngang trên checkbox chọn tất cả
 const isIndeterminate = computed(() => {
   return (
     selectedIds.value.length > 0 &&
     selectedIds.value.length < salaryCompositions.value.length
   );
 });
-
+// hasActiveSelected là trạng thái khi có ít nhất một dòng đang được chọn có trạng thái Đang theo dõi, dùng để quyết định hiển thị nút Ngừng theo dõi trên thanh công cụ
 const hasActiveSelected = computed(() => {
   return selectedIds.value.some((id) => {
     const item = salaryCompositions.value.find(
@@ -1559,6 +1667,7 @@ const hasActiveSelected = computed(() => {
   });
 });
 
+// hasInactiveSelected là trạng thái khi có ít nhất một dòng đang được chọn có trạng thái Ngừng theo dõi, dùng để quyết định hiển thị nút Đang theo dõi trên thanh công cụ
 const hasInactiveSelected = computed(() => {
   return selectedIds.value.some((id) => {
     const item = salaryCompositions.value.find(
@@ -1572,6 +1681,7 @@ const hasInactiveSelected = computed(() => {
   });
 });
 
+// FUNCTION:
 /**
  * Toggle chọn tất cả bản ghi trên trang hiện tại
  *
@@ -1584,10 +1694,12 @@ const hasInactiveSelected = computed(() => {
  */
 const toggleSelectAll = (event) => {
   if (event.target.checked) {
+    // Nếu checkbox được chọn, lấy tất cả ID của các dòng hiện tại và lưu vào selectedIds
     selectedIds.value = salaryCompositions.value.map(
       (row) => row.salaryCompositionId,
     );
   } else {
+    // Nếu checkbox bị bỏ chọn, xóa hết ID trong selectedIds để bỏ chọn tất cả
     selectedIds.value = [];
   }
 };
@@ -1615,18 +1727,17 @@ const isRowSelected = (id) => selectedIds.value.includes(id);
  * CREATED BY: TDHieu (09/06/2026)
  */
 const toggleRow = (id) => {
+  // Nếu ID đã tồn tại trong selectedIds, nghĩa là đang được chọn, thì bỏ chọn bằng cách lọc nó ra khỏi mảng
   if (selectedIds.value.includes(id)) {
     selectedIds.value = selectedIds.value.filter((item) => item !== id);
   } else {
+    // Nếu ID chưa tồn tại trong selectedIds, nghĩa là chưa được chọn, thì thêm nó vào mảng để chọn
     selectedIds.value = [...selectedIds.value, id];
   }
 };
 
-// ======================== Emit + Toast ========================
+// NOTICE: Emit
 const emit = defineEmits(["openAlert"]);
-
-// danh sách các thông báo toast
-const toasts = ref([]);
 
 /**
  * Thêm một thông báo toast
@@ -1648,6 +1759,7 @@ const addToast = (message, type = "success", duration = 3000) => {
     duration,
   });
 };
+
 /**
  * Xóa một thông báo toast
  *
@@ -1662,128 +1774,33 @@ const removeToast = (id) => {
   toasts.value = toasts.value.filter((t) => t.id !== id);
 };
 
-// ======================== Table fields ========================
-// Danh sách cột mặc định (nguồn gốc, dùng để reset)
-const DEFAULT_FIELDS = [
-  {
-    key: "",
-    label: "",
-    slot: "checkbox",
-    width: 48,
-    draggable: false,
-    pinnable: false,
-    resizable: false,
-    isSystemCol: true, // cột hệ thống, không được ẩn/hiện
-  },
-  {
-    key: "salaryCompositionCode",
-    label: "Mã thành phần",
-    width: 180,
-    isVisible: true,
-  },
-  {
-    key: "salaryCompositionName",
-    label: "Tên thành phần",
-    width: 220,
-    isVisible: true,
-  },
-  {
-    key: "organizationName",
-    label: "Đơn vị áp dụng",
-    width: 200,
-    isVisible: true,
-  },
-  {
-    key: "compositionType",
-    label: "Loại thành phần",
-    slot: "compositionType",
-    width: 180,
-    isVisible: true,
-  },
-  {
-    key: "compositionNature",
-    label: "Tính chất",
-    slot: "compositionNature",
-    width: 160,
-    isVisible: true,
-  },
-  {
-    key: "taxable",
-    label: "Chịu thuế",
-    slot: "taxable",
-    width: 160,
-    isVisible: true,
-  },
-  {
-    key: "taxDeduction",
-    label: "Giảm trừ khi tính thuế",
-    slot: "taxDeduction",
-    width: 210,
-    isVisible: true,
-  },
-  { key: "quota", label: "Định mức", width: 140, isVisible: true },
-  {
-    key: "valueType",
-    label: "Kiểu giá trị",
-    slot: "valueType",
-    width: 160,
-    isVisible: true,
-  },
-  { key: "formula", label: "Giá trị", width: 160, isVisible: true },
-  { key: "description", label: "Mô tả", width: 240, isVisible: true },
-  {
-    key: "optionShowPaycheck",
-    label: "Hiển thị trên phiếu lương",
-    slot: "optionShowPaycheck",
-    width: 230,
-    isVisible: true,
-  },
-  {
-    key: "sourceType",
-    label: "Nguồn tạo",
-    slot: "sourceType",
-    width: 150,
-    isVisible: true,
-  },
-  {
-    key: "status",
-    label: "Trạng thái",
-    slot: "status",
-    width: 160,
-    isVisible: true,
-  },
-  { key: "ghost", label: "", width: 180, isSystemCol: true },
-  {
-    key: "actions",
-    label: "",
-    slot: "actions",
-    width: 1,
-    draggable: false,
-    pinnable: false,
-    resizable: false,
-    isSystemCol: true,
-  },
-];
-
-// Reactive fields – được cập nhật khi user kéo thả / resize / pin / ẩn hiện
-const fields = ref(DEFAULT_FIELDS.map((f) => ({ ...f })));
-
-// Chỉ các cột có thể tùy chỉnh (không phải cột hệ thống)
+// NOTICE: Computed
+// Chỉ các cột không phải hệ thống mới được phép cấu hình hiển thị, sắp xếp trong PopupSettingColumn
+// Phục vụ chức năng "Khôi phục mặc định"
 const defaultConfigurableFields = computed(() =>
   DEFAULT_FIELDS.filter((f) => !f.isSystemCol),
 );
+// Các cột đang hiển thị trên bảng (bao gồm cả cột hệ thống) sẽ được truyền vào MsTable để render
 const configurableFields = computed(() =>
   fields.value.filter((f) => !f.isSystemCol),
 );
-
 // Tất cả cột visible (bao gồm cột hệ thống) – truyền vào MsTable
 const visibleFields = computed(() =>
   fields.value.filter((f) => f.isSystemCol || f.isVisible !== false),
 );
 
-// Cập nhật fields khi MsTable emit update:fields (kéo thả, ghim)
+// FUNCTION:
+/**
+ * Bắt sự kiện khi MsTable emit update:fields với fields đã được sắp xếp lại sau khi người dùng kéo thả hoặc ghim cột
+ *
+ * Sử dụng khi: Người dùng thay đổi thứ tự cột hoặc ghim cột trên bảng, MsTable sẽ emit sự kiện update:fields với danh sách fields mới đã được cập nhật thứ tự và trạng thái pinned
+ *
+ * @param updatedFields Danh sách fields mới đã được cập nhật thứ tự và trạng thái pinned từ MsTable
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 const handleTableFieldsUpdate = (updatedFields) => {
-  // MsTable chỉ biết visibleFields, cần merge lại với các cột ẩn
+  // MsTable chỉ biết visibleFields, cần merge lại để lấy được các cột ẩn
   const hiddenFields = fields.value.filter(
     (f) => !f.isSystemCol && f.isVisible === false,
   );
@@ -1802,8 +1819,17 @@ const handleTableFieldsUpdate = (updatedFields) => {
   });
 };
 
-// Lưu cấu hình cột từ PopupSettingColumn
-// Dùng async/await trực tiếp (không qua debounce) để đảm bảo toàn bộ cấu hình được lưu
+/**
+ * Lưu cấu hình cột từ PopupSettingColumn
+ * Dùng async/await trực tiếp (không qua debounce) để đảm bảo toàn bộ cấu hình được lưu
+ *
+ * Sử dụng khi: Người dùng click nút Lưu trong PopupSettingColumn sau khi đã thay đổi cấu hình hiển thị cột (ẩn/hiện) và thứ tự cột (kéo thả)
+ *
+ * @param configurableSaved Danh sách cấu hình cột đã được lưu
+ * @returns Promise resolving khi tất cả cấu hình được lưu lên BE
+ *
+ * CREATED BY: TDHieu (09/06/2026)
+ */
 const handleSaveColumnSettings = async (configurableSaved) => {
   // Tách các cột system để giữ vị trí
   const firstSystemFields = fields.value.filter(
@@ -1813,9 +1839,11 @@ const handleSaveColumnSettings = async (configurableSaved) => {
     (f) => f.isSystemCol && f.key !== "",
   );
 
-  // Update non-system cols theo ĐÚNG thứ tự từ configurableSaved (do user kéo thả)
+  // Update cột không phải hệ thống theo ĐÚNG thứ tự từ configurableSaved (do user kéo thả)
   const updatedNonSystem = configurableSaved.map((saved) => {
+    // Tìm cột gốc trong fields để giữ lại các thuộc tính khác như width, pinned
     const originalField = fields.value.find((f) => f.key === saved.key);
+    // Nếu cột này bị ẩn, thì pinned sẽ luôn là null
     const isVisible = saved.isVisible !== false;
     return {
       ...originalField,
@@ -1825,13 +1853,14 @@ const handleSaveColumnSettings = async (configurableSaved) => {
   });
 
   // Ghép lại thành mảng fields mới với thứ tự đã được cập nhật
+  // Các cột hệ thống vẫn giữ nguyên vị trí, chỉ có các cột không phải hệ thống được sắp xếp lại theo thứ tự mới từ PopupSettingColumn
   fields.value = [
     ...firstSystemFields,
     ...updatedNonSystem,
     ...lastSystemFields,
   ];
 
-  // Đóng popup ngay lập tức cho UX tốt
+  // Đóng popup
   isOpenPopupSettingColumn.value = false;
 
   // Lưu từng cột lên BE – dùng Promise.all để song song nhưng không qua debounce
@@ -1842,14 +1871,19 @@ const handleSaveColumnSettings = async (configurableSaved) => {
 
   await Promise.all(
     savableCols.map(async (f) => {
+      // Nếu cột bị ẩn thì vẫn lưu isVisible = false
       const isVisible = f.isVisible !== false;
       const overrides = { isVisible };
+      // Nếu cột bị ẩn, thì pinned sẽ luôn là null
       if (!isVisible) overrides.pinnedPosition = null;
 
       try {
+        // Build payload đầy đủ dựa trên state hiện tại của fields
         const payload = buildPayload(f.key, overrides);
+        // Gọi API để lưu cấu hình cột, nếu có gridConfigId sẽ là update, nếu không sẽ là insert
         const result = await gridConfigApi.upsertColumn(payload);
         if (result.isSuccess && result.data) {
+          // Cập nhật lại ref với gridConfigId mới (nếu là insert) và data mới sau khi lưu thành công
           gridConfigIdMap.value[f.key] = result.data.gridConfigId;
           gridConfigDataMap.value[f.key] = result.data;
         } else {
@@ -2282,9 +2316,9 @@ const handleSaveColumnSettings = async (configurableSaved) => {
   border: 1.5px solid;
 }
 
-.status-badge--inactive-border{
+.status-badge--inactive-border {
   color: #f90 !important;
-  border: 1px solid #FF9900 !important;
+  border: 1px solid #ff9900 !important;
   border-radius: 8px;
 }
 
@@ -2315,7 +2349,7 @@ const handleSaveColumnSettings = async (configurableSaved) => {
   border-color: #86efac;
 }
 
-.status-badge--active-border{
+.status-badge--active-border {
   color: #34b057 !important;
   border: 1px solid #34b057;
   border-radius: 8px;

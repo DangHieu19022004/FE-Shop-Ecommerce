@@ -195,6 +195,10 @@ a {
   height: 32px !important;
 }
 
+.pd-10{
+  padding: 10px !important;
+}
+
 .p-l-8 {
   padding-left: 8px;
 }

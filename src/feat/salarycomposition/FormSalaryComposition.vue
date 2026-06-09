@@ -54,10 +54,9 @@
           <div class="header_dropdown_wrapper" ref="actionDropdownRef" style="position: relative; display: inline-block;">
             <MsButton
               iconLeft="mi-threedot"
-              class="border-gray bg-white"
+              class="border-gray bg-white pd-10"
               @click.stop="toggleActionDropdown"
               :isTooltip="false"
-              style="padding: 10px 10px;"
             />
             <MsDropdownMenu
               v-if="showActionDropdown"
@@ -237,7 +236,6 @@
               horizontal
               placeholder="Tự động gợi ý công thức và tham số khi gõ"
               v-model="formData.quota"
-              :variables="formulaVariables"
               :parameters="formulaParameters"
               @validate="setCustomError('quota', $event[0] || '')"
               @blur="markTouched('quota')"
@@ -334,7 +332,9 @@
               <MsSelect
                 v-if="selectedOptionsValue !== optionsValue[1].value"
                 v-model="selectedSalaryCoposition"
-                :data="salaryCompositionOptions"
+                :data="formulaParameters"
+                optionLabel="displayLabel"
+                trackBy="code"
                 horizontal
                 class="fz-14"
                 placeholder="Chọn thành phần lương để cộng giá trị"
@@ -376,7 +376,6 @@
               "
               placeholder="Tự động gợi ý công thức và tham số khi gõ"
               v-model="formData.formula"
-              :variables="formulaVariables"
               :parameters="formulaParameters"
               @validate="setCustomError('formula', $event[0] || '')"
               @blur="markTouched('formula')"
@@ -466,21 +465,13 @@
                 :disabled="isSubmitting"
               />
             </template>
-            <MsButton
-              v-else-if="!formData.salaryCompositionSystemId"
-              message="Chỉnh sửa"
-              :isTooltip="false"
-              class="fz-14"
-              type="green"
-              @click="switchToEditMode"
-            />
           </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Toast n\u1ed9i b\u1ed9 form (Req 4) -->
+  <!-- Toast -->
   <MsToastContainer :toasts="toasts" @close="removeToast" />
 </template>
 <script setup>
@@ -494,12 +485,8 @@ import MsFormula from "@/components/base/MsFormula/MsFormula.vue";
 import MsDropdownMenu from "@/components/base/MsDropdownMenu.vue";
 import MsToastContainer from "@/components/overlay/MsToast/MsToastContainer.vue";
 import { computed, nextTick, onMounted, ref, watch, onUnmounted } from "vue";
-
-// ── Import services ──────────────────────────────────────────
 import salaryCompositionApi from "@/services/salaryCompositionService";
 import organizationApi from "@/services/organizationService";
-
-// ── Import enum constants ────────────────────────────────────
 import {
   SalaryCompositionNature,
   SalaryCompositionNatureOptions,
@@ -517,9 +504,7 @@ import {
   SalaryCompositionTaxDeduction,
 } from "@/constants/enums";
 
-const isHoverAgent = ref(false);
-
-// ── Props & Emits ─────────────────────────────────────────────
+// NOTICE: Props
 const props = defineProps({
   /** Nếu có editId → mode sửa; không có → mode thêm mới */
   editId: {
@@ -538,8 +523,12 @@ const props = defineProps({
   },
 });
 
+// NOTICE: Emits
 const emit = defineEmits(["openAlert", "close", "saved", "duplicate", "delete"]);
 
+
+// VARIABLE:
+const isHoverAgent = ref(false);
 // trạng thái hiển thị dropdown menu
 const showActionDropdown = ref(false);
 // danh sách các mục trong dropdown menu
@@ -549,7 +538,23 @@ const dropdownItems = [
 ];
 // ref của dropdown menu để xử lý click outside
 const actionDropdownRef = ref(null);
+// danh sách các thông báo toast nội bộ của form
+const toasts = ref([]);
+// trạng thái form có phải đang sửa không
+const isEditMode = ref(!!props.editId); // !! để convert sang boolean
+// trạng thái form có phải đang xem không
+const isViewMode = ref(!!props.viewId);
+// trạng thái form đang gọi API submit
+const isSubmitting = ref(false);
+// ID của bản ghi đang edit (tách riêng khỏi formData để không bị mất khi resetForm)
+const currentEditId = ref(props.editId || null);
+// dữ liệu cây đơn vị
+const orgTreeData = ref([]);
+// danh sách id đơn vị được chọn
+const selectedOrgs = ref([]);
 
+
+// FUNCTION:
 /**
  * Toggle trạng thái hiển thị dropdown menu
  *
@@ -574,11 +579,14 @@ const toggleActionDropdown = () => {
  * CREATED BY: TDHieu (09/06/2026)
  */
 const handleDropdownSelect = (item) => {
+  // Đóng dropdown sau khi chọn
   showActionDropdown.value = false;
+  // Build payload chung cho cả duplicate và delete, có thể mở rộng thêm nếu cần
   const payload = {
     salaryCompositionId: currentEditId.value || props.viewId || formData.value.salaryCompositionId,
     salaryCompositionName: formData.value.salaryCompositionName
   };
+  // Phân biệt action dựa trên item.value và emit sự kiện tương ứng với payload
   if (item.value === 'duplicate') {
     emit('duplicate', payload);
   } else if (item.value === 'delete') {
@@ -610,10 +618,6 @@ onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside);
 });
 
-// ── Toast nội bộ form ────────────────────────────────────────────
-// danh sách các thông báo toast
-const toasts = ref([]);
-
 /**
  * Thêm một thông báo toast
  *
@@ -634,6 +638,7 @@ const addToast = (message, type = "success", duration = 3000) => {
     duration,
   });
 };
+
 /**
  * Xóa một thông báo toast
  *
@@ -647,16 +652,6 @@ const addToast = (message, type = "success", duration = 3000) => {
 const removeToast = (id) => {
   toasts.value = toasts.value.filter((t) => t.id !== id);
 };
-
-// trạng thái form có phải đang sửa không
-const isEditMode = ref(!!props.editId);
-// trạng thái form có phải đang xem không
-const isViewMode = ref(!!props.viewId);
-// trạng thái form đang gọi API submit
-const isSubmitting = ref(false);
-
-// ID của bản ghi đang edit (tách riêng khỏi formData để không bị mất khi resetForm)
-const currentEditId = ref(props.editId || null);
 
 /**
  * Chuyển form từ chế độ xem chi tiết sang chế độ chỉnh sửa
@@ -674,12 +669,6 @@ function switchToEditMode() {
   currentEditId.value = formData.value.salaryCompositionId || props.viewId;
 }
 
-// ── Org Tree ─────────────────────────────────────────────────
-// dữ liệu cây đơn vị
-const orgTreeData = ref([]);
-// danh sách id đơn vị được chọn
-const selectedOrgs = ref([]);
-
 /**
  * Gọi API lấy dữ liệu cây đơn vị
  *
@@ -691,11 +680,15 @@ const selectedOrgs = ref([]);
  */
 async function fetchOrgTree() {
   try {
+    // Gọi API để lấy dữ liệu cây đơn vị
     const result = await organizationApi.getTree();
+    // Nếu gọi API thành công và có dữ liệu trả về, thì map dữ liệu về format của MsTreeSelect
     if (result.isSuccess && result.data) {
+      // Lưu dữ liệu cây đơn vị đã map vào ref để dùng cho MsTreeSelect
       orgTreeData.value = mapOrgTree(result.data);
-      // Task 7: Tự chọn tất cả org đầu tiên khi thêm mới
+      // Tự chọn tất cả org đầu tiên khi thêm mới
       if (!props.editId && !props.viewId && orgTreeData.value.length > 0) {
+        // Hàm đệ quy để lấy tất cả id của node và con cháu
         const firstNode = orgTreeData.value[0];
         const getAllIds = (node) => {
           const ids = [node.id];
@@ -704,6 +697,7 @@ async function fetchOrgTree() {
           }
           return ids;
         };
+        // Gán tất cả id vào selectedOrgs để tự chọn hết cây đơn vị đầu tiên
         selectedOrgs.value = getAllIds(firstNode);
       }
     }
@@ -723,6 +717,7 @@ async function fetchOrgTree() {
  * CREATED BY: TDHieu (09/06/2026)
  */
 function mapOrgTree(nodes) {
+  // Đệ quy để map từng node về format { id, label, children }
   return nodes.map((node) => ({
     id: node.organizationId,
     label: node.organizationName,
@@ -740,8 +735,10 @@ function mapOrgTree(nodes) {
  * CREATED BY: TDHieu (09/06/2026)
  */
 function buildOrgFlatMap() {
+  // Duyệt qua orgTreeData để xây dựng 2 map: byId (id -> label) và byName (label -> id)
   const byId = {};
   const byName = {};
+  // Hàm đệ quy để duyệt qua tất cả node và con cháu trong orgTreeData
   const walk = (nodes) => {
     for (const n of nodes) {
       byId[n.id] = n.label;
@@ -787,7 +784,8 @@ function restoreSelectedOrgs(data) {
   selectedOrgs.value = [];
 }
 
-// ── Form data ────────────────────────────────────────────────
+// VARIABLE:
+// ─────────────────── Form data ───────────────────────
 // các ref để focus vào input khi có lỗi
 const salaryCompositionNameRef = ref(null);
 const salaryCompositionCodeRef = ref(null);
@@ -828,18 +826,6 @@ const optionsValueCombobox = [
 const selectedOptionsValueCombobox = ref(optionsValueCombobox[0].value);
 const selectedSalaryCoposition = ref(null);
 
-// Danh sách biến thành phần lương dùng trong công thức
-const formulaVariables = [
-  "LUONG_CO_BAN",
-  "DOANH_SO",
-  "THUONG_KPI",
-  "SO_NGAY_CONG",
-  "SO_GIO_LAM",
-  "PHAN_TRAM_HOAN_THANH",
-  "BAO_HIEM_XH",
-  "THUE_TNCN",
-];
-
 // Danh sách tham số (thành phần lương) cho popup Định mức
 const formulaParameters = ref([]);
 
@@ -854,12 +840,15 @@ const formulaParameters = ref([]);
  */
 async function fetchFormulaParameters() {
   try {
+    // Gọi API để lấy tất cả thành phần lương
     const result = await salaryCompositionApi.getAll();
     if (result.isSuccess && Array.isArray(result.data)) {
+      // Map dữ liệu thành format { name, code, description } để dùng cho MsFormula
       formulaParameters.value = result.data.map((item) => ({
         name: item.salaryCompositionName || "",
         code: item.salaryCompositionCode || "",
         description: item.description || "",
+        displayLabel: `${item.salaryCompositionName || ""} (${item.salaryCompositionCode || ""})`
       }));
     }
   } catch (err) {
@@ -873,13 +862,7 @@ const categoryOptions = SalaryCompositionTypeOptions;
 // Dùng SalaryCompositionTaxableOptions từ enums (số nguyên khớp backend)
 const taxOptions = SalaryCompositionTaxableOptions;
 
-const salaryCompositionOptions = [
-  { value: "thanh_phan_a", label: "Thành phần A" },
-  { value: "thanh_phan_b", label: "Thành phần B" },
-  { value: "thanh_phan_c", label: "Thành phần C" },
-];
-
-// ── Form model ────────────────────────────────────────────────
+// Dữ liệu form chính, bind với các input thông qua v-model
 const formData = ref({
   salaryCompositionId: "",
   salaryCompositionSystemId: null,
@@ -901,13 +884,13 @@ const formData = ref({
   modifiedDate: "",
 });
 
+// Computed property để xác định có hiển thị label "Giá trị" cho trường công thức hay không
 const hasFormulaLabel = computed(
   () =>
     formData.value.valueType !== SalaryCompositionValueType.Number &&
     formData.value.valueType !== SalaryCompositionValueType.Currency,
 );
 
-// ── Populate form data (edit, view, or duplicate) ─────────────────
 /**
  * Tải dữ liệu bản ghi vào form
  *
@@ -920,10 +903,13 @@ const hasFormulaLabel = computed(
  * CREATED BY: TDHieu (09/06/2026)
  */
 async function loadData(id, isDuplicate = false) {
+  // Nếu không có ID thì không làm gì (trường hợp thêm mới)
   if (!id) return;
   try {
+    // Gọi API để lấy dữ liệu chi tiết của bản ghi theo ID
     const result = await salaryCompositionApi.getById(id);
     if (result.isSuccess && result.data) {
+      // Map dữ liệu trả về từ API vào formData, nếu là nhân bản thì reset mã/tên và các trường liên quan đến định danh
       const data = result.data;
       formData.value = {
         salaryCompositionId: isDuplicate ? "" : (data.salaryCompositionId ?? ""),
@@ -947,7 +933,7 @@ async function loadData(id, isDuplicate = false) {
         createdDate: isDuplicate ? "" : (data.createdDate ?? ""),
         modifiedDate: isDuplicate ? "" : (data.modifiedDate ?? ""),
       };
-      // Restore selectedTax từ taxable (integer enum)
+      // Restore selectedTax từ taxable enum
       if (data.taxable) selectedTax.value = data.taxable;
       // Restore isDeductedTax từ taxDeduction enum
       isDeductedTax.value = data.taxDeduction === SalaryCompositionTaxDeduction.Yes;
@@ -959,20 +945,30 @@ async function loadData(id, isDuplicate = false) {
   }
 }
 
-
+// ───────────────────────────────────────────────
+// VARIABLE:
 // ── Validation ───────────────────────────────────────────────
+// touchedFields để track xem trường nào đã được tương tác (blur) để hiển thị lỗi
 const touchedFields = ref({});
+// customErrorMessages để lưu lỗi tùy chỉnh từ validate của MsFormula
 const customErrorMessages = ref({});
 
+//FUNCTION:
+// Hàm kiểm tra giá trị có bị coi là "empty" hay không (null, undefined, chuỗi rỗng, hoặc mảng rỗng)
 const isEmptyValue = (value) => {
+  // Nếu là mảng, coi là empty nếu length === 0
   if (Array.isArray(value)) return value.length === 0;
   return value === null || value === undefined || String(value).trim() === "";
 };
 
+// Hàm tạo rule bắt buộc với message tùy chỉnh
 const requiredRule = (message) => (value) =>
   isEmptyValue(value) ? message : "";
+
+// Hàm tạo rule lấy lỗi tùy chỉnh từ customErrorMessages
 const customErrorRule = (field) => () => customErrorMessages.value[field] || "";
 
+// Định nghĩa các rule validation cho từng trường, có thể có nhiều rule cho 1 trường
 const validationRules = {
   salaryCompositionName: [requiredRule("Không được để trống")],
   salaryCompositionCode: [requiredRule("Không được để trống")],
@@ -982,6 +978,7 @@ const validationRules = {
   formula: [customErrorRule("formula")],
 };
 
+// Map các ref của trường vào 1 object để dễ dàng truy cập khi focus lỗi
 const fieldRefs = {
   salaryCompositionName: salaryCompositionNameRef,
   salaryCompositionCode: salaryCompositionCodeRef,
@@ -991,6 +988,7 @@ const fieldRefs = {
   formula: formulaRef,
 };
 
+// errorMessages để lưu message lỗi hiện tại của từng trường, được cập nhật sau mỗi lần validate
 const errorMessages = ref(
   Object.keys(validationRules).reduce((messages, field) => {
     messages[field] = "";
@@ -998,8 +996,10 @@ const errorMessages = ref(
   }, {}),
 );
 
+// Hàm kiểm tra xem trường đã bị touch (blur) hay chưa để quyết định có hiển thị lỗi hay không
 const isTouched = (field) => Boolean(touchedFields.value[field]);
 
+// Hàm validate 1 trường cụ thể, trả về true nếu hợp lệ, false nếu có lỗi
 const validateField = (field) => {
   const rules = validationRules[field] || [];
   const message =
@@ -1020,16 +1020,19 @@ const validateField = (field) => {
  * CREATED BY: TDHieu (09/06/2026)
  */
 const validateForm = () => {
+  // Validate tất cả các trường có rule, đồng thời cập nhật errorMessages
   const results = Object.keys(validationRules).map(validateField);
   return results.every(Boolean);
 };
 
+// Hàm lấy tên trường đầu tiên có lỗi để focus vào đó
 const getFirstErrorField = () => {
   return Object.keys(validationRules).find(
     (field) => errorMessages.value[field],
   );
 };
 
+// Hàm lấy element có thể focus trong trường hợp cần scroll vào view và focus khi có lỗi
 const getFocusableElement = (fieldRef) => {
   const target = fieldRef?.value;
   if (!target) return null;
@@ -1039,6 +1042,7 @@ const getFocusableElement = (fieldRef) => {
   );
 };
 
+// Hàm focus vào trường đầu tiên có lỗi sau khi validate, đồng thời scroll vào view nếu cần
 const focusFirstErrorField = async () => {
   await nextTick();
   const firstErrorField = getFirstErrorField();
@@ -1055,20 +1059,24 @@ const focusFirstErrorField = async () => {
   touchedFields.value[firstErrorField] = true;
 };
 
+// Hàm set lỗi tùy chỉnh từ validate của MsFormula, nhận field và message lỗi
 const setCustomError = (field, message) => {
   customErrorMessages.value[field] = message;
   validateField(field);
 };
 
+// Hàm đánh dấu trường đã bị touch (blur) để hiển thị lỗi, đồng thời gọi validateField để cập nhật lỗi
 const markTouched = (field) => {
   touchedFields.value[field] = true;
   validateField(field);
 };
 
+// Hàm bỏ đánh dấu touch của trường, thường gọi khi focus vào trường để ẩn lỗi
 const unMarkTouched = (field) => {
   touchedFields.value[field] = false;
 };
 
+// Hàm đánh dấu tất cả các trường đã bị touch, thường gọi khi submit để hiển thị lỗi của tất cả trường
 const touchAll = () => {
   Object.keys(validationRules).forEach((field) => {
     touchedFields.value[field] = true;
@@ -1203,11 +1211,11 @@ async function submitForm(andAdd = false) {
         resetForm();
         await nextTick();
         salaryCompositionNameRef.value?.focus?.();
-        addToast("Đã lưu thành phần lương thành công", "success");
+        addToast("Lưu thành công", "success");
       } else {
         // Lưu: emit saved kèm cờ showToast để component cha hiển thị trước khi form bị đóng
-        emit("saved", { 
-          data: result.data, 
+        emit("saved", {
+          data: result.data,
           isEdit: isEditMode.value && !!currentEditId.value,
           showToast: true
         });
