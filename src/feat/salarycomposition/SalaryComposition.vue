@@ -2090,7 +2090,7 @@ const handleSaveColumnSettings = async (configurableSaved) => {
 }
 
 .content_header_right .btn-system:hover {
-  background-color: #f1f2f1;
+  background-color: #e7e7e7;
 }
 
 .btn-add {
@@ -2288,7 +2288,7 @@ const handleSaveColumnSettings = async (configurableSaved) => {
   min-height: 32px;
 }
 .select-composition :deep(.ms-button:hover) {
-  background-color: #f3f4f6;
+  background-color: #e7e7e7;
   color: #111827;
 }
 

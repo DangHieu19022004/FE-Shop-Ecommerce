@@ -115,6 +115,7 @@ const handleChange = (e) => {
   cursor: pointer;
   user-select: none;
   line-height: 1;
+  vertical-align: middle;
 }
 
 .ms-checkbox--disabled {
@@ -135,12 +136,13 @@ const handleChange = (e) => {
    Custom box
 ══════════════════════════════════ */
 .ms-checkbox__box {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
   width: 16px;
   height: 16px;
+  box-sizing: border-box;
   border-radius: 3px;
   border: 2px solid #d1d5db;
   background: #fff;
@@ -165,7 +167,7 @@ const handleChange = (e) => {
 ══════════════════════════════════ */
 .ms-checkbox__check {
   display: block;
-  width: 12px;
+  width: 8px;
   height: 10px;
   flex-shrink: 0;
 }
