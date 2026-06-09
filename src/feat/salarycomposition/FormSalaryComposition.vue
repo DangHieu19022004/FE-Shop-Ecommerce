@@ -1057,16 +1057,21 @@ const getFocusableElement = (fieldRef) => {
 // Hàm focus vào trường đầu tiên có lỗi sau khi validate, đồng thời scroll vào view nếu cần
 const focusFirstErrorField = async () => {
   await nextTick();
+   // 1. Tìm cái tên ô bị lỗi đầu tiên
   const firstErrorField = getFirstErrorField();
   if (!firstErrorField) return;
+   // 2. Tìm cái thẻ HTML của ô đó để chuẩn bị tương tác
   const focusableElement = getFocusableElement(fieldRefs[firstErrorField]);
   if (!focusableElement) return;
+  // 3. Scroll vào view và focus vào ô đó
   focusableElement.$el?.scrollIntoView?.({
     behavior: "smooth",
     block: "center",
   });
+  // 4. Bắt con trỏ chuột nhảy thẳng vào ô đó để người dùng sửa luôn
   focusableElement.scrollIntoView?.({ behavior: "smooth", block: "center" });
   focusableElement.focus?.();
+   // 5. Hiện chữ đỏ báo lỗi cho ô đó
   await nextTick();
   touchedFields.value[firstErrorField] = true;
 };
@@ -1394,6 +1399,7 @@ onMounted(async () => {
     await loadData(props.viewId, false);
   }
 
+  // Sau khi đã load data, focus vào tên thành phần
   await nextTick();
   if (!isViewMode.value) {
     salaryCompositionNameRef.value?.focus?.();
