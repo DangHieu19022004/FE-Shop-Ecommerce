@@ -47,15 +47,13 @@
             @dragend="onDragEnd"
           >
             <!-- Checkbox -->
-            <label class="psc-check-label">
-              <input
-                type="checkbox"
-                class="psc-checkbox"
-                :checked="field.isVisible !== false"
-                @change="handleToggleField(field.key, $event.target.checked)"
-              />
-              <span class="psc-check-text">{{ field.label || field.key }}</span>
-            </label>
+            <MsCheckbox
+              :modelValue="field.isVisible !== false"
+              @update:modelValue="handleToggleField(field.key, $event)"
+              class="psc-checkbox-custom"
+            >
+              <span class="psc-check-text" :title="field.label || field.key">{{ field.label || field.key }}</span>
+            </MsCheckbox>
 
             <!-- Drag handle -->
             <span
@@ -93,6 +91,7 @@
  * CREATED BY: TDHieu (08/06/2026)
  */
 import MsButton from "@/components/base/MsButton.vue";
+import MsCheckbox from "@/components/base/MsCheckbox.vue";
 import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue';
 
 // ─── Props & Emits ────────────────────────────────────────────────────────────
@@ -427,70 +426,14 @@ onBeforeUnmount(() => {
   border-top: 2px solid #34b057;
 }
 
-/* ── Checkbox label ── */
-.psc-check-label {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  cursor: pointer;
+.psc-checkbox-custom {
   flex: 1;
   min-width: 0;
 }
 
-.psc-check-text {
-  font-size: 13.5px;
-  color: #1f2937;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* ── Custom checkbox ── */
-.psc-checkbox {
-  appearance: none;
-  -webkit-appearance: none;
-  width: 17px;
-  height: 17px;
-  min-width: 17px;
-  border: 1.8px solid #c9cdd4;
-  border-radius: 4px;
-  background: #fff;
-  cursor: pointer;
-  transition: border-color 0.15s, background 0.15s;
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.psc-checkbox:checked {
-  background: #34b057;
-  border-color: #34b057;
-}
-.psc-checkbox:checked::after {
-  content: '';
-  position: absolute;
-  left: 4px;
-  top: 1.5px;
-  width: 5px;
-  height: 9px;
-  border: 2px solid #fff;
-  border-top: none;
-  border-left: none;
-  transform: rotate(45deg);
-}
-.psc-checkbox:indeterminate {
-  background: #34b057;
-  border-color: #34b057;
-}
-.psc-checkbox:indeterminate::after {
-  content: '';
-  position: absolute;
-  left: 3px;
-  top: 6px;
-  width: 8px;
-  height: 2px;
-  background: #fff;
-  border-radius: 1px;
+:deep(.psc-checkbox-custom .ms-checkbox__label) {
+  flex: 1;
+  min-width: 0;
 }
 
 /* ── Drag handle ── */
