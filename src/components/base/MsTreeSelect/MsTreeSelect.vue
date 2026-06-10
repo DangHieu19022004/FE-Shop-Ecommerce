@@ -280,18 +280,22 @@ onBeforeUnmount(() => {
   resizeObserver?.disconnect();
 });
 
-// ── Auto mở tất cả node cha khi mount ──────────────────────────
-onMounted(() => {
-  const walkExpand = (nodes) => {
-    for (const n of nodes) {
-      if (n.children?.length) {
-        expandedIds.value.add(n.id);
-        walkExpand(n.children);
+// ── Auto mở tất cả node cha khi options thay đổi ──────────────────────────
+watch(
+  () => props.options,
+  (newOptions) => {
+    const walkExpand = (nodes) => {
+      for (const n of nodes) {
+        if (n.children?.length) {
+          expandedIds.value.add(n.id);
+          walkExpand(n.children);
+        }
       }
-    }
-  };
-  walkExpand(props.options);
-});
+    };
+    walkExpand(newOptions);
+  },
+  { immediate: true }
+);
 
 /**
  * Toggle đóng/mở dropdown.

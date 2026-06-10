@@ -17,26 +17,26 @@
         <div class="filter-group">
             <div v-for="item in filteredItems" :key="item.key"  :class="[item.checked ? 'filter-container m-b-8' : '', 'filter-item']">
                 <div>
-                    <MsCheckbox v-model="item.checked" :label="item.label" />
+                    <MsCheckbox class="m-b-4 m-t-4" v-model="item.checked" :label="item.label" />
                     <MsSelect
                         v-if="item.checked"
                         v-model="item.condition"
                         :data="item.isSelect ? conditionsSelect : conditionsCompare"
                     />
-                    
+
                     <template v-if="item.checked && item.condition !== 'empty' && item.condition !== 'not_empty'">
                         <!-- Nếu là trường select thì dùng MsSelect -->
                         <MsSelect
                             v-if="item.isSelect"
                             v-model="item.value"
                             :data="item.options"
-                            class="m-t-8"
+                            class="m-t-8 m-b-4"
                         />
                         <!-- Ngược lại dùng MsInput -->
                         <MsInput
                             v-else
                             v-model="item.value"
-                            class="h-32 m-t-8"
+                            class="h-32 m-t-8 m-b-4"
                         />
                     </template>
                 </div>
@@ -169,7 +169,6 @@ const handleApply = () => {
     width: 260px;
     flex-shrink: 0;
     background: #fff;
-    border: 4px solid transparent;
     border-radius: 8px;
     display: flex;
     flex-direction: column;
@@ -182,7 +181,7 @@ const handleApply = () => {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 10px 12px 0px 16px;
+    padding: 12px 13px 0px 20px;
     flex-shrink: 0;
 }
 
@@ -198,7 +197,7 @@ const handleApply = () => {
     border-radius: 6px;
     height: 32px;
     border: 1px solid #d9dee7;
-    margin: 12px 12px 4px;
+    margin: 8px 19px 4px;
     flex-shrink: 0;
 }
 
@@ -211,7 +210,7 @@ const handleApply = () => {
     color: #111;
     background-color: transparent;
     border: none;
-    font-size: 14px;
+    font-size: 13px;
 }
 
 :deep(.ms-input-in.content-body__search-input:focus),
@@ -232,7 +231,7 @@ const handleApply = () => {
 }
 
 .filter-item {
-    padding: 8px 12px;
+    padding: 2px 12px;
     border-radius: 8px;
     transition: background 0.12s ease;
     cursor: pointer;
@@ -247,7 +246,7 @@ const handleApply = () => {
     padding: 10px 12px;
     gap: 8px;
     flex-shrink: 0;
-    background: #fff;
+    background: #f9f9f9;
 }
 
 .filter-footer :deep(.ms-button) {
@@ -258,8 +257,16 @@ const handleApply = () => {
     width: 80px !important;
     height: 32px !important;
     padding: 0 !important;
+    color: #000;
 }
-:deep(.ms-checkbox__label){
+
+/* Đặt font-size 13px cho toàn bộ Input, Select, Checkbox */
+:deep(.ms-checkbox__label),
+:deep(.ms-input-in),
+:deep(.multiselect__single),
+:deep(.multiselect__placeholder),
+:deep(.multiselect__option),
+:deep(.multiselect__input) {
     font-size: 13px !important;
 }
 </style>
