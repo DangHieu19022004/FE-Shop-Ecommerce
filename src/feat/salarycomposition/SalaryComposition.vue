@@ -2236,7 +2236,7 @@ const handleSaveColumnSettings = async (configurableSaved) => {
 
 :deep(.ms-tree-select__control) {
   height: 32px;
-  width: 350px;
+  width: 320px;
 }
 
 /* 📐 Filter layout: table + filter panel side by side 📐 */

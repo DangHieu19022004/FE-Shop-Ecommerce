@@ -243,7 +243,7 @@ defineExpose({
   /* padding-right nhường chỗ cho icon (36px) */
   padding: 0 32px 0 12px;
   border: 1.5px solid #d0d5dd;
-  border-radius: 4px;
+  border-radius: 8px;
   background: #fff;
   display: flex;
   align-items: center;
