@@ -39,7 +39,7 @@
         />
       </div>
 
-      <!-- Tooltip lỗi (giống MsInput) -->
+      <!-- Tooltip lỗi -->
       <div v-if="errorMessages" class="ms-formula__tooltip">
         {{ errorMessages }}
       </div>
@@ -77,24 +77,6 @@
           </MsButton>
         </div>
 
-        <!-- Search box inside popup -->
-        <div class="ms-formula-popup__search">
-          <span class="ms-formula-popup__search-icon">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-              <circle cx="11" cy="11" r="7" stroke="#9ca3af" stroke-width="2"/>
-              <path d="M16.5 16.5L21 21" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/>
-            </svg>
-          </span>
-          <input
-            ref="searchInputRef"
-            class="ms-formula-popup__search-input"
-            v-model="searchText"
-            placeholder="Tìm kiếm..."
-            @mousedown.stop="handlePopupMousedown"
-            @click.stop
-          />
-        </div>
-
         <!-- Tab: Công thức -->
         <div v-if="activeTab === 'formula'" class="ms-formula-popup__list">
           <div
@@ -104,8 +86,8 @@
             @mousedown.stop.prevent="insertFormula(item)"
           >
             <span class="ms-formula-popup__icon">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                <text x="2" y="17" font-size="14" font-style="italic" font-weight="bold" fill="#0e9a62" font-family="serif">fx</text>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <text x="1" y="20" font-size="16" font-style="italic" fill="#747474" font-family="serif">fx</text>
               </svg>
             </span>
             <div class="ms-formula-popup__item-content">
@@ -127,9 +109,9 @@
           >
             <span class="ms-formula-popup__icon ms-formula-popup__icon--db">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                <ellipse cx="12" cy="7" rx="9" ry="3.5" stroke="#4b8ef0" stroke-width="1.8"/>
-                <path d="M3 7v5c0 1.93 4.03 3.5 9 3.5s9-1.57 9-3.5V7" stroke="#4b8ef0" stroke-width="1.8" fill="none"/>
-                <path d="M3 12v5c0 1.93 4.03 3.5 9 3.5s9-1.57 9-3.5v-5" stroke="#4b8ef0" stroke-width="1.8" fill="none"/>
+                <ellipse cx="12" cy="7" rx="9" ry="3.5" stroke="#111827" stroke-width="1.8"/>
+                <path d="M3 7v5c0 1.93 4.03 3.5 9 3.5s9-1.57 9-3.5V7" stroke="#111827" stroke-width="1.8" fill="none"/>
+                <path d="M3 12v5c0 1.93 4.03 3.5 9 3.5s9-1.57 9-3.5v-5" stroke="#111827" stroke-width="1.8" fill="none"/>
               </svg>
             </span>
             <div class="ms-formula-popup__item-content">
@@ -281,26 +263,6 @@ function switchTab(tab) {
   activeTab.value = tab;
   // Đảm bảo popup vẫn mở sau khi đổi tab
   showPopup.value = true;
-}
-
-/**
- * Xử lý sự kiện mousedown bên trong popup.
- * Khi mousedown xảy ra bên trong popup → đánh dấu flag
- * để handleBlur biết không được đóng popup.
- *
- * Sử dụng khi: Người dùng click vào các item trong popup để không bị mất focus.
- *
- * @param {Event} e Sự kiện mousedown
- * @returns {void}
- *
- * CREATED BY: TDHieu (09/06/2026)
- */
-function handlePopupMousedown(e) {
-  isMouseInsidePopup.value = true;
-  // Reset flag sau khi blur+focus cycle hoàn tất
-  setTimeout(() => {
-    isMouseInsidePopup.value = false;
-  }, 300);
 }
 
 // ── Event handlers ────────────────────────────────────────────────────────────
@@ -696,7 +658,7 @@ defineExpose({ focus, insertVariable });
   background: transparent !important;
   font-family:
     "Fira Code", "Fira Mono", Consolas, "Courier New", monospace !important;
-  font-size: 13.5px !important;
+  font-size: 13px !important;
   line-height: 1.65 !important;
   padding: 8px 12px !important;
   min-height: 83px;
@@ -766,6 +728,9 @@ defineExpose({ focus, insertVariable });
    z-index cao để đè lên các phần tử khác
 ══════════════════════════════════════════════ */
 .ms-formula-popup {
+      height: 260px;
+
+  padding: 28px;
   position: absolute;
   top: calc(100% + 4px);
   left: 0;
@@ -794,7 +759,6 @@ defineExpose({ focus, insertVariable });
 .ms-formula-popup__tabs {
   display: flex;
   border-bottom: 1.5px solid #e5e7eb;
-  background: #fafafa;
   padding: 0 8px;
   flex-shrink: 0;
 }
@@ -818,10 +782,29 @@ defineExpose({ focus, insertVariable });
   color: #0e9a62;
 }
 
+:deep(.ms-button){
+  border-radius: 0 !important;
+}
+
+:deep(.ms-button:hover){
+  background: transparent !important;
+}
+
 .ms-formula-popup__tab--active {
+  position: relative;
   color: #0e9a62;
-  border-bottom-color: #0e9a62;
-  font-weight: 600;
+  font-weight: 700;
+}
+
+.ms-formula-popup__tab--active::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 70%;
+  height: 2px;
+  background-color: #0e9a62;
 }
 
 /* ── Search ── */
@@ -864,14 +847,25 @@ defineExpose({ focus, insertVariable });
 
 /* ── Item ── */
 .ms-formula-popup__item {
+  position: relative;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 10px;
-  padding: 10px 14px;
+  padding: 16px 28px;
   cursor: pointer;
-  border-bottom: 1px solid #f3f4f6;
   transition: background 0.1s;
 }
+
+.ms-formula-popup__item::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 60px;
+  right: 0;
+  height: 0.8px;
+  background: #e1e1e1;
+}
+
 
 .ms-formula-popup__item:last-child {
   border-bottom: none;
@@ -899,20 +893,20 @@ defineExpose({ focus, insertVariable });
 
 .ms-formula-popup__item-name {
   font-weight: 700;
-  font-size: 13.5px;
+  font-size: 15px;
   color: #111827;
   font-family: "Fira Code", "Fira Mono", Consolas, monospace;
 }
 
 .ms-formula-popup__item-params {
-  font-size: 12.5px;
+  font-size: 13.5px;
   color: #6b7280;
   font-family: "Fira Code", "Fira Mono", Consolas, monospace;
 }
 
 .ms-formula-popup__item-code {
-  font-size: 12.5px;
-  color: #1d6bc9;
+  font-size: 13.5px;
+  color: #000000;
   font-family: "Fira Code", "Fira Mono", Consolas, monospace;
   margin-left: 3px;
   font-weight: 500;
