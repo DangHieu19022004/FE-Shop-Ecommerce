@@ -89,6 +89,7 @@
               "
               @blur="markTouched('salaryCompositionName')"
               @focus="unMarkTouched('salaryCompositionName')"
+              @update:modelValue="handleFieldValueChange('salaryCompositionName', $event)"
               :disabled="isViewMode"
             />
             <div class="validate-msg">
@@ -117,6 +118,7 @@
               "
               @blur="markTouched('salaryCompositionCode')"
               @focus="unMarkTouched('salaryCompositionCode')"
+              @update:modelValue="handleFieldValueChange('salaryCompositionCode', $event)"
               :disabled="isViewMode || isEditMode"
             />
             <div class="validate-msg">
@@ -1104,6 +1106,15 @@ const markTouched = (field) => {
   validateField(field);
 };
 
+// Hàm xử lý khi người dùng nhập liệu, nếu xóa rỗng thì validate ngay
+const handleFieldValueChange = (field, value) => {
+  if (isEmptyValue(value)) {
+    markTouched(field);
+  } else if (touchedFields.value[field]) {
+    validateField(field);
+  }
+};
+
 // Hàm bỏ đánh dấu touch của trường, thường gọi khi focus vào trường để ẩn lỗi
 const unMarkTouched = (field) => {
   touchedFields.value[field] = false;
@@ -1376,6 +1387,10 @@ watch(
   (newName) => {
     if (!isEditMode.value && !isViewMode.value && !isCodeManuallyEdited.value) {
       formData.value.salaryCompositionCode = toCompositionCode(newName);
+      // Nếu ô mã thành phần đang bị báo lỗi (đã touch), gọi validate lại để xóa lỗi
+      if (touchedFields.value.salaryCompositionCode) {
+        validateField("salaryCompositionCode");
+      }
     }
   },
 );

@@ -1,12 +1,12 @@
 <template lang="">
   <div :class="['ms-input', { 'ms-input--horizontal': horizontal }]">
     <label v-if="label" class="ms-input__label" :for="id">{{ label }} <span v-if="isRequired" class="color-red"> *</span></label>
-    <input 
+    <input
       ref="inputRef"
       :class="['ms-input-in', props.class, { 'ms-input--error': props.errorMessages }]"
       :value="props.type === 'file' ? '' : modelValue"
-      :type="type" 
-      :placeholder="placeholder" 
+      :type="type"
+      :placeholder="placeholder"
       :name="name"
       :id="id"
       :accept="accept"
@@ -16,12 +16,12 @@
       @blur="handleBlur"
       @focus="handleFocus"
     />
-    <!-- <p 
+    <!-- <p
     v-if="props.errorMessages"
     :class="['ms-input__error', { 'ms-input__error--visible': props.errorMessages }]" >{{ props.errorMessages || '\u00A0' }}</p> -->
-    <div v-if="props.errorMessages" class="ms-input__tooltip">
+    <!-- <div v-if="props.errorMessages" class="ms-input__tooltip">
       {{ props.errorMessages || "" }}
-    </div>
+    </div> -->
   </div>
 </template>
 <script setup>
