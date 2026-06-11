@@ -1281,7 +1281,8 @@ async function submitForm(andAdd = false) {
     }
   } catch (err) {
     console.error("[FormSalaryComposition] submitForm:", err);
-    addToast("Có lỗi xảy ra, vui lòng thử lại", "error");
+    const errMsg = err.data?.userMessage || "Có lỗi xảy ra, vui lòng thử lại";
+    addToast(errMsg, "error");
   } finally {
     isSubmitting.value = false;
   }

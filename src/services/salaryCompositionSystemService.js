@@ -33,7 +33,7 @@ const salaryCompositionSystemApi = {
    * CREATED BY: TDHieu (09/06/2026)
    */
   getPaging(params = {}) {
-    return axiosInstance.get(`${BASE}/Paging-System`, { params });
+    return axiosInstance.get(`${BASE}/Paging`, { params });
   },
 
   /**

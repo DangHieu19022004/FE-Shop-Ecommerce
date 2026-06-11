@@ -328,7 +328,7 @@
                       class="sz-28 pd-0"
                       :tooltipMessage="
                         row.status === SalaryCompositionStatus.Following
-                          ? 'Ngưng theo dõi'
+                          ? 'Ngừng theo dõi'
                           : 'Theo dõi'
                       "
                       tooltipPosition="bottom"
@@ -754,7 +754,7 @@ const handleSavedRefresh = ({ data, isEdit, showToast } = {}) => {
       }
 
       if (showToast) {
-        addToast("Cập nhật thành công", "success");
+        addToast("Cập nhật thành phần lương thành công", "success");
       }
     } else {
       // Thêm mới: unshift lên đầu
@@ -1639,7 +1639,7 @@ const executeUpdateStatus = async (updatableIds, status) => {
         status === SalaryCompositionStatus.Following
           ? "đang theo dõi"
           : "ngừng theo dõi";
-      addToast(`Cập nhật trạng thái thành công`, "success");
+      addToast(`Cập nhật thành phần lương thành công`, "success");
     } else {
       addToast("Cập nhật trạng thái thất bại", "error");
     }

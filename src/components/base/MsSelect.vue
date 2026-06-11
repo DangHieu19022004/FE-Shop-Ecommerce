@@ -47,9 +47,9 @@
       </Multiselect>
 
       <!-- Error tooltip -->
-      <div v-if="errorMessages" class="ms-input__tooltip">
+      <!-- <div v-if="errorMessages" class="ms-input__tooltip">
         {{ errorMessages }}
-      </div>
+      </div> -->
     </div>
   </div>
 </template>
