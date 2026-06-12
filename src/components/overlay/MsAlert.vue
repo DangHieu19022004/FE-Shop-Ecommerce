@@ -29,6 +29,7 @@
           :type="props.confirmType"
           :isTooltip="false"
           class="btn-alert-confirm sz-32 w-80"
+          :disabled="props.confirmDisabled"
           @click="emit('confirm')"
         />
       </div>
@@ -69,6 +70,11 @@ const props = defineProps({
   confirmType: {
     type: String,
     default: "green",
+  },
+  // disable nút confirm của MsAlert, ép user phải chọn 1 phương án trước khi xác nhận
+  confirmDisabled: {
+    type: Boolean,
+    default: false,
   },
 });
 
@@ -178,7 +184,7 @@ const emit = defineEmits(["close", "confirm"]);
 .modal_alert_action :deep(.btn-alert-cancel .ms-button__content) {
   margin: 0 8px !important;
 }
-/* 
+/*
 .modal_alert_action :deep(.btn-alert-cancel:hover) {
   background-color: #f8f9fa !important;
 }

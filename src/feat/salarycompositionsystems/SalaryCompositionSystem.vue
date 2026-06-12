@@ -579,18 +579,14 @@ async function handleAddToUsageList(row) {
     confirmType: "green",
     onConfirm: async () => {
       try {
-        const payload = await buildUsagePayload(row.salaryCompositionSystemId);
-        const result = await salaryCompositionApi.create(payload);
+        const result = await saveUsageItem(row);
         if (result.isSuccess) {
-
           localStorage.setItem('pendingToast', JSON.stringify({ message: "Thêm thành công", type: "success" }));
           router.push("/salarycomposition");
-        } else {
-          addToast("Thành phần lương đã tồn tại", "error");
         }
       } catch (err) {
         console.error("[SalaryCompositionSystem] addToUsageList:", err);
-        const msg = err.data?.data || err.response?.data?.data || err.data?.devMessage || "Thành phần lương đã tồn tại";
+        const msg = err.data?.userMessage || err.data?.devMessage || "Thành phần lương đã tồn tại";
         addToast(msg, "error");
       }
     },
@@ -620,23 +616,19 @@ const handleConfirm = async () => {
         try {
           const itemsToAdd = salaryCompositions.value.filter(item => selectedIds.value.includes(item.salaryCompositionSystemId));
 
-          // Call API create cho từng item đã chọn
-          await Promise.all(itemsToAdd.map(async (row) => {
-            const payload = await buildUsagePayload(row.salaryCompositionSystemId);
+          // Chạy tuần tự để nếu có case cần xác nhận thay thế thì alert không bị chồng lên nhau
+          for (const row of itemsToAdd) {
             try {
-              const res = await salaryCompositionApi.create(payload);
+              const res = await saveUsageItem(row);
               if (res.isSuccess) {
                 successCount++;
-
-              } else {
-                addToast(`Thêm thất bại`, "error");
               }
             } catch (err) {
               console.error("[SalaryCompositionSystem] create:", err);
-              const msg = err.data?.data || err.response?.data?.data || err.data?.devMessage || `Thành phần lương "${row.salaryCompositionName}" đã tồn tại`;
+              const msg = err.data?.userMessage || err.data?.devMessage || `Thành phần lương "${row.salaryCompositionName}" đã tồn tại`;
               addToast(msg, "error");
             }
-          }));
+          }
 
           if (successCount > 0) {
             if (props.isOverlay) {
@@ -690,6 +682,44 @@ async function buildUsagePayload(salaryCompositionSystemId) {
     sourceType: 2,
     status: 1,
   };
+}
+
+function requestReplaceConfirmation(row, payload) {
+  return new Promise((resolve, reject) => {
+    emit("openAlert", {
+      title: "Thông báo",
+      message: `Đã tồn tại một thành phần lương trùng mã <strong>${row.salaryCompositionCode}</strong> trên danh sách. Chương trình sẽ cập nhật thông tin của thành phần lương mặc định vào bản ghi hiện có. Bạn có muốn tiếp tục không?`,
+      cancelText: "Hủy bỏ",
+      confirmText: "Xác nhận",
+      confirmType: "green",
+      onConfirm: async () => {
+        try {
+          const confirmedResult = await salaryCompositionApi.create({
+            ...payload,
+            confirmReplaceExisting: true,
+          });
+          resolve(confirmedResult);
+        } catch (confirmError) {
+          reject(confirmError);
+        }
+      },
+    });
+  });
+}
+
+async function saveUsageItem(row) {
+  const payload = await buildUsagePayload(row.salaryCompositionSystemId);
+
+  try {
+    return await salaryCompositionApi.create(payload);
+  } catch (err) {
+    const userMessage = err.data?.userMessage || "";
+    if (userMessage.includes(`Đã tồn tại một thành phần lương trùng mã ${row.salaryCompositionCode} trên danh sách`)) {
+      return await requestReplaceConfirmation(row, payload);
+    }
+
+    throw err;
+  }
 }
 
 onMounted(() => {

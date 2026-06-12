@@ -495,6 +495,7 @@ import MsDropdownMenu from "@/components/base/MsDropdownMenu.vue";
 import MsToastContainer from "@/components/overlay/MsToast/MsToastContainer.vue";
 import { computed, nextTick, onMounted, ref, watch, onUnmounted } from "vue";
 import salaryCompositionApi from "@/services/salaryCompositionService";
+import salaryCompositionSystemApi from "@/services/salaryCompositionSystemService";
 import organizationApi from "@/services/organizationService";
 import {
   SalaryCompositionNature,
@@ -1183,6 +1184,103 @@ function buildPayload() {
   };
 }
 
+async function findSystemSalaryCompositionByCode(code) {
+  const result = await salaryCompositionSystemApi.getAll();
+  const normalizedCode = code.trim().toUpperCase();
+
+  return (result.data || []).find(
+    (item) => item.salaryCompositionCode?.trim()?.toUpperCase() === normalizedCode
+  ) ?? null;
+}
+
+async function buildSystemUsagePayloadByCode(code) {
+  const matchedSystemItem = await findSystemSalaryCompositionByCode(code);
+  if (!matchedSystemItem?.salaryCompositionSystemId) {
+    throw new Error("Không tìm thấy thành phần lương mặc định tương ứng");
+  }
+
+  const detailResult = await salaryCompositionSystemApi.getById(
+    matchedSystemItem.salaryCompositionSystemId,
+  );
+  const data = detailResult?.data;
+
+  return {
+    salaryCompositionSystemId: data.salaryCompositionSystemId,
+    salaryCompositionCode: data.salaryCompositionCode,
+    salaryCompositionName: data.salaryCompositionName,
+    organizationIds: Array.isArray(data.organizationIds) ? data.organizationIds : [],
+    organizationName: data.organizationName ?? null,
+    compositionType: data.compositionType,
+    compositionNature: data.compositionNature,
+    taxable: data.taxable ?? null,
+    taxDeduction: data.taxDeduction ?? null,
+    quota: data.quota ?? null,
+    valueType: data.valueType,
+    formula: data.formula ?? null,
+    description: data.description ?? null,
+    optionShowPaycheck: data.optionShowPaycheck ?? null,
+    sourceType: SalaryCompositionSourceType.Default,
+    status: data.status,
+  };
+}
+
+async function handleSystemDuplicateSelection(selectedOption, andAdd) {
+  if (!selectedOption) {
+    return;
+  }
+
+  isSubmitting.value = true;
+  try {
+    let result;
+
+    if (selectedOption === "use-system-default") {
+      const payload = await buildSystemUsagePayloadByCode(formData.value.salaryCompositionCode);
+      result = await salaryCompositionApi.create(payload);
+    } else if (selectedOption === "continue-create-custom") {
+      const payload = buildPayload();
+      result = await salaryCompositionApi.create(payload);
+    } else {
+      return;
+    }
+
+    await handleSubmitSuccess(result, andAdd);
+  } catch (err) {
+    const errMsg = err.data?.userMessage || err.message || "Có lỗi xảy ra, vui lòng thử lại";
+    addToast(errMsg, "error");
+  } finally {
+    isSubmitting.value = false;
+  }
+}
+
+async function handleSubmitSuccess(result, andAdd) {
+  if (!result?.isSuccess) {
+    const errMsg = result?.data || "Có lỗi xảy ra, vui lòng thử lại";
+    emit("openAlert", {
+      title: "Lưu không thành công",
+      message: errMsg,
+      showConfirmButton: false,
+      cancelText: "Đóng",
+    });
+    return;
+  }
+
+  if (andAdd) {
+    emit("saved", { data: result.data, isEdit: isEditMode.value && !!currentEditId.value });
+    resetForm();
+    await nextTick();
+    salaryCompositionNameRef.value?.focus?.();
+    addToast("Lưu thành công", "success");
+    return;
+  }
+
+  emit("saved", {
+    data: result.data,
+    isEdit: isEditMode.value && !!currentEditId.value,
+    showToast: true
+  });
+  emit("close");
+}
+
 // ── Submit handlers ─────────────────────────────────────────
 /**
  * Xử lý sự kiện lưu form
@@ -1236,6 +1334,30 @@ async function submitForm(andAdd = false) {
   try {
     // Build payload từ formData để gửi lên API
     const payload = buildPayload();
+    if (!isEditMode.value && !payload.salaryCompositionSystemId) {
+      const systemDuplicate = await findSystemSalaryCompositionByCode(
+        payload.salaryCompositionCode,
+      );
+
+      if (systemDuplicate) {
+        emit("openAlert", {
+          title: "Thông báo",
+          message: `Đã tìm thấy một thành phần lương mặc định của hệ thống<br>có cùng mã <strong style="color: #6f2dbd;">${payload.salaryCompositionCode}</strong>. Chọn<br>thao tác bạn muốn thực hiện với đối tượng này:`,
+          cancelText: "Hủy bỏ",
+          confirmText: "Đồng ý",
+          confirmType: "green",
+          options: [
+            { value: "use-system-default", label: "Sử dụng thành phần lương mặc định" },
+            { value: "continue-create-custom", label: "Tiếp tục thêm mới thành phần lương này" },
+          ],
+          onConfirm: async (selectedOption) => {
+            await handleSystemDuplicateSelection(selectedOption, andAdd);
+          },
+        });
+        return;
+      }
+    }
+
     let result;
     // Nếu đang ở edit mode và có currentEditId thì gọi API update, ngược lại gọi API create
     if (isEditMode.value && currentEditId.value) {
@@ -1249,36 +1371,7 @@ async function submitForm(andAdd = false) {
       result = await salaryCompositionApi.create(payload);
     }
 
-    if (result.isSuccess) {
-      if (andAdd) {
-        // Lưu và thêm: reset form để nhập tiếp, không đóng form
-        // Emit 'saved' kèm data API + flag để list unshift/update ngay
-        emit("saved", { data: result.data, isEdit: isEditMode.value && !!currentEditId.value });
-        resetForm();
-        // Sau khi reset form, cần đợi nextTick để DOM cập nhật trước khi focus vào input
-        await nextTick();
-        // Focus vào tên thành phần sau khi reset form
-        // Nếu có lỗi validate thì sẽ focus vào trường đó, nếu không thì focus vào tên thành phần
-        salaryCompositionNameRef.value?.focus?.();
-        addToast("Lưu thành công", "success");
-      } else {
-        // Lưu: emit saved kèm cờ showToast để component cha hiển thị trước khi form bị đóng
-        emit("saved", {
-          data: result.data,
-          isEdit: isEditMode.value && !!currentEditId.value,
-          showToast: true
-        });
-        emit("close");
-      }
-    } else {
-      const errMsg = result.data || "Có lỗi xảy ra, vui lòng thử lại";
-      emit("openAlert", {
-        title: "Lưu không thành công",
-        message: errMsg,
-        showConfirmButton: false,
-        cancelText: "Đóng",
-      });
-    }
+    await handleSubmitSuccess(result, andAdd);
   } catch (err) {
     console.error("[FormSalaryComposition] submitForm:", err);
     const errMsg = err.data?.userMessage || "Có lỗi xảy ra, vui lòng thử lại";

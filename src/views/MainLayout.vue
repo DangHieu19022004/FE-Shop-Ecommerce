@@ -26,7 +26,7 @@
       <MsOverlay
         v-if="alertState.isShow"
         class="overlay--alert"
-        @click="alertState.isShow = false"
+        @click="closeAlert"
       />
 
       <!-- Component Alert dùng chung cho toàn layout -->
@@ -39,9 +39,30 @@
         :confirmText="alertState.confirmText"
         :cancelType="alertState.cancelType"
         :confirmType="alertState.confirmType"
-        @close="alertState.isShow = false"
+        :confirmDisabled="!!alertState.options?.length && !alertSelectedOption"
+        @close="closeAlert"
         @confirm="handleConfirmAlert"
-      />
+      >
+        <template v-if="alertState.options?.length">
+          <div class="alert-options">
+            <div
+              v-for="option in alertState.options"
+              :key="option.value"
+              class="alert-option"
+              @click="alertSelectedOption = option.value"
+            >
+              <input
+                type="radio"
+                name="alert-option"
+                :value="option.value"
+                :checked="alertSelectedOption === option.value"
+                @change="alertSelectedOption = option.value"
+              />
+              <span>{{ option.label }}</span>
+            </div>
+          </div>
+        </template>
+      </MsAlert>
 
       <!-- Container hiển thị toast -->
       <MsToastContainer :toasts="toasts" @close="removeToast" />
@@ -92,12 +113,19 @@ const alertState = ref({
 const pendingUpdate = ref(null);
 const pendingDelete = ref(null);
 const pendingAction = ref(null);
+const alertSelectedOption = ref("");
 // Biến lưu thông tin cột hiển thị, dùng để truyền vào component con để điều khiển cột nào được hiển thị
 const visibleColumns = ref({
 
 });
 // Biến lưu thông tin route hiện tại, dùng để điều hướng route
 const route = useRoute();
+
+const closeAlert = () => {
+  alertState.value.isShow = false;
+  alertSelectedOption.value = "";
+  pendingAction.value = null;
+};
 
 // FUNCTION:
 /**
@@ -141,8 +169,9 @@ const handleConfirmAlert = () => {
 
   // Nếu có callback onConfirm từ component con (vd: FormSalaryComposition)
   if (pendingAction.value) {
-    pendingAction.value();
+    pendingAction.value(alertSelectedOption.value);
     pendingAction.value = null;
+    alertSelectedOption.value = "";
     return;
   }
 
@@ -236,6 +265,7 @@ const handleDeleteItem = (salaryData) => {
 const openAlert = (payload) => {
   // Lưu callback onConfirm nếu component con truyền vào
   pendingAction.value = payload.onConfirm ?? null;
+  alertSelectedOption.value = payload.defaultOption ?? "";
   // Mở alert với thông tin từ payload, nếu không có thì sử dụng giá trị mặc định
   alertState.value = {
     isShow: true,
@@ -245,7 +275,8 @@ const openAlert = (payload) => {
     cancelText: payload.cancelText ?? "Hủy",
     confirmText: payload.confirmText ?? "Xác nhận",
     cancelType: payload.cancelType ?? "none",
-    confirmType: payload.confirmType ?? "green"
+    confirmType: payload.confirmType ?? "green",
+    options: payload.options ?? [],
   };
 };
 
@@ -273,5 +304,19 @@ watch(isCollapse, () => {
 .container {
   display: flex;
   height: calc(100vh - 48px);
+}
+
+.alert-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.alert-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
 }
 </style>
