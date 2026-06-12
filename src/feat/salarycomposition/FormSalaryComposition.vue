@@ -1238,7 +1238,7 @@ async function handleSystemDuplicateSelection(selectedOption, andAdd) {
       result = await salaryCompositionApi.create(payload);
     } else if (selectedOption === "continue-create-custom") {
       const payload = buildPayload();
-      result = await salaryCompositionApi.create(payload);
+      result = await salaryCompositionApi.createIgnoringSystemCode(payload);
     } else {
       return;
     }
@@ -1334,30 +1334,6 @@ async function submitForm(andAdd = false) {
   try {
     // Build payload từ formData để gửi lên API
     const payload = buildPayload();
-    if (!isEditMode.value && !payload.salaryCompositionSystemId) {
-      const systemDuplicate = await findSystemSalaryCompositionByCode(
-        payload.salaryCompositionCode,
-      );
-
-      if (systemDuplicate) {
-        emit("openAlert", {
-          title: "Thông báo",
-          message: `Đã tìm thấy một thành phần lương mặc định của hệ thống<br>có cùng mã <strong style="color: #6f2dbd;">${payload.salaryCompositionCode}</strong>. Chọn<br>thao tác bạn muốn thực hiện với đối tượng này:`,
-          cancelText: "Hủy bỏ",
-          confirmText: "Đồng ý",
-          confirmType: "green",
-          options: [
-            { value: "use-system-default", label: "Sử dụng thành phần lương mặc định" },
-            { value: "continue-create-custom", label: "Tiếp tục thêm mới thành phần lương này" },
-          ],
-          onConfirm: async (selectedOption) => {
-            await handleSystemDuplicateSelection(selectedOption, andAdd);
-          },
-        });
-        return;
-      }
-    }
-
     let result;
     // Nếu đang ở edit mode và có currentEditId thì gọi API update, ngược lại gọi API create
     if (isEditMode.value && currentEditId.value) {
@@ -1374,6 +1350,28 @@ async function submitForm(andAdd = false) {
     await handleSubmitSuccess(result, andAdd);
   } catch (err) {
     console.error("[FormSalaryComposition] submitForm:", err);
+    if (
+      !isEditMode.value &&
+      err.data?.userMessage === "Mã thành phần lương trùng với Mã thành phần lương của hệ thống"
+    ) {
+      const duplicateCode = formData.value.salaryCompositionCode.trim();
+      emit("openAlert", {
+        title: "Thông báo",
+        message: `Đã tìm thấy một thành phần lương mặc định của hệ thống<br>có cùng mã <strong style="color: #6f2dbd;">${duplicateCode}</strong>. Chọn<br>thao tác bạn muốn thực hiện với đối tượng này:`,
+        cancelText: "Hủy bỏ",
+        confirmText: "Đồng ý",
+        confirmType: "green",
+        options: [
+          { value: "use-system-default", label: "Sử dụng thành phần lương mặc định" },
+          { value: "continue-create-custom", label: "Tiếp tục thêm mới thành phần lương này" },
+        ],
+        onConfirm: async (selectedOption) => {
+          await handleSystemDuplicateSelection(selectedOption, andAdd);
+        },
+      });
+      return;
+    }
+
     const errMsg = err.data?.userMessage || "Có lỗi xảy ra, vui lòng thử lại";
     addToast(errMsg, "error");
   } finally {

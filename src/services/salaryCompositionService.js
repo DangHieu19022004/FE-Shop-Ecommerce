@@ -64,6 +64,10 @@ const salaryCompositionApi = {
     return axiosInstance.post(BASE, data);
   },
 
+  createIgnoringSystemCode(data) {
+    return axiosInstance.post(`${BASE}/continue`, data);
+  },
+
   /**
    * Cập nhật thành phần lương.
    *

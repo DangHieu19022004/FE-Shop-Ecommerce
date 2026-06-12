@@ -113,6 +113,7 @@ const alertState = ref({
 const pendingUpdate = ref(null);
 const pendingDelete = ref(null);
 const pendingAction = ref(null);
+const pendingCancelAction = ref(null);
 const alertSelectedOption = ref("");
 // Biến lưu thông tin cột hiển thị, dùng để truyền vào component con để điều khiển cột nào được hiển thị
 const visibleColumns = ref({
@@ -124,6 +125,8 @@ const route = useRoute();
 const closeAlert = () => {
   alertState.value.isShow = false;
   alertSelectedOption.value = "";
+  pendingCancelAction.value?.();
+  pendingCancelAction.value = null;
   pendingAction.value = null;
 };
 
@@ -171,6 +174,7 @@ const handleConfirmAlert = () => {
   if (pendingAction.value) {
     pendingAction.value(alertSelectedOption.value);
     pendingAction.value = null;
+    pendingCancelAction.value = null;
     alertSelectedOption.value = "";
     return;
   }
@@ -265,6 +269,7 @@ const handleDeleteItem = (salaryData) => {
 const openAlert = (payload) => {
   // Lưu callback onConfirm nếu component con truyền vào
   pendingAction.value = payload.onConfirm ?? null;
+  pendingCancelAction.value = payload.onCancel ?? null;
   alertSelectedOption.value = payload.defaultOption ?? "";
   // Mở alert với thông tin từ payload, nếu không có thì sử dụng giá trị mặc định
   alertState.value = {

@@ -580,7 +580,7 @@ async function handleAddToUsageList(row) {
     onConfirm: async () => {
       try {
         const result = await saveUsageItem(row);
-        if (result.isSuccess) {
+        if (result?.isSuccess) {
           localStorage.setItem('pendingToast', JSON.stringify({ message: "Thêm thành công", type: "success" }));
           router.push("/salarycomposition");
         }
@@ -620,7 +620,7 @@ const handleConfirm = async () => {
           for (const row of itemsToAdd) {
             try {
               const res = await saveUsageItem(row);
-              if (res.isSuccess) {
+              if (res?.isSuccess) {
                 successCount++;
               }
             } catch (err) {
@@ -684,7 +684,7 @@ async function buildUsagePayload(salaryCompositionSystemId) {
   };
 }
 
-function requestReplaceConfirmation(row, payload) {
+function requestReplaceConfirmation(row, payload, existingEntity) {
   return new Promise((resolve, reject) => {
     emit("openAlert", {
       title: "Thông báo",
@@ -694,17 +694,28 @@ function requestReplaceConfirmation(row, payload) {
       confirmType: "green",
       onConfirm: async () => {
         try {
-          const confirmedResult = await salaryCompositionApi.create({
-            ...payload,
-            confirmReplaceExisting: true,
-          });
-          resolve(confirmedResult);
+          const updateResult = await salaryCompositionApi.update(
+            existingEntity.salaryCompositionId,
+            payload,
+          );
+          await salaryCompositionSystemApi.deleteById(row.salaryCompositionSystemId);
+          resolve(updateResult);
         } catch (confirmError) {
           reject(confirmError);
         }
       },
+      onCancel: () => resolve(null),
     });
   });
+}
+
+async function findSalaryCompositionByCode(code) {
+  const result = await salaryCompositionApi.getAll();
+  const normalizedCode = code.trim().toUpperCase();
+
+  return (result.data || []).find(
+    (item) => item.salaryCompositionCode?.trim()?.toUpperCase() === normalizedCode,
+  ) ?? null;
 }
 
 async function saveUsageItem(row) {
@@ -714,8 +725,11 @@ async function saveUsageItem(row) {
     return await salaryCompositionApi.create(payload);
   } catch (err) {
     const userMessage = err.data?.userMessage || "";
-    if (userMessage.includes(`Đã tồn tại một thành phần lương trùng mã ${row.salaryCompositionCode} trên danh sách`)) {
-      return await requestReplaceConfirmation(row, payload);
+    if (userMessage.includes("Mã thành phần đã tồn tại")) {
+      const existingEntity = await findSalaryCompositionByCode(row.salaryCompositionCode);
+      if (existingEntity) {
+        return await requestReplaceConfirmation(row, payload, existingEntity);
+      }
     }
 
     throw err;
