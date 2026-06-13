@@ -1357,7 +1357,7 @@ async function submitForm(andAdd = false) {
       const duplicateCode = formData.value.salaryCompositionCode.trim();
       emit("openAlert", {
         title: "Thông báo",
-        message: `Đã tìm thấy một thành phần lương mặc định của hệ thống<br>có cùng mã <strong style="color: #6f2dbd;">${duplicateCode}</strong>. Chọn<br>thao tác bạn muốn thực hiện với đối tượng này:`,
+        message: `Đã tìm thấy một thành phần lương mặc định của hệ thống có cùng mã <strong style="color: #6f2dbd;">${duplicateCode}</strong>. Chọn thao tác bạn muốn thực hiện với đối tượng này:`,
         cancelText: "Hủy bỏ",
         confirmText: "Đồng ý",
         confirmType: "green",

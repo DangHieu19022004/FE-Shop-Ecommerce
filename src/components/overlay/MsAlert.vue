@@ -11,9 +11,8 @@
         />
       </div>
       <div class="modal_alert_content">
-        <slot>
-          <div v-html="props.message"></div>
-        </slot>
+        <div v-if="props.message" v-html="props.message"></div>
+        <slot></slot>
       </div>
     </div>
     <div v-if="props.showConfirmButton" class="modal_alert_action">
