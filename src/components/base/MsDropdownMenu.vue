@@ -1,11 +1,17 @@
 <template>
   <div
     class="ms-dropdown-menu"
-    :class="[`ms-dropdown-menu--${position}`, { 'ms-dropdown-menu--floating': isFloating }]"
+    :class="[
+      `ms-dropdown-menu--${position}`,
+      { 'ms-dropdown-menu--floating': isFloating },
+    ]"
     :style="isFloating ? positionStyle : {}"
     @click.stop
   >
-    <template v-for="item in items" :key="item.divider ? Math.random() : item[trackBy]">
+    <template
+      v-for="item in items"
+      :key="item.divider ? Math.random() : item[trackBy]"
+    >
       <!-- Divider -->
       <div v-if="item.divider" class="ms-dropdown-menu__divider" />
 
@@ -20,13 +26,22 @@
         @click="!item.disabled && handleSelect(item)"
       >
         <!-- Icon trái -->
-        <i v-if="item.icon" class="ms-dropdown-menu__item-icon" :class="item.icon" />
+        <i
+          v-if="item.icon"
+          class="ms-dropdown-menu__item-icon"
+          :class="item.icon"
+        />
 
         <!-- Label -->
-        <span class="ms-dropdown-menu__item-label">{{ item[optionLabel] }}</span>
+        <span class="ms-dropdown-menu__item-label">{{
+          item[optionLabel]
+        }}</span>
 
         <!-- Checkmark khi đang được chọn -->
-        <i v-if="isSelected(item)" class="ms-dropdown-menu__item-check mi-check" />
+        <i
+          v-if="isSelected(item)"
+          class="ms-dropdown-menu__item-check mi-check"
+        />
       </div>
     </template>
 
@@ -38,7 +53,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { computed } from "vue";
 
 /**
  * MsDropdownMenu — Danh sách menu dropdown dùng chung.
@@ -74,11 +89,11 @@ const props = defineProps({
   },
   optionLabel: {
     type: String,
-    default: 'label',
+    default: "label",
   },
   trackBy: {
     type: String,
-    default: 'value',
+    default: "value",
   },
   /**
    * Vị trí của dropdown so với phần tử cha (parent cần position: relative).
@@ -92,8 +107,16 @@ const props = defineProps({
     default: null,
     validator: (v) =>
       v === null ||
-      ['right-start', 'right-end', 'left-start', 'left-end',
-       'bottom-start', 'bottom-end', 'top-start', 'top-end'].includes(v),
+      [
+        "right-start",
+        "right-end",
+        "left-start",
+        "left-end",
+        "bottom-start",
+        "bottom-end",
+        "top-start",
+        "top-end",
+      ].includes(v),
   },
   /** Khoảng cách (px) giữa trigger và dropdown khi dùng floating mode */
   offset: {
@@ -102,7 +125,7 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(['update:modelValue', 'select']);
+const emit = defineEmits(["update:modelValue", "select"]);
 
 /** Chỉ floating khi có position */
 const isFloating = computed(() => props.position !== null);
@@ -114,16 +137,16 @@ const isFloating = computed(() => props.position !== null);
 const positionStyle = computed(() => {
   const gap = `${props.offset}px`;
   const map = {
-    'right-start':  { top: '0',    left: '100%',  marginLeft:   gap },
-    'right-end':    { bottom: '0', left: '100%',  marginLeft:   gap },
-    'left-start':   { top: '0',    right: '100%', marginRight:  gap },
-    'left-end':     { bottom: '0', right: '100%', marginRight:  gap },
-    'bottom-start': { top: '100%', left: '0',     marginTop:    gap },
-    'bottom-end':   { top: '100%', right: '0',    marginTop:    gap },
-    'top-start':    { bottom: '100%', left: '0',  marginBottom: gap },
-    'top-end':      { bottom: '100%', right: '0', marginBottom: gap },
+    "right-start": { top: "0", left: "100%", marginLeft: gap },
+    "right-end": { bottom: "0", left: "100%", marginLeft: gap },
+    "left-start": { top: "0", right: "100%", marginRight: gap },
+    "left-end": { bottom: "0", right: "100%", marginRight: gap },
+    "bottom-start": { top: "100%", left: "0", marginTop: gap },
+    "bottom-end": { top: "100%", right: "0", marginTop: gap },
+    "top-start": { bottom: "100%", left: "0", marginBottom: gap },
+    "top-end": { bottom: "100%", right: "0", marginBottom: gap },
   };
-  return map[props.position] ?? map['bottom-start'];
+  return map[props.position] ?? map["bottom-start"];
 });
 
 const isSelected = (item) => {
@@ -132,8 +155,8 @@ const isSelected = (item) => {
 };
 
 const handleSelect = (item) => {
-  emit('update:modelValue', item[props.trackBy]);
-  emit('select', item);
+  emit("update:modelValue", item[props.trackBy]);
+  emit("select", item);
 };
 </script>
 
@@ -180,11 +203,15 @@ const handleSelect = (item) => {
   font-size: 14px;
   color: #1f2937;
   cursor: pointer;
-  transition: background 0.12s ease, color 0.12s ease;
+  transition:
+    background 0.12s ease,
+    color 0.12s ease;
 }
 
 /* Hover → nền xám nhạt */
-.ms-dropdown-menu__item:hover:not(.ms-dropdown-menu__item--selected):not(.ms-dropdown-menu__item--disabled) {
+.ms-dropdown-menu__item:hover:not(.ms-dropdown-menu__item--selected):not(
+    .ms-dropdown-menu__item--disabled
+  ) {
   background-color: #f3f4f6;
   color: #111827;
 }
