@@ -12,7 +12,6 @@
         class="ms-formula__editor-wrap"
         :class="{
           'ms-formula__editor-wrap--focused': isFocused || showPopup,
-          'ms-formula__editor-wrap--error': errorMessages,
         }"
       >
         <!-- Placeholder -->
@@ -37,11 +36,6 @@
           @blur="handleBlur"
           @keydown="handleKeydown"
         />
-      </div>
-
-      <!-- Tooltip lỗi -->
-      <div v-if="errorMessages" class="ms-formula__tooltip">
-        {{ errorMessages }}
       </div>
 
       <!-- ══════════════════════════════════════
@@ -130,11 +124,12 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount } from "vue";
+import { ref, computed, onMounted, onBeforeUnmount, watch } from "vue";
 import { PrismEditor } from "vue-prism-editor";
 import "vue-prism-editor/dist/prismeditor.min.css";
 import { highlightFormula } from "./formula-prism.js";
 import { EXCEL_FORMULAS } from "@/constants/formulaTemplate.js";
+import { validateFormula } from "./formula-validator.js";
 import MsButton from "@/components/base/MsButton.vue";
 
 // ── Props ─────────────────────────────────────────────────────────────────────
@@ -151,11 +146,22 @@ const props = defineProps({
   horizontal: { type: Boolean, default: false },
   isRequired: { type: Boolean, default: false },
   id: { type: String, default: "" },
-  errorMessages: { type: String, default: "" },
 });
 
 // ── Emits ─────────────────────────────────────────────────────────────────────
-const emit = defineEmits(["update:modelValue", "blur", "focus"]);
+const emit = defineEmits(["update:modelValue", "blur", "focus", "validate"]);
+
+function runValidation(value = props.modelValue) {
+  const errors = validateFormula(value, props.parameters, props.variables);
+  emit("validate", errors);
+  return errors.length === 0;
+}
+
+watch(
+  () => [props.modelValue, props.parameters, props.variables],
+  () => runValidation(),
+  { deep: true, flush: "post" },
+);
 
 // ── Refs ──────────────────────────────────────────────────────────────────────
 // Trạng thái focus của editor
@@ -278,6 +284,7 @@ function switchTab(tab) {
  */
 function handleInput(value) {
   emit("update:modelValue", value);
+  runValidation(value);
   if (value && value.startsWith("=")) {
     // Cập nhật searchText từ token đang gõ
     const afterEq = value.slice(1);
@@ -320,6 +327,7 @@ function handleFocus(e) {
  */
 function handleBlur(e) {
   isFocused.value = false;
+  runValidation();
   emit("blur", e);
   // Nếu mousedown đang xảy ra bên trong popup → không đóng
   if (isMouseInsidePopup.value) return;
@@ -501,6 +509,7 @@ function handleDocumentMousedown(e) {
 }
 
 onMounted(() => {
+  runValidation();
   document.addEventListener("mousedown", handleDocumentMousedown);
 });
 
@@ -508,7 +517,7 @@ onBeforeUnmount(() => {
   document.removeEventListener("mousedown", handleDocumentMousedown);
 });
 
-defineExpose({ focus, insertVariable });
+defineExpose({ focus, insertVariable, validate: runValidation });
 </script>
 
 <style>

@@ -390,9 +390,6 @@
               @blur="markTouched('formula')"
               @focus="unMarkTouched('formula')"
             />
-            <div class="validate-msg">
-              {{ isTouched("formula") ? errorMessages.formula : "" }}
-            </div>
             <MsButton
               iconLeft="mi-agent-box"
               :isTooltip="false"
@@ -1057,6 +1054,11 @@ const validateForm = () => {
   return results.every(Boolean);
 };
 
+const showFormulaValidationToast = () => {
+  const message = errorMessages.value.quota || errorMessages.value.formula;
+  if (message) addToast(message, "error");
+};
+
 // Hàm lấy tên trường đầu tiên có lỗi để focus vào đó
 const getFirstErrorField = () => {
   return Object.keys(validationRules).find(
@@ -1288,6 +1290,7 @@ async function handleSubmitSuccess(result, andAdd) {
 async function handleSubmit() {
   touchAll();
   if (!validateForm()) {
+    showFormulaValidationToast();
     await focusFirstErrorField();
     return;
   }
@@ -1306,6 +1309,7 @@ async function handleSubmit() {
 async function handleSubmitAndAdd() {
   touchAll();
   if (!validateForm()) {
+    showFormulaValidationToast();
     await focusFirstErrorField();
     return;
   }
@@ -1478,9 +1482,13 @@ watch(
   () => formData.value.salaryCompositionName,
   (newName) => {
     if (!isEditMode.value && !isViewMode.value && !isCodeManuallyEdited.value) {
-      formData.value.salaryCompositionCode = toCompositionCode(newName);
-      // Nếu ô mã thành phần đang bị báo lỗi (đã touch), gọi validate lại để xóa lỗi
-      if (touchedFields.value.salaryCompositionCode) {
+      const autoCode = toCompositionCode(newName);
+      formData.value.salaryCompositionCode = autoCode;
+
+      // Mã được sinh từ tên nên khi tên bị xóa, mã cũng phải validate required ngay.
+      if (isEmptyValue(autoCode)) {
+        markTouched("salaryCompositionCode");
+      } else if (touchedFields.value.salaryCompositionCode) {
         validateField("salaryCompositionCode");
       }
     }
