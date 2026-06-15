@@ -2141,7 +2141,7 @@ const handleSaveColumnSettings = async (configurableSaved) => {
 
 .content_body_search:hover,
 .content_body_search:focus-within {
-  border-color: #34b057;
+  border-color: #0E9A62;
 }
 
 .content_body_status {
@@ -2367,8 +2367,8 @@ const handleSaveColumnSettings = async (configurableSaved) => {
 }
 
 .status-badge--active-border {
-  color: #34b057 !important;
-  border: 1px solid #34b057;
+  color: #0E9A62 !important;
+  border: 1px solid #0E9A62;
   border-radius: 8px;
 }
 

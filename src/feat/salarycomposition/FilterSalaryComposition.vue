@@ -203,7 +203,7 @@ const handleApply = () => {
 
 .content-body__search:hover,
 .content-body__search:focus-within {
-    border-color: #34B057;
+    border-color: #0E9A62;
 }
 
 :deep(.ms-input-in.content-body__search-input) {

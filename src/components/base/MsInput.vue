@@ -171,7 +171,6 @@ const handleFocus = () => {
 
 .ms-input-in:focus {
   border-color: #0E9A62;
-  box-shadow: 0 0 0 3px rgba(14, 154, 98, 0.12);
   background-color: #ffffff;
 }
 
@@ -189,7 +188,6 @@ const handleFocus = () => {
 
 .ms-input .ms-input--error {
   border-color: #f44336 !important;
-  box-shadow: 0 0 0 3px rgba(244, 67, 54, 0.1) !important;
 }
 
 .ms-input .ms-input--error:hover,

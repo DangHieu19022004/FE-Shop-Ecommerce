@@ -1349,7 +1349,7 @@ const handleSaveColumnSettings = async (configurableSaved) => {
 }
 .content_body_search:hover,
 .content_body_search:focus-within {
-  border-color: #34b057;
+  border-color: #0E9A62;
 }
 .content_body_status {
   margin-left: 8px;

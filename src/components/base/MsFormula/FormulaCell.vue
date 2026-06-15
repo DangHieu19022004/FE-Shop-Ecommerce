@@ -38,11 +38,11 @@ const highlighted = computed(() => {
 <style>
 /* ── FormulaCell: token colors (global, không scoped) ── */
 .formula-cell .token.function {
-  color: #7c3aed;
-  font-weight: 600;
+  color: #101828;
+  font-weight: 400;
 }
 .formula-cell .token.variable {
-  color: #0369a1;
+  color: #007aff;
   font-weight: 500;
 }
 .formula-cell .token.number {

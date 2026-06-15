@@ -77,7 +77,6 @@
 
     <!-- Actions -->
     <div class="psc-actions">
-      <MsButton message="Hủy" type="border-secondary" @click="$emit('close')" :isTooltip="false" class="psc-btn psc-btn--cancel" />
       <MsButton message="Lưu" type="green" @click="handleSave" :isTooltip="false" class="psc-btn psc-btn--save" />
     </div>
   </div>
@@ -298,7 +297,8 @@ onBeforeUnmount(() => {
   top: calc(100% + 6px);
   right: 0;
   z-index: 600;
-  width: 320px;
+  height: 490px;
+  width: 400px;
   background: #fff;
   border-radius: 10px;
   box-shadow: 0 8px 32px rgba(17, 24, 39, 0.16), 0 2px 8px rgba(0,0,0,0.06);
@@ -315,13 +315,12 @@ onBeforeUnmount(() => {
   align-items: center;
   justify-content: space-between;
   padding: 14px 16px 10px;
-  border-bottom: 1px solid #f0f1f3;
 }
 
 .psc-title {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 600;
-  color: #111827;
+  color: #212121;
 }
 
 .psc-reset-btn {
@@ -359,7 +358,7 @@ onBeforeUnmount(() => {
   transition: border-color 0.15s, background 0.15s;
 }
 .psc-search--focused {
-  border-color: #34b057;
+  border-color: #0E9A62;
   background: #fff;
 }
 
@@ -384,12 +383,13 @@ onBeforeUnmount(() => {
 /* ── List wrapper ── */
 .psc-list-wrapper {
   margin: 0 8px 4px;
+  /* flex: 1; */
   overflow: hidden;
 }
 
 /* ── List body ── */
 .psc-list-body {
-  max-height: 260px;
+  max-height: 320px;
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: #d1d5db transparent;
@@ -423,7 +423,7 @@ onBeforeUnmount(() => {
 }
 
 .psc-item--drag-over {
-  border-top: 2px solid #34b057;
+  border-top: 2px solid #0E9A62;
 }
 
 .psc-checkbox-custom {
@@ -434,6 +434,7 @@ onBeforeUnmount(() => {
 :deep(.psc-checkbox-custom .ms-checkbox__label) {
   flex: 1;
   min-width: 0;
+  color: #2b3240;
 }
 
 /* ── Drag handle ── */
@@ -489,8 +490,10 @@ onBeforeUnmount(() => {
 }
 
 .psc-btn--save {
-  background: #34b057;
-  border-color: #34b057;
+  width: 80px !important;
+  height: 32px !important;
+  background: #0E9A62;
+  border-color: #0E9A62;
   color: #fff;
 }
 .psc-btn--save:hover {

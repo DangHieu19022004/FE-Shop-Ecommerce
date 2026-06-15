@@ -523,11 +523,11 @@ defineExpose({ focus, insertVariable, validate: runValidation });
 <style>
 /* ── Token colors (global vì PrismEditor không dùng scoped) ── */
 .ms-formula__prism .token.function {
-  color: #7c3aed;
-  font-weight: 600;
+  color: #101828;
+  font-weight: 400;
 }
 .ms-formula__prism .token.variable {
-  color: #0369a1;
+  color: #007aff;
 }
 .ms-formula__prism .token.number {
   color: #b45309;
@@ -630,12 +630,10 @@ defineExpose({ focus, insertVariable, validate: runValidation });
 
 .ms-formula__editor-wrap--focused {
   border-color: #0e9a62;
-  box-shadow: 0 0 0 3px rgba(14, 154, 98, 0.12);
 }
 
 .ms-formula__editor-wrap--error {
   border-color: #f44336 !important;
-  box-shadow: 0 0 0 3px rgba(244, 67, 54, 0.1) !important;
 }
 
 .ms-formula__editor-wrap--error:hover {

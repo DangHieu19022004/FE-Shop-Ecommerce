@@ -341,7 +341,7 @@ const toggleCollapse = () => {
 }
 
 .sidebar.sidebar_hide .menu__item {
-  width: 40px;
+  width: 30px;
   height: 40px;
   justify-content: center;
   margin: 0 auto;

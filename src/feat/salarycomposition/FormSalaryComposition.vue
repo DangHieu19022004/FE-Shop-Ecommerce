@@ -142,12 +142,12 @@
             <div class="validate-msg"></div>
           </div>
 
-          <!-- Loại thành phần lương -->
+          <!-- Loại thành phần -->
           <div class="form-field">
             <MsSelect
               ref="compositionTypeRef"
               :data="categoryOptions"
-              label-text="Loại thành phần lương"
+              label-text="Loại thành phần"
               :is-required="true"
               horizontal
               class="fz-14"
@@ -1509,6 +1509,10 @@ watch(
 function toCompositionCode(name) {
   return (name || "")
     .trim()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/g, "d")
+    .replace(/Đ/g, "D")
     .toUpperCase()
     .replace(/\s+/g, "_")
     .replace(/[^A-Z0-9_]/g, "");

@@ -473,7 +473,7 @@ onBeforeUnmount(() => {
   background: #f44336;
   color: #fff;
   padding: 5px 10px;
-  border-radius: 4px;
+  border-radius: 8px;
   font-size: 12px;
   white-space: nowrap;
   opacity: 0;
@@ -553,7 +553,7 @@ onBeforeUnmount(() => {
   display: flex;
   align-items: center;
   min-height: 32px;
-  padding: 4px 8px;
+  padding: 4px 3px;
   padding-right: 32px;
   border: 1px solid #d1d5db;
   border-radius: 8px;
@@ -590,11 +590,12 @@ onBeforeUnmount(() => {
   align-items: center;
   gap: 4px;
   padding: 2px 8px;
-  background-color: #f3f4f6;
-  border: 1px solid #e5e7eb;
-  border-radius: 4px;
-  font-size: 14px;
-  color: #111827;
+  background-color: #f5f5f5;
+  border: 1px solid #D5D7DA;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #101828;
   line-height: 20px;
   white-space: nowrap;
   flex-shrink: 0;
@@ -612,7 +613,7 @@ onBeforeUnmount(() => {
   justify-content: center;
   width: 16px;
   height: 16px;
-  font-size: 14px;
+  font-size: 16px;
   color: #6b7280;
   cursor: pointer;
   border-radius: 50%;

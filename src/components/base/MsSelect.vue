@@ -253,11 +253,11 @@ defineExpose({
 }
 
 .ms-multiselect .multiselect__tags:hover {
-  border-color: #2ab5a8;
+  border-color: #0E9A62;
 }
 
 .ms-multiselect.multiselect--active .multiselect__tags {
-  border-color: #2ab5a8;
+  border-color: #0E9A62;
   border-radius: 4px 4px 0 0;
 }
 
@@ -345,20 +345,20 @@ defineExpose({
 
 .ms-multiselect__caret--open {
   transform: translateY(-50%) rotate(180deg);
-  color: #2ab5a8;
+  color: #0E9A62;
 }
 
 /* ══════════════════════════
    Dropdown panel
 ══════════════════════════ */
 .ms-multiselect .multiselect__content-wrapper {
-  border: 1.5px solid #2ab5a8;
+  border: 1.5px solid #D5D7DA;
   border-radius: 8px;
   background: #fff;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
   overflow-y: auto;
   max-height: 280px;
   scrollbar-width: thin;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
   scrollbar-color: #d0d5dd transparent;
 }
 
