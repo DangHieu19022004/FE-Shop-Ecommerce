@@ -147,7 +147,7 @@ const emit = defineEmits(["close", "confirm"]);
 }
 
 .modal_alert_content {
-  margin: 0;
+  margin: 0 0 8px 0;
   font-size: 13px;
   line-height: 1.6;
   color: #374151;
