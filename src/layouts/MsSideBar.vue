@@ -253,8 +253,12 @@ const toggleCollapse = () => {
   color: #0E9A62;
 }
 
+.menu__item.router-link-active :deep(.ms-button__icon),
+.menu__item:active :deep(.ms-button__icon) {
+  background-color: #0E9A62 !important;
+}
+
 .menu__item:hover {
-  background-color: #0E9A62;
   color: #ffffff;
 }
 
@@ -273,7 +277,6 @@ const toggleCollapse = () => {
 }
 
 .menu__item-wrapper:hover .menu__item {
-  background-color: #0E9A62;
   color: #ffffff;
 }
 
