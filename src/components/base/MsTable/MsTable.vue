@@ -32,7 +32,11 @@
               @dragstart="onColDragStart($event, index)"
             >
               <!-- Icon pin hiển khi cột đang được ghim -->
-              <span v-if="field.pinned === 'left'" class="col-pin-icon" title="Đang ghim cột">
+              <span
+                v-if="field.pinned === 'left' && field.showPinnedIcon !== false"
+                class="col-pin-icon"
+                title="Đang ghim cột"
+              >
                 <div class="mi-pinned"></div>
               </span>
 

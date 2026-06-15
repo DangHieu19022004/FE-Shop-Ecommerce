@@ -522,6 +522,8 @@ const DEFAULT_FIELDS = [
     label: "",
     slot: "checkbox",
     width: 48,
+    pinned: "left",
+    showPinnedIcon: false,
     draggable: false,
     pinnable: false,
     resizable: false,
