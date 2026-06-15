@@ -497,6 +497,7 @@ import { computed, nextTick, onMounted, ref, watch, onUnmounted } from "vue";
 import salaryCompositionApi from "@/services/salaryCompositionService";
 import salaryCompositionSystemApi from "@/services/salaryCompositionSystemService";
 import organizationApi from "@/services/organizationService";
+import { ErrorCodes } from "@/constants/errorCodes";
 import {
   SalaryCompositionNature,
   SalaryCompositionNatureOptions,
@@ -1345,7 +1346,7 @@ async function submitForm(andAdd = false) {
     console.error("[FormSalaryComposition] submitForm:", err);
     if (
       !isEditMode.value &&
-      err.data?.userMessage === "Mã thành phần lương trùng với Mã thành phần lương của hệ thống"
+      err.data?.errorCode === ErrorCodes.DUPLICATE_WITH_SYSTEM_CODE
     ) {
       const duplicateCode = formData.value.salaryCompositionCode.trim();
       emit("openAlert", {

@@ -305,6 +305,7 @@ import { useRouter } from "vue-router";
 import salaryCompositionSystemApi from "@/services/salaryCompositionSystemService";
 import salaryCompositionApi from "@/services/salaryCompositionService";
 import gridConfigApi from "@/services/gridConfigService";
+import { ErrorCodes } from "@/constants/errorCodes";
 
 // ── Import enum constants ────────────────────────────────────
 import {
@@ -725,8 +726,7 @@ async function saveUsageItem(row) {
   try {
     return await salaryCompositionApi.create(payload);
   } catch (err) {
-    const userMessage = err.data?.userMessage || "";
-    if (userMessage.includes("Mã thành phần đã tồn tại")) {
+    if (err.data?.errorCode === ErrorCodes.DUPLICATE_SALARY_COMPOSITION_CODE) {
       const existingEntity = await findSalaryCompositionByCode(row.salaryCompositionCode);
       if (existingEntity) {
         return await requestReplaceConfirmation(row, payload, existingEntity);
