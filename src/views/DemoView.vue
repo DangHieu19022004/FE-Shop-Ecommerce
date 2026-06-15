@@ -30,7 +30,7 @@ const goBack = () => {
   align-items: center;
   justify-content: center;
   background: linear-gradient(135deg, #f5f7fa, #e4ecf5);
-  padding: 24px;
+  padding: 12px 16px 16px;
   width: 100%;
   flex: 1;
 }

@@ -710,12 +710,13 @@ function requestReplaceConfirmation(row, payload, existingEntity) {
 }
 
 async function findSalaryCompositionByCode(code) {
-  const result = await salaryCompositionApi.getAll();
-  const normalizedCode = code.trim().toUpperCase();
-
-  return (result.data || []).find(
-    (item) => item.salaryCompositionCode?.trim()?.toUpperCase() === normalizedCode,
-  ) ?? null;
+  try {
+    const result = await salaryCompositionApi.getByCode(code);
+    return result?.data ?? null;
+  } catch {
+    // 404 = không tồn tại bản ghi trùng mã → trả null để caller xử lý
+    return null;
+  }
 }
 
 async function saveUsageItem(row) {
@@ -1261,18 +1262,22 @@ const handleSaveColumnSettings = async (configurableSaved) => {
   flex-direction: column;
   flex: 1;
   background-color: #f1f2f1;
-  padding: 24px;
+  padding: 12px 16px 16px;
   min-width: 0;
   min-height: 0;
 }
+:deep(.ms-multiselect__option-label) {
+  font-size: 13px;
+}
+
 .content_body_footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 16px;
+  padding: 7px 16px;
   background-color: #fff;
-  border-bottom-left-radius: 4px;
-  border-bottom-right-radius: 4px;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
   font-size: 14px;
 }
 .footer-left b,
@@ -1328,8 +1333,8 @@ const handleSaveColumnSettings = async (configurableSaved) => {
   justify-content: space-between;
   padding: 16px;
   background-color: #fff;
-  border-top-left-radius: 4px;
-  border-top-right-radius: 4px;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
 }
 .content_body_search {
   display: flex;

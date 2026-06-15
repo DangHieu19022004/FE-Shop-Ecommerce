@@ -1184,25 +1184,18 @@ function buildPayload() {
   };
 }
 
-async function findSystemSalaryCompositionByCode(code) {
-  const result = await salaryCompositionSystemApi.getAll();
-  const normalizedCode = code.trim().toUpperCase();
-
-  return (result.data || []).find(
-    (item) => item.salaryCompositionCode?.trim()?.toUpperCase() === normalizedCode
-  ) ?? null;
-}
-
 async function buildSystemUsagePayloadByCode(code) {
-  const matchedSystemItem = await findSystemSalaryCompositionByCode(code);
-  if (!matchedSystemItem?.salaryCompositionSystemId) {
+  let data;
+  try {
+    const result = await salaryCompositionSystemApi.getByCode(code);
+    data = result?.data;
+  } catch {
     throw new Error("Không tìm thấy thành phần lương mặc định tương ứng");
   }
 
-  const detailResult = await salaryCompositionSystemApi.getById(
-    matchedSystemItem.salaryCompositionSystemId,
-  );
-  const data = detailResult?.data;
+  if (!data) {
+    throw new Error("Không tìm thấy thành phần lương mặc định tương ứng");
+  }
 
   return {
     salaryCompositionSystemId: data.salaryCompositionSystemId,
@@ -1445,6 +1438,12 @@ function resetForm() {
  * CREATED BY: TDHieu (09/06/2026)
  */
 const handleCloseForm = () => {
+  // Chế độ xem: không có dữ liệu chưa lưu → thoát thẳng, không cần confirm
+  if (isViewMode.value) {
+    emit("close");
+    return;
+  }
+
   emit("openAlert", {
     title: "Thoát và không lưu?",
     message: "Nếu bạn thoát, các dữ liệu đang nhập liệu sẽ không được lưu lại.",
@@ -1583,7 +1582,7 @@ onMounted(async () => {
   flex-direction: column;
   flex: 1;
   background-color: #f1f2f1;
-  padding: 24px;
+  padding: 12px 16px 16px;
   min-width: 0;
   min-height: 0;
 }
@@ -1592,17 +1591,29 @@ onMounted(async () => {
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  padding: 12px 16px;
-  background-color: #fff;
+  padding-top: 12px;
+  background-color: #f1f2f1;
   border-bottom-left-radius: 4px;
   border-bottom-right-radius: 4px;
   font-size: 14px;
 }
 
+.footer-right :deep(.ms-button--none) {
+  background: #fff;
+}
+
+.footer-right :deep(.ms-button ) {
+  height: 32px;
+}
+
+.footer-right :deep(.ms-button--green ) {
+  width: 80px;
+}
+
 .footer-right {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 8px;
   color: #666;
 }
 

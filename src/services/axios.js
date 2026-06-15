@@ -17,7 +17,7 @@ const axiosInstance = axios.create({
 });
 
 /**
- * Cấu hình interceptor cho request và response để xử lý token và lỗi toàn cục.
+ * Cấu hình interceptor (Chặn một request hoặc response ở giữa quá trình xử lý để thực hiện thêm logic trước khi nó đi tiếp) cho request và response để xử lý token và lỗi toàn cục.
  * Tự động gắn token vào header trước mỗi request.
  *
  * CREATED BY: TDHieu (09/06/2026)

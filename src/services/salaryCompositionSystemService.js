@@ -51,6 +51,21 @@ const salaryCompositionSystemApi = {
   },
 
   /**
+   * Lấy chi tiết một thành phần lương hệ thống theo mã (SalaryCompositionCode).
+   *
+   * Sử dụng khi: Cần tìm nhanh bản ghi hệ thống theo mã mà không cần biết trước ID.
+   * Thay thế pattern: getAll() → find() → getById() bằng một lời gọi duy nhất.
+   *
+   * @param {string} code salaryCompositionCode
+   * @returns {Promise<ServiceResponse<SalaryCompositionSystem>>} Dữ liệu chi tiết hoặc 404
+   *
+   * CREATED BY: TDHieu (15/06/2026)
+   */
+  getByCode(code) {
+    return axiosInstance.get(`${BASE}/ByCode/${encodeURIComponent(code)}`);
+  },
+
+  /**
    * Tạo mới thành phần lương hệ thống.
    *
    * Sử dụng khi: Quản trị viên hệ thống thêm danh mục chuẩn mới.
