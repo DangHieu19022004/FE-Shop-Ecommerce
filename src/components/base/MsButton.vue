@@ -173,7 +173,7 @@ const hideTooltip = () => {
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  font-size: 1rem;
+  font-size: 13px;
   transition: background-color 0.3s ease;
   position: relative;
   white-space: nowrap;

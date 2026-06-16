@@ -69,11 +69,11 @@
               </div>
 
               <div v-if="selectedIds.length > 0" class="checkbox_function">
-                <p class="fz-14 m-r-8">Đã chọn</p>
-                <b class="fz-14">{{ selectedIds.length }}</b>
+                <p class="fz-13 m-r-8">Đã chọn</p>
+                <b class="fz-13">{{ selectedIds.length }}</b>
                 <MsButton
                   message="Bỏ chọn"
-                  class="m-r-8 color-green fz-14 no-background"
+                  class="m-r-8 color-green fz-13 no-background"
                   :isTooltip="false"
                   @click="selectedIds = []"
                 />
@@ -112,7 +112,7 @@
                   :isTooltip="false"
                   message="Xóa"
                   iconLeft="mi-trash-red"
-                  class="m-r-8 fz-14 h-32"
+                  class="m-r-8 fz-13 h-32"
                   type="border-danger"
                   @click="handleDeleteSelected"
                 />
@@ -1188,7 +1188,9 @@ async function loadGridConfig() {
       return;
     }
 
-    // Build 2 map để dễ lookup khi áp dụng config và khi build payload
+    // Bước 1: build 2 map để lookup theo tên cột.
+    // - idMap["salaryCompositionCode"] = "grid-config-guid"
+    // - dataMap["salaryCompositionCode"] = { gridConfigId, columnWidth, isVisible, ... }
     const idMap = {};
     const dataMap = {};
     // Duyệt qua configs từ DB, map columnName → gridConfigId và columnName → full config object
@@ -1200,7 +1202,8 @@ async function loadGridConfig() {
     gridConfigIdMap.value = idMap;
     gridConfigDataMap.value = dataMap;
 
-    // Sắp xếp non-system cols theo displayOrder từ DB và áp dụng config
+    // Bước 2: áp config từ DB vào từng cột non-system rồi sắp xếp theo displayOrder.
+    // Cột nào chưa có config thì giữ nguyên cấu hình mặc định ở fields.value.
     const orderedNonSystem = nonSystemFields
       .map((field) => {
         // Duyệt qua từng cột, nếu có config trong DB thì áp dụng các thuộc tính width, isVisible, pinned
@@ -1221,7 +1224,8 @@ async function loadGridConfig() {
         return orderA - orderB;
       });
 
-    // Ghép lại: checkbox → non-system (sorted) → ghost + actions
+    // Bước 3: ghép lại đúng thứ tự render cuối cùng trên table:
+    // checkbox/hệ thống đầu bảng → cột dữ liệu đã sort → cột hệ thống cuối bảng.
     fields.value = [
       ...firstSystemFields,
       ...orderedNonSystem,
@@ -1243,8 +1247,11 @@ async function loadGridConfig() {
  * CREATED BY: TDHieu (09/06/2026)
  */
 async function initGridConfig(existingConfigs = []) {
-  // Tạo một Set chứa tên cột đã có trong DB để dễ dàng kiểm tra
-  const existingNames = new Set(existingConfigs.map((c) => c.columnName));
+  // Lấy danh sách tên cột đã có trong DB.
+  const existingNames = [];
+  for (const config of existingConfigs) {
+    existingNames.push(config.columnName);
+  }
   // Lọc ra các cột thực tế (non-system) cần kiểm tra, bỏ qua các cột đặc biệt như ghost, actions, và cột không có key
   const nonSystemCols = fields.value.filter(
     (f) =>
@@ -1256,7 +1263,12 @@ async function initGridConfig(existingConfigs = []) {
   );
 
   // Chỉ lấy những cột chưa có trong DB
-  const missingCols = nonSystemCols.filter((f) => !existingNames.has(f.key));
+  const missingCols = [];
+  for (const field of nonSystemCols) {
+    if (!existingNames.includes(field.key)) {
+      missingCols.push(field);
+    }
+  }
 
   // Nếu có cột nào thiếu, gọi API để insert cấu hình mặc định cho những cột đó
   if (missingCols.length > 0) {
@@ -1311,6 +1323,15 @@ function buildPayload(columnName, overrides = {}) {
   // Lấy cấu hình đã lưu trong DB nếu có, để giữ lại các giá trị mà BE quản lý (vd: allowFilter, filterType)
   const cached = gridConfigDataMap.value[columnName] || {};
 
+  let isVisible = cached.isVisible ?? true;
+  if (field) {
+    if (field.isSystemCol) {
+      isVisible = true;
+    } else {
+      isVisible = field.isVisible !== false;
+    }
+  }
+
   // Build payload với các giá trị được ưu tiên: overrides > fields hiện tại > cache DB > mặc định
   const payload = {
     // Fields Grid
@@ -1319,11 +1340,7 @@ function buildPayload(columnName, overrides = {}) {
     columnCaption: field?.label ?? cached.columnCaption ?? "",
     // Trạng thái hiện tại từ fields.value (source of truth)
     columnWidth: field?.width ?? cached.columnWidth ?? 150,
-    isVisible: field
-      ? field.isSystemCol
-        ? true
-        : field.isVisible !== false
-      : (cached.isVisible ?? true),
+    isVisible,
     pinnedPosition: field?.pinned ?? cached.pinnedPosition ?? null,
     displayOrder: idx !== -1 ? idx : (cached.displayOrder ?? 0),
     // Fields không quản lý qua UI, giữ nguyên từ cache DB
@@ -2080,9 +2097,7 @@ const handleSaveColumnSettings = async (configurableSaved) => {
 
 .content_header_right .ms-button {
   height: 32px;
-  padding: 0 12px;
-  font-size: 14px;
-  border-radius: 6px;
+  padding: 0 10px;
 }
 
 .content_header_right .btn-system {
@@ -2391,7 +2406,12 @@ const handleSaveColumnSettings = async (configurableSaved) => {
   display: flex;
 }
 
-@media screen and (max-width: 1280px) {
+.content_header_left{
+  font-size: 20px;
+    font-weight: 700;
+}
+
+@media screen and (max-width: 1115px) {
   .content_body_search {
     width: 200px;
   }

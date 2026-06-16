@@ -195,13 +195,12 @@ const emit = defineEmits(["update:modelValue"]);
    Option label text
 ══════════════════════════════════ */
 .ms-radio__label {
-  font-size: 14px;
+  font-size: 13px;
   color: #1d2939;
   line-height: 1;
 }
 
 .ms-radio__item--checked .ms-radio__label {
-  color: #0e9a62;
   font-weight: 500;
 }
 

@@ -267,8 +267,8 @@
 
       <!-- Overlay Footer -->
       <div v-if="isOverlay" class="modal_system_footer">
-        <MsButton message="Hủy bỏ" type="border-secondary" @click="emit('close')" />
-        <MsButton message="Đồng ý" type="green" :disabled="selectedIds.length === 0 || isSaving" @click="handleConfirm" />
+        <MsButton message="Hủy bỏ" type="border-secondary" class="w-80 h-32 fz-13" @click="emit('close')" />
+        <MsButton message="Đồng ý" type="green" class="w-80 h-32 fz-13" :disabled="selectedIds.length === 0 || isSaving" @click="handleConfirm" />
       </div>
 
     </div>
@@ -405,9 +405,13 @@ const typeItems = [
   ...SalaryCompositionTypeOptions,
 ];
 
-const selectedTypeLabel = computed(
-  () => typeItems.find((i) => i.value === selectedType.value)?.label ?? "Tất cả"
-);
+const selectedTypeLabel = computed(() => {
+  const foundItem = typeItems.find((i) => i.value === selectedType.value);
+  if (foundItem) {
+    return foundItem.label;
+  }
+  return "Tất cả";
+});
 
 /**
  * Hàm dùng để: Cập nhật type được chọn từ combobox và tải lại bảng.
@@ -944,13 +948,21 @@ async function loadGridConfig() {
  * CREATED BY: TDHieu (08/06/2026)
  */
 async function initGridConfig(existingConfigs = []) {
-  const existingNames = new Set(existingConfigs.map((c) => c.columnName));
+  const existingNames = [];
+  for (const config of existingConfigs) {
+    existingNames.push(config.columnName);
+  }
   const nonSystemCols = fields.value.filter(
     (f) => !f.isSystemCol && f.key && f.key !== "ghost" && f.key !== "actions" && f.key !== ""
   );
 
   // Chỉ lấy những cột chưa có trong DB
-  const missingCols = nonSystemCols.filter((f) => !existingNames.has(f.key));
+  const missingCols = [];
+  for (const field of nonSystemCols) {
+    if (!existingNames.includes(field.key)) {
+      missingCols.push(field);
+    }
+  }
 
   if (missingCols.length > 0) {
     await Promise.all(
@@ -1143,7 +1155,7 @@ const handleSaveColumnSettings = async (configurableSaved) => {
 
 <style scoped>
 .overlay-content_body  {
-  height: 440px !important;
+  height: 460px !important;
 }
 /* Modal Overlay CSS */
 .overlay--system {
@@ -1177,7 +1189,7 @@ const handleSaveColumnSettings = async (configurableSaved) => {
 }
 .modal_system_title {
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 700;
   color: #212121;
 }
 .modal_system_body {
@@ -1195,7 +1207,8 @@ const handleSaveColumnSettings = async (configurableSaved) => {
   display: flex;
   justify-content: flex-end;
   gap: 12px;
-  padding: 16px 24px;
+      padding: 9px 24px;
+      background-color: #FAFAFA;
 }
 /* Reusing normal styles below */
 .status-label {

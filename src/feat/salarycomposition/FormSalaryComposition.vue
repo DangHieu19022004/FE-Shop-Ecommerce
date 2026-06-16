@@ -743,13 +743,20 @@ function mapOrgTree(nodes) {
  * CREATED BY: TDHieu (09/06/2026)
  */
 function buildOrgFlatMap() {
-  // Duyệt qua orgTreeData để xây dựng 2 map: byId (id -> label) và byName (label -> id)
+  // Duyệt toàn bộ cây đơn vị để xây 2 dictionary dùng lại nhiều lần:
+  // - byId: tra từ id ra tên đơn vị để hiển thị nhanh
+  // - byName: tra ngược từ tên chuẩn hóa ra id khi backend chỉ trả organizationName
   const byId = {};
   const byName = {};
-  // Hàm đệ quy để duyệt qua tất cả node và con cháu trong orgTreeData
+  // Hàm đệ quy đi qua từng node và toàn bộ con cháu của node đó.
   const walk = (nodes) => {
     for (const n of nodes) {
+      // Ví dụ:
+      // byId["pb-ke-toan"] = "Phòng kế toán"
       byId[n.id] = n.label;
+      // Chuẩn hóa tên về lowercase + trim để tăng khả năng khớp khi backend trả chuỗi text.
+      // Ví dụ:
+      // byName["phòng kế toán"] = "pb-ke-toan"
       byName[n.label.toLowerCase().trim()] = n.id;
       if (n.children?.length) walk(n.children);
     }
@@ -771,24 +778,34 @@ function buildOrgFlatMap() {
 function restoreSelectedOrgs(data) {
   // Trường hợp 1: backend trả về mảng organizationIds
   if (Array.isArray(data.organizationIds) && data.organizationIds.length > 0) {
+    // Có sẵn danh sách id rồi thì dùng trực tiếp, không cần suy luận thêm.
     selectedOrgs.value = data.organizationIds;
     return;
   }
   // Trường hợp 2: backend trả về chuỗi organizationId (single guid)
   if (data.organizationId && typeof data.organizationId === "string") {
+    // Chuẩn hóa về cùng format mảng để đồng nhất với v-model của MsTreeSelect.
     selectedOrgs.value = [data.organizationId];
     return;
   }
   // Trường hợp 3: chỉ có organizationName → tra ngược qua byName
   if (data.organizationName && typeof data.organizationName === "string") {
     const { byName } = buildOrgFlatMap();
+    // Ví dụ backend trả:
+    // "Phòng kế toán, Phòng nhân sự"
+    // Sau split/map sẽ thành:
+    // ["phòng kế toán", "phòng nhân sự"]
     const names = data.organizationName
       .split(",")
       .map((s) => s.trim().toLowerCase());
+    // Map từng tên chuẩn hóa về id tương ứng trong cây đơn vị.
+    // Nếu tên nào không tìm thấy thì byName[name] sẽ là undefined.
     const ids = names.map((name) => byName[name]).filter(Boolean);
+    // Chỉ giữ lại các id tra được hợp lệ; nếu không khớp tên nào thì trả về mảng rỗng.
     selectedOrgs.value = ids.length > 0 ? ids : [];
     return;
   }
+  // Không có dữ liệu tổ chức ở bất kỳ format nào thì reset về rỗng.
   selectedOrgs.value = [];
 }
 
@@ -1015,13 +1032,17 @@ const fieldRefs = {
   formula: formulaRef,
 };
 
+// Object.keys(validationRules) trả về mảng tên field cần validate.
+// Ví dụ mảng thực tế sẽ có dạng:
+// ["salaryCompositionName", "salaryCompositionCode", "compositionNature", "compositionType", "quota", "formula"]
+const arrValidationRuleFields = Object.keys(validationRules);
+
 // errorMessages để lưu message lỗi hiện tại của từng trường, được cập nhật sau mỗi lần validate
-const errorMessages = ref(
-  Object.keys(validationRules).reduce((messages, field) => {
-    messages[field] = "";
-    return messages;
-  }, {}),
-);
+const initialErrorMessages = {};
+for (const field of arrValidationRuleFields) {
+  initialErrorMessages[field] = "";
+}
+const errorMessages = ref(initialErrorMessages);
 
 // Hàm kiểm tra xem trường đã bị touch (blur) hay chưa để quyết định có hiển thị lỗi hay không
 const isTouched = (field) => Boolean(touchedFields.value[field]);
@@ -1030,13 +1051,18 @@ const isTouched = (field) => Boolean(touchedFields.value[field]);
 const validateField = (field) => {
   // Lấy các rule của trường, kết quả sẽ lấy được mảng các rule của field
   const rules = validationRules[field] || [];
-  // Chạy qua các rule, lấy message lỗi đầu tiên nếu có, hoặc "" nếu hợp lệ
-  const message =
-    rules
-      .map((rule) => rule(formData.value[field], formData.value))
-      .find(Boolean) || "";
-  errorMessages.value[field] = message;
-  return !message;
+  // Chạy từng rule theo thứ tự từ trên xuống dưới.
+  // Gặp rule nào trả về message lỗi đầu tiên thì dừng lại luôn để hiển thị lỗi đó.
+  let firstErrorMessage = "";
+  for (const rule of rules) {
+    const ruleResult = rule(formData.value[field], formData.value);
+    if (ruleResult) {
+      firstErrorMessage = ruleResult;
+      break;
+    }
+  }
+  errorMessages.value[field] = firstErrorMessage;
+  return firstErrorMessage === "";
 };
 
 /**
@@ -1050,8 +1076,8 @@ const validateField = (field) => {
  */
 const validateForm = () => {
   // Validate tất cả các trường có rule, đồng thời cập nhật errorMessages
-  const results = Object.keys(validationRules).map(validateField);
-  return results.every(Boolean);
+  const results = arrValidationRuleFields.map(validateField);
+  return results.every((result) => result === true);
 };
 
 const showFormulaValidationToast = () => {
@@ -1061,7 +1087,7 @@ const showFormulaValidationToast = () => {
 
 // Hàm lấy tên trường đầu tiên có lỗi để focus vào đó
 const getFirstErrorField = () => {
-  return Object.keys(validationRules).find(
+  return arrValidationRuleFields.find(
     (field) => errorMessages.value[field],
   );
 };
@@ -1126,9 +1152,9 @@ const unMarkTouched = (field) => {
 
 // Hàm đánh dấu tất cả các trường đã bị touch, thường gọi khi submit để hiển thị lỗi của tất cả trường
 const touchAll = () => {
-  Object.keys(validationRules).forEach((field) => {
+  for (const field of arrValidationRuleFields) {
     touchedFields.value[field] = true;
-  });
+  }
 };
 
 // ── Build payload gửi API ────────────────────────────────────
@@ -1686,7 +1712,7 @@ onMounted(async () => {
 
 .formula-btn {
   position: absolute;
-  bottom: 26px;
+  bottom: 5px;
   right: 3px;
   z-index: 2;
 background: linear-gradient(270deg, #efe9ff 7.74%, #f0f8ff 40.17%, #dff8ff 64.73%, #f3f3ff 84.04%);

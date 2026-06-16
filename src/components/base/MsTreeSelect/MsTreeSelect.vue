@@ -99,7 +99,12 @@ const visibleItems = ref([]);
 
 // Flatten tree để lấy item theo id
 /**
- * Flatten tree để lấy item theo id nhanh chóng (Dictionary {id: node}).
+ * Flatten tree để lấy item theo id nhanh chóng (Dictionary { id: node }).
+ * Ví dụ sau khi duyệt xong, object có thể trông như:
+ * {
+ *   "pb-ke-toan": { id: "pb-ke-toan", label: "Phòng kế toán", children: [...] },
+ *   "pb-nhan-su": { id: "pb-nhan-su", label: "Phòng nhân sự", children: [] }
+ * }
  *
  * Sử dụng khi: Cần tra cứu nhanh thông tin node từ id.
  *
@@ -133,14 +138,18 @@ const flatMap = computed(() => {
 const displayItems = computed(() => {
   if (props.modelValue.length === 0) return [];
 
+  // Set này giúp kiểm tra "id đã được chọn chưa" rất nhanh khi đi ngược lên cha.
   const selectedSet = new Set(props.modelValue);
 
   // Hàm kiểm tra xem node có ancestor nào đã được chọn không
-  // (để loại bỏ node con khi cha đã chọn)
+  // (để loại bỏ node con khi cha đã chọn).
+  // Ví dụ:
+  // - props.modelValue = ["cha-a", "con-a1", "con-a2"]
+  // - nếu "cha-a" đã có trong selectedSet thì chip của "con-a1", "con-a2" sẽ không hiển thị nữa.
   const hasSelectedAncestor = (nodeId) => {
     const node = flatMap.value[nodeId];
     if (!node) return false;
-    // Tìm cha của node này trong cây
+    // Tìm cha trực tiếp của node hiện tại trong toàn bộ cây options.
     const findParent = (nodes, targetId, parent = null) => {
       for (const n of nodes) {
         if (n.id === targetId) return parent;
@@ -153,12 +162,14 @@ const displayItems = computed(() => {
     };
     const parent = findParent(props.options, nodeId);
     if (parent && selectedSet.has(parent.id)) return true;
-    // Check grandparent recursively
+    // Nếu cha chưa được chọn thì đi tiếp lên ông/bà để kiểm tra ancestor ở cấp cao hơn.
     if (parent) return hasSelectedAncestor(parent.id);
     return false;
   };
 
-  // Chỉ giữ lại các node không có ancestor nào được chọn
+  // Bước 1: đổi từng id đã chọn sang object node thật trong flatMap.
+  // Bước 2: bỏ các id không còn tồn tại trong tree (tránh undefined).
+  // Bước 3: chỉ giữ lại node "đại diện cao nhất", tức là node không có cha nào đã được chọn.
   return props.modelValue
     .map((id) => flatMap.value[id])
     .filter(Boolean)
@@ -194,6 +205,7 @@ async function recalculateOverflow() {
   await nextTick();
   const container = chipsContainerRef.value;
   if (!container) {
+    // Chưa có DOM container để đo width thì tạm hiển thị toàn bộ item.
     visibleItems.value = displayItems.value;
     hiddenCount.value = 0;
     return;
@@ -201,12 +213,14 @@ async function recalculateOverflow() {
 
   const items = displayItems.value;
   if (items.length === 0) {
+    // Không có chip nào được chọn.
     visibleItems.value = [];
     hiddenCount.value = 0;
     return;
   }
 
   if (items.length === 1) {
+    // Chỉ có 1 chip thì không cần tính overflow, luôn hiển thị trực tiếp.
     visibleItems.value = items;
     hiddenCount.value = 0;
     return;
@@ -218,7 +232,8 @@ async function recalculateOverflow() {
   const ARROW_WIDTH = 32;   // arrow icon
   const availableWidth = containerWidth - ARROW_WIDTH - GAP;
 
-  // Đo width chip ảo
+  // Đo width từng chip bằng cách tạo 1 <span> ảo ngoài màn hình.
+  // Làm vậy vì width thật phụ thuộc vào font, padding và nội dung label hiện tại.
   const measureChip = (text) => {
     const span = document.createElement('span');
     span.style.cssText = `
@@ -235,15 +250,19 @@ async function recalculateOverflow() {
   };
 
   const chipWidths = items.map((item) => measureChip(item.label));
-  const totalWidth = chipWidths.reduce((a, b) => a + b, 0);
+  let totalWidth = 0;
+  for (const chipWidth of chipWidths) {
+    totalWidth += chipWidth;
+  }
 
   if (totalWidth <= availableWidth) {
+    // Tổng width đủ nhỏ để hiển thị hết tất cả chip.
     visibleItems.value = items;
     hiddenCount.value = 0;
     return;
   }
 
-  // Dành chỗ cho badge
+  // Không đủ chỗ: phải chừa sẵn 1 vùng cho badge "+N" rồi mới tính số chip còn fit.
   const widthWithBadge = availableWidth - BADGE_WIDTH - GAP;
   let used = 0;
   let fitCount = 0;
@@ -257,9 +276,11 @@ async function recalculateOverflow() {
   }
 
   if (fitCount === 0) {
+    // Trường hợp cực hẹp: vẫn cố hiển thị 1 chip đầu tiên rồi dồn phần còn lại vào badge.
     visibleItems.value = [items[0]];
     hiddenCount.value = items.length - 1;
   } else {
+    // Hiển thị các chip đầu tiên còn vừa chỗ, phần sau gom vào badge "+N".
     visibleItems.value = items.slice(0, fitCount);
     hiddenCount.value = items.length - fitCount;
   }
@@ -371,15 +392,19 @@ const getAllIds = (node) => {
 function bubbleUpSelection(selected, nodes) {
   const selectedSet = new Set(selected);
 
-  // Post-order traversal (con trước cha)
+  // Duyệt hậu tự (post-order): xử lý tất cả node con trước,
+  // rồi mới quyết định node cha có nên được chọn hay không.
   const visit = (node) => {
     if (!node.children?.length) return;
     for (const child of node.children) visit(child);
 
+    // Nếu mọi node con trực tiếp đều đã có trong selectedSet
+    // thì cha cũng được thêm vào selectedSet.
     const allChildrenSelected = node.children.every((child) => selectedSet.has(child.id));
     if (allChildrenSelected) {
       selectedSet.add(node.id);
     } else {
+      // Chỉ cần thiếu 1 con là bỏ trạng thái selected của cha.
       selectedSet.delete(node.id);
     }
   };
@@ -628,7 +653,7 @@ onBeforeUnmount(() => {
 
 .ms-tree-select__placeholder {
   color: #9ca3af;
-  font-size: 14px;
+  font-size: 13px;
   line-height: 28px;
   user-select: none;
 }

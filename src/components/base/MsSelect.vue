@@ -258,7 +258,7 @@ defineExpose({
 
 .ms-multiselect.multiselect--active .multiselect__tags {
   border-color: #0E9A62;
-  border-radius: 4px 4px 0 0;
+  border-radius: 8px;
 }
 
 .ms-multiselect.ms-multiselect--error .multiselect__tags {
@@ -281,7 +281,7 @@ defineExpose({
    Text đã chọn & placeholder
 ══════════════════════════ */
 .ms-multiselect .multiselect__single {
-  font-size: 14px;
+  font-size: 13px;
   color: #1d2939;
   line-height: 22px;
   margin: 0;

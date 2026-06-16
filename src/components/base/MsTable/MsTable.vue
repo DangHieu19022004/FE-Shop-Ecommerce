@@ -593,8 +593,9 @@ function onColDrop(e, index) {
   }
 
   const newFields = [...internalFields.value];
-  const [moved] = newFields.splice(dragSrcIndex, 1);
-  newFields.splice(index, 0, moved);
+  const movedField = newFields[dragSrcIndex];
+  newFields.splice(dragSrcIndex, 1);
+  newFields.splice(index, 0, movedField);
 
   // Rebuild columnWidths theo thứ tự mới
   const oldWidths = { ...columnWidths.value };
@@ -602,8 +603,9 @@ function onColDrop(e, index) {
   // Map lại widths: vị trí cũ -> vị trí mới
   const oldOrder = [...Array(internalFields.value.length).keys()];
   const newOrder = [...oldOrder];
-  const [movedIdx] = newOrder.splice(dragSrcIndex, 1);
-  newOrder.splice(index, 0, movedIdx);
+  const movedOldIndex = newOrder[dragSrcIndex];
+  newOrder.splice(dragSrcIndex, 1);
+  newOrder.splice(index, 0, movedOldIndex);
   newOrder.forEach((oldIdx, newIdx) => {
     if (oldWidths[oldIdx] !== undefined) newWidths[newIdx] = oldWidths[oldIdx];
   });

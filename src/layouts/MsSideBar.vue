@@ -222,9 +222,9 @@ const toggleCollapse = () => {
 .sb__list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 3px;
   align-content: center;
-  height: calc(100% - 60px);
+  height: 100px;
   margin-left: 12px;
 }
 
