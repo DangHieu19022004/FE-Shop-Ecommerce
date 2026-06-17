@@ -46,8 +46,8 @@
         <!-- Footer -->
         <div class="filter-footer">
             <MsButton :isTooltip="false" type="border-secondary" message="Bỏ lọc" @click="handleReset"
-                class="btn-filter fz-14" />
-            <MsButton :isTooltip="false" type="green" message="Áp dụng" @click="handleApply" class="btn-filter fz-14" />
+                class="btn-filter" />
+            <MsButton :isTooltip="false" type="green" message="Áp dụng" @click="handleApply" class="btn-filter" />
         </div>
     </div>
 </template>

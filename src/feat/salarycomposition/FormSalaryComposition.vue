@@ -991,7 +991,8 @@ const customErrorMessages = ref({});
 // Hàm kiểm tra giá trị có bị coi là "empty" hay không (null, undefined, chuỗi rỗng, hoặc mảng rỗng)
 const isEmptyValue = (value) => {
   // Nếu là mảng, coi là empty nếu length === 0
-  if (Array.isArray(value)) return value.length === 0;
+  if (Array.isArray(value)) return value.length === 0; //return true nếu là mảng rỗng
+  // return true nếu là null, undefined, chuỗi rỗng hoặc chuỗi chỉ có khoảng trắng
   return value === null || value === undefined || String(value).trim() === "";
 };
 
@@ -1042,7 +1043,7 @@ const initialErrorMessages = {};
 for (const field of arrValidationRuleFields) {
   initialErrorMessages[field] = "";
 }
-const errorMessages = ref(initialErrorMessages);
+const errorMessages = ref(initialErrorMessages);// Khởi tạo errorMessages với tất cả trường có rule đều là rỗng (không lỗi)
 
 // Hàm kiểm tra xem trường đã bị touch (blur) hay chưa để quyết định có hiển thị lỗi hay không
 const isTouched = (field) => Boolean(touchedFields.value[field]);
@@ -1245,7 +1246,6 @@ async function buildSystemUsagePayloadByCode(code) {
     status: data.status,
   };
 }
-
 async function handleSystemDuplicateSelection(selectedOption, andAdd) {
   if (!selectedOption) {
     return;
@@ -1346,7 +1346,6 @@ async function handleSubmitAndAdd() {
  * Thực thi quá trình submit form (gọi API Create/Update)
  *
  * Sử dụng khi: Có yêu cầu lưu form sau khi đã qua bước validate
- *
  * @param {boolean} andAdd Cờ xác định có tiếp tục thêm mới sau khi lưu thành công không
  * @returns {Promise<void>}
  *
