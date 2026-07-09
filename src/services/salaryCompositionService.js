@@ -37,6 +37,22 @@ const salaryCompositionApi = {
   },
 
   /**
+   * Lấy danh sách thành phần lương có phân trang với bộ lọc nâng cao.
+   *
+   * Sử dụng khi: Người dùng áp dụng bộ lọc nâng cao từ filter sidebar.
+   * Gửi POST thay GET để truyền advancedFilters dưới dạng JSON body (array typed),
+   * tránh serialize thành query string cồng kềnh.
+   *
+   * @param {Object} body Toàn bộ tham số: pageIndex, pageSize, search, sort, searchFields, status, organizationIds, advancedFilters[]
+   * @returns {Promise<ServiceResponse<PagingResponse<SalaryComposition>>>} Dữ liệu phân trang
+   *
+   * CREATED BY: TDHieu (09/07/2026)
+   */
+  filterPaging(body = {}) {
+    return axiosInstance.post(`${BASE}/Paging`, body);
+  },
+
+  /**
    * Lấy chi tiết một thành phần lương theo ID.
    *
    * Sử dụng khi: Mở form xem chi tiết, sửa hoặc nhân bản bản ghi.

@@ -25,8 +25,7 @@
   </div>
 </template>
 <script setup>
-import { defineEmits, ref } from "vue";
-import { errorMessages } from "vue/compiler-sfc";
+import { ref } from "vue";
 const props = defineProps({
   class: {
     type: String,

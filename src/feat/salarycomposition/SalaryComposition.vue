@@ -1025,8 +1025,8 @@ async function fetchSalaryCompositions() {
   errorMessage.value = "";
 
   try {
-    // Xây dựng params cho API dựa trên các trạng thái hiện tại: phân trang, tìm kiếm, lọc, sắp xếp
-    const params = {
+    // Xây dựng params/body dùng chung cho cả GET và POST
+    const baseParams = {
       pageIndex: pageIndex.value,
       pageSize: pageSize.value,
       search: searchKeyword.value || undefined,
@@ -1037,26 +1037,32 @@ async function fetchSalaryCompositions() {
 
     // Filter theo trạng thái (null = Tất cả, 1 = Đang theo dõi, 2 = Ngừng theo dõi)
     if (selectedStatus.value !== null && selectedStatus.value !== undefined) {
-      params.status = selectedStatus.value;
+      baseParams.status = selectedStatus.value;
     }
 
     // Filter theo đơn vị: gửi mảng organizationId lên server
     if (selectedOrgs.value && selectedOrgs.value.length > 0) {
-      params.organizationIds = selectedOrgs.value.join(",");
+      baseParams.organizationIds = selectedOrgs.value.join(",");
     }
 
     // Sắp xếp: gửi theo format "column_name ASC/DESC"
     if (sortField.value && sortDirection.value) {
-      params.sort = `${toSnakeCase(sortField.value)} ${sortDirection.value.toUpperCase()}`;
+      baseParams.sort = `${toSnakeCase(sortField.value)} ${sortDirection.value.toUpperCase()}`;
     }
 
-    // Bộ lọc nâng cao: gửi dưới dạng JSON nếu có
+    let result;
+
     if (advancedFilters.value && advancedFilters.value.length > 0) {
-      params.advancedFilters = JSON.stringify(advancedFilters.value);
+      // Có bộ lọc nâng cao → dùng POST /Paging để truyền filter dưới dạng JSON body
+      // advancedFilters là array typed, không cần JSON.stringify
+      result = await salaryCompositionApi.filterPaging({
+        ...baseParams,
+        advancedFilters: advancedFilters.value,
+      });
+    } else {
+      // Không có bộ lọc nâng cao → dùng GET /Paging như bình thường
+      result = await salaryCompositionApi.getPaging(baseParams);
     }
-
-    // Gọi API với params đã xây dựng
-    const result = await salaryCompositionApi.getPaging(params);
 
     // Xử lý kết quả trả về: nếu thành công thì cập nhật danh sách và tổng số bản ghi, nếu lỗi thì hiển thị thông báo lỗi
     if (result.isSuccess && result.data) {

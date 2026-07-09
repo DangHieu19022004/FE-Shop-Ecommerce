@@ -41,7 +41,7 @@
 </button>
 </template>
 <script setup>
-import { computed, defineProps, defineEmits, nextTick, ref } from "vue";
+import { computed, nextTick, ref } from "vue";
 
 /**
  * NOTICE: emit + props

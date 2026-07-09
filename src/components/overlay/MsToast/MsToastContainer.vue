@@ -14,7 +14,6 @@
 </template>
 <script setup>
 import MsToast from './MsToast.vue';
-import { defineEmits, defineProps } from 'vue';
 const props = defineProps({
     toasts: {
         type: Array,
