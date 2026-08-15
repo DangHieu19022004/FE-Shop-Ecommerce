@@ -7,4 +7,5 @@
 <style>
 @import './assets/styles/icon.css';
 @import './assets/styles/utility.css';
+@import './assets/styles/dormmart.css';
 </style>
