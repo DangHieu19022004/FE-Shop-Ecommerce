@@ -9,6 +9,7 @@ import HomeView from "@/views/dormmart/HomeView.vue";
 import ProductListView from "@/views/dormmart/ProductListView.vue";
 import ProductDetailView from "@/views/dormmart/ProductDetailView.vue";
 import CartView from "@/views/dormmart/CartView.vue";
+import SupportView from "@/views/dormmart/SupportView.vue";
 import LoginView from "@/views/dormmart/LoginView.vue";
 import RegisterView from "@/views/dormmart/RegisterView.vue";
 import AdminDashboardView from "@/views/dormmart/admin/AdminDashboardView.vue";
@@ -47,6 +48,7 @@ const routes = [
         name: "cart",
         component: CartView,
       },
+      { path: "support", name: "support", component: SupportView },
     ],
   },
   {

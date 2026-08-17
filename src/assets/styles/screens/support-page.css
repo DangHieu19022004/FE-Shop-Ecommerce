@@ -1,0 +1,17 @@
+.support-page { display: flex; flex-direction: column; gap: 20px; }
+.support-page__hero { display: flex; align-items: center; gap: 18px; padding: 28px; background: var(--dm-primary); color: var(--dm-on-primary); }
+.support-page__hero > .material-symbols-outlined { font-size: 54px; }
+.support-page__hero h1, .support-page__hero p { margin: 0; }.support-page__hero h1 { margin-bottom: 7px; font-size: 32px; }
+.support-page__layout { display: grid; grid-template-columns: minmax(0, 1fr) 420px; align-items: start; gap: 20px; }
+.support-page__content { display: grid; gap: 20px; }
+.support-topics, .support-contact { padding: 22px; }
+.support-page h2 { margin: 0 0 18px; color: var(--dm-primary); font-size: 20px; }
+.support-topics__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.support-topics__grid button { display: flex; align-items: flex-start; flex-direction: column; gap: 7px; padding: 16px; border: 1px solid var(--dm-border); border-radius: 14px; background: var(--dm-surface); color: var(--dm-text); text-align: left; cursor: pointer; transition: border-color 0.15s ease, transform 0.15s ease; }
+.support-topics__grid button:hover { border-color: var(--dm-secondary); transform: translateY(-2px); }
+.support-topics__grid .material-symbols-outlined { color: var(--dm-primary); font-size: 28px; }.support-topics__grid small { color: var(--dm-text-soft); line-height: 1.4; }
+.support-contact { display: grid; gap: 14px; }.support-contact > div { display: flex; align-items: center; gap: 12px; }.support-contact > div > .material-symbols-outlined { display: grid; width: 42px; height: 42px; place-items: center; border-radius: 50%; background: var(--dm-primary-soft); color: var(--dm-primary); }
+.support-contact p { display: flex; flex-direction: column; gap: 4px; margin: 0; }.support-contact a, .support-contact p span { color: var(--dm-text-soft); }
+.support-page__chat > div { margin-bottom: 12px; }.support-page__chat > div h2 { margin-bottom: 5px; }.support-page__chat > div p { margin: 0; color: var(--dm-text-soft); }
+@media (max-width: 960px) { .support-page__layout { grid-template-columns: 1fr; } .support-page__chat { width: min(100%, 560px); margin: 0 auto; } }
+@media (max-width: 540px) { .support-page__hero { padding: 20px; }.support-topics__grid { grid-template-columns: 1fr; } }

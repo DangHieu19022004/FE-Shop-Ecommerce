@@ -1,0 +1,19 @@
+{
+  "SupportAgents": [
+    { "SupportAgentId": 1, "AgentCode": "ADMIN_SUPPORT", "DisplayName": "Dorm Mart Support", "AvatarUrl": "", "IsOnline": true, "AverageResponseMinutes": 2 }
+  ],
+  "ChatMessages": [
+    { "ChatMessageId": "MSG-001", "SupportAgentId": 1, "SenderType": "ADMIN", "MessageContent": "Xin chào! Dorm Mart có thể hỗ trợ gì cho bạn?", "SentAt": "2026-08-17T08:00:00.000Z", "IsRead": true }
+  ],
+  "QuickReplies": [
+    { "QuickReplyId": 1, "QuickReplyCode": "ORDER_STATUS", "QuickReplyText": "Kiểm tra trạng thái đơn hàng" },
+    { "QuickReplyId": 2, "QuickReplyCode": "PAYMENT_SUPPORT", "QuickReplyText": "Hỗ trợ thanh toán" },
+    { "QuickReplyId": 3, "QuickReplyCode": "RETURN_POLICY", "QuickReplyText": "Chính sách đổi trả" }
+  ],
+  "SupportTopics": [
+    { "SupportTopicId": 1, "TopicCode": "ORDER", "TopicName": "Đơn hàng", "TopicDescription": "Theo dõi, thay đổi hoặc hủy đơn", "IconName": "package_2" },
+    { "SupportTopicId": 2, "TopicCode": "PAYMENT", "TopicName": "Thanh toán", "TopicDescription": "Thanh toán, voucher và hoàn tiền", "IconName": "payments" },
+    { "SupportTopicId": 3, "TopicCode": "DELIVERY", "TopicName": "Giao hàng", "TopicDescription": "Phí ship và thời gian nhận hàng", "IconName": "local_shipping" },
+    { "SupportTopicId": 4, "TopicCode": "RETURN", "TopicName": "Đổi trả", "TopicDescription": "Yêu cầu đổi trả và bảo hành", "IconName": "assignment_return" }
+  ]
+}
