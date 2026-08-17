@@ -89,8 +89,8 @@
       <span>{{ emptyText }}</span>
     </div>
 
-    <!-- MsMenuTable dropdown -->
-    <MsMenuTable
+    <!-- DMMenuTable dropdown -->
+    <DMMenuTable
       v-if="menuOpen && pinnable"
       :is-pinned="activeFieldPinned"
       :active-sort="activeFieldSort"
@@ -106,7 +106,7 @@
 
 <script setup>
 import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from "vue";
-import MsMenuTable from "./MsMenuTable.vue";
+import DMMenuTable from "./DMMenuTable.vue";
 
 // ─── Props ───────────────────────────────────────────────────────────────────
 const props = defineProps({
@@ -1058,7 +1058,7 @@ tbody tr:hover .btn__action {
   background-color: transparent !important;
 }
 
-/* ── Checkbox (match MsCheckbox theme) ── */
+/* ── Checkbox (match DMCheckbox theme) ── */
 .ms-table :deep(input[type="checkbox"]) {
   appearance: none;
   -webkit-appearance: none;

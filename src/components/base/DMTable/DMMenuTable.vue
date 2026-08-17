@@ -1,6 +1,6 @@
 <template>
   <div class="menu-table" @click.stop>
-    <MsButton
+    <DMButton
       iconLeft="mi-circle-off"
       :isTooltip="false"
       message="Không sắp xếp"
@@ -8,7 +8,7 @@
       class="btn-menu"
       @click="emit('sort', 'none')"
     />
-    <MsButton
+    <DMButton
       v-if="!isPinned"
       iconLeft="mi-pinned"
       :iconRight="isPinned ? 'ms-icon-check' : ''"
@@ -17,7 +17,7 @@
       class="btn-menu"
       @click="emit('pin')"
     />
-    <MsButton
+    <DMButton
       v-if="isPinned"
       iconLeft="mi-unpin"
       iconRight="ms-icon-check"
@@ -26,7 +26,7 @@
       class="btn-menu"
       @click="emit('unpin')"
     />
-    <MsButton
+    <DMButton
       iconLeft="mi-arrow-up"
       message="Tăng dần"
       :isTooltip="false"
@@ -34,7 +34,7 @@
       class="btn-menu"
       @click="emit('sort', 'asc')"
     />
-    <MsButton
+    <DMButton
       iconLeft="mi-arrow-down"
       message="Giảm dần"
       :isTooltip="false"
@@ -46,7 +46,7 @@
 </template>
 
 <script setup>
-import MsButton from "../MsButton.vue";
+import DMButton from "../DMButton.vue";
 
 defineProps({
   isPinned: {

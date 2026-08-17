@@ -56,7 +56,7 @@
 import { computed } from "vue";
 
 /**
- * MsDropdownMenu — Danh sách menu dropdown dùng chung.
+ * DMDropdownMenu — Danh sách menu dropdown dùng chung.
  *
  * Props:
  *  - items       : Array  — danh sách item. Mỗi item có thể chứa:
