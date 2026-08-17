@@ -1,0 +1,32 @@
+{
+  "Finance": {
+    "RevenueByMonth": [
+      { "Month": "T03", "Revenue": 18500000, "Expense": 12400000 },
+      { "Month": "T04", "Revenue": 22800000, "Expense": 15200000 },
+      { "Month": "T05", "Revenue": 21400000, "Expense": 16800000 },
+      { "Month": "T06", "Revenue": 28900000, "Expense": 17300000 },
+      { "Month": "T07", "Revenue": 32600000, "Expense": 20100000 },
+      { "Month": "T08", "Revenue": 38400000, "Expense": 22900000 }
+    ],
+    "Expenses": [
+      { "ExpenseId": "EXP-001", "CategoryCode": "PRODUCT_CAPITAL", "Description": "Nhập hàng tháng 8", "Amount": 15200000, "ExpenseDate": "2026-08-02" },
+      { "ExpenseId": "EXP-002", "CategoryCode": "SERVER", "Description": "VPS backend", "Amount": 1200000, "ExpenseDate": "2026-08-05" },
+      { "ExpenseId": "EXP-003", "CategoryCode": "SHIPPING", "Description": "Bù phí vận chuyển", "Amount": 5700000, "ExpenseDate": "2026-08-12" },
+      { "ExpenseId": "EXP-004", "CategoryCode": "DOMAIN", "Description": "Gia hạn tên miền", "Amount": 800000, "ExpenseDate": "2026-08-15" }
+    ]
+  },
+  "Accounts": [
+    { "UserId": "USR-001", "FullName": "Nguyễn Minh Anh", "Email": "minhanh@gmail.com", "Phone": "0901234567", "OrderCount": 12, "StatusCode": "ACTIVE", "CreatedAt": "2026-05-12" },
+    { "UserId": "USR-002", "FullName": "Trần Hải Nam", "Email": "hainam@gmail.com", "Phone": "0912345678", "OrderCount": 4, "StatusCode": "LOCKED", "CreatedAt": "2026-06-03" },
+    { "UserId": "USR-003", "FullName": "Lê Thu Hà", "Email": "thuha@gmail.com", "Phone": "0987654321", "OrderCount": 8, "StatusCode": "ACTIVE", "CreatedAt": "2026-07-19" }
+  ],
+  "Orders": [
+    { "OrderId": "DM-8942", "CustomerName": "Nguyễn Minh Anh", "TotalAmount": 1149000, "CarrierName": "Giao Hàng Nhanh", "TrackingCode": "GHN238941", "StatusCode": "SHIPPING", "UpdatedAt": "2026-08-17 09:20" },
+    { "OrderId": "DM-8941", "CustomerName": "Lê Thu Hà", "TotalAmount": 685000, "CarrierName": "Chưa chọn", "TrackingCode": "", "StatusCode": "PREPARING", "UpdatedAt": "2026-08-17 08:45" },
+    { "OrderId": "DM-8940", "CustomerName": "Phạm Quang Huy", "TotalAmount": 2290000, "CarrierName": "Viettel Post", "TrackingCode": "VTP883021", "StatusCode": "WAITING_CARRIER", "UpdatedAt": "2026-08-16 16:10" }
+  ],
+  "SupportTickets": [
+    { "TicketId": "SP-1024", "CustomerName": "Đỗ Ngọc Mai", "Subject": "Đơn giao thiếu sản phẩm", "LastMessage": "Mình nhận thiếu một bộ cốc.", "StatusCode": "WAITING_REPLY", "CreatedAt": "2026-08-17 10:15", "Replies": [] },
+    { "TicketId": "SP-1023", "CustomerName": "Vũ Minh Đức", "Subject": "Đổi địa chỉ nhận hàng", "LastMessage": "Nhờ shop đổi sang KTX khu B.", "StatusCode": "IN_PROGRESS", "CreatedAt": "2026-08-17 08:40", "Replies": [{ "SenderType": "ADMIN", "Message": "Shop đang kiểm tra với đơn vị vận chuyển.", "CreatedAt": "2026-08-17 09:00" }] }
+  ]
+}
