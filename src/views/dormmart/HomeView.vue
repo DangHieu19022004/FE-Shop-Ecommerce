@@ -1,5 +1,6 @@
 <script setup>
 import { Categories, FlashProducts, Products } from "@/views/dormmart/mock/catalog";
+import QuickAddCartButton from "@/components/dormmart/QuickAddCartButton.vue";
 
 const DiscoverProducts = Products.slice(0, 4);
 </script>
@@ -43,15 +44,16 @@ const DiscoverProducts = Products.slice(0, 4);
       <div class="dm-pill" style="background: rgba(186, 26, 26, 0.08); color: var(--dm-danger);">01 : 45 : 22</div>
     </div>
     <div class="dm-grid dm-grid--products">
-      <router-link v-for="ProductItem in FlashProducts" :key="ProductItem.Slug" :to="`/products/${ProductItem.Slug}`" class="dm-card dm-product-card" style="display: block; color: inherit;">
-        <img :src="ProductItem.Image" :alt="ProductItem.Name" class="dm-product-card__image" />
+      <article v-for="ProductItem in FlashProducts" :key="ProductItem.Slug" class="dm-card dm-product-card">
+        <router-link :to="`/products/${ProductItem.Slug}`"><img :src="ProductItem.Image" :alt="ProductItem.Name" class="dm-product-card__image" /></router-link>
         <div class="dm-product-card__body">
           <div class="dm-pill" style="align-self: flex-start; background: var(--dm-secondary); color: var(--dm-secondary-text);">{{ ProductItem.Discount }}</div>
           <strong>{{ ProductItem.Name }}</strong>
           <div style="color: var(--dm-danger); font-size: 20px; font-weight: 800;">{{ ProductItem.Price }}</div>
           <div style="color: var(--dm-text-soft); font-size: 13px;">{{ ProductItem.Sold }}</div>
         </div>
-      </router-link>
+        <QuickAddCartButton :ProductId="ProductItem.ProductId" :ImageUrl="ProductItem.Image" />
+      </article>
     </div>
   </section>
 
@@ -61,17 +63,18 @@ const DiscoverProducts = Products.slice(0, 4);
       <router-link to="/products" style="color: var(--dm-primary); font-weight: 600;">Browse catalog</router-link>
     </div>
     <div class="dm-grid dm-grid--products">
-      <router-link v-for="ProductItem in DiscoverProducts" :key="ProductItem.Slug" :to="`/products/${ProductItem.Slug}`" class="dm-card dm-product-card" style="display: block;">
-        <img :src="ProductItem.Image" :alt="ProductItem.Title" class="dm-product-card__image" />
+      <article v-for="ProductItem in DiscoverProducts" :key="ProductItem.Slug" class="dm-card dm-product-card">
+        <router-link :to="`/products/${ProductItem.Slug}`"><img :src="ProductItem.Image" :alt="ProductItem.Title" class="dm-product-card__image" /></router-link>
         <div class="dm-product-card__body">
           <div class="dm-pill" style="align-self: flex-start; background: var(--dm-primary-soft); color: var(--dm-primary);">{{ ProductItem.Badge }}</div>
-          <strong style="line-height: 1.4;">{{ ProductItem.Title }}</strong>
+          <router-link :to="`/products/${ProductItem.Slug}`"><strong style="line-height: 1.4;">{{ ProductItem.Title }}</strong></router-link>
           <div style="display: flex; justify-content: space-between; gap: 10px; align-items: baseline;">
             <span style="color: var(--dm-danger); font-size: 18px; font-weight: 800;">{{ ProductItem.Price }}</span>
             <span style="color: var(--dm-text-soft); font-size: 12px;">{{ ProductItem.Sold }}</span>
           </div>
         </div>
-      </router-link>
+        <QuickAddCartButton :ProductId="ProductItem.ProductId" :ImageUrl="ProductItem.Image" />
+      </article>
     </div>
   </section>
 </template>

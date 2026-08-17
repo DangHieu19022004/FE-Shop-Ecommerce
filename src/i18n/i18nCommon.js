@@ -1,4 +1,8 @@
 const i18nCommon = {
+  Common: {
+    QuickAddCart: "Thêm nhanh vào giỏ hàng",
+    CartLabel: "Giỏ hàng",
+  },
   ProductDetail: {
     BreadcrumbHome: "Trang chủ",
     BreadcrumbProducts: "Sản phẩm",
@@ -26,6 +30,38 @@ const i18nCommon = {
     CurrencyLocale: "vi-VN",
     CurrencyCode: "VND",
     ContactPrice: "Liên hệ",
+  },
+  Cart: {
+    Title: "Giỏ hàng của bạn",
+    SelectedSuffix: "sản phẩm được chọn",
+    ContinueShopping: "Tiếp tục mua sắm",
+    SelectAll: "Chọn tất cả",
+    ProductSuffix: "sản phẩm trong giỏ",
+    SelectProduct: "Chọn sản phẩm",
+    ProductCode: "Mã sản phẩm",
+    SetQuantity: "Quy cách set",
+    InStock: "sản phẩm có sẵn",
+    DecreaseQuantity: "Giảm số lượng",
+    IncreaseQuantity: "Tăng số lượng",
+    Remove: "Xóa",
+    EmptyTitle: "Giỏ hàng đang trống",
+    EmptyDescription: "Hãy thêm sản phẩm cần thiết cho căn phòng của bạn.",
+    ExploreProducts: "Khám phá sản phẩm",
+    SummaryTitle: "Tóm tắt đơn hàng",
+    Subtotal: "Tạm tính",
+    Shipping: "Phí vận chuyển",
+    Free: "Miễn phí",
+    Total: "Tổng thanh toán",
+    Checkout: "Thanh toán",
+    ShippingNote: "Miễn phí vận chuyển cho đơn từ 100.000 ₫",
+    ContactPrice: "Liên hệ",
+    CurrencyLocale: "vi-VN",
+    CurrencyCode: "VND",
+  },
+  Checkout: {
+    Title: "Thanh toán đơn hàng",
+    Description: "Thông tin giỏ hàng đã được ghi nhận. Địa chỉ giao hàng và phương thức thanh toán sẽ được bổ sung khi kết nối API.",
+    BackToCart: "Quay lại giỏ hàng",
   },
 };
 

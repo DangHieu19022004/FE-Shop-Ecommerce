@@ -308,6 +308,7 @@
 }
 
 .dm-product-card {
+  position: relative;
   overflow: hidden;
 }
 

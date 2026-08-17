@@ -2,6 +2,7 @@
 import { computed } from "vue";
 import { useRoute } from "vue-router";
 import { Products } from "@/views/dormmart/mock/catalog";
+import QuickAddCartButton from "@/components/dormmart/QuickAddCartButton.vue";
 
 const filters = ["Mini Fridges", "Cooling Fans", "Electric Kettles", "Microwaves"];
 const route = useRoute();
@@ -60,21 +61,21 @@ const pageTitle = computed(() => {
         </div>
 
         <div class="dm-grid dm-grid--products">
-          <router-link v-for="ProductItem in Products" :key="ProductItem.Slug" :to="`/products/${ProductItem.Slug}`" class="dm-card dm-product-card" style="display: block;">
-            <img :src="ProductItem.Image" :alt="ProductItem.Title" class="dm-product-card__image" />
+          <article v-for="ProductItem in Products" :key="ProductItem.Slug" class="dm-card dm-product-card">
+            <router-link :to="`/products/${ProductItem.Slug}`"><img :src="ProductItem.Image" :alt="ProductItem.Title" class="dm-product-card__image" /></router-link>
             <div class="dm-product-card__body">
               <div class="dm-pill" style="align-self: flex-start; background: var(--dm-secondary); color: var(--dm-secondary-text);">{{ ProductItem.Badge }}</div>
-              <strong style="line-height: 1.4;">{{ ProductItem.Title }}</strong>
+              <router-link :to="`/products/${ProductItem.Slug}`"><strong style="line-height: 1.4;">{{ ProductItem.Title }}</strong></router-link>
               <div style="display: flex; justify-content: space-between; gap: 8px; align-items: baseline;">
                 <span style="color: var(--dm-danger); font-size: 18px; font-weight: 800;">{{ ProductItem.Price }}</span>
                 <span style="color: var(--dm-text-soft); font-size: 12px;">{{ ProductItem.Sold }}</span>
               </div>
               <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; color: var(--dm-text-soft); font-size: 12px;">
                 <span>{{ ProductItem.Location }}</span>
-                <span class="material-symbols-outlined">add_shopping_cart</span>
               </div>
             </div>
-          </router-link>
+            <QuickAddCartButton :ProductId="ProductItem.ProductId" :ImageUrl="ProductItem.Image" />
+          </article>
         </div>
       </div>
     </div>

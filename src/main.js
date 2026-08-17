@@ -7,6 +7,7 @@ import "./assets/styles/brand-icons.css";
 import "./assets/styles/icon.css";
 import "./assets/styles/utility.css";
 import "./assets/styles/dormmart.css";
+import "./assets/styles/cart-animation.css";
 
 const AppInstance = createApp(App);
 

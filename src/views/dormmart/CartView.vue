@@ -1,71 +1,101 @@
 <script setup>
-const cartItems = [
-  {
-    name: "Mini Washing Machine X-1",
-    variant: "Arctic White",
-    price: "đ 1,250,000",
-    qty: 1,
-    image: "https://images.unsplash.com/photo-1626806787461-102c1bfaaea1?auto=format&fit=crop&w=600&q=80",
-  },
-  {
-    name: "LumiDesk LED Smart Lamp",
-    variant: "Wireless Charging",
-    price: "$34.50",
-    qty: 2,
-    image: "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&w=600&q=80",
-  },
-];
+import { computed, inject, onMounted } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import DMButton from "@/components/base/DMButton.vue";
+import DMCheckbox from "@/components/base/DMCheckbox.vue";
+import CartData from "@/data/cartData.json";
+import ProductData from "@/data/productDetailData.json";
+import { addProductToCart, CartItems } from "@/stores/cartStore";
+
+const Route = useRoute();
+const Router = useRouter();
+const Text = inject("i18nCommon").Cart;
+const EnrichedCartItems = computed(() => CartItems.value.map((CartItem) => {
+  const Product = ProductData.Products.find((ProductItem) => ProductItem.ProductId === CartItem.ProductId);
+  if (!Product) return null;
+  const Image = ProductData.ProductImages.find((ImageItem) => ImageItem.ProductId === Product.ProductId && ImageItem.IsPrimary);
+  return { ...CartItem, Product, ImageUrl: Image?.ImageUrl ?? "" };
+}).filter(Boolean));
+const SelectedItems = computed(() => EnrichedCartItems.value.filter((CartItem) => CartItem.IsSelected));
+const SelectedQuantity = computed(() => SelectedItems.value.reduce((Total, CartItem) => Total + CartItem.Quantity, 0));
+const SubtotalAmount = computed(() => SelectedItems.value.reduce((Total, CartItem) => Total + (CartItem.Product.UnitPrice ?? 0) * CartItem.Quantity, 0));
+const ShippingAmount = computed(() => SubtotalAmount.value === 0 || SubtotalAmount.value >= CartData.FreeShippingThreshold ? 0 : CartData.ShippingFee);
+const TotalAmount = computed(() => SubtotalAmount.value + ShippingAmount.value);
+const IsAllSelected = computed(() => CartItems.value.length > 0 && CartItems.value.every((CartItem) => CartItem.IsSelected));
+
+const formatCurrency = (Amount) => new Intl.NumberFormat(Text.CurrencyLocale, { style: "currency", currency: Text.CurrencyCode }).format(Amount);
+const changeQuantity = (CartItemId, Delta) => {
+  const CartItem = CartItems.value.find((Item) => Item.CartItemId === CartItemId);
+  const Product = ProductData.Products.find((Item) => Item.ProductId === CartItem?.ProductId);
+  if (CartItem && Product) CartItem.Quantity = Math.min(Product.StockQuantity, Math.max(1, CartItem.Quantity + Delta));
+};
+const removeItem = (CartItemId) => { CartItems.value = CartItems.value.filter((CartItem) => CartItem.CartItemId !== CartItemId); };
+const toggleItem = (CartItemId, IsSelected) => {
+  const CartItem = CartItems.value.find((Item) => Item.CartItemId === CartItemId);
+  if (CartItem) CartItem.IsSelected = IsSelected;
+};
+const toggleAll = (IsSelected) => CartItems.value.forEach((CartItem) => { CartItem.IsSelected = IsSelected; });
+const navigateToCheckout = () => Router.push({ name: "checkout" });
+const addQueryProduct = () => {
+  const ProductId = Number(Route.query.ProductId);
+  const Product = ProductData.Products.find((ProductItem) => ProductItem.ProductId === ProductId);
+  if (!Product) return;
+  const Quantity = Math.max(1, Number(Route.query.Quantity) || 1);
+  const ProductVariantId = Route.query.ProductVariantId ? Number(Route.query.ProductVariantId) : null;
+  addProductToCart(ProductId, Quantity, ProductVariantId);
+  Router.replace({ name: "cart" });
+};
+
+onMounted(addQueryProduct);
 </script>
 
 <template>
-  <section style="display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 20px; align-items: start;">
-    <article class="dm-card" style="padding: 20px;">
-      <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 18px;">
-        <div>
-          <h1 style="font-size: 32px; margin-bottom: 6px;">Your Cart</h1>
-          <p style="color: var(--dm-text-soft);">{{ cartItems.length }} items selected for checkout</p>
-        </div>
-        <router-link to="/products" class="dm-btn-ghost">Continue shopping</router-link>
+  <section class="cart-page">
+    <article class="cart-list dm-card">
+      <header class="cart-list__header">
+        <div><h1>{{ Text.Title }}</h1><p>{{ SelectedQuantity }} {{ Text.SelectedSuffix }}</p></div>
+        <router-link :to="{ name: 'productList' }" class="dm-btn-ghost">{{ Text.ContinueShopping }}</router-link>
+      </header>
+      <div v-if="CartItems.length" class="cart-list__selection">
+        <DMCheckbox :model-value="IsAllSelected" :label="Text.SelectAll" @update:model-value="toggleAll" />
+        <span>{{ CartItems.length }} {{ Text.ProductSuffix }}</span>
       </div>
-
-      <div style="display: grid; gap: 14px;">
-        <div v-for="item in cartItems" :key="item.name" class="dm-card" style="padding: 14px; box-shadow: none; display: grid; grid-template-columns: 110px minmax(0, 1fr) auto; gap: 14px; align-items: center;">
-          <img :src="item.image" :alt="item.name" style="width: 100%; aspect-ratio: 1 / 1; border-radius: 12px; object-fit: cover;" />
-          <div style="min-width: 0;">
-            <strong style="display: block; margin-bottom: 6px;">{{ item.name }}</strong>
-            <div style="color: var(--dm-text-soft); font-size: 13px; margin-bottom: 10px;">{{ item.variant }}</div>
-            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-              <div class="dm-card" style="display: inline-flex; align-items: center; box-shadow: none;">
-                <button type="button" class="dm-btn-ghost" style="border: 0; border-right: 1px solid var(--dm-border); border-radius: 12px 0 0 12px;">-</button>
-                <div style="min-width: 44px; text-align: center; font-weight: 600;">{{ item.qty }}</div>
-                <button type="button" class="dm-btn-ghost" style="border: 0; border-left: 1px solid var(--dm-border); border-radius: 0 12px 12px 0;">+</button>
-              </div>
-              <button type="button" class="dm-btn-danger" style="padding: 10px 12px;">Remove</button>
-            </div>
+      <div v-if="EnrichedCartItems.length" class="cart-items">
+        <article v-for="CartItem in EnrichedCartItems" :key="CartItem.CartItemId" class="cart-item">
+          <DMCheckbox :model-value="CartItem.IsSelected" :aria-label="`${Text.SelectProduct} ${CartItem.Product.ProductName}`" @update:model-value="toggleItem(CartItem.CartItemId, $event)" />
+          <router-link :to="{ name: 'productDetail', params: { slug: CartItem.Product.Slug } }" class="cart-item__image"><img :src="CartItem.ImageUrl" :alt="CartItem.Product.ProductName" /></router-link>
+          <div class="cart-item__information">
+            <router-link :to="{ name: 'productDetail', params: { slug: CartItem.Product.Slug } }" class="cart-item__name">{{ CartItem.Product.ProductName }}</router-link>
+            <span>{{ Text.ProductCode }}: {{ CartItem.Product.ProductCode }}</span>
+            <span>{{ Text.SetQuantity }}: {{ CartItem.Product.SetQuantity }}</span>
+            <div class="cart-item__mobile-price">{{ CartItem.Product.UnitPrice === null ? Text.ContactPrice : formatCurrency(CartItem.Product.UnitPrice) }}</div>
           </div>
-          <strong style="font-size: 20px; color: var(--dm-danger);">{{ item.price }}</strong>
-        </div>
+          <div class="cart-quantity">
+            <DMButton type="none" :is-tooltip="false" class="cart-quantity__button" :aria-label="Text.DecreaseQuantity" :un-active="CartItem.Quantity <= 1" @click="changeQuantity(CartItem.CartItemId, -1)"><span class="material-symbols-outlined" aria-hidden="true">remove</span></DMButton>
+            <strong>{{ CartItem.Quantity }}</strong>
+            <DMButton type="none" :is-tooltip="false" class="cart-quantity__button" :aria-label="Text.IncreaseQuantity" :un-active="CartItem.Quantity >= CartItem.Product.StockQuantity" @click="changeQuantity(CartItem.CartItemId, 1)"><span class="material-symbols-outlined" aria-hidden="true">add</span></DMButton>
+            <small>{{ CartItem.Product.StockQuantity }} {{ Text.InStock }}</small>
+          </div>
+          <strong class="cart-item__price">{{ CartItem.Product.UnitPrice === null ? Text.ContactPrice : formatCurrency(CartItem.Product.UnitPrice * CartItem.Quantity) }}</strong>
+          <DMButton type="none" :is-tooltip="false" class="cart-item__remove" :aria-label="`${Text.Remove} ${CartItem.Product.ProductName}`" @click="removeItem(CartItem.CartItemId)"><span class="material-symbols-outlined" aria-hidden="true">delete</span></DMButton>
+        </article>
+      </div>
+      <div v-else class="cart-empty">
+        <span class="material-symbols-outlined" aria-hidden="true">shopping_cart</span><h2>{{ Text.EmptyTitle }}</h2><p>{{ Text.EmptyDescription }}</p>
+        <router-link :to="{ name: 'productList' }" class="dm-btn">{{ Text.ExploreProducts }}</router-link>
       </div>
     </article>
-
-    <aside class="dm-card" style="padding: 20px; position: sticky; top: 110px;">
-      <h2 style="font-size: 24px; margin-bottom: 16px;">Order Summary</h2>
-      <div style="display: grid; gap: 12px; color: var(--dm-text-soft); margin-bottom: 18px;">
-        <div style="display: flex; justify-content: space-between; gap: 8px;">
-          <span>Subtotal</span>
-          <strong style="color: var(--dm-text);">đ 1,319,000</strong>
-        </div>
-        <div style="display: flex; justify-content: space-between; gap: 8px;">
-          <span>Shipping</span>
-          <strong style="color: var(--dm-success);">Free</strong>
-        </div>
-        <div style="display: flex; justify-content: space-between; gap: 8px; padding-top: 12px; border-top: 1px solid var(--dm-border);">
-          <span>Total</span>
-          <strong style="font-size: 22px; color: var(--dm-danger);">đ 1,319,000</strong>
-        </div>
+    <aside class="cart-summary dm-card">
+      <h2>{{ Text.SummaryTitle }}</h2>
+      <div class="cart-summary__rows">
+        <div><span>{{ Text.Subtotal }}</span><strong>{{ formatCurrency(SubtotalAmount) }}</strong></div>
+        <div><span>{{ Text.Shipping }}</span><strong class="cart-summary__shipping">{{ ShippingAmount ? formatCurrency(ShippingAmount) : Text.Free }}</strong></div>
+        <div class="cart-summary__total"><span>{{ Text.Total }}</span><strong>{{ formatCurrency(TotalAmount) }}</strong></div>
       </div>
-      <button type="button" class="dm-btn" style="width: 100%; margin-bottom: 10px;">Proceed to Checkout</button>
-      <div class="dm-pill" style="width: 100%; justify-content: center; background: rgba(0, 191, 165, 0.08); color: var(--dm-success);">Free Shipping Extra</div>
+      <DMButton type="none" :is-tooltip="false" :message="`${Text.Checkout} (${SelectedQuantity})`" class="cart-summary__checkout" :un-active="SelectedItems.length === 0" @click="navigateToCheckout" />
+      <div class="cart-summary__note"><span class="material-symbols-outlined" aria-hidden="true">local_shipping</span>{{ Text.ShippingNote }}</div>
     </aside>
   </section>
 </template>
+
+<style scoped src="@/assets/styles/screens/cart.css"></style>

@@ -20,6 +20,7 @@ export const Categories = ProductDetailData.Categories.map((CategoryItem) => ({
 }));
 
 export const Products = ProductDetailData.Products.map((ProductItem) => ({
+  ProductId: ProductItem.ProductId,
   Slug: ProductItem.Slug,
   Title: ProductItem.ProductName,
   CategoryId: ProductItem.CategoryId,
