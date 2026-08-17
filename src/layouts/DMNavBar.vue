@@ -3,7 +3,7 @@
         <div class="bgnv">
             <div class="navbar__header">
                 <div class="navbar__header_left">
-                    <MsButton
+                    <DMButton
                         iconLeft="mi-ninedot-white icon--sm"
                         shapeBtn="circle"
                         tooltipPosition="right"
@@ -14,59 +14,59 @@
                 </div>
                 <div class="navbar__header_right">
                     <div class="navbar__search">
-                        <MsButton
+                        <DMButton
                             iconLeft="mi-search-white icon--base"
                             :isTooltip="false"
                             unActive
                         />
-                        <MsInput
+                        <DMInput
                             placeholder="Tìm kiếm"
                             class="navbar__search-input"
                         />
                     </div>
-                    <MsButton
+                    <DMButton
                         iconLeft="mi-setting-white hvp"
                         shapeBtn="circle"
                         tooltipMessage="Thiết lập"
                         tooltipPosition="bottom"
                     />
-                    <MsButton
+                    <DMButton
                         iconLeft="mi-agent-box"
                         shapeBtn="circle"
                         :isTooltip="false"
                         class="w-38"
                     />
-                    <MsButton
+                    <DMButton
                         iconLeft="mi-new-feature-white"
                         shapeBtn="circle"
                         tooltipMessage="Tính năng mới"
                         tooltipPosition="bottom"
                     />
-                   <MsButton
+                   <DMButton
                         iconLeft="mi-chat"
                         shapeBtn="circle"
                         tooltipMessage="Tin nhắn"
                         tooltipPosition="bottom"
                    />
-                    <MsButton
+                    <DMButton
                         iconLeft="mi-alert"
                         shapeBtn="circle"
                         tooltipMessage="Thông báo"
                         tooltipPosition="bottom"
                     />
-                    <MsButton
+                    <DMButton
                         iconLeft="mi-ask"
                         shapeBtn="circle"
                         tooltipMessage="Trợ giúp"
                         tooltipPosition="bottom"
                     />
-                    <MsButton
+                    <DMButton
                         iconLeft="mi-other-feat"
                         shapeBtn="circle"
                         tooltipMessage="Tính năng khác"
                         tooltipPosition="bottom"
                     />
-                    <MsButton
+                    <DMButton
                         iconLeft="mi-book"
                         shapeBtn="circle"
                         tooltipMessage="Kiến thức hữu ích"
@@ -89,8 +89,8 @@
     </header>
 </template>
 <script setup>
-import MsButton from "@/components/base/MsButton.vue";
-import MsInput from "@/components/base/MsInput.vue";
+import DMButton from "@/components/base/DMButton.vue";
+import DMInput from "@/components/base/DMInput.vue";
 
 </script>
 <style scoped>

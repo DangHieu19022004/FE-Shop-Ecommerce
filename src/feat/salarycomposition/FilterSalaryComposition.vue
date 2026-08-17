@@ -3,37 +3,37 @@
         <!-- Header -->
         <div class="filter-header">
             <p class="fz-16 fw-700">Bộ lọc</p>
-            <MsButton iconLeft="mi-close" shapeBtn="circle" type="border-none" tooltipMessage="Đóng"
+            <DMButton iconLeft="mi-close" shapeBtn="circle" type="border-none" tooltipMessage="Đóng"
                 tooltipPosition="bottom" @click="$emit('close')" />
         </div>
 
         <!-- Search -->
         <div class="content-body__search">
-            <MsButton iconLeft="mi-search" tooltipMessage="Tìm kiếm" unActive tooltipPosition="bottom" />
-            <MsInput v-model="searchKeyword" placeholder="Tìm kiếm" class="content-body__search-input" />
+            <DMButton iconLeft="mi-search" tooltipMessage="Tìm kiếm" unActive tooltipPosition="bottom" />
+            <DMInput v-model="searchKeyword" placeholder="Tìm kiếm" class="content-body__search-input" />
         </div>
 
         <!-- Danh sách cột lọc -->
         <div class="filter-group">
             <div v-for="item in filteredItems" :key="item.key"  :class="[item.checked ? 'filter-container m-b-8' : '', 'filter-item']">
                 <div>
-                    <MsCheckbox class="m-b-4 m-t-4" v-model="item.checked" :label="item.label" />
-                    <MsSelect
+                    <DMCheckbox class="m-b-4 m-t-4" v-model="item.checked" :label="item.label" />
+                    <DMSelect
                         v-if="item.checked"
                         v-model="item.condition"
                         :data="item.isSelect ? conditionsSelect : conditionsCompare"
                     />
 
                     <template v-if="item.checked && item.condition !== 'empty' && item.condition !== 'not_empty'">
-                        <!-- Nếu là trường select thì dùng MsSelect -->
-                        <MsSelect
+                        <!-- Nếu là trường select thì dùng DMSelect -->
+                        <DMSelect
                             v-if="item.isSelect"
                             v-model="item.value"
                             :data="item.options"
                             class="m-t-8 m-b-4"
                         />
-                        <!-- Ngược lại dùng MsInput -->
-                        <MsInput
+                        <!-- Ngược lại dùng DMInput -->
+                        <DMInput
                             v-else
                             v-model="item.value"
                             class="h-32 m-t-8 m-b-4"
@@ -45,9 +45,9 @@
 
         <!-- Footer -->
         <div class="filter-footer">
-            <MsButton :isTooltip="false" type="border-secondary" message="Bỏ lọc" @click="handleReset"
+            <DMButton :isTooltip="false" type="border-secondary" message="Bỏ lọc" @click="handleReset"
                 class="btn-filter" />
-            <MsButton :isTooltip="false" type="green" message="Áp dụng" @click="handleApply" class="btn-filter" />
+            <DMButton :isTooltip="false" type="green" message="Áp dụng" @click="handleApply" class="btn-filter" />
         </div>
     </div>
 </template>
@@ -60,10 +60,10 @@
  * CREATED BY: TDHieu (08/06/2026)
  */
 import { reactive, ref, computed, watch } from 'vue';
-import MsCheckbox from '@/components/base/MsCheckbox.vue';
-import MsButton from '@/components/base/MsButton.vue';
-import MsInput from '@/components/base/MsInput.vue';
-import MsSelect from '@/components/base/MsSelect.vue';
+import DMCheckbox from '@/components/base/DMCheckbox.vue';
+import DMButton from '@/components/base/DMButton.vue';
+import DMInput from '@/components/base/DMInput.vue';
+import DMSelect from '@/components/base/DMSelect.vue';
 import {
     SalaryCompositionNatureOptions,
     SalaryCompositionValueTypeOptions,

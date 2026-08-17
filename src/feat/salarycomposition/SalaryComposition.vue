@@ -17,14 +17,14 @@
           <h2 class="content_header_left">Thành phần lương</h2>
         </div>
         <div class="content_header_right">
-          <MsButton
+          <DMButton
             class="btn-system mg-r-8 fw-500"
             message="Danh mục của hệ thống"
             :isTooltip="false"
             iconLeft="mi-rule mg-r-8"
             @click="$router.push('/salarycomposition/salarycomposition-system')"
           />
-          <MsButton
+          <DMButton
             class="btn-add fw-500"
             message="Thêm"
             type="green"
@@ -32,7 +32,7 @@
             iconLeft="mi-plus-white mg-r-8 fw-500"
             @click="handleOpenForm(null)"
           />
-          <MsButton
+          <DMButton
             class="btn-add-menu fw-500"
             iconLeft="mi-chevron-down-white"
             type="green"
@@ -40,7 +40,7 @@
             @click="openSelectComposition"
           />
           <div v-if="toggleSelectComposition" class="select-composition">
-            <MsButton
+            <DMButton
               message="Chọn từ danh mục của hệ thống"
               :isTooltip="false"
               @click="openPopupSystem"
@@ -54,13 +54,13 @@
           <div class="content_body_header">
             <div class="content_body_header_left">
               <div class="content_body_search">
-                <MsButton
+                <DMButton
                   iconLeft="mi-search"
                   tooltipMessage="Tìm kiếm"
                   unActive
                   tooltipPosition="bottom"
                 />
-                <MsInput
+                <DMInput
                   placeholder="Tìm kiếm"
                   class="content_body_search-input"
                   v-model="searchKeyword"
@@ -71,14 +71,14 @@
               <div v-if="selectedIds.length > 0" class="checkbox_function">
                 <p class="fz-13 m-r-8">Đã chọn</p>
                 <b class="fz-13">{{ selectedIds.length }}</b>
-                <MsButton
+                <DMButton
                   message="Bỏ chọn"
                   class="m-r-8 color-green fz-13 no-background"
                   :isTooltip="false"
                   @click="selectedIds = []"
                 />
                 <!-- Nút Ngừng theo dõi: Hiển thị khi có ít nhất 1 dòng Đang theo dõi -->
-                <MsButton
+                <DMButton
                   v-if="hasActiveSelected"
                   iconLeft="mi-circle-minus-yellow"
                   type="none"
@@ -92,10 +92,10 @@
                 >
                   <span class="status-badge__dot"></span>
                   Ngừng theo dõi
-                </MsButton>
+                </DMButton>
 
                 <!-- Nút Đang theo dõi: Hiển thị khi có ít nhất 1 dòng Ngừng theo dõi -->
-                <MsButton
+                <DMButton
                   v-if="hasInactiveSelected"
                   iconLeft="mi-circle-check-green"
                   type="none"
@@ -107,8 +107,8 @@
                 >
                   <span class="status-badge__dot"></span>
                   Đang theo dõi
-                </MsButton>
-                <MsButton
+                </DMButton>
+                <DMButton
                   :isTooltip="false"
                   message="Xóa"
                   iconLeft="mi-trash-red"
@@ -120,7 +120,7 @@
 
               <div v-else class="content_body_filters">
                 <div class="content_body_status">
-                  <MsButton
+                  <DMButton
                     :isTooltip="false"
                     iconRight="mi-chevron-down mg-l-8"
                     class="status-trigger h-32"
@@ -129,9 +129,9 @@
                   >
                     <span class="status-label">Trạng thái:</span>
                     <span class="status-value">{{ selectedStatusLabel }}</span>
-                  </MsButton>
+                  </DMButton>
                   <Transition name="status-dropdown">
-                    <MsDropdownMenu
+                    <DMDropdownMenu
                       v-if="statusMenuOpen"
                       :items="statusItems"
                       v-model="selectedStatus"
@@ -142,7 +142,7 @@
                     />
                   </Transition>
                 </div>
-                <MsTreeSelect
+                <DMTreeSelect
                   placeholder="Tất cả đơn vị"
                   :options="orgTreeData"
                   v-model="selectedOrgs"
@@ -151,14 +151,14 @@
                 >
                   <template #footer>
                     <div style="padding: 10px 16px; background-color: #eafbf2; border-bottom-left-radius: 6px; border-bottom-right-radius: 6px;">
-                      <MsCheckbox v-model="showInactiveOrgs" label="Hiển thị đơn vị ngừng theo dõi" />
+                      <DMCheckbox v-model="showInactiveOrgs" label="Hiển thị đơn vị ngừng theo dõi" />
                     </div>
                   </template>
-                </MsTreeSelect>
+                </DMTreeSelect>
               </div>
             </div>
             <div class="content_body_header_right">
-              <MsButton
+              <DMButton
                 iconLeft="mi-filter"
                 tooltipMessage="Bộ lọc"
                 shapeBtn="square"
@@ -168,7 +168,7 @@
                 @click="isOpenFilter = !isOpenFilter"
               />
               <div class="setting-btn-wrapper" @click.stop>
-                <MsButton
+                <DMButton
                   iconLeft="mi-setting"
                   tooltipMessage="Thiết lập"
                   shapeBtn="square"
@@ -190,7 +190,7 @@
           <div class="content_body">
             <div class="content_body_table">
               <!-- Trạng thái đang tải -->
-              <MsLoader
+              <DMLoader
                 v-if="isLoading"
                 class="table-state table-state--loading"
               />
@@ -201,7 +201,7 @@
                 class="table-state table-state--error"
               >
                 <span>{{ errorMessage }}</span>
-                <MsButton
+                <DMButton
                   message="Thử lại"
                   :isTooltip="false"
                   type="border-secondary"
@@ -211,7 +211,7 @@
               </div>
 
               <!-- Bảng dữ liệu (chỉ render khi có data và không loading) -->
-              <MsTable
+              <DMTable
                 v-else
                 :fields="visibleFields"
                 :data-rows="salaryCompositions"
@@ -316,7 +316,7 @@
                 <template #cell-actions="{ row }">
                   <div class="btn_action">
                     <!-- Nút Toggle status: ẩn nếu là data hệ thống -->
-                    <MsButton
+                    <DMButton
                       v-if="!row.salaryCompositionSystemId"
                       :iconLeft="
                         row.status === SalaryCompositionStatus.Following
@@ -341,7 +341,7 @@
                       style="display: inline-block"
                     ></div>
                     <!-- Nút Nhân bản: không lock -->
-                    <MsButton
+                    <DMButton
                       iconLeft="mi-copy"
                       type="border-none"
                       shapeBtn="square"
@@ -351,7 +351,7 @@
                       @click.stop="handleDuplicate(row)"
                     />
                     <!-- Nút Sửa: hiện toast nếu có salaryCompositionSystemId -->
-                    <MsButton
+                    <DMButton
                       iconLeft="mi-pencil"
                       type="border-none"
                       shapeBtn="square"
@@ -368,7 +368,7 @@
                       "
                     />
                     <!-- Nút Xóa: hiện toast nếu có salaryCompositionSystemId -->
-                    <MsButton
+                    <DMButton
                       iconLeft="mi-trash-red"
                       type="border-none"
                       shapeBtn="square"
@@ -386,7 +386,7 @@
                     />
                   </div>
                 </template>
-              </MsTable>
+              </DMTable>
             </div>
           </div>
           <div class="content_body_footer">
@@ -398,7 +398,7 @@
             <div class="footer-right">
               <span>Số dòng/trang</span>
               <div class="page-size hvp">
-                <MsSelect
+                <DMSelect
                   v-model="pageSize"
                   :data="pageSizeOptions"
                   :allow-empty="false"
@@ -463,25 +463,25 @@
   />
 
   <!-- Toast container (nội bộ, khi Req4 toast không qua MainLayout) -->
-  <MsToastContainer :toasts="toasts" @close="removeToast" />
+  <DMToastContainer :toasts="toasts" @close="removeToast" />
 </template>
 <script setup>
-import MsButton from "@/components/base/MsButton.vue";
-import MsInput from "@/components/base/MsInput.vue";
-import MsTable from "@/components/base/MsTable/MsTable.vue";
+import DMButton from "@/components/base/DMButton.vue";
+import DMInput from "@/components/base/DMInput.vue";
+import DMTable from "@/components/base/DMTable/DMTable.vue";
 import FormSalaryComposition from "./FormSalaryComposition.vue";
-import MsDropdownMenu from "@/components/base/MsDropdownMenu.vue";
-import MsSelect from "@/components/base/MsSelect.vue";
+import DMDropdownMenu from "@/components/base/DMDropdownMenu.vue";
+import DMSelect from "@/components/base/DMSelect.vue";
 import PopupSettingColumn from "./PopupSettingColumn.vue";
 import SalaryCompositionSystem from "../salarycompositionsystems/SalaryCompositionSystem.vue";
 import FilterSalaryComposition from "./FilterSalaryComposition.vue";
-import MsTreeSelect from "@/components/base/MsTreeSelect/MsTreeSelect.vue";
-import MsCheckbox from "@/components/base/MsCheckbox.vue";
-import MsToastContainer from "@/components/overlay/MsToast/MsToastContainer.vue";
-import MsLoader from "@/components/base/MsLoader.vue";
-import MsOverlay from "@/components/overlay/MsOverlay.vue";
-import MsAlert from "@/components/overlay/MsAlert.vue";
-import FormulaCell from "@/components/base/MsFormula/FormulaCell.vue";
+import DMTreeSelect from "@/components/base/DMTreeSelect/DMTreeSelect.vue";
+import DMCheckbox from "@/components/base/DMCheckbox.vue";
+import DMToastContainer from "@/components/overlay/DMToast/DMToastContainer.vue";
+import DMLoader from "@/components/base/DMLoader.vue";
+import DMOverlay from "@/components/overlay/DMOverlay.vue";
+import DMAlert from "@/components/overlay/DMAlert.vue";
+import FormulaCell from "@/components/base/DMFormula/FormulaCell.vue";
 import { onMounted, onUnmounted, ref, computed, watch } from "vue";
 import salaryCompositionApi from "@/services/salaryCompositionService";
 import organizationApi from "@/services/organizationService";
@@ -951,7 +951,7 @@ const toSnakeCase = (value) =>
  * Xử lý khi thay đổi sắp xếp trên bảng
  *
  * Sử dụng khi: Người dùng click vào tiêu đề cột để sắp xếp
- * Là sự kiện để sort giảm dần tăng dần ở MsMenuTable
+ * Là sự kiện để sort giảm dần tăng dần ở DMMenuTable
  *
  * @param {Object} payload Chứa field và direction (asc/desc)
  * @returns {void}
@@ -1108,7 +1108,7 @@ async function fetchOrgTree() {
 }
 
 /**
- * Map cây tổ chức từ API sang format cho MsTreeSelect
+ * Map cây tổ chức từ API sang format cho DMTreeSelect
  *
  * Sử dụng khi: Nhận được dữ liệu cây đơn vị từ API
  *
@@ -1815,31 +1815,31 @@ const removeToast = (id) => {
 const defaultConfigurableFields = computed(() =>
   DEFAULT_FIELDS.filter((f) => !f.isSystemCol),
 );
-// Các cột đang hiển thị trên bảng (bao gồm cả cột hệ thống) sẽ được truyền vào MsTable để render
+// Các cột đang hiển thị trên bảng (bao gồm cả cột hệ thống) sẽ được truyền vào DMTable để render
 const configurableFields = computed(() =>
   fields.value.filter((f) => !f.isSystemCol),
 );
-// Tất cả cột visible (bao gồm cột hệ thống) – truyền vào MsTable
+// Tất cả cột visible (bao gồm cột hệ thống) – truyền vào DMTable
 const visibleFields = computed(() =>
   fields.value.filter((f) => f.isSystemCol || f.isVisible !== false),
 );
 
 // FUNCTION:
 /**
- * Bắt sự kiện khi MsTable emit update:fields với fields đã được sắp xếp lại sau khi người dùng kéo thả hoặc ghim cột
+ * Bắt sự kiện khi DMTable emit update:fields với fields đã được sắp xếp lại sau khi người dùng kéo thả hoặc ghim cột
  *
- * Sử dụng khi: Người dùng thay đổi thứ tự cột hoặc ghim cột trên bảng, MsTable sẽ emit sự kiện update:fields với danh sách fields mới đã được cập nhật thứ tự và trạng thái pinned
+ * Sử dụng khi: Người dùng thay đổi thứ tự cột hoặc ghim cột trên bảng, DMTable sẽ emit sự kiện update:fields với danh sách fields mới đã được cập nhật thứ tự và trạng thái pinned
  *
- * @param updatedFields Danh sách fields mới đã được cập nhật thứ tự và trạng thái pinned từ MsTable
+ * @param updatedFields Danh sách fields mới đã được cập nhật thứ tự và trạng thái pinned từ DMTable
  *
  * CREATED BY: TDHieu (09/06/2026)
  */
 const handleTableFieldsUpdate = (updatedFields) => {
-  // MsTable chỉ biết visibleFields, cần merge lại để lấy được các cột ẩn
+  // DMTable chỉ biết visibleFields, cần merge lại để lấy được các cột ẩn
   const hiddenFields = fields.value.filter(
     (f) => !f.isSystemCol && f.isVisible === false,
   );
-  // Rebuild fields: giữ thứ tự từ MsTable + append các cột ẩn
+  // Rebuild fields: giữ thứ tự từ DMTable + append các cột ẩn
   fields.value = [...updatedFields, ...hiddenFields];
 
   // Lưu displayOrder và pinnedPosition lên BE với explicit overrides

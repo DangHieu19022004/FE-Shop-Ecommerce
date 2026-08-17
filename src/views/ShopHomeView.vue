@@ -44,7 +44,7 @@ const categories = [
 const flashProducts = [
   {
     image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuBmu3vE3e_1wj0eEK5BwK7Zti4aWEM987lQMs6mZiLGRj-1X0l5v_0Oxa_YdVf3WVkVf3SqM7nWKs1IRb8FaQEubCiD1dBN9eG5AcnGwcG3_c2Tc6hYfgBE1BG9LcyAQcntBoxEMyD0lCZPbiLPfrjPQZrpCA2XMbNnO5VV39AII3fXsDzaDsQ3GMYp8h8L4CqRfps71nsbKIi1gocmmx_dJOnXm68mn3zbGE2ulvkz7JfC_kf0dUkWqg",
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuBmu3vE3e_1wj0eEK5BwK7Zti4aWEM987lQDM6mZiLGRj-1X0l5v_0Oxa_YdVf3WVkVf3SqM7nWKs1IRb8FaQEubCiD1dBN9eG5AcnGwcG3_c2Tc6hYfgBE1BG9LcyAQcntBoxEMyD0lCZPbiLPfrjPQZrpCA2XMbNnO5VV39AII3fXsDzaDsQ3GMYp8h8L4CqRfps71nsbKIi1gocmmx_dJOnXm68mn3zbGE2ulvkz7JfC_kf0dUkWqg",
     discount: "25%",
     price: "$45.00",
     sold: "85 SOLD",
@@ -222,15 +222,9 @@ onBeforeUnmount(() => {
       </div>
 
       <div class="topbar__row topbar__row--main">
-        <div class="brand">
-          <div class="brand__logo">
-            <img
-              src="https://lh3.googleusercontent.com/aida/AP1WRLt66z9jsS2Ku4bPKG6Meq2mQ00JChY9WVQW2pybOsyeXTyDAmj7Y37YWx-JoTVpjzuqCbW7qk5qNuT9rglsKx80DGDsn0N4_BpvEb39ITMT0ESbA1Gj63Bg2vhEMGBYACxOEZLijOfhINFPr_u_Swfe55uTB5haYtrb2vv8wt7wtqoZqFXNq4rVBosNSyU6fKPGNfTotXZcgEo6BMQ6N97IsFvl3rdYyk-cHuYTItRDJTQFNQ79GakC6WU56THOpvhD_SzBxsGR65k"
-              alt="Dorm Mart"
-            />
-          </div>
-          <div class="brand__name">Dorm Mart</div>
-        </div>
+        <router-link to="/" class="brand" aria-label="Dorm Mart - Trang chủ">
+          <span class="dm-brand-icon dm-brand-icon--horizontal-logo" aria-hidden="true"></span>
+        </router-link>
 
         <div class="searchbar">
           <input placeholder="Search for dorm essentials, snacks, and tech" />
@@ -574,29 +568,6 @@ onBeforeUnmount(() => {
   align-items: center;
   gap: 12px;
   flex-shrink: 0;
-}
-
-.brand__logo {
-  width: 58px;
-  height: 40px;
-  border-radius: 8px;
-  overflow: hidden;
-  background: rgba(255, 255, 255, 0.08);
-  display: grid;
-  place-items: center;
-}
-
-.brand__logo img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-
-.brand__name {
-  font-size: 28px;
-  line-height: 1;
-  font-weight: 800;
-  letter-spacing: -0.03em;
 }
 
 .searchbar {
@@ -1555,10 +1526,6 @@ onBeforeUnmount(() => {
 
   .topbar__row--main {
     gap: 10px;
-  }
-
-  .brand__name {
-    font-size: 22px;
   }
 
   .hero-carousel {

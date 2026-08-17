@@ -1,7 +1,7 @@
 <template lang="">
     <div class="ms-toast-container">
         <TransitionGroup name="toast">
-            <MsToast
+            <DMToast
                 v-for="toast in props.toasts"
                 :key="toast.id"
                 :message="toast.message"
@@ -13,7 +13,7 @@
     </div>
 </template>
 <script setup>
-import MsToast from './MsToast.vue';
+import DMToast from './DMToast.vue';
 const props = defineProps({
     toasts: {
         type: Array,

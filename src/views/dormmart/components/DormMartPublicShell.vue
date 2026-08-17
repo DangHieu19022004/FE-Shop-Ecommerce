@@ -14,9 +14,8 @@
       </div>
 
       <div class="dm-public-header__main">
-        <router-link to="/" class="dm-brand">
-          <div class="dm-brand__logo">🛒</div>
-          <div class="dm-brand__name">Dorm Mart</div>
+        <router-link to="/" class="dm-brand" aria-label="Dorm Mart - Trang chủ">
+          <span class="dm-brand-icon dm-brand-icon--horizontal-logo" aria-hidden="true"></span>
         </router-link>
 
         <label class="dm-search">

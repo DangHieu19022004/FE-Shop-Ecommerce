@@ -5,35 +5,35 @@
         <div :class="[{ sidebar_hide: props.isCollapse }, 'sb__list']">
           <!-- Tổng quan (không có submenu) -->
           <router-link to="/demo" class="hvp dpl menu__item">
-            <MsButton
+            <DMButton
               iconLeft="mi-sidebar-dashboard mg-r-8"
               message="Tổng quan"
               :class="['align-left', { 'is-collapse': props.isCollapse }]"
               spreadIcon
             >
-            </MsButton>
+            </DMButton>
           </router-link>
 
           <!-- Thành phần lương (không có submenu) -->
           <router-link to="/salarycomposition" class="hvp dpl menu__item">
-            <MsButton
+            <DMButton
               iconLeft="mi-sidebar-salary-composition mg-r-8"
               message="Thành phần lương"
               :class="['align-left', { 'is-collapse': props.isCollapse }]"
               spreadIcon
             >
-            </MsButton>
+            </DMButton>
           </router-link>
 
           <!-- Mẫu bảng lương (không có submenu) -->
           <router-link to="/demo" class="hvp dpl menu__item">
-            <MsButton
+            <DMButton
               iconLeft="mi-sidebar-salary-template mg-r-8"
               message="Mẫu bảng lương"
               :class="['align-left', { 'is-collapse': props.isCollapse }]"
               spreadIcon
             >
-            </MsButton>
+            </DMButton>
           </router-link>
 
           <!-- Dữ liệu tính lương -->
@@ -43,7 +43,7 @@
             @mouseleave="openMenuId = null"
           >
             <div class="hvp dpl menu__item">
-              <MsButton
+              <DMButton
                 iconLeft="mi-sidebar-salary-data mg-r-8"
                 message="Dữ liệu tính lương"
                 iconRight="ms-icon-chevron-right mg-l-16 "
@@ -53,7 +53,7 @@
               />
             </div>
             <Transition name="dropdown-fade">
-              <MsDropdownMenu
+              <DMDropdownMenu
                 v-if="openMenuId === 'salary-data' && !props.isCollapse"
                 :items="salaryDataItems"
                 position="right-start"
@@ -69,7 +69,7 @@
             @mouseleave="openMenuId = null"
           >
             <div class="hvp dpl menu__item">
-              <MsButton
+              <DMButton
                 iconLeft="mi-sidebar-salary-table mg-r-8"
                 message="Tính lương"
                 iconRight="ms-icon-chevron-right mg-l-16 "
@@ -79,7 +79,7 @@
               />
             </div>
             <Transition name="dropdown-fade">
-              <MsDropdownMenu
+              <DMDropdownMenu
                 v-if="openMenuId === 'salary-calc' && !props.isCollapse"
                 :items="salaryCalcItems"
                 position="right-start"
@@ -95,7 +95,7 @@
             @mouseleave="openMenuId = null"
           >
             <div class="hvp dpl menu__item">
-              <MsButton
+              <DMButton
                 iconLeft="mi-sidebar-payment mg-r-8"
                 message="Chi trả"
                 iconRight="ms-icon-chevron-right mg-l-16 "
@@ -105,7 +105,7 @@
               />
             </div>
             <Transition name="dropdown-fade">
-              <MsDropdownMenu
+              <DMDropdownMenu
                 v-if="openMenuId === 'payment' && !props.isCollapse"
                 :items="paymentItems"
                 position="right-start"
@@ -116,19 +116,19 @@
 
           <!-- Báo cáo-->
           <router-link to="/demo" class="hvp dpl menu__item">
-            <MsButton
+            <DMButton
               iconLeft="mi-sidebar-report mg-r-8"
               message="Báo cáo"
               :isTooltip="false"
               :class="['align-left', { 'is-collapse': props.isCollapse }]"
               spreadIcon
             >
-            </MsButton>
+            </DMButton>
           </router-link>
         </div>
       </div>
       <div :class="[{ 'sb-bottom_hide': props.isCollapse }, 'sb-bottom']">
-        <MsButton
+        <DMButton
           iconLeft="mi-sidebar-collapse"
           :tooltipMessage="props.isCollapse ? 'Hiện sidebar' : 'Ẩn sidebar'"
           :class="['sb__btn_left hvp', { sb__btn_left_hide: props.isCollapse }]"
@@ -141,8 +141,8 @@
 </template>
 <script setup>
 import { ref } from "vue";
-import MsButton from "@/components/base/MsButton.vue";
-import MsDropdownMenu from "@/components/base/MsDropdownMenu.vue";
+import DMButton from "@/components/base/DMButton.vue";
+import DMDropdownMenu from "@/components/base/DMDropdownMenu.vue";
 
 //NOTICE: props + emit
 const props = defineProps(["isCollapse"]);
@@ -267,7 +267,7 @@ const toggleCollapse = () => {
    (wrapper chứa trigger + dropdown)
 ────────────────────────── */
 .menu__item-wrapper {
-  position: relative; /* positioning context cho MsDropdownMenu */
+  position: relative; /* positioning context cho DMDropdownMenu */
   width: 206px;
   border-radius: 6px;
 }
@@ -360,10 +360,10 @@ const toggleCollapse = () => {
 }
 
 /* ──────────────────────────
-   MsButton overrides (deep)
+   DMButton overrides (deep)
 ────────────────────────── */
 /* ──────────────────────────
-   MsButton overrides (deep)
+   DMButton overrides (deep)
 ────────────────────────── */
 :deep(.ms-button.align-left) {
   justify-content: flex-start !important;

@@ -3,7 +3,7 @@
     <div class="modal_alert_wrapper">
       <div class="modal_alert_wrap_head">
         <div class="modal_alert_title" v-if="props.title">{{ props.title }}</div>
-        <MsButton
+        <DMButton
           iconLeft="mi-close"
           :isTooltip="false"
           @click="emit('close')"
@@ -16,14 +16,14 @@
       </div>
     </div>
     <div v-if="props.showConfirmButton" class="modal_alert_action">
-        <MsButton
+        <DMButton
           :message="props.cancelText"
           :type="props.cancelType"
           :isTooltip="false"
           class="btn-alert-cancel sz-32 w-80"
           @click="emit('close')"
         />
-        <MsButton
+        <DMButton
           :message="props.confirmText"
           :type="props.confirmType"
           :isTooltip="false"
@@ -36,7 +36,7 @@
 </template>
 
 <script setup>
-import MsButton from "@/components/base/MsButton.vue";
+import DMButton from "@/components/base/DMButton.vue";
 
 /**
  * NOTICE: PROP + EMIT
@@ -70,7 +70,7 @@ const props = defineProps({
     type: String,
     default: "green",
   },
-  // disable nút confirm của MsAlert, ép user phải chọn 1 phương án trước khi xác nhận
+  // disable nút confirm của DMAlert, ép user phải chọn 1 phương án trước khi xác nhận
   confirmDisabled: {
     type: Boolean,
     default: false,
@@ -164,7 +164,7 @@ const emit = defineEmits(["close", "confirm"]);
 }
 
 
-/* Custom styles for MsButton within MsAlert */
+/* Custom styles for DMButton within DMAlert */
 .modal_alert_action :deep(.ms-button) {
   width: auto !important;
   height: 36px;

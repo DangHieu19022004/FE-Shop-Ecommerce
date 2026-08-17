@@ -46,3 +46,6 @@ dist/
 dist-check/
 dist-check-action/
 dist-check-sticky-actions/
+.vercel
+.env*
+!.env.example
