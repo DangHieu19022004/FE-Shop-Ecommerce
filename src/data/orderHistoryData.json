@@ -1,0 +1,34 @@
+{
+  "OrderStatuses": [
+    { "OrderStatusId": 1, "StatusCode": "PREPARING", "StatusName": "Đang chuẩn bị", "IconName": "inventory_2", "SortOrder": 1 },
+    { "OrderStatusId": 2, "StatusCode": "PREPARED", "StatusName": "Đã chuẩn bị xong", "IconName": "task_alt", "SortOrder": 2 },
+    { "OrderStatusId": 3, "StatusCode": "AWAITING_PICKUP", "StatusName": "Đang đợi ship nhận hàng", "IconName": "schedule", "SortOrder": 3 },
+    { "OrderStatusId": 4, "StatusCode": "SHIPPING", "StatusName": "Đang giao hàng", "IconName": "local_shipping", "SortOrder": 4 },
+    { "OrderStatusId": 5, "StatusCode": "DELIVERED", "StatusName": "Đã giao", "IconName": "package_2", "SortOrder": 5 },
+    { "OrderStatusId": 6, "StatusCode": "CANCELLED", "StatusName": "Đã hủy", "IconName": "cancel", "SortOrder": 6 }
+  ],
+  "Orders": [
+    { "OrderId": 1, "OrderCode": "DM26081701", "OrderStatusId": 4, "RecipientName": "Trần Đăng Hiếu", "Phone": "0901234567", "ShippingAddress": "Ký túc xá khu A, TP. Thủ Đức, TP. Hồ Chí Minh", "PaymentMethodName": "Thanh toán khi nhận hàng", "ShippingMethodName": "Giao hàng tiêu chuẩn", "ShippingFee": 25000, "DiscountAmount": 50000, "TotalAmount": 2074000, "EstimatedDeliveryDate": "2026-08-20", "CreatedAt": "2026-08-17T08:30:00.000Z" },
+    { "OrderId": 2, "OrderCode": "DM26081502", "OrderStatusId": 3, "RecipientName": "Trần Đăng Hiếu", "Phone": "0901234567", "ShippingAddress": "123 Nguyễn Trãi, Quận 1, TP. Hồ Chí Minh", "PaymentMethodName": "Chuyển khoản ngân hàng", "ShippingMethodName": "Giao hàng tiết kiệm", "ShippingFee": 15000, "DiscountAmount": 0, "TotalAmount": 196500, "EstimatedDeliveryDate": "2026-08-19", "CreatedAt": "2026-08-15T13:15:00.000Z" },
+    { "OrderId": 3, "OrderCode": "DM26081003", "OrderStatusId": 5, "RecipientName": "Trần Đăng Hiếu", "Phone": "0901234567", "ShippingAddress": "45 Điện Biên Phủ, Quận Bình Thạnh, TP. Hồ Chí Minh", "PaymentMethodName": "Ví điện tử", "ShippingMethodName": "Giao hàng hỏa tốc", "ShippingFee": 45000, "DiscountAmount": 25000, "TotalAmount": 864000, "EstimatedDeliveryDate": "2026-08-11", "CreatedAt": "2026-08-10T09:00:00.000Z" },
+    { "OrderId": 4, "OrderCode": "DM26080904", "OrderStatusId": 1, "RecipientName": "Trần Đăng Hiếu", "Phone": "0901234567", "ShippingAddress": "Ký túc xá khu A, TP. Thủ Đức, TP. Hồ Chí Minh", "PaymentMethodName": "Thanh toán khi nhận hàng", "ShippingMethodName": "Giao hàng tiêu chuẩn", "ShippingFee": 25000, "DiscountAmount": 0, "TotalAmount": 125000, "EstimatedDeliveryDate": "2026-08-21", "CreatedAt": "2026-08-17T15:00:00.000Z" }
+  ],
+  "OrderItems": [
+    { "OrderItemId": 1, "OrderId": 1, "ProductName": "Máy giặt mini X-1 dung tích 4.5kg", "VariantName": "Màu trắng", "ImageUrl": "https://images.unsplash.com/photo-1626806787461-102c1bfaaea1?auto=format&fit=crop&w=600&q=80", "UnitPrice": 1250000, "Quantity": 1 },
+    { "OrderItemId": 2, "OrderId": 1, "ProductName": "Đèn bàn LED LumiDesk tích hợp sạc không dây", "VariantName": "Xanh đậm", "ImageUrl": "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&w=600&q=80", "UnitPrice": 849000, "Quantity": 1 },
+    { "OrderItemId": 3, "OrderId": 2, "ProductName": "Bộ 5 sổ lò xo giấy dày khổ A5", "VariantName": "Mẫu ngẫu nhiên", "ImageUrl": "https://images.unsplash.com/photo-1517842645767-c639042777db?auto=format&fit=crop&w=600&q=80", "UnitPrice": 181500, "Quantity": 1 },
+    { "OrderItemId": 4, "OrderId": 3, "ProductName": "Đèn bàn LED LumiDesk tích hợp sạc không dây", "VariantName": "Màu trắng", "ImageUrl": "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&w=600&q=80", "UnitPrice": 844000, "Quantity": 1 },
+    { "OrderItemId": 5, "OrderId": 4, "ProductName": "Quạt USB để bàn phong cách vintage", "VariantName": "Màu xanh", "ImageUrl": "https://images.unsplash.com/photo-1519710164239-da123dc03ef4?auto=format&fit=crop&w=600&q=80", "UnitPrice": 100000, "Quantity": 1 }
+  ],
+  "OrderStatusHistories": [
+    { "OrderStatusHistoryId": 1, "OrderId": 1, "OrderStatusId": 1, "StatusNote": "Người bán đang chuẩn bị hàng", "UpdatedAt": "2026-08-17T08:35:00.000Z" },
+    { "OrderStatusHistoryId": 2, "OrderId": 1, "OrderStatusId": 2, "StatusNote": "Đơn hàng đã đóng gói xong", "UpdatedAt": "2026-08-17T11:20:00.000Z" },
+    { "OrderStatusHistoryId": 3, "OrderId": 1, "OrderStatusId": 3, "StatusNote": "Đang chờ đơn vị vận chuyển đến lấy hàng", "UpdatedAt": "2026-08-17T13:00:00.000Z" },
+    { "OrderStatusHistoryId": 4, "OrderId": 1, "OrderStatusId": 4, "StatusNote": "Đơn hàng đang được giao đến bạn", "UpdatedAt": "2026-08-18T07:45:00.000Z" },
+    { "OrderStatusHistoryId": 5, "OrderId": 2, "OrderStatusId": 1, "StatusNote": "Người bán đang chuẩn bị hàng", "UpdatedAt": "2026-08-15T13:20:00.000Z" },
+    { "OrderStatusHistoryId": 6, "OrderId": 2, "OrderStatusId": 2, "StatusNote": "Đơn hàng đã đóng gói xong", "UpdatedAt": "2026-08-16T09:15:00.000Z" },
+    { "OrderStatusHistoryId": 7, "OrderId": 2, "OrderStatusId": 3, "StatusNote": "Đang chờ shipper nhận hàng", "UpdatedAt": "2026-08-16T10:30:00.000Z" },
+    { "OrderStatusHistoryId": 8, "OrderId": 3, "OrderStatusId": 5, "StatusNote": "Giao hàng thành công", "UpdatedAt": "2026-08-11T16:40:00.000Z" },
+    { "OrderStatusHistoryId": 9, "OrderId": 4, "OrderStatusId": 1, "StatusNote": "Đơn hàng đã được xác nhận", "UpdatedAt": "2026-08-17T15:05:00.000Z" }
+  ]
+}
