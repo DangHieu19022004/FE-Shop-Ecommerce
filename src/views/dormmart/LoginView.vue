@@ -1,41 +1,81 @@
-<template>
-  <article class="dm-card dm-auth__card">
-    <div style="text-align: center; margin-bottom: 24px;">
-      <div style="width: 64px; height: 64px; border-radius: 14px; margin: 0 auto 14px; background: var(--dm-surface-soft); display: grid; place-items: center; font-size: 28px;">🛒</div>
-      <h1 style="font-size: 32px; margin-bottom: 8px;">Welcome Back</h1>
-      <p style="color: var(--dm-text-soft);">Sign in to access student-exclusive deals.</p>
-    </div>
+<script setup>
+import { inject, reactive, ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import DMButton from "@/components/base/DMButton.vue";
+import DMCheckbox from "@/components/base/DMCheckbox.vue";
+import DMInput from "@/components/base/DMInput.vue";
+import { loginUser } from "@/services/authService";
 
-    <form style="display: grid; gap: 14px;">
-      <div>
-        <label for="login-email" style="display: block; margin-bottom: 6px; font-weight: 600;">Email or Phone</label>
-        <input id="login-email" class="dm-field" placeholder="student@university.edu" readonly />
+const Text = inject("i18nCommon").Login;
+const Route = useRoute();
+const Router = useRouter();
+const LoginForm = reactive({ Account: "", Password: "", RememberMe: true });
+const FormErrors = reactive({ Account: "", Password: "", General: "" });
+const IsPasswordVisible = ref(false);
+const IsSubmitting = ref(false);
+
+const validateForm = () => {
+  FormErrors.Account = LoginForm.Account.trim() ? "" : Text.AccountRequired;
+  FormErrors.Password = LoginForm.Password ? "" : Text.PasswordRequired;
+  FormErrors.General = "";
+  return !FormErrors.Account && !FormErrors.Password;
+};
+
+const handleSubmit = async () => {
+  if (!validateForm()) return;
+  IsSubmitting.value = true;
+  const LoginResult = await loginUser(LoginForm);
+  IsSubmitting.value = false;
+
+  if (!LoginResult.IsSuccess) {
+    FormErrors.General = Text.InvalidCredentials;
+    return;
+  }
+
+  const RedirectPath = typeof Route.query.Redirect === "string" ? Route.query.Redirect : "/";
+  Router.push({ path: RedirectPath, query: { AuthMessage: Text.LoginSuccess } });
+};
+
+const togglePassword = () => {
+  IsPasswordVisible.value = !IsPasswordVisible.value;
+};
+</script>
+
+<template>
+  <article class="auth-card dm-card">
+    <header class="auth-card__header">
+      <span class="dm-brand-icon dm-brand-icon--app-icon" aria-hidden="true"></span>
+      <h1>{{ Text.Title }}</h1>
+      <p>{{ Text.Subtitle }}</p>
+    </header>
+
+    <form class="auth-form" novalidate @submit.prevent="handleSubmit">
+      <DMInput v-model="LoginForm.Account" class="auth-form__input" :label="Text.AccountLabel" :placeholder="Text.AccountPlaceholder" :error-messages="FormErrors.Account" :is-required="true" />
+      <div class="auth-form__password">
+        <DMInput v-model="LoginForm.Password" class="auth-form__input" :type="IsPasswordVisible ? 'text' : 'password'" :label="Text.PasswordLabel" :placeholder="Text.PasswordPlaceholder" :error-messages="FormErrors.Password" :is-required="true" :has-trailing-action="true" />
+        <DMButton type="none" :is-tooltip="false" class="auth-form__visibility" :aria-label="IsPasswordVisible ? Text.HidePassword : Text.ShowPassword" @click="togglePassword">
+          <span class="material-symbols-outlined" aria-hidden="true">{{ IsPasswordVisible ? "visibility_off" : "visibility" }}</span>
+        </DMButton>
       </div>
-      <div>
-        <label for="login-password" style="display: block; margin-bottom: 6px; font-weight: 600;">Password</label>
-        <input id="login-password" class="dm-field" type="password" placeholder="••••••••" readonly />
+
+      <p v-if="FormErrors.General" class="auth-form__message auth-form__message--error" role="alert">{{ FormErrors.General }}</p>
+
+      <div class="auth-form__options">
+        <DMCheckbox v-model="LoginForm.RememberMe" :label="Text.RememberMe" />
+        <router-link :to="{ name: 'forgotPassword' }">{{ Text.ForgotPassword }}</router-link>
       </div>
-      <div style="display: flex; justify-content: space-between; gap: 12px; color: var(--dm-text-soft); font-size: 14px;">
-        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-          <input type="checkbox" checked />
-          <span>Remember me</span>
-        </label>
-        <a href="#" style="color: var(--dm-primary);">Forgot password?</a>
-      </div>
-      <button type="button" class="dm-btn" style="width: 100%;">Sign In</button>
+
+      <DMButton native-type="submit" type="none" :is-tooltip="false" :message="Text.SubmitButton" class="auth-form__submit" :un-active="IsSubmitting" />
     </form>
 
-    <div style="display: flex; align-items: center; gap: 14px; margin: 20px 0; color: var(--dm-text-soft);">
-      <div style="height: 1px; background: var(--dm-border); flex: 1;"></div>
-      <span style="font-size: 12px; text-transform: uppercase; font-weight: 700;">or</span>
-      <div style="height: 1px; background: var(--dm-border); flex: 1;"></div>
-    </div>
+    <div class="auth-divider"><span>{{ Text.Divider }}</span></div>
+    <DMButton type="none" :is-tooltip="false" :message="Text.GoogleButton" class="auth-form__google" />
 
-    <button type="button" class="dm-btn-ghost" style="width: 100%; margin-bottom: 18px;">Continue with Google</button>
-
-    <p style="text-align: center; color: var(--dm-text-soft);">
-      New to Dorm Mart?
-      <router-link to="/register" style="color: var(--dm-primary); font-weight: 700;">Register now</router-link>
+    <p class="auth-card__switch">
+      {{ Text.NoAccount }}
+      <router-link :to="{ name: 'register' }">{{ Text.RegisterLink }}</router-link>
     </p>
   </article>
 </template>
+
+<style scoped src="@/assets/styles/screens/auth.css"></style>
