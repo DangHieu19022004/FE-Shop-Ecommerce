@@ -19,6 +19,9 @@
   --dm-danger: #ba1a1a;
   --dm-danger-soft: #ffdad6;
   --dm-success: #00bfa5;
+  --dm-success-soft: rgba(0, 191, 165, 0.1);
+  --dm-secondary-soft: rgba(255, 193, 7, 0.2);
+  --dm-overlay-soft: rgba(13, 43, 99, 0.04);
   --dm-on-primary: #ffffff;
 
   /* Reusable translucent colors */

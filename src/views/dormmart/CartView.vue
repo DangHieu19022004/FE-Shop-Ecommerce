@@ -64,7 +64,7 @@ const cartItems = [
           <strong style="font-size: 22px; color: var(--dm-danger);">đ 1,319,000</strong>
         </div>
       </div>
-      <button type="button" class="dm-btn" style="width: 100%; margin-bottom: 10px;">Proceed to Checkout</button>
+      <router-link :to="{ name: 'payment' }" class="dm-btn" style="display: flex; width: 100%; justify-content: center; margin-bottom: 10px;">Proceed to Checkout</router-link>
       <div class="dm-pill" style="width: 100%; justify-content: center; background: rgba(0, 191, 165, 0.08); color: var(--dm-success);">Free Shipping Extra</div>
     </aside>
   </section>
