@@ -1,162 +1,38 @@
-export const categories = [
-  { icon: "local_laundry_service", label: "Appliances", query: "appliances" },
-  { icon: "edit", label: "Stationery", query: "stationery" },
-  { icon: "devices", label: "Tech Gear", query: "tech" },
-  { icon: "bed", label: "Bedding", query: "bedding" },
-  { icon: "fastfood", label: "Snacks", query: "snacks" },
-  { icon: "chair", label: "Furniture", query: "furniture" },
-  { icon: "cleaning_services", label: "Cleaning", query: "cleaning" },
-  { icon: "sell", label: "Flash Sale", query: "flash-sale" },
-];
+import ProductDetailData from "@/data/productDetailData.json";
 
-export const products = [
-  {
-    slug: "mini-washing-machine-x1",
-    title: "Mini Washing Machine X-1 (4.5kg Capacity)",
-    category: "Appliances",
-    price: "đ 1,250,000",
-    oldPrice: "đ 1,780,000",
-    sold: "3.2k sold",
-    rating: "4.8 (124 reviews)",
-    location: "North Campus",
-    badge: "Mall",
-    stock: 45,
-    image: "https://images.unsplash.com/photo-1626806787461-102c1bfaaea1?auto=format&fit=crop&w=1200&q=80",
-    thumbs: [
-      "https://images.unsplash.com/photo-1626806787461-102c1bfaaea1?auto=format&fit=crop&w=600&q=80",
-      "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=600&q=80",
-      "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&w=600&q=80",
-    ],
-    description: "Compact washer cho phòng trọ, ký túc xá, ít tốn diện tích, có chế độ giặt nhanh và tiết kiệm nước.",
-  },
-  {
-    slug: "portable-ac",
-    title: "ArcticBreeze Compact Portable Air Conditioner",
-    category: "Appliances",
-    price: "$129.00",
-    oldPrice: "$159.00",
-    sold: "1.2k sold",
-    rating: "4.7 (88 reviews)",
-    location: "South Campus",
-    badge: "Mall",
-    stock: 18,
-    image: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=1200&q=80",
-    thumbs: [
-      "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=600&q=80",
-      "https://images.unsplash.com/photo-1519710164239-da123dc03ef4?auto=format&fit=crop&w=600&q=80",
-      "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=600&q=80",
-    ],
-    description: "Portable AC nhỏ gọn cho phòng nhỏ, làm mát nhanh, hợp dùng trong phòng trọ hoặc góc học tập cá nhân.",
-  },
-  {
-    slug: "lumidesk-led-lamp",
-    title: "LumiDesk LED Smart Lamp with Wireless Charging Base",
-    category: "Tech Gear",
-    price: "$34.50",
-    oldPrice: "$49.00",
-    sold: "850 sold",
-    rating: "4.9 (210 reviews)",
-    location: "West Hall",
-    badge: "Hot",
-    stock: 63,
-    image: "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&w=1200&q=80",
-    thumbs: [
-      "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&w=600&q=80",
-      "https://images.unsplash.com/photo-1517842645767-c639042777db?auto=format&fit=crop&w=600&q=80",
-      "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=600&q=80",
-    ],
-    description: "Đèn bàn LED có sạc không dây tích hợp, phù hợp góc học tập tối giản và cần thêm ánh sáng ổn định.",
-  },
-  {
-    slug: "premium-notebooks",
-    title: "Premium Thick Paper Spiral Notebooks Set of 5",
-    category: "Stationery",
-    price: "$15.99",
-    oldPrice: "$21.99",
-    sold: "3.5k sold",
-    rating: "4.6 (301 reviews)",
-    location: "North Campus",
-    badge: "Ad",
-    stock: 120,
-    image: "https://images.unsplash.com/photo-1517842645767-c639042777db?auto=format&fit=crop&w=1200&q=80",
-    thumbs: [
-      "https://images.unsplash.com/photo-1517842645767-c639042777db?auto=format&fit=crop&w=600&q=80",
-      "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&w=600&q=80",
-      "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=600&q=80",
-    ],
-    description: "Bộ sổ ghi chép giấy dày, dùng tốt cho học kỳ dài, ghi chú môn học và planner hằng ngày.",
-  },
-  {
-    slug: "rolling-cart-organizer",
-    title: "3-Tier Rolling Utility Cart Organizer",
-    category: "Furniture",
-    price: "$29.90",
-    oldPrice: "$39.00",
-    sold: "420 sold",
-    rating: "4.5 (74 reviews)",
-    location: "East Hall",
-    badge: "Free Ship",
-    stock: 32,
-    image: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=1200&q=80",
-    thumbs: [
-      "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=600&q=80",
-      "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=600&q=80",
-      "https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=600&q=80",
-    ],
-    description: "Xe đẩy 3 tầng giúp gom đồ học tập, mỹ phẩm, đồ vệ sinh trong không gian nhỏ.",
-  },
-  {
-    slug: "desk-fan-vintage",
-    title: "Vintage USB Desktop Fan - Silent Motor",
-    category: "Appliances",
-    price: "₫125k",
-    oldPrice: "₫169k",
-    sold: "3.1k sold",
-    rating: "4.4 (96 reviews)",
-    location: "Student Seller #449",
-    badge: "Used",
-    stock: 27,
-    image: "https://images.unsplash.com/photo-1519710164239-da123dc03ef4?auto=format&fit=crop&w=1200&q=80",
-    thumbs: [
-      "https://images.unsplash.com/photo-1519710164239-da123dc03ef4?auto=format&fit=crop&w=600&q=80",
-      "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=600&q=80",
-      "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=600&q=80",
-    ],
-    description: "Quạt USB để bàn chạy êm, hợp phòng học hoặc đầu giường, dùng nguồn USB tiện mang theo.",
-  },
-];
+const CurrencyFormatter = new Intl.NumberFormat("vi-VN", {
+  style: "currency",
+  currency: "VND",
+});
 
-export const flashProducts = [
-  {
-    slug: "portable-ac",
-    name: "Portable AC",
-    price: "$45.00",
-    sold: "85 SOLD",
-    discount: "25%",
-    image: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=800&q=80",
-  },
-  {
-    slug: "lumidesk-led-lamp",
-    name: "Study Lamp",
-    price: "$8.50",
-    sold: "40 SOLD",
-    discount: "50%",
-    image: "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&w=800&q=80",
-  },
-  {
-    slug: "rolling-cart-organizer",
-    name: "Storage Rack",
-    price: "$18.90",
-    sold: "FAST",
-    discount: "15%",
-    image: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=800&q=80",
-  },
-  {
-    slug: "desk-fan-vintage",
-    name: "Desk Fan",
-    price: "$55.00",
-    sold: "20 SOLD",
-    discount: "30%",
-    image: "https://images.unsplash.com/photo-1519710164239-da123dc03ef4?auto=format&fit=crop&w=800&q=80",
-  },
-];
+const getImageUrl = (ProductId) =>
+  ProductDetailData.ProductImages.find(
+    (ImageItem) => ImageItem.ProductId === ProductId && ImageItem.IsPrimary,
+  )?.ImageUrl ?? "";
+
+const formatPrice = (Amount) =>
+  Amount === null || Amount === undefined ? "Liên hệ" : CurrencyFormatter.format(Amount);
+
+export const Categories = ProductDetailData.Categories.map((CategoryItem) => ({
+  Icon: CategoryItem.CategoryCode === "CLEANING" ? "cleaning_services" : "home",
+  Label: CategoryItem.CategoryName,
+  Query: CategoryItem.CategoryCode,
+}));
+
+export const Products = ProductDetailData.Products.map((ProductItem) => ({
+  Slug: ProductItem.Slug,
+  Title: ProductItem.ProductName,
+  CategoryId: ProductItem.CategoryId,
+  Price: formatPrice(ProductItem.UnitPrice),
+  Sold: `${ProductItem.SoldQuantity} đã bán`,
+  Location: ProductItem.LocationName,
+  Badge: ProductItem.BadgeCode,
+  Stock: ProductItem.StockQuantity,
+  Image: getImageUrl(ProductItem.ProductId),
+}));
+
+export const FlashProducts = Products.slice(0, 4).map((ProductItem) => ({
+  ...ProductItem,
+  Name: ProductItem.Title,
+  Discount: "Mới",
+}));

@@ -15,10 +15,13 @@
   --dm-primary: var(--dm-brand-blue);
   --dm-primary-soft: #dae2ff;
   --dm-secondary: var(--dm-brand-yellow);
+  --dm-secondary-soft: rgba(255, 193, 7, 0.2);
   --dm-secondary-text: #6c5000;
   --dm-danger: #ba1a1a;
   --dm-danger-soft: #ffdad6;
   --dm-success: #00bfa5;
+  --dm-success-soft: rgba(0, 191, 165, 0.1);
+  --dm-rating: #d97706;
   --dm-on-primary: #ffffff;
 
   /* Reusable translucent colors */

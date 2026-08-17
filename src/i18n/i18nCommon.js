@@ -1,0 +1,32 @@
+const i18nCommon = {
+  ProductDetail: {
+    BreadcrumbHome: "Trang chủ",
+    BreadcrumbProducts: "Sản phẩm",
+    AuthenticBrand: "Thương hiệu chính hãng",
+    ReviewLabel: "đánh giá",
+    SoldLabel: "đã bán",
+    FlashDeal: "Ưu đãi trong ngày",
+    FreeShipping: "Miễn phí vận chuyển",
+    VariantLabel: "Phân loại",
+    QuantityLabel: "Số lượng",
+    AvailableSuffix: "sản phẩm có sẵn",
+    DecreaseQuantity: "Giảm số lượng",
+    IncreaseQuantity: "Tăng số lượng",
+    AddToCart: "Thêm vào giỏ",
+    BuyNow: "Mua ngay",
+    DescriptionTitle: "Mô tả sản phẩm",
+    FeatureTitle: "Đặc điểm nổi bật",
+    RelatedTitle: "Sản phẩm liên quan",
+    BackToCatalog: "Xem tất cả sản phẩm",
+    ProtectionTitle: "Bảo vệ & cam kết",
+    VideoLabel: "Video",
+    ProductNotFound: "Không tìm thấy sản phẩm",
+    ProductNotFoundDescription: "Sản phẩm bạn đang tìm kiếm không tồn tại hoặc đã ngừng bán.",
+    BackHome: "Quay về trang chủ",
+    CurrencyLocale: "vi-VN",
+    CurrencyCode: "VND",
+    ContactPrice: "Liên hệ",
+  },
+};
+
+export default i18nCommon;
