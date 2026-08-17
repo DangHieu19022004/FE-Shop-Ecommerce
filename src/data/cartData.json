@@ -1,0 +1,9 @@
+{
+  "CartItems": [
+    { "CartItemId": "CART-001", "ProductId": 1, "ProductVariantId": null, "Quantity": 1, "IsSelected": true, "AddedAt": "2026-08-17T00:00:00.000Z" },
+    { "CartItemId": "CART-002", "ProductId": 3, "ProductVariantId": null, "Quantity": 2, "IsSelected": true, "AddedAt": "2026-08-17T00:00:00.000Z" },
+    { "CartItemId": "CART-003", "ProductId": 7, "ProductVariantId": null, "Quantity": 1, "IsSelected": false, "AddedAt": "2026-08-17T00:00:00.000Z" }
+  ],
+  "ShippingFee": 15000,
+  "FreeShippingThreshold": 100000
+}

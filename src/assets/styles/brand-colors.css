@@ -1,0 +1,38 @@
+:root {
+  /* Dorm Mart brand palette */
+  --dm-brand-yellow: #ffc107;
+  --dm-brand-blue: #0d2b63;
+  --dm-brand-yellow-rgb: 255, 193, 7;
+  --dm-brand-blue-rgb: 13, 43, 99;
+
+  /* Semantic colors */
+  --dm-bg: #f8f9fa;
+  --dm-surface: #ffffff;
+  --dm-surface-soft: #f3f4f5;
+  --dm-border: #e8e8e8;
+  --dm-text: #191c1d;
+  --dm-text-soft: #434651;
+  --dm-primary: var(--dm-brand-blue);
+  --dm-primary-soft: #dae2ff;
+  --dm-secondary: var(--dm-brand-yellow);
+  --dm-secondary-soft: rgba(255, 193, 7, 0.2);
+  --dm-secondary-text: #6c5000;
+  --dm-danger: #ba1a1a;
+  --dm-danger-soft: #ffdad6;
+  --dm-success: #00bfa5;
+  --dm-success-soft: rgba(0, 191, 165, 0.1);
+  --dm-rating: #d97706;
+  --dm-on-primary: #ffffff;
+
+  /* Reusable translucent colors */
+  --dm-shadow-color: rgba(13, 43, 99, 0.08);
+  --dm-header-shadow-color: rgba(13, 43, 99, 0.16);
+  --dm-surface-90: rgba(255, 255, 255, 0.9);
+  --dm-surface-14: rgba(255, 255, 255, 0.14);
+  --dm-surface-12: rgba(255, 255, 255, 0.12);
+  --dm-bg-92: rgba(248, 249, 250, 0.92);
+  --dm-logo-edge: rgba(255, 255, 255, 0.92);
+  --dm-logo-shadow: rgba(13, 43, 99, 0.24);
+
+  --dm-shadow: 0 10px 28px var(--dm-shadow-color);
+}

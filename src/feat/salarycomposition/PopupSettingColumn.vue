@@ -3,7 +3,7 @@
     <!-- Header -->
     <div class="psc-header">
       <span class="psc-title">Tùy chỉnh cột</span>
-      <MsButton
+      <DMButton
         type="none"
         shapeBtn="square"
         iconLeft="mi-update"
@@ -47,13 +47,13 @@
             @dragend="onDragEnd"
           >
             <!-- Checkbox -->
-            <MsCheckbox
+            <DMCheckbox
               :modelValue="field.isVisible !== false"
               @update:modelValue="handleToggleField(field.key, $event)"
               class="psc-checkbox-custom"
             >
               <span class="psc-check-text" :title="field.label || field.key">{{ field.label || field.key }}</span>
-            </MsCheckbox>
+            </DMCheckbox>
 
             <!-- Drag handle -->
             <span
@@ -77,7 +77,7 @@
 
     <!-- Actions -->
     <div class="psc-actions">
-      <MsButton message="Lưu" type="green" @click="handleSave" :isTooltip="false" class="psc-btn psc-btn--save" />
+      <DMButton message="Lưu" type="green" @click="handleSave" :isTooltip="false" class="psc-btn psc-btn--save" />
     </div>
   </div>
 </template>
@@ -89,8 +89,8 @@
  * Hàm quan trọng: handleSave, handleReset, onDrop.
  * CREATED BY: TDHieu (08/06/2026)
  */
-import MsButton from "@/components/base/MsButton.vue";
-import MsCheckbox from "@/components/base/MsCheckbox.vue";
+import DMButton from "@/components/base/DMButton.vue";
+import DMCheckbox from "@/components/base/DMCheckbox.vue";
 import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue';
 
 // ─── Props & Emits ────────────────────────────────────────────────────────────

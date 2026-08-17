@@ -1,6 +1,6 @@
 <template>
   <!-- Nếu là Overlay -->
-  <MsOverlay v-if="isOverlay" class="overlay--system" @click="emit('close')" />
+  <DMOverlay v-if="isOverlay" class="overlay--system" @click="emit('close')" />
 
   <div :class="isOverlay ? 'modal_system' : 'content_bg'">
     <div :class="!isOverlay ? 'content' : 'modal_system_wrapper'">
@@ -9,7 +9,7 @@
       <div v-if="!isOverlay" class="content_header">
         <div>
           <div class="content_header_left_icon">
-            <MsButton
+            <DMButton
               iconLeft="mi-arrow-left"
               shapeBtn="circle"
               :isTooltip="false"
@@ -23,7 +23,7 @@
       <!-- Overlay Header -->
       <div v-if="isOverlay" class="modal_system_header">
         <div class="modal_system_title">Thêm từ danh mục của hệ thống</div>
-        <MsButton iconLeft="mi-close" :isTooltip="false" @click="emit('close')" shapeBtn="circle" class="btn-close" />
+        <DMButton iconLeft="mi-close" :isTooltip="false" @click="emit('close')" shapeBtn="circle" class="btn-close" />
       </div>
       <!-- page-area (normal) hoặc overlay-mode -->
       <div :class="isOverlay ? 'content_body_wrapper overlay-mode modal_system_body' : 'page-area'">
@@ -31,13 +31,13 @@
         <div class="content_body_header">
           <div class="content_body_header_left">
             <div class="content_body_search">
-              <MsButton
+              <DMButton
                 iconLeft="mi-search"
                 tooltipMessage="Tìm kiếm"
                 unActive
                 tooltipPosition="bottom"
               />
-              <MsInput
+              <DMInput
                 placeholder="Tìm kiếm"
                 class="content_body_search-input"
                 v-model="searchKeyword"
@@ -48,13 +48,13 @@
             <div v-if="!isOverlay && selectedIds.length > 0" class="checkbox_function">
               <p class="fz-14 m-r-8">Đã chọn</p>
               <b class="fz-14">{{ selectedIds.length }}</b>
-              <MsButton
+              <DMButton
                 message="Bỏ chọn"
                 class="m-r-8 color-green fz-14 no-background"
                 :isTooltip="false"
                 @click="selectedIds = []"
               />
-              <MsButton
+              <DMButton
                 :isTooltip="false"
                 message="Đưa vào danh sách sử dụng"
                 iconLeft="mi-plus-primary"
@@ -65,7 +65,7 @@
             </div>
 
             <div v-else class="content_body_status">
-              <MsButton
+              <DMButton
                 :isTooltip="false"
                 iconRight="mi-chevron-down mg-l-8"
                 class="status-trigger"
@@ -74,9 +74,9 @@
               >
                 <span class="status-label">Loại thành phần:</span>
                 <span class="status-value">{{ selectedTypeLabel }}</span>
-              </MsButton>
+              </DMButton>
               <Transition name="status-dropdown">
-                <MsDropdownMenu
+                <DMDropdownMenu
                   v-if="statusMenuOpen"
                   :items="typeItems"
                   v-model="selectedType"
@@ -91,7 +91,7 @@
 
           <!-- Header right: chỉ hiện khi không phải overlay -->
           <div v-if="!isOverlay" class="content_body_header_right">
-            <MsButton
+            <DMButton
               iconLeft="mi-filter"
               tooltipMessage="Bộ lọc"
               shapeBtn="square"
@@ -101,7 +101,7 @@
               @click="isOpenFilter = !isOpenFilter"
             />
             <div class="setting-btn-wrapper" @click.stop>
-              <MsButton
+              <DMButton
                 iconLeft="mi-setting"
                 tooltipMessage="Thiết lập"
                 shapeBtn="square"
@@ -123,12 +123,12 @@
         <div :class="['content_body', isOverlay ? 'overlay-content_body' : '']">
           <div class="content_body_table">
             <!-- Trạng thái đang tải -->
-            <MsLoader v-if="isLoading" text="Đang tải dữ liệu..." class="table-state table-state--loading" />
+            <DMLoader v-if="isLoading" text="Đang tải dữ liệu..." class="table-state table-state--loading" />
 
             <!-- Trạng thái lỗi -->
             <div v-else-if="errorMessage" class="table-state table-state--error">
               <span>{{ errorMessage }}</span>
-              <MsButton
+              <DMButton
                 message="Thử lại"
                 :isTooltip="false"
                 type="border-secondary"
@@ -138,7 +138,7 @@
             </div>
 
             <!-- Bảng dữ liệu -->
-            <MsTable
+            <DMTable
               v-else
               :fields="visibleFields"
               :data-rows="salaryCompositions"
@@ -208,7 +208,7 @@
               <!-- Cột status đã ẩn theo yêu cầu (Req 3) -->
               <template #cell-actions="{ row }">
                 <div class="btn__action">
-                  <MsButton
+                  <DMButton
                     iconLeft="mi-plus-primary"
                     type="border-none"
                     shapeBtn="square"
@@ -219,7 +219,7 @@
                   />
                 </div>
               </template>
-            </MsTable>
+            </DMTable>
           </div>
         </div>
         <div class="content_body_footer">
@@ -229,7 +229,7 @@
           <div class="footer-right">
             <span>Số dòng/trang</span>
             <div class="page-size hvp">
-              <MsSelect
+              <DMSelect
                 v-model="pageSize"
                 :data="pageSizeOptions"
                 :allow-empty="false"
@@ -267,8 +267,8 @@
 
       <!-- Overlay Footer -->
       <div v-if="isOverlay" class="modal_system_footer">
-        <MsButton message="Hủy bỏ" type="border-secondary" class="w-80 h-32 fz-13" @click="emit('close')" />
-        <MsButton message="Đồng ý" type="green" class="w-80 h-32 fz-13" :disabled="selectedIds.length === 0 || isSaving" @click="handleConfirm" />
+        <DMButton message="Hủy bỏ" type="border-secondary" class="w-80 h-32 fz-13" @click="emit('close')" />
+        <DMButton message="Đồng ý" type="green" class="w-80 h-32 fz-13" :disabled="selectedIds.length === 0 || isSaving" @click="handleConfirm" />
       </div>
 
     </div>
@@ -277,7 +277,7 @@
 
 
   <!-- Toast container -->
-  <MsToastContainer :toasts="toasts" @close="removeToast" />
+  <DMToastContainer :toasts="toasts" @close="removeToast" />
 </template>
 <script setup>
 /**
@@ -286,18 +286,18 @@
  * Hàm quan trọng: fetchData, handleConfirm, loadGridConfig, initGridConfig.
  * CREATED BY: TDHieu (08/06/2026)
  */
-import MsButton from "@/components/base/MsButton.vue";
-import MsInput from "@/components/base/MsInput.vue";
-import MsTable from "@/components/base/MsTable/MsTable.vue";
-import MsSelect from "@/components/base/MsSelect.vue";
-import MsDropdownMenu from "@/components/base/MsDropdownMenu.vue";
-import MsAlert from "@/components/overlay/MsAlert.vue";
-import MsOverlay from "@/components/overlay/MsOverlay.vue";
-import MsToastContainer from "@/components/overlay/MsToast/MsToastContainer.vue";
+import DMButton from "@/components/base/DMButton.vue";
+import DMInput from "@/components/base/DMInput.vue";
+import DMTable from "@/components/base/DMTable/DMTable.vue";
+import DMSelect from "@/components/base/DMSelect.vue";
+import DMDropdownMenu from "@/components/base/DMDropdownMenu.vue";
+import DMAlert from "@/components/overlay/DMAlert.vue";
+import DMOverlay from "@/components/overlay/DMOverlay.vue";
+import DMToastContainer from "@/components/overlay/DMToast/DMToastContainer.vue";
 import PopupSettingColumn from "@/feat/salarycomposition/PopupSettingColumn.vue";
 import FilterSalaryComposition from "@/feat/salarycomposition/FilterSalaryComposition.vue";
-import FormulaCell from "@/components/base/MsFormula/FormulaCell.vue";
-import MsLoader from "@/components/base/MsLoader.vue";
+import FormulaCell from "@/components/base/DMFormula/FormulaCell.vue";
+import DMLoader from "@/components/base/DMLoader.vue";
 import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 
@@ -849,7 +849,7 @@ const configurableFields = computed(() =>
   fields.value.filter((f) => !f.isSystemCol)
 );
 
-// Tất cả cột visible (bao gồm cột hệ thống) – truyền vào MsTable
+// Tất cả cột visible (bao gồm cột hệ thống) – truyền vào DMTable
 const visibleFields = computed(() => {
   let filtered = fields.value.filter((f) => f.isSystemCol || f.isVisible !== false);
   // Nếu là overlay, ẩn đi cột actions (thao tác từng dòng)

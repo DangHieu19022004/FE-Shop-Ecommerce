@@ -1,4 +1,11 @@
 import axios from "axios";
+import {
+  ApiTimeoutMs,
+  FallbackApiBaseUrl,
+  PrimaryApiBaseUrl,
+} from "@/config/apiConfig";
+
+const RetryableStatusCodes = [502, 503, 504];
 
 /**
  * Khởi tạo instance axios và cấu hình các interceptor.
@@ -8,8 +15,8 @@ import axios from "axios";
  * CREATED BY: TDHieu (09/06/2026)
  */
 const axiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || "https://localhost:7173/api",
-  // timeout: 15000, // 15 giây
+  baseURL: PrimaryApiBaseUrl,
+  timeout: ApiTimeoutMs,
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",
@@ -77,9 +84,29 @@ axiosInstance.interceptors.response.use(
    *
    * CREATED BY: TDHieu (09/06/2026)
    */
-  (error) => {
+  async (error) => {
     // Lấy status code nếu có, mặc định 0 nếu lỗi không có response (network error)
     const status = error.response?.status;
+    const RequestConfig = error.config;
+    const ShouldUseFallback =
+      RequestConfig &&
+      !RequestConfig.HasRetriedWithFallback &&
+      RequestConfig.baseURL !== FallbackApiBaseUrl &&
+      (!error.response || RetryableStatusCodes.includes(status));
+
+    if (ShouldUseFallback) {
+      const FallbackRequestConfig = {
+        ...RequestConfig,
+        baseURL: FallbackApiBaseUrl,
+        HasRetriedWithFallback: true,
+      };
+
+      console.warn(
+        `[API] Không kết nối được ${RequestConfig.baseURL}. Chuyển sang ${FallbackApiBaseUrl}`,
+      );
+
+      return axiosInstance(FallbackRequestConfig);
+    }
 
     // Xử lý lỗi 401 Unauthorized: thường do token hết hạn hoặc không hợp lệ
     if (status === 401) {

@@ -24,7 +24,7 @@ export const SalaryCompositionNatureLabel = {
 };
 
 /**
- * Options dùng cho MsSelect / MsRadio
+ * Options dùng cho DMSelect / DMRadio
  */
 export const SalaryCompositionNatureOptions = [
   { value: SalaryCompositionNature.Income, label: "Thu nhập" },

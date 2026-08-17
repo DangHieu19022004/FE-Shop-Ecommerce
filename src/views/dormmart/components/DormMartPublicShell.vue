@@ -14,9 +14,8 @@
       </div>
 
       <div class="dm-public-header__main">
-        <router-link to="/" class="dm-brand">
-          <div class="dm-brand__logo">🛒</div>
-          <div class="dm-brand__name">Dorm Mart</div>
+        <router-link to="/" class="dm-brand" aria-label="Dorm Mart - Trang chủ">
+          <span class="dm-brand-icon dm-brand-icon--horizontal-logo" aria-hidden="true"></span>
         </router-link>
 
         <label class="dm-search">
@@ -26,9 +25,9 @@
         </label>
 
         <div class="dm-public-actions">
-          <router-link class="dm-icon-btn" to="/cart" aria-label="Cart">
+          <router-link class="dm-icon-btn dm-cart-button" to="/cart" :aria-label="Text.CartLabel">
             <span class="material-symbols-outlined">shopping_cart</span>
-            <span class="dm-badge-dot">3</span>
+            <span v-if="CartTotalQuantity" class="dm-badge-dot">{{ CartTotalQuantity }}</span>
           </router-link>
           <router-link class="dm-icon-btn" to="/login" aria-label="Account">
             <span class="material-symbols-outlined">person</span>
@@ -80,6 +79,11 @@
 </template>
 
 <script setup>
+import { inject } from "vue";
+import { CartTotalQuantity } from "@/stores/cartStore";
+
+const Text = inject("i18nCommon").Common;
+
 defineProps({
   searchValue: {
     type: String,
