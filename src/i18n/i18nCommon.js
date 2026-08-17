@@ -62,6 +62,18 @@ const i18nCommon = {
     InvalidEmail: "Email không đúng định dạng.",
     SuccessMessage: "Yêu cầu đã được ghi nhận. Tính năng gửi email sẽ hoạt động khi kết nối API.",
   },
+  Profile: {
+    PageTitle: "Thông tin cá nhân",
+    PageSubtitle: "Quản lý tài khoản Dorm Mart của bạn.",
+    AccountSectionTitle: "Tài khoản của tôi",
+    FullNameLabel: "Họ và tên",
+    EmailLabel: "Email",
+    PhoneLabel: "Số điện thoại",
+    EmptyValue: "Chưa cập nhật",
+    ComingSoonTitle: "Các tính năng khác đang được hoàn thiện",
+    ComingSoonDescription: "Chỉnh sửa hồ sơ, đổi mật khẩu và cài đặt tài khoản sẽ được bổ sung sau.",
+    LogoutButton: "Đăng xuất",
+  },
 };
 
 export default i18nCommon;

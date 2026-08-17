@@ -29,7 +29,7 @@
             <span class="material-symbols-outlined">shopping_cart</span>
             <span class="dm-badge-dot">3</span>
           </router-link>
-          <router-link class="dm-icon-btn" to="/login" aria-label="Account">
+          <router-link class="dm-icon-btn" to="/profile" aria-label="Account">
             <span class="material-symbols-outlined">person</span>
           </router-link>
         </div>

@@ -58,10 +58,31 @@ export const loginUser = async (LoginPayload) => {
     UserId: User.UserId,
     FullName: User.FullName,
     Email: User.Email,
+    Phone: User.Phone,
     RoleId: User.RoleId,
     CreatedAt: new Date().toISOString(),
   };
   const Storage = LoginPayload.RememberMe ? localStorage : sessionStorage;
   Storage.setItem(SESSION_STORAGE_KEY, JSON.stringify(SessionData));
   return { IsSuccess: true, SessionData };
+};
+
+export const getCurrentSession = () => {
+  const StoredSession = localStorage.getItem(SESSION_STORAGE_KEY) || sessionStorage.getItem(SESSION_STORAGE_KEY);
+  if (!StoredSession) return null;
+
+  try {
+    const SessionData = JSON.parse(StoredSession);
+    const User = getStoredUsers().find((UserItem) => UserItem.UserId === SessionData.UserId);
+    return User
+      ? { ...SessionData, FullName: User.FullName, Email: User.Email, Phone: User.Phone }
+      : SessionData;
+  } catch {
+    return null;
+  }
+};
+
+export const logoutUser = () => {
+  localStorage.removeItem(SESSION_STORAGE_KEY);
+  sessionStorage.removeItem(SESSION_STORAGE_KEY);
 };
