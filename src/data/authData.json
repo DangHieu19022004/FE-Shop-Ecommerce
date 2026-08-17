@@ -1,0 +1,7 @@
+{
+  "Users": [],
+  "Roles": [
+    { "RoleId": 1, "RoleCode": "CUSTOMER", "RoleName": "Khách hàng" },
+    { "RoleId": 2, "RoleCode": "ADMIN", "RoleName": "Quản trị viên" }
+  ]
+}

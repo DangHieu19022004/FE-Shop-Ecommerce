@@ -4,7 +4,7 @@
       <div class="content_header">
         <div>
           <div class="content_header_left_icon">
-            <MsButton
+            <DMButton
               iconLeft="mi-arrow-left"
               shapeBtn="circle"
               @click="handleCloseForm"
@@ -21,7 +21,7 @@
           </div>
         </div>
         <div class="content_header_right" v-if="isEditMode || isViewMode">
-          <MsButton
+          <DMButton
             v-if="isEditMode"
             message="Hủy bỏ"
             class="border-gray fz-14 bg-white w-80 h-32"
@@ -30,7 +30,7 @@
             :isTooltip="false"
           />
           <template v-if="isEditMode">
-            <MsButton
+            <DMButton
               message="Lưu"
               type="green"
               class="fz-14 w-80 h-32"
@@ -41,7 +41,7 @@
             />
           </template>
           <template v-else-if="isViewMode && !formData.salaryCompositionSystemId">
-            <MsButton
+            <DMButton
               message="Sửa"
               type="none"
               iconLeft="mi-pencil"
@@ -52,13 +52,13 @@
             />
           </template>
           <div class="header_dropdown_wrapper" ref="actionDropdownRef" style="position: relative; display: inline-block;">
-            <MsButton
+            <DMButton
               iconLeft="mi-threedot"
               class="border-gray bg-white pd-10"
               @click.stop="toggleActionDropdown"
               :isTooltip="false"
             />
-            <MsDropdownMenu
+            <DMDropdownMenu
               v-if="showActionDropdown"
               :items="dropdownItems"
               position="bottom-end"
@@ -74,7 +74,7 @@
         >
           <!-- Tên thành phần -->
           <div class="form-field">
-            <MsInput
+            <DMInput
               ref="salaryCompositionNameRef"
               type="text"
               id="input_name_salary"
@@ -103,7 +103,7 @@
 
           <!-- Mã thành phần -->
           <div class="form-field">
-            <MsInput
+            <DMInput
               ref="salaryCompositionCodeRef"
               type="text"
               id="input_code_salary"
@@ -132,7 +132,7 @@
 
           <!-- Đơn vị áp dụng -->
           <div class="form-field">
-            <MsTreeSelect
+            <DMTreeSelect
               label="Đơn vị áp dụng"
               horizontal
               placeholder="Chọn đơn vị..."
@@ -144,7 +144,7 @@
 
           <!-- Loại thành phần -->
           <div class="form-field">
-            <MsSelect
+            <DMSelect
               ref="compositionTypeRef"
               :data="categoryOptions"
               label-text="Loại thành phần"
@@ -173,7 +173,7 @@
           <!-- Tính chất + Thuế -->
           <div class="form-field">
             <div class="type_salary_wrapper">
-              <MsSelect
+              <DMSelect
                 ref="compositionNatureRef"
                 :data="SalaryCompositionNatureOptions"
                 labelText="Tính chất"
@@ -196,7 +196,7 @@
                 "
                 class="type_salary"
               >
-                <MsRadio
+                <DMRadio
                   v-if="
                     formData.compositionNature ===
                     SalaryCompositionNature.Income
@@ -207,7 +207,7 @@
                   class="fz-14"
                   horizontalInput
                 />
-                <MsCheckbox
+                <DMCheckbox
                   v-if="
                     formData.compositionNature ===
                     SalaryCompositionNature.Deduction
@@ -231,7 +231,7 @@
             v-if="formData.compositionNature !== SalaryCompositionNature.Other"
             class="form-field"
           >
-            <MsFormula
+            <DMFormula
               ref="quotaRef"
               id="input_limit_salary"
               label="Định mức"
@@ -250,11 +250,11 @@
             v-if="formData.compositionNature !== SalaryCompositionNature.Other"
             class="is-over-limit"
           >
-            <MsCheckbox
+            <DMCheckbox
               v-model="isOverLimit"
               label="Cho phép giá trị tính vượt qua định mức"
             />
-            <MsButton
+            <DMButton
               iconLeft="mi-circle-info"
               tooltipPosition="bottom"
               tooltipMessage="Nếu không tích chọn thì khi tính giá trị thành phần lương này mà vượt quá định mức thì hệ thống sẽ tự lấy tối đa bằng định mức đã nhập"
@@ -264,7 +264,7 @@
 
           <!-- Kiểu giá trị -->
           <div class="form-field">
-            <MsSelect
+            <DMSelect
               labelText="Kiểu giá trị"
               v-model="formData.valueType"
               :data="SalaryCompositionValueTypeOptions"
@@ -286,7 +286,7 @@
             "
             class="form-field"
           >
-            <MsRadio
+            <DMRadio
               v-model="selectedOptionsValue"
               name="options-value"
               :options="optionsValue"
@@ -305,7 +305,7 @@
             class="form-field"
           >
             <div class="value-select-row">
-              <MsSelect
+              <DMSelect
                 class="fz-14 is-over-limit"
                 :width="315"
                 v-model="selectedOptionsValueCombobox"
@@ -330,15 +330,15 @@
                     ></i>
                   </span>
                 </template>
-              </MsSelect>
-              <MsSelect
+              </DMSelect>
+              <DMSelect
                 v-if="selectedOptionsValueCombobox === 'option3'"
                 v-model="selectedLevel"
                 :data="levelOptions"
                 class="fz-14 w-120"
                 style="margin-right: 8px; width: 120px;"
               />
-              <MsSelect
+              <DMSelect
                 v-if="selectedOptionsValue !== optionsValue[1].value"
                 v-model="selectedSalaryCoposition"
                 :data="formulaParameters"
@@ -365,7 +365,7 @@
               { 'formula-field--with-label': hasFormulaLabel },
             ]"
           >
-            <MsFormula
+            <DMFormula
               ref="formulaRef"
               id="input_value_salary"
               :class="[
@@ -390,7 +390,7 @@
               @blur="markTouched('formula')"
               @focus="unMarkTouched('formula')"
             />
-            <MsButton
+            <DMButton
               iconLeft="mi-agent-box"
               :isTooltip="false"
               :message="isHoverAgent ? 'Tạo công thức với AVA Tiền lương' : ''"
@@ -416,7 +416,7 @@
 
           <!-- Hiển thị trên phiếu lương -->
           <div class="form-field">
-            <MsRadio
+            <DMRadio
               v-model="formData.optionShowPaycheck"
               name="options-display"
               :options="SalaryCompositionShowPaycheckOptions"
@@ -430,7 +430,7 @@
 
           <!-- Nguồn tạo -->
           <div class="form-field">
-            <MsInput
+            <DMInput
               type="text"
               id="input_source"
               label="Nguồn tạo"
@@ -447,14 +447,14 @@
         </div>
         <div class="content_body_footer" v-if="!isEditMode && !isViewMode">
           <div class="footer-right">
-            <MsButton
+            <DMButton
               message="Hủy bỏ"
               :isTooltip="false"
               class="border-gray fz-14"
               @click="handleCloseForm"
             />
             <template v-if="!isViewMode">
-              <MsButton
+              <DMButton
                 message="Lưu và thêm"
                 :isTooltip="false"
                 class="fz-14"
@@ -462,7 +462,7 @@
                 @click="handleSubmitAndAdd"
                 :disabled="isSubmitting"
               />
-              <MsButton
+              <DMButton
                 message="Lưu"
                 :isTooltip="false"
                 class="fz-14"
@@ -478,18 +478,18 @@
   </div>
 
   <!-- Toast -->
-  <MsToastContainer :toasts="toasts" @close="removeToast" />
+  <DMToastContainer :toasts="toasts" @close="removeToast" />
 </template>
 <script setup>
-import MsButton from "@/components/base/MsButton.vue";
-import MsInput from "@/components/base/MsInput.vue";
-import MsTreeSelect from "@/components/base/MsTreeSelect/MsTreeSelect.vue";
-import MsSelect from "@/components/base/MsSelect.vue";
-import MsRadio from "@/components/base/MsRadio.vue";
-import MsCheckbox from "@/components/base/MsCheckbox.vue";
-import MsFormula from "@/components/base/MsFormula/MsFormula.vue";
-import MsDropdownMenu from "@/components/base/MsDropdownMenu.vue";
-import MsToastContainer from "@/components/overlay/MsToast/MsToastContainer.vue";
+import DMButton from "@/components/base/DMButton.vue";
+import DMInput from "@/components/base/DMInput.vue";
+import DMTreeSelect from "@/components/base/DMTreeSelect/DMTreeSelect.vue";
+import DMSelect from "@/components/base/DMSelect.vue";
+import DMRadio from "@/components/base/DMRadio.vue";
+import DMCheckbox from "@/components/base/DMCheckbox.vue";
+import DMFormula from "@/components/base/DMFormula/DMFormula.vue";
+import DMDropdownMenu from "@/components/base/DMDropdownMenu.vue";
+import DMToastContainer from "@/components/overlay/DMToast/DMToastContainer.vue";
 import { computed, nextTick, onMounted, ref, watch, onUnmounted } from "vue";
 import salaryCompositionApi from "@/services/salaryCompositionService";
 import salaryCompositionSystemApi from "@/services/salaryCompositionSystemService";
@@ -690,9 +690,9 @@ async function fetchOrgTree() {
   try {
     // Gọi API để lấy dữ liệu cây đơn vị
     const result = await organizationApi.getTree();
-    // Nếu gọi API thành công và có dữ liệu trả về, thì map dữ liệu về format của MsTreeSelect
+    // Nếu gọi API thành công và có dữ liệu trả về, thì map dữ liệu về format của DMTreeSelect
     if (result.isSuccess && result.data) {
-      // Lưu dữ liệu cây đơn vị đã map vào ref để dùng cho MsTreeSelect
+      // Lưu dữ liệu cây đơn vị đã map vào ref để dùng cho DMTreeSelect
       orgTreeData.value = mapOrgTree(result.data);
       // Tự chọn tất cả org đầu tiên khi thêm mới
       if (!props.editId && !props.viewId && orgTreeData.value.length > 0) {
@@ -715,7 +715,7 @@ async function fetchOrgTree() {
 }
 
 /**
- * Đổi format dữ liệu cây đơn vị để tương thích với MsTreeSelect
+ * Đổi format dữ liệu cây đơn vị để tương thích với DMTreeSelect
  *
  * Sử dụng khi: Có dữ liệu trả về từ API getTree
  *
@@ -784,7 +784,7 @@ function restoreSelectedOrgs(data) {
   }
   // Trường hợp 2: backend trả về chuỗi organizationId (single guid)
   if (data.organizationId && typeof data.organizationId === "string") {
-    // Chuẩn hóa về cùng format mảng để đồng nhất với v-model của MsTreeSelect.
+    // Chuẩn hóa về cùng format mảng để đồng nhất với v-model của DMTreeSelect.
     selectedOrgs.value = [data.organizationId];
     return;
   }
@@ -877,7 +877,7 @@ async function fetchFormulaParameters() {
     // Gọi API để lấy tất cả thành phần lương
     const result = await salaryCompositionApi.getAll();
     if (result.isSuccess && Array.isArray(result.data)) {
-      // Map dữ liệu thành format { name, code, description } để dùng cho MsFormula
+      // Map dữ liệu thành format { name, code, description } để dùng cho DMFormula
       formulaParameters.value = result.data.map((item) => ({
         name: item.salaryCompositionName || "",
         code: item.salaryCompositionCode || "",
@@ -971,7 +971,7 @@ async function loadData(id, isDuplicate = false) {
       if (data.taxable) selectedTax.value = data.taxable;
       // Restore isDeductedTax từ taxDeduction enum
       isDeductedTax.value = data.taxDeduction === SalaryCompositionTaxDeduction.Yes;
-      // Restore đơn vị áp dụng vào MsTreeSelect
+      // Restore đơn vị áp dụng vào DMTreeSelect
       restoreSelectedOrgs(data);
     }
   } catch (err) {
@@ -984,7 +984,7 @@ async function loadData(id, isDuplicate = false) {
 // ── Validation ───────────────────────────────────────────────
 // touchedFields để track xem trường nào đã được tương tác (blur) để hiển thị lỗi
 const touchedFields = ref({});
-// customErrorMessages để lưu lỗi tùy chỉnh từ validate của MsFormula
+// customErrorMessages để lưu lỗi tùy chỉnh từ validate của DMFormula
 const customErrorMessages = ref({});
 
 //FUNCTION:
@@ -1125,7 +1125,7 @@ const focusFirstErrorField = async () => {
   touchedFields.value[firstErrorField] = true;
 };
 
-// Hàm set lỗi tùy chỉnh từ validate của MsFormula, nhận field và message lỗi
+// Hàm set lỗi tùy chỉnh từ validate của DMFormula, nhận field và message lỗi
 const setCustomError = (field, message) => {
   customErrorMessages.value[field] = message;
   validateField(field);
@@ -1267,8 +1267,8 @@ async function handleSystemDuplicateSelection(selectedOption, andAdd) {
 
     await handleSubmitSuccess(result, andAdd);
   } catch (err) {
-    const errMsg = err.data?.userMessage || err.message || "Có lỗi xảy ra, vui lòng thử lại";
-    addToast(errMsg, "error");
+    const errDMg = err.data?.userMessage || err.message || "Có lỗi xảy ra, vui lòng thử lại";
+    addToast(errDMg, "error");
   } finally {
     isSubmitting.value = false;
   }
@@ -1276,10 +1276,10 @@ async function handleSystemDuplicateSelection(selectedOption, andAdd) {
 
 async function handleSubmitSuccess(result, andAdd) {
   if (!result?.isSuccess) {
-    const errMsg = result?.data || "Có lỗi xảy ra, vui lòng thử lại";
+    const errDMg = result?.data || "Có lỗi xảy ra, vui lòng thử lại";
     emit("openAlert", {
       title: "Lưu không thành công",
-      message: errMsg,
+      message: errDMg,
       showConfirmButton: false,
       cancelText: "Đóng",
     });
@@ -1395,8 +1395,8 @@ async function submitForm(andAdd = false) {
       return;
     }
 
-    const errMsg = err.data?.userMessage || "Có lỗi xảy ra, vui lòng thử lại";
-    addToast(errMsg, "error");
+    const errDMg = err.data?.userMessage || "Có lỗi xảy ra, vui lòng thử lại";
+    addToast(errDMg, "error");
   } finally {
     isSubmitting.value = false;
   }
@@ -1544,7 +1544,7 @@ function toCompositionCode(name) {
 }
 
 onMounted(async () => {
-  // Load dữ liệu cây đơn vị để hiển thị trong MsTreeSelect
+  // Load dữ liệu cây đơn vị để hiển thị trong DMTreeSelect
   await fetchOrgTree();
   // Load danh sách tham số cho popup công thức
   fetchFormulaParameters();

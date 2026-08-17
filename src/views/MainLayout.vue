@@ -1,11 +1,11 @@
 <template lang="">
   <div class="layout">
     <!-- Thanh điều hướng trên cùng -->
-    <MsNavBar/>
+    <DMNavBar/>
 
     <main class="container">
       <!-- Thanh sidebar bên trái -->
-      <MsSideBar v-model:isCollapse="isCollapse" />
+      <DMSideBar v-model:isCollapse="isCollapse" />
 
        <!-- Khu vực nội dung chính, nơi các component con sẽ được hiển thị. VD: Thành phần lương, Thành phần lương hệ thống -->
       <router-view v-slot="{ Component }">
@@ -22,15 +22,15 @@
       </router-view>
 
       <!-- Overlay dùng chung cho toàn layout -->
-      <MsOverlay v-if="isShowForm" @click="handleCloseForm" />
-      <MsOverlay
+      <DMOverlay v-if="isShowForm" @click="handleCloseForm" />
+      <DMOverlay
         v-if="alertState.isShow"
         class="overlay--alert"
         @click="closeAlert"
       />
 
       <!-- Component Alert dùng chung cho toàn layout -->
-      <MsAlert
+      <DMAlert
         v-if="alertState.isShow"
         :title="alertState.title"
         :message="alertState.message"
@@ -62,19 +62,19 @@
             </div>
           </div>
         </template>
-      </MsAlert>
+      </DMAlert>
 
       <!-- Container hiển thị toast -->
-      <MsToastContainer :toasts="toasts" @close="removeToast" />
+      <DMToastContainer :toasts="toasts" @close="removeToast" />
     </main>
   </div>
 </template>
 <script setup>
-import MsOverlay from "@/components/overlay/MsOverlay.vue";
-import MsAlert from "@/components/overlay/MsAlert.vue";
-import MsNavBar from "@/layouts/MsNavBar.vue";
-import MsSideBar from "@/layouts/MsSideBar.vue";
-import MsToastContainer from "@/components/overlay/MsToast/MsToastContainer.vue";
+import DMOverlay from "@/components/overlay/DMOverlay.vue";
+import DMAlert from "@/components/overlay/DMAlert.vue";
+import DMNavBar from "@/layouts/DMNavBar.vue";
+import DMSideBar from "@/layouts/DMSideBar.vue";
+import DMToastContainer from "@/components/overlay/DMToast/DMToastContainer.vue";
 import { onMounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 

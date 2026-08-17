@@ -1,0 +1,45 @@
+.dm-brand-icon {
+  display: inline-block;
+  flex-shrink: 0;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+}
+
+.dm-brand-icon--primary-logo {
+  width: 320px;
+  aspect-ratio: 16 / 10;
+  background-image: url("../brand/dorm-mart-primary-logo.png");
+}
+
+.dm-brand-icon--app-icon {
+  width: 48px;
+  aspect-ratio: 1;
+  background-image: url("../brand/dorm-mart-app-icon.png");
+}
+
+.dm-brand-icon--horizontal-logo {
+  width: 280px;
+  aspect-ratio: 886 / 215;
+  background-image: url("../brand/dorm-mart-horizontal-logo-alpha-cropped.png");
+}
+
+.dm-brand > .dm-brand-icon--horizontal-logo,
+.brand > .dm-brand-icon--horizontal-logo {
+  width: 220px;
+  height: 58px;
+  filter:
+    drop-shadow(1px 0 0 var(--dm-logo-edge))
+    drop-shadow(-1px 0 0 var(--dm-logo-edge))
+    drop-shadow(0 1px 0 var(--dm-logo-edge))
+    drop-shadow(0 -1px 0 var(--dm-logo-edge))
+    drop-shadow(0 3px 4px var(--dm-logo-shadow));
+}
+
+@media (max-width: 640px) {
+  .dm-brand > .dm-brand-icon--horizontal-logo,
+  .brand > .dm-brand-icon--horizontal-logo {
+    width: 190px;
+    height: 50px;
+  }
+}

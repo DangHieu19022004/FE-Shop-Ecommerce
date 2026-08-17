@@ -45,7 +45,7 @@
     <!-- Dropdown -->
     <div v-if="isOpen" class="ms-tree-select__dropdown">
       <div class="ms-tree-select__tree">
-        <MsTreeNode
+        <DMTreeNode
           v-for="node in options"
           :key="node.id"
           :node="node"
@@ -68,7 +68,7 @@
 
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from "vue";
-import MsTreeNode from "./MsTreeNode.vue";
+import DMTreeNode from "./DMTreeNode.vue";
 
 const props = defineProps({
   label: { type: String, default: "" },
@@ -417,7 +417,7 @@ function bubbleUpSelection(selected, nodes) {
  * Xử lý toggle chọn/bỏ chọn một node trên cây dropdown.
  * Tự động chọn/bỏ chọn toàn bộ con và lan truyền bubble-up lên cha.
  *
- * Sử dụng khi: Component MsTreeNode phát ra sự kiện toggle-select.
+ * Sử dụng khi: Component DMTreeNode phát ra sự kiện toggle-select.
  *
  * @param {string|number} nodeId ID của node bị tương tác
  * @returns {void}

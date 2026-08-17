@@ -2,20 +2,6 @@
 @import url("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap");
 
 :root {
-  --dm-bg: #f8f9fa;
-  --dm-surface: #ffffff;
-  --dm-surface-soft: #f3f4f5;
-  --dm-border: #e8e8e8;
-  --dm-text: #191c1d;
-  --dm-text-soft: #434651;
-  --dm-primary: #002b6b;
-  --dm-primary-soft: #dae2ff;
-  --dm-secondary: #fdc003;
-  --dm-secondary-text: #6c5000;
-  --dm-danger: #ba1a1a;
-  --dm-danger-soft: #ffdad6;
-  --dm-success: #00bfa5;
-  --dm-shadow: 0 10px 28px rgba(0, 16, 58, 0.08);
   --dm-radius: 16px;
 }
 
@@ -63,7 +49,7 @@
 
 .dm-btn {
   background: var(--dm-primary);
-  color: #fff;
+  color: var(--dm-on-primary);
 }
 
 .dm-btn-ghost {
@@ -74,7 +60,7 @@
 
 .dm-btn-danger {
   background: var(--dm-danger);
-  color: #fff;
+  color: var(--dm-on-primary);
 }
 
 .dm-card {
@@ -89,8 +75,8 @@
   top: 0;
   z-index: 20;
   background: var(--dm-primary);
-  color: #fff;
-  box-shadow: 0 8px 24px rgba(0, 16, 58, 0.16);
+  color: var(--dm-on-primary);
+  box-shadow: 0 8px 24px var(--dm-header-shadow-color);
 }
 
 .dm-public-header__top,
@@ -138,7 +124,7 @@
   border-radius: 10px;
   display: grid;
   place-items: center;
-  background: rgba(255, 255, 255, 0.12);
+  background: var(--dm-surface-12);
   font-size: 22px;
 }
 
@@ -156,7 +142,7 @@
   min-height: 44px;
   padding: 0 14px;
   border-radius: 12px;
-  background: #fff;
+  background: var(--dm-surface);
   color: var(--dm-text);
 }
 
@@ -181,8 +167,8 @@
   height: 42px;
   border-radius: 50%;
   border: 0;
-  background: rgba(255, 255, 255, 0.14);
-  color: #fff;
+  background: var(--dm-surface-14);
+  color: var(--dm-on-primary);
   display: grid;
   place-items: center;
   cursor: pointer;
@@ -211,7 +197,7 @@
 .dm-footer {
   margin-top: 32px;
   border-top: 4px solid var(--dm-secondary);
-  background: rgba(255, 255, 255, 0.9);
+  background: var(--dm-surface-90);
 }
 
 .dm-footer__inner {
@@ -283,7 +269,7 @@
 
 .dm-admin__link--active {
   background: var(--dm-primary);
-  color: #fff;
+  color: var(--dm-on-primary);
 }
 
 .dm-admin__body {
@@ -296,7 +282,7 @@
   top: 0;
   z-index: 10;
   min-height: 72px;
-  background: rgba(248, 249, 250, 0.92);
+  background: var(--dm-bg-92);
   backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--dm-border);
   display: flex;

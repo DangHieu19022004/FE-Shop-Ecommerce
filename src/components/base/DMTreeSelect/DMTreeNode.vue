@@ -50,7 +50,7 @@
 
     <!-- Children -->
     <div v-if="node.children?.length && isExpanded" class="ms-tree-node__children">
-      <MsTreeNode
+      <DMTreeNode
         v-for="child in node.children"
         :key="child.id"
         :node="child"

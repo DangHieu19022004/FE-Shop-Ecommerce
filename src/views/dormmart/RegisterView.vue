@@ -1,45 +1,82 @@
-<template>
-  <article class="dm-card dm-auth__card">
-    <div style="text-align: center; margin-bottom: 24px;">
-      <h1 style="font-size: 32px; margin-bottom: 8px;">Create Account</h1>
-      <p style="color: var(--dm-text-soft);">Join Dorm Mart to get started.</p>
-    </div>
+<script setup>
+import { inject, reactive, ref } from "vue";
+import { useRouter } from "vue-router";
+import DMButton from "@/components/base/DMButton.vue";
+import DMCheckbox from "@/components/base/DMCheckbox.vue";
+import DMInput from "@/components/base/DMInput.vue";
+import { registerUser } from "@/services/authService";
 
-    <form style="display: grid; gap: 14px;">
-      <div>
-        <label for="register-name" style="display: block; margin-bottom: 6px; font-weight: 600;">Full Name</label>
-        <input id="register-name" class="dm-field" placeholder="John Doe" readonly />
+const Text = inject("i18nCommon").Register;
+const Router = useRouter();
+const RegisterForm = reactive({ FullName: "", Email: "", Phone: "", Password: "", ConfirmPassword: "", HasAgreed: false });
+const FormErrors = reactive({ FullName: "", Email: "", Phone: "", Password: "", ConfirmPassword: "", Agreement: "", General: "" });
+const IsPasswordVisible = ref(false);
+const IsSubmitting = ref(false);
+
+const validateForm = () => {
+  const EmailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const PhonePattern = /^(0|\+84)[0-9]{9}$/;
+  FormErrors.FullName = RegisterForm.FullName.trim() ? "" : Text.RequiredField;
+  FormErrors.Email = !RegisterForm.Email.trim() ? Text.RequiredField : EmailPattern.test(RegisterForm.Email) ? "" : Text.InvalidEmail;
+  FormErrors.Phone = !RegisterForm.Phone.trim() ? Text.RequiredField : PhonePattern.test(RegisterForm.Phone) ? "" : Text.InvalidPhone;
+  FormErrors.Password = !RegisterForm.Password ? Text.RequiredField : RegisterForm.Password.length >= 8 ? "" : Text.WeakPassword;
+  FormErrors.ConfirmPassword = RegisterForm.ConfirmPassword === RegisterForm.Password ? "" : Text.PasswordMismatch;
+  FormErrors.Agreement = RegisterForm.HasAgreed ? "" : Text.AgreementRequired;
+  FormErrors.General = "";
+  return !Object.values(FormErrors).some(Boolean);
+};
+
+const handleSubmit = async () => {
+  if (!validateForm()) return;
+  IsSubmitting.value = true;
+  const RegisterResult = await registerUser(RegisterForm);
+  IsSubmitting.value = false;
+  if (!RegisterResult.IsSuccess) {
+    FormErrors.General = Text.AccountExists;
+    return;
+  }
+  Router.push({ name: "login", query: { RegisterMessage: Text.RegisterSuccess } });
+};
+
+const togglePassword = () => {
+  IsPasswordVisible.value = !IsPasswordVisible.value;
+};
+</script>
+
+<template>
+  <article class="auth-card auth-card--wide dm-card">
+    <header class="auth-card__header">
+      <span class="dm-brand-icon dm-brand-icon--app-icon" aria-hidden="true"></span>
+      <h1>{{ Text.Title }}</h1>
+      <p>{{ Text.Subtitle }}</p>
+    </header>
+
+    <form class="auth-form" novalidate @submit.prevent="handleSubmit">
+      <div class="auth-form__grid">
+        <DMInput v-model="RegisterForm.FullName" class="auth-form__input" :label="Text.FullNameLabel" :placeholder="Text.FullNamePlaceholder" :error-messages="FormErrors.FullName" :is-required="true" />
+        <DMInput v-model="RegisterForm.Phone" class="auth-form__input" :label="Text.PhoneLabel" :placeholder="Text.PhonePlaceholder" :error-messages="FormErrors.Phone" :is-required="true" />
       </div>
-      <div>
-        <label for="register-email" style="display: block; margin-bottom: 6px; font-weight: 600;">University Email</label>
-        <input id="register-email" class="dm-field" placeholder="student@university.edu" readonly />
+      <DMInput v-model="RegisterForm.Email" class="auth-form__input" type="email" :label="Text.EmailLabel" :placeholder="Text.EmailPlaceholder" :error-messages="FormErrors.Email" :is-required="true" />
+      <div class="auth-form__grid">
+        <div class="auth-form__password">
+          <DMInput v-model="RegisterForm.Password" class="auth-form__input" :type="IsPasswordVisible ? 'text' : 'password'" :label="Text.PasswordLabel" :placeholder="Text.PasswordPlaceholder" :error-messages="FormErrors.Password" :is-required="true" :has-trailing-action="true" />
+          <DMButton type="none" :is-tooltip="false" class="auth-form__visibility" :aria-label="IsPasswordVisible ? Text.HidePassword : Text.ShowPassword" @click="togglePassword"><span class="material-symbols-outlined" aria-hidden="true">{{ IsPasswordVisible ? "visibility_off" : "visibility" }}</span></DMButton>
+        </div>
+        <DMInput v-model="RegisterForm.ConfirmPassword" class="auth-form__input" :type="IsPasswordVisible ? 'text' : 'password'" :label="Text.ConfirmPasswordLabel" :placeholder="Text.ConfirmPasswordPlaceholder" :error-messages="FormErrors.ConfirmPassword" :is-required="true" />
       </div>
-      <div>
-        <label for="register-phone" style="display: block; margin-bottom: 6px; font-weight: 600;">Phone Number</label>
-        <input id="register-phone" class="dm-field" placeholder="(555) 123-4567" readonly />
-      </div>
-      <div>
-        <label for="register-password" style="display: block; margin-bottom: 6px; font-weight: 600;">Password</label>
-        <input id="register-password" class="dm-field" type="password" placeholder="••••••••" readonly />
-      </div>
-      <label style="display: flex; align-items: flex-start; gap: 10px; color: var(--dm-text-soft); font-size: 14px;">
-        <input type="checkbox" checked />
-        <span>I agree to Terms & Conditions</span>
-      </label>
-      <button type="button" class="dm-btn" style="width: 100%;">Register</button>
+
+      <DMCheckbox v-model="RegisterForm.HasAgreed">
+        {{ Text.AgreementPrefix }} <strong>{{ Text.TermsLink }}</strong>
+      </DMCheckbox>
+      <p v-if="FormErrors.Agreement" class="auth-form__message auth-form__message--error">{{ FormErrors.Agreement }}</p>
+      <p v-if="FormErrors.General" class="auth-form__message auth-form__message--error" role="alert">{{ FormErrors.General }}</p>
+      <DMButton native-type="submit" type="none" :is-tooltip="false" :message="Text.SubmitButton" class="auth-form__submit" :un-active="IsSubmitting" />
     </form>
 
-    <div style="display: flex; align-items: center; gap: 14px; margin: 20px 0; color: var(--dm-text-soft);">
-      <div style="height: 1px; background: var(--dm-border); flex: 1;"></div>
-      <span style="font-size: 12px; text-transform: uppercase; font-weight: 700;">or</span>
-      <div style="height: 1px; background: var(--dm-border); flex: 1;"></div>
-    </div>
-
-    <button type="button" class="dm-btn-ghost" style="width: 100%; margin-bottom: 18px;">Continue with Google</button>
-
-    <p style="text-align: center; color: var(--dm-text-soft);">
-      Already have an account?
-      <router-link to="/login" style="color: var(--dm-primary); font-weight: 700;">Sign in</router-link>
-    </p>
+    <div class="auth-divider"><span>{{ Text.Divider }}</span></div>
+    <DMButton type="none" :is-tooltip="false" :message="Text.GoogleButton" class="auth-form__google" />
+    <p class="auth-card__switch">{{ Text.HasAccount }} <router-link :to="{ name: 'login' }">{{ Text.LoginLink }}</router-link></p>
   </article>
 </template>
+
+<style scoped src="@/assets/styles/screens/auth.css"></style>

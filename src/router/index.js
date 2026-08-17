@@ -11,6 +11,7 @@ import ProductDetailView from "@/views/dormmart/ProductDetailView.vue";
 import CartView from "@/views/dormmart/CartView.vue";
 import LoginView from "@/views/dormmart/LoginView.vue";
 import RegisterView from "@/views/dormmart/RegisterView.vue";
+import ForgotPasswordView from "@/views/dormmart/ForgotPasswordView.vue";
 import AdminDashboardView from "@/views/dormmart/admin/AdminDashboardView.vue";
 import AdminProductsView from "@/views/dormmart/admin/AdminProductsView.vue";
 import AdminOrdersView from "@/views/dormmart/admin/AdminOrdersView.vue";
@@ -68,6 +69,17 @@ const routes = [
         path: "",
         name: "register",
         component: RegisterView,
+      },
+    ],
+  },
+  {
+    path: "/forgot-password",
+    component: DormMartAuthLayout,
+    children: [
+      {
+        path: "",
+        name: "forgotPassword",
+        component: ForgotPasswordView,
       },
     ],
   },
