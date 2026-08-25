@@ -10,7 +10,6 @@ import "./assets/styles/dormmart.css";
 import "./assets/styles/cart-animation.css";
 
 const AppInstance = createApp(App);
-
 AppInstance.provide("i18nCommon", i18nCommon);
 AppInstance.use(router);
 AppInstance.mount("#app");

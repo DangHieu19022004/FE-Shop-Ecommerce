@@ -8,6 +8,7 @@
           <span>Student deals daily</span>
         </div>
         <div class="dm-public-header__links">
+          <router-link :to="{ name: 'orderHistory' }">{{ Text.OrderHistoryLink }}</router-link>
           <router-link to="/login">Đăng nhập</router-link>
           <router-link to="/register">Đăng ký</router-link>
         </div>
