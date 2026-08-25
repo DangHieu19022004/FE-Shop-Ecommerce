@@ -22,6 +22,9 @@ import { getCurrentSession } from "@/services/authService";
 import AdminDashboardView from "@/views/dormmart/admin/AdminDashboardView.vue";
 import AdminProductsView from "@/views/dormmart/admin/AdminProductsView.vue";
 import AdminOrdersView from "@/views/dormmart/admin/AdminOrdersView.vue";
+import AdminFinanceView from "@/views/dormmart/admin/AdminFinanceView.vue";
+import AdminAccountsView from "@/views/dormmart/admin/AdminAccountsView.vue";
+import AdminSupportView from "@/views/dormmart/admin/AdminSupportView.vue";
 
 /**
  * Khai báo danh sách các tuyến đường (routes) của ứng dụng.
@@ -119,6 +122,16 @@ const routes = [
         component: AdminDashboardView,
       },
       {
+        path: "finance",
+        name: "adminFinance",
+        component: AdminFinanceView,
+      },
+      {
+        path: "accounts",
+        name: "adminAccounts",
+        component: AdminAccountsView,
+      },
+      {
         path: "products",
         name: "adminProducts",
         component: AdminProductsView,
@@ -127,6 +140,11 @@ const routes = [
         path: "orders",
         name: "adminOrders",
         component: AdminOrdersView,
+      },
+      {
+        path: "support",
+        name: "adminSupport",
+        component: AdminSupportView,
       },
     ],
   },
