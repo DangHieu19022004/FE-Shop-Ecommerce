@@ -13,6 +13,7 @@ import CheckoutView from "@/views/dormmart/CheckoutView.vue";
 import PaymentView from "@/views/dormmart/PaymentView.vue";
 import OrderHistoryView from "@/views/dormmart/OrderHistoryView.vue";
 import OrderDetailView from "@/views/dormmart/OrderDetailView.vue";
+import SupportView from "@/views/dormmart/SupportView.vue";
 import LoginView from "@/views/dormmart/LoginView.vue";
 import RegisterView from "@/views/dormmart/RegisterView.vue";
 import ForgotPasswordView from "@/views/dormmart/ForgotPasswordView.vue";
@@ -72,6 +73,7 @@ const routes = [
       },
       { path: "orders", name: "orderHistory", component: OrderHistoryView },
       { path: "orders/:orderCode", name: "orderDetail", component: OrderDetailView },
+      { path: "support", name: "support", component: SupportView },
     ],
   },
   {

@@ -24,6 +24,7 @@
   --dm-rating: #d97706;
   --dm-focus-ring: rgba(13, 43, 99, 0.18);
   --dm-overlay-soft: rgba(13, 43, 99, 0.04);
+  --dm-chat-overlay: rgba(13, 43, 99, 0.12);
   --dm-on-primary: #ffffff;
 
   /* Reusable translucent colors */

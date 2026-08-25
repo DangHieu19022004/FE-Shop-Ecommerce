@@ -9,6 +9,7 @@
         </div>
         <div class="dm-public-header__links">
           <router-link :to="{ name: 'orderHistory' }">{{ Text.OrderHistoryLink }}</router-link>
+          <router-link :to="{ name: 'support' }">{{ Text.SupportLink }}</router-link>
           <router-link to="/login">Đăng nhập</router-link>
           <router-link to="/register">Đăng ký</router-link>
         </div>
@@ -76,12 +77,14 @@
         </div>
       </div>
     </footer>
+    <SupportChatWidget />
   </div>
 </template>
 
 <script setup>
 import { inject } from "vue";
 import { CartTotalQuantity } from "@/stores/cartStore";
+import SupportChatWidget from "@/components/dormmart/SupportChatWidget.vue";
 
 const Text = inject("i18nCommon").Common;
 
