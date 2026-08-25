@@ -33,7 +33,9 @@
           <span class="ms-radio__dot"></span>
         </span>
         <!-- Option label -->
-        <span class="ms-radio__label">{{ option.label }}</span>
+        <span class="ms-radio__label">
+          <slot name="option" :option="option">{{ option.label }}</slot>
+        </span>
       </label>
     </div>
 
@@ -137,6 +139,7 @@ const emit = defineEmits(["update:modelValue"]);
   cursor: pointer;
   user-select: none;
   line-height: 1;
+  width: 100%;
 }
 
 .ms-radio__item--disabled {
@@ -163,8 +166,8 @@ const emit = defineEmits(["update:modelValue"]);
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  border: 2px solid #d1d5db;
-  background: #fff;
+  border: 2px solid var(--dm-border);
+  background: var(--dm-surface);
   flex-shrink: 0;
 }
 
@@ -173,30 +176,31 @@ const emit = defineEmits(["update:modelValue"]);
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #fff;
+  background: var(--dm-surface);
 }
 
 /* Checked state */
 .ms-radio__item--checked .ms-radio__circle {
-  border-color: #0e9a62;
+  border-color: var(--dm-primary);
 }
 
 .ms-radio__item--checked .ms-radio__circle .ms-radio__dot {
-  background-color: #0e9a62;
+  background-color: var(--dm-primary);
 }
 
 
 /* Hover (chưa chọn) */
 .ms-radio__item:not(.ms-radio__item--checked):not(.ms-radio__item--disabled):hover .ms-radio__circle {
-  border-color: #0e9a62;
+  border-color: var(--dm-primary);
 }
 
 /* ══════════════════════════════════
    Option label text
 ══════════════════════════════════ */
 .ms-radio__label {
+  flex: 1;
   font-size: 13px;
-  color: #1d2939;
+  color: var(--dm-text);
   line-height: 1;
 }
 

@@ -10,6 +10,7 @@ import ProductListView from "@/views/dormmart/ProductListView.vue";
 import ProductDetailView from "@/views/dormmart/ProductDetailView.vue";
 import CartView from "@/views/dormmart/CartView.vue";
 import CheckoutView from "@/views/dormmart/CheckoutView.vue";
+import PaymentView from "@/views/dormmart/PaymentView.vue";
 import LoginView from "@/views/dormmart/LoginView.vue";
 import RegisterView from "@/views/dormmart/RegisterView.vue";
 import ForgotPasswordView from "@/views/dormmart/ForgotPasswordView.vue";
@@ -61,6 +62,11 @@ const routes = [
         name: "profile",
         component: ProfileView,
         meta: { RequiresAuth: true },
+      },
+      {
+        path: "payment",
+        name: "payment",
+        component: PaymentView,
       },
     ],
   },

@@ -35,7 +35,7 @@ const toggleItem = (CartItemId, IsSelected) => {
   if (CartItem) CartItem.IsSelected = IsSelected;
 };
 const toggleAll = (IsSelected) => CartItems.value.forEach((CartItem) => { CartItem.IsSelected = IsSelected; });
-const navigateToCheckout = () => Router.push({ name: "checkout" });
+const navigateToCheckout = () => Router.push({ name: "payment" });
 const addQueryProduct = () => {
   const ProductId = Number(Route.query.ProductId);
   const Product = ProductData.Products.find((ProductItem) => ProductItem.ProductId === ProductId);

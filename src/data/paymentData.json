@@ -1,0 +1,26 @@
+{
+  "Addresses": [
+    { "AddressId": 1, "RecipientName": "Trần Đăng Hiếu", "Phone": "0901234567", "AddressLine": "Ký túc xá khu A, Phường Linh Trung, Thành phố Thủ Đức, TP. Hồ Chí Minh", "AddressType": "Ký túc xá", "IsDefault": true },
+    { "AddressId": 2, "RecipientName": "Trần Đăng Hiếu", "Phone": "0901234567", "AddressLine": "123 Nguyễn Trãi, Phường Bến Thành, Quận 1, TP. Hồ Chí Minh", "AddressType": "Nhà riêng", "IsDefault": false },
+    { "AddressId": 3, "RecipientName": "Trần Đăng Hiếu", "Phone": "0901234567", "AddressLine": "45 Điện Biên Phủ, Phường 15, Quận Bình Thạnh, TP. Hồ Chí Minh", "AddressType": "Văn phòng", "IsDefault": false }
+  ],
+  "CheckoutItems": [
+    { "CheckoutItemId": 1, "ProductId": 1, "ProductName": "Máy giặt mini X-1 dung tích 4.5kg", "VariantName": "Màu trắng", "UnitPrice": 1250000, "Quantity": 1, "ImageUrl": "https://images.unsplash.com/photo-1626806787461-102c1bfaaea1?auto=format&fit=crop&w=600&q=80" },
+    { "CheckoutItemId": 2, "ProductId": 3, "ProductName": "Đèn bàn LED LumiDesk tích hợp sạc không dây", "VariantName": "Xanh đậm", "UnitPrice": 849000, "Quantity": 1, "ImageUrl": "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&w=600&q=80" }
+  ],
+  "ShippingMethods": [
+    { "ShippingMethodId": 1, "ShippingCode": "ECONOMY", "ShippingName": "Giao hàng tiết kiệm", "ShippingDescription": "Nhận hàng trong giờ hành chính", "ShippingFee": 15000, "EstimatedFromDate": "2026-08-20", "EstimatedToDate": "2026-08-22", "IsRecommended": false },
+    { "ShippingMethodId": 2, "ShippingCode": "STANDARD", "ShippingName": "Giao hàng tiêu chuẩn", "ShippingDescription": "Theo dõi hành trình đơn hàng", "ShippingFee": 25000, "EstimatedFromDate": "2026-08-19", "EstimatedToDate": "2026-08-20", "IsRecommended": true },
+    { "ShippingMethodId": 3, "ShippingCode": "EXPRESS", "ShippingName": "Giao hàng hỏa tốc", "ShippingDescription": "Ưu tiên xử lý và giao sớm", "ShippingFee": 45000, "EstimatedFromDate": "2026-08-18", "EstimatedToDate": "2026-08-18", "IsRecommended": false }
+  ],
+  "PaymentMethods": [
+    { "PaymentMethodId": 1, "PaymentCode": "COD", "PaymentName": "Thanh toán khi nhận hàng", "PaymentDescription": "Thanh toán bằng tiền mặt khi đơn hàng được giao", "IconName": "payments", "IsActive": true },
+    { "PaymentMethodId": 2, "PaymentCode": "BANK_TRANSFER", "PaymentName": "Chuyển khoản ngân hàng", "PaymentDescription": "Quét mã QR hoặc chuyển khoản theo thông tin đơn hàng", "IconName": "account_balance", "IsActive": true },
+    { "PaymentMethodId": 3, "PaymentCode": "E_WALLET", "PaymentName": "Ví điện tử", "PaymentDescription": "Thanh toán nhanh qua ví điện tử liên kết", "IconName": "account_balance_wallet", "IsActive": true }
+  ],
+  "Vouchers": [
+    { "VoucherId": 1, "VoucherCode": "DORM50", "VoucherName": "Giảm 50.000 ₫", "VoucherDescription": "Đơn tối thiểu 500.000 ₫", "DiscountType": "FIXED_AMOUNT", "DiscountValue": 50000, "MinimumOrderAmount": 500000, "ExpiryDate": "2026-09-30", "IsActive": true },
+    { "VoucherId": 2, "VoucherCode": "FREESHIP25", "VoucherName": "Giảm 25.000 ₫ phí vận chuyển", "VoucherDescription": "Áp dụng cho mọi phương thức giao hàng", "DiscountType": "SHIPPING_AMOUNT", "DiscountValue": 25000, "MinimumOrderAmount": 100000, "ExpiryDate": "2026-09-15", "IsActive": true },
+    { "VoucherId": 3, "VoucherCode": "STUDENT10", "VoucherName": "Giảm 10% cho sinh viên", "VoucherDescription": "Giảm tối đa 100.000 ₫", "DiscountType": "PERCENTAGE", "DiscountValue": 10, "MaximumDiscountAmount": 100000, "MinimumOrderAmount": 300000, "ExpiryDate": "2026-10-31", "IsActive": true }
+  ]
+}

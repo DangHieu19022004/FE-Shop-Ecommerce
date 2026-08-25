@@ -1,0 +1,66 @@
+.payment-page { display: grid; grid-template-columns: minmax(0, 1fr) 360px; align-items: start; gap: 18px; }
+.payment-page__heading, .payment-success, .payment-section { grid-column: 1 / -1; }
+.payment-page__heading h1 { margin: 0; color: var(--dm-primary); font-size: 32px; }
+.payment-success { display: flex; align-items: center; gap: 10px; padding: 16px 20px; border-color: var(--dm-success); background: var(--dm-success-soft); color: var(--dm-success); }
+.payment-section { padding: 22px; }
+.payment-section__title { display: flex; align-items: center; gap: 9px; margin-bottom: 18px; color: var(--dm-primary); }
+.payment-section__title h2 { margin: 0; font-size: 20px; }
+.payment-address__content { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; align-items: center; gap: 12px; }
+.payment-address__content p { margin: 0; color: var(--dm-text-soft); }
+.payment-address__content .dm-pill { border: 1px solid var(--dm-secondary); background: var(--dm-secondary-soft); color: var(--dm-secondary-text); }
+.payment-link-button { color: var(--dm-primary); font-weight: 700; }
+.address-list { grid-column: 1 / -1; display: grid; gap: 10px; padding-top: 14px; border-top: 1px solid var(--dm-border); }
+.address-item { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 14px; border: 1px solid var(--dm-border); border-radius: 12px; background: var(--dm-surface); color: var(--dm-text); text-align: left; cursor: pointer; }
+.address-item:hover, .address-item--active { border-color: var(--dm-primary); background: var(--dm-overlay-soft); }
+.address-item > .material-symbols-outlined { display: grid; width: 38px; height: 38px; place-items: center; border-radius: 50%; background: var(--dm-primary-soft); color: var(--dm-primary); }
+.address-item > span:nth-child(2) { display: flex; flex-direction: column; gap: 4px; }
+.address-item small { color: var(--dm-primary); font-weight: 700; }
+.address-item p { margin: 0; color: var(--dm-text-soft); }
+.address-item__status { color: var(--dm-primary); font-size: 13px; font-weight: 800; }
+.payment-products__header, .payment-product { display: grid; grid-template-columns: minmax(0, 1fr) 130px 90px 140px; align-items: center; gap: 14px; }
+.payment-products__header { padding: 10px 0; color: var(--dm-text-soft); font-size: 12px; text-align: right; }
+.payment-products__header span:first-child { text-align: left; }
+.payment-product { grid-template-columns: 76px minmax(0, 1fr) 130px 90px 140px; padding: 14px 0; border-top: 1px solid var(--dm-border); text-align: right; }
+.payment-product img { width: 76px; height: 76px; border-radius: 10px; object-fit: cover; }
+.payment-product > div { display: flex; min-width: 0; flex-direction: column; gap: 6px; text-align: left; }
+.payment-product > div span { color: var(--dm-text-soft); font-size: 13px; }
+.payment-product > strong:last-child { color: var(--dm-danger); }
+.payment-radio { width: 100%; }
+.shipping-method { min-width: 0; flex: 1; padding: 14px; border: 1px solid var(--dm-border); border-radius: 12px; background: var(--dm-surface); }
+.shipping-method > div:first-child { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.shipping-method .dm-pill { background: var(--dm-secondary-soft); color: var(--dm-secondary-text); font-size: 10px; }
+.shipping-method p, .payment-method-detail p { margin: 6px 0; color: var(--dm-text-soft); line-height: 1.5; }
+.shipping-method__details { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px 16px; margin-top: 10px; color: var(--dm-text-soft); font-size: 12px; }
+.payment-method-detail { display: flex; align-items: center; gap: 12px; min-width: 0; padding: 12px 14px; border: 1px solid var(--dm-border); border-radius: 12px; }
+.payment-method-detail > .material-symbols-outlined { color: var(--dm-primary); font-size: 28px; }
+.payment-voucher { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 14px; padding: 16px; border: 1px solid var(--dm-secondary); border-radius: 14px; background: var(--dm-secondary-soft); }
+.payment-voucher__heading, .payment-voucher__actions { display: flex; align-items: center; gap: 12px; }
+.payment-voucher__heading > .material-symbols-outlined { color: var(--dm-secondary-text); font-size: 28px; }
+.payment-voucher p { margin: 4px 0 0; color: var(--dm-text-soft); }
+.payment-voucher__select { border: 1px solid var(--dm-primary); background: var(--dm-surface); color: var(--dm-primary); font-weight: 700; }
+.payment-voucher__remove { color: var(--dm-danger); }
+.payment-voucher__search { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 10px; }
+.payment-voucher__apply { min-height: 42px; background: var(--dm-primary); color: var(--dm-on-primary); font-weight: 700; }
+.payment-voucher__message { grid-column: 1 / -1; margin: 0; color: var(--dm-danger); font-size: 13px; }
+.voucher-list { grid-column: 1 / -1; display: grid; gap: 10px; padding-top: 14px; border-top: 1px solid var(--dm-secondary); }
+.voucher-item { display: grid; grid-template-columns: 48px minmax(0, 1fr) auto; align-items: center; gap: 12px; width: 100%; padding: 12px; border: 1px solid var(--dm-border); border-radius: 12px; background: var(--dm-surface); color: var(--dm-text); text-align: left; cursor: pointer; }
+.voucher-item:hover, .voucher-item--active { border-color: var(--dm-primary); background: var(--dm-overlay-soft); }
+.voucher-item:disabled { opacity: 0.48; cursor: not-allowed; }
+.voucher-item__icon { display: grid; width: 44px; height: 44px; place-items: center; border-radius: 10px; background: var(--dm-secondary); color: var(--dm-secondary-text); font-size: 20px; font-weight: 800; }
+.voucher-item__content { display: flex; min-width: 0; flex-direction: column; gap: 3px; }
+.voucher-item__content small { color: var(--dm-text-soft); }
+.voucher-item__action { color: var(--dm-primary); font-size: 13px; font-weight: 800; }
+.voucher-list__empty { margin: 0; padding: 16px; color: var(--dm-text-soft); text-align: center; }
+.payment-extras { display: grid; gap: 20px; }
+.payment-summary { grid-column: 1 / -1; width: 100%; padding: 22px; }
+.payment-summary h2 { margin: 0 0 18px; color: var(--dm-primary); }
+.payment-summary__content { display: grid; grid-template-columns: minmax(0, 1fr) minmax(300px, 420px); align-items: end; gap: 40px; }
+.payment-summary__rows { display: grid; gap: 2px; }
+.payment-summary__rows > div { display: flex; justify-content: space-between; gap: 24px; padding: 9px 0; }
+.payment-summary__discount { color: var(--dm-success); }
+.payment-summary__rows .payment-summary__total { margin-top: 8px; padding-top: 16px; border-top: 1px solid var(--dm-border); }
+.payment-summary__total strong { color: var(--dm-danger); font-size: 24px; }
+.payment-summary__submit { width: 100%; min-height: 48px; margin-top: 18px; justify-content: center; background: var(--dm-secondary); color: var(--dm-secondary-text); font-weight: 800; }
+.payment-summary__action p { margin: 12px 0 0; color: var(--dm-text-soft); font-size: 12px; line-height: 1.5; text-align: center; }
+@media (max-width: 960px) { .payment-page { grid-template-columns: 1fr; } .payment-summary { grid-column: 1; } .payment-summary__content { grid-template-columns: 1fr; gap: 18px; } }
+@media (max-width: 720px) { .payment-section, .payment-summary { padding: 16px; } .payment-address__content { grid-template-columns: 1fr auto; } .payment-address__content p { grid-column: 1 / -1; } .address-item { grid-template-columns: 38px minmax(0, 1fr); } .address-item__status { grid-column: 2; } .payment-products__header { display: none; } .payment-product { grid-template-columns: 70px minmax(0, 1fr); text-align: left; } .payment-product > span, .payment-product > strong:last-child { grid-column: 2; } .shipping-method__details { flex-direction: column; } .payment-voucher { grid-template-columns: 1fr; } .payment-voucher__actions { justify-content: flex-start; flex-wrap: wrap; } .payment-voucher__search { grid-template-columns: 1fr; } .voucher-item { grid-template-columns: 42px minmax(0, 1fr); } .voucher-item__action { grid-column: 2; } }
