@@ -3,7 +3,7 @@
     <label v-if="label" class="ms-input__label" :for="id">{{ label }} <span v-if="isRequired" class="color-red"> *</span></label>
     <input
       ref="inputRef"
-      :class="['ms-input-in', props.class, { 'ms-input--error': props.errorMessages }]"
+      :class="['ms-input-in', props.class, { 'ms-input--error': props.errorMessages, 'ms-input-in--trailing-action': hasTrailingAction }]"
       :value="props.type === 'file' ? '' : modelValue"
       :type="type"
       :placeholder="placeholder"
@@ -16,9 +16,11 @@
       @blur="handleBlur"
       @focus="handleFocus"
     />
-    <!-- <p
-    v-if="props.errorMessages"
-    :class="['ms-input__error', { 'ms-input__error--visible': props.errorMessages }]" >{{ props.errorMessages || '\u00A0' }}</p> -->
+    <p
+      v-if="props.errorMessages"
+      class="ms-input__error ms-input__error--visible"
+      role="alert"
+    >{{ props.errorMessages }}</p>
     <!-- <div v-if="props.errorMessages" class="ms-input__tooltip">
       {{ props.errorMessages || "" }}
     </div> -->
@@ -75,6 +77,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  hasTrailingAction: {
+    type: Boolean,
+    default: false,
+  },
 });
 const emit = defineEmits(["update:modelValue", "blur", "focus", "change"]);
 const inputRef = ref(null);
@@ -106,7 +112,7 @@ const handleFocus = () => {
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 7px;
   width: 100%;
 }
 
@@ -138,60 +144,70 @@ const handleFocus = () => {
 
 .ms-input__label {
   display: block;
-  font-size: 13px;
-  font-weight: 500;
-  color: #374151;
-  margin-bottom: 2px;
+  margin-bottom: 0;
+  color: var(--dm-text);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.4;
   user-select: none;
 }
 
 .ms-input-in {
   width: 100%;
-  /* height: 36px; */
-  padding: 0 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  font-size: 13px;
-  color: #111827;
-  background-color: #ffffff;
+  min-height: 46px;
+  padding: 0 14px;
+  border: 1px solid var(--dm-border);
+  border-radius: 12px;
+  background-color: var(--dm-surface);
+  color: var(--dm-text);
+  font: inherit;
+  font-size: 14px;
   outline: none;
   transition: border-color 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
 }
 
 .ms-input-in::placeholder {
-  color: #9ca3af;
-  font-size: 13px;
+  color: var(--dm-text-soft);
+  font-size: 14px;
+  opacity: 0.7;
+}
+
+.ms-input-in--trailing-action {
+  padding-right: 50px;
 }
 
 .ms-input-in:hover {
-  border-color: #0E9A62;
-  background-color: #f9fffe;
+  border-color: var(--dm-primary);
+  background-color: var(--dm-overlay-soft);
 }
 
 .ms-input-in:focus {
-  border-color: #0E9A62;
-  background-color: #ffffff;
+  border-color: var(--dm-primary);
+  background-color: var(--dm-surface);
+  box-shadow: 0 0 0 3px var(--dm-focus-ring);
 }
 
 .ms-input-in:disabled {
-  background-color: #eff1f4;
-  color: #8c929f;
+  background-color: var(--dm-surface-soft);
+  color: var(--dm-text-soft);
   cursor: not-allowed;
-  border-color: #d1d5db !important;
+  border-color: var(--dm-border) !important;
 }
 
 .ms-input-in:disabled:hover {
-  background-color: #eff1f4;
-  border-color: #d1d5db !important;
+  background-color: var(--dm-surface-soft);
+  border-color: var(--dm-border) !important;
 }
 
 .ms-input .ms-input--error {
-  border-color: #f44336 !important;
+  border-color: var(--dm-danger) !important;
+  background-color: var(--dm-danger-soft);
 }
 
 .ms-input .ms-input--error:hover,
 .ms-input .ms-input--error:focus {
-  border-color: #f44336 !important;
+  border-color: var(--dm-danger) !important;
+  box-shadow: 0 0 0 3px var(--dm-danger-soft);
 }
 
 /* Tooltip lỗi */
@@ -227,13 +243,14 @@ const handleFocus = () => {
 }
 
 .ms-input__error {
-  min-height: 16px;
+  min-height: 0;
+  margin: 0;
   font-size: 12px;
-  color: transparent;
+  line-height: 1.4;
 }
 
 .ms-input__error--visible {
-  color: #f44336;
+  color: var(--dm-danger);
 }
 
 .width-100 {

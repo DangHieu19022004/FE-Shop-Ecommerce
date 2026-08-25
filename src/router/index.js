@@ -12,6 +12,9 @@ import CartView from "@/views/dormmart/CartView.vue";
 import CheckoutView from "@/views/dormmart/CheckoutView.vue";
 import LoginView from "@/views/dormmart/LoginView.vue";
 import RegisterView from "@/views/dormmart/RegisterView.vue";
+import ForgotPasswordView from "@/views/dormmart/ForgotPasswordView.vue";
+import ProfileView from "@/views/dormmart/ProfileView.vue";
+import { getCurrentSession } from "@/services/authService";
 import AdminDashboardView from "@/views/dormmart/admin/AdminDashboardView.vue";
 import AdminProductsView from "@/views/dormmart/admin/AdminProductsView.vue";
 import AdminOrdersView from "@/views/dormmart/admin/AdminOrdersView.vue";
@@ -53,6 +56,12 @@ const routes = [
         name: "checkout",
         component: CheckoutView,
       },
+      {
+        path: "profile",
+        name: "profile",
+        component: ProfileView,
+        meta: { RequiresAuth: true },
+      },
     ],
   },
   {
@@ -74,6 +83,17 @@ const routes = [
         path: "",
         name: "register",
         component: RegisterView,
+      },
+    ],
+  },
+  {
+    path: "/forgot-password",
+    component: DormMartAuthLayout,
+    children: [
+      {
+        path: "",
+        name: "forgotPassword",
+        component: ForgotPasswordView,
       },
     ],
   },
@@ -118,6 +138,13 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(),
   routes,
+});
+
+router.beforeEach((ToRoute) => {
+  if (ToRoute.meta.RequiresAuth && !getCurrentSession()) {
+    return { name: "login", query: { Redirect: ToRoute.fullPath } };
+  }
+  return true;
 });
 
 export default router;

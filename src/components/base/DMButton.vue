@@ -1,6 +1,7 @@
 <template lang="">
 <button
   v-bind="$attrs"
+  :type="nativeType"
   ref="buttonRef"
   :class="[
     'ms-button',
@@ -47,6 +48,10 @@ import { computed, nextTick, ref } from "vue";
  * NOTICE: emit + props
  */
 const props = defineProps({
+  nativeType: {
+    type: String,
+    default: "button",
+  },
   message: {
     type: String,
     default: "",
