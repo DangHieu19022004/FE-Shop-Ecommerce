@@ -1,5 +1,4 @@
 const i18nCommon = {
-<<<<<<< HEAD
   Common: {
     QuickAddCart: "Thêm nhanh vào giỏ hàng",
     CartLabel: "Giỏ hàng",
