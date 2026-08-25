@@ -17,13 +17,13 @@ const Sections = computed(() => [
   { Title: Text.OrdersTitle, Description: Text.OrdersDescription, Icon: "inventory", RouteName: "adminOrders" },
   { Title: Text.SupportTitle, Description: Text.SupportDescription, Icon: "support_agent", RouteName: "adminSupport" }
 ]);
-function formatCurrency(Value) { return new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(Value); }
+function formatCurrency(Value) { return new Intl.NumberFormat(Text.CurrencyLocale, { style: "currency", currency: Text.CurrencyCode }).format(Value); }
 </script>
 <template>
   <section class="admin-page">
     <header class="admin-page__header"><div><h1>{{ Text.Title }}</h1><p>{{ Text.Subtitle }}</p></div></header>
     <div class="admin-metrics"><article v-for="Item in Metrics" :key="Item.Label" :class="['dm-card', 'admin-metric', `admin-metric--${Item.Tone}`]"><span class="material-symbols-outlined">{{ Item.Icon }}</span><div class="admin-metric__label">{{ Item.Label }}</div><div class="admin-metric__value">{{ Item.Value }}</div></article></div>
-    <article class="dm-card admin-panel"><div class="admin-panel__header"><h2>{{ Text.SectionsTitle }}</h2></div><div class="admin-section-grid"><router-link v-for="Item in Sections" :key="Item.RouteName" :to="{ name: Item.RouteName }" class="admin-section-card"><span class="material-symbols-outlined">{{ Item.Icon }}</span><div><h3>{{ Item.Title }}</h3><p>{{ Item.Description }}</p><strong>{{ Text.OpenSection }} →</strong></div></router-link></div></article>
+    <article class="dm-card admin-panel"><div class="admin-panel__header"><h2>{{ Text.SectionsTitle }}</h2></div><div class="admin-section-grid"><router-link v-for="Item in Sections" :key="Item.RouteName" :to="{ name: Item.RouteName }" class="admin-section-card"><span class="material-symbols-outlined">{{ Item.Icon }}</span><div><h3>{{ Item.Title }}</h3><p>{{ Item.Description }}</p><strong>{{ Text.OpenSection }} <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span></strong></div></router-link></div></article>
   </section>
 </template>
 <style scoped src="@/assets/styles/screens/admin-operations.css"></style>

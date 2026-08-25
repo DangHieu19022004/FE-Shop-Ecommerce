@@ -69,10 +69,10 @@ const placeOrder = () => {
         <strong>{{ SelectedAddress.RecipientName }} · {{ SelectedAddress.Phone }}</strong>
         <p>{{ SelectedAddress.AddressLine }}</p>
         <span class="dm-pill">{{ Text.DefaultAddress }}</span>
-        <DMButton type="none" :is-tooltip="false" :message="Text.ChangeAddress" class="payment-link-button" @click="IsAddressListVisible = !IsAddressListVisible" />
+        <DMButton type="none" :is-tooltip="false" class="payment-link-button" :aria-label="Text.ChangeAddress" :title="Text.ChangeAddress" @click="IsAddressListVisible = !IsAddressListVisible"><span class="material-symbols-outlined" aria-hidden="true">edit_location_alt</span></DMButton>
         <div v-if="IsAddressListVisible" class="address-list">
           <button v-for="AddressItem in PaymentData.Addresses" :key="AddressItem.AddressId" type="button" class="address-item" :class="{ 'address-item--active': SelectedAddressId === AddressItem.AddressId }" @click="selectAddress(AddressItem.AddressId)">
-            <span class="material-symbols-outlined" aria-hidden="true">{{ AddressItem.AddressType === 'Nhà riêng' ? 'home' : AddressItem.AddressType === 'Văn phòng' ? 'apartment' : 'school' }}</span>
+            <span class="material-symbols-outlined" aria-hidden="true">{{ AddressItem.AddressTypeCode === 'HOME' ? 'home' : AddressItem.AddressTypeCode === 'OFFICE' ? 'apartment' : 'school' }}</span>
             <span><strong>{{ AddressItem.RecipientName }} · {{ AddressItem.Phone }}</strong><small>{{ AddressItem.AddressType }}</small><p>{{ AddressItem.AddressLine }}</p></span>
             <span class="address-item__status">{{ SelectedAddressId === AddressItem.AddressId ? Text.SelectedAddress : Text.UseAddress }}</span>
           </button>
@@ -116,12 +116,12 @@ const placeOrder = () => {
       <div class="payment-voucher">
         <div class="payment-voucher__heading"><span class="material-symbols-outlined" aria-hidden="true">confirmation_number</span><div><strong>{{ Text.VoucherTitle }}</strong><p>{{ SelectedVoucher ? SelectedVoucher.VoucherName : Text.NoVoucher }}</p></div></div>
         <div class="payment-voucher__actions">
-          <DMButton v-if="SelectedVoucher" type="none" :is-tooltip="false" :message="Text.RemoveVoucher" class="payment-voucher__remove" @click="removeVoucher" />
-          <DMButton type="none" :is-tooltip="false" :message="Text.SelectVoucher" class="payment-voucher__select" @click="IsVoucherListVisible = !IsVoucherListVisible" />
+          <DMButton v-if="SelectedVoucher" type="none" :is-tooltip="false" class="payment-voucher__remove" :aria-label="Text.RemoveVoucher" :title="Text.RemoveVoucher" @click="removeVoucher"><span class="material-symbols-outlined" aria-hidden="true">close</span></DMButton>
+          <DMButton type="none" :is-tooltip="false" class="payment-voucher__select" :aria-label="Text.SelectVoucher" :title="Text.SelectVoucher" @click="IsVoucherListVisible = !IsVoucherListVisible"><span class="material-symbols-outlined" aria-hidden="true">confirmation_number</span></DMButton>
         </div>
         <div class="payment-voucher__search">
           <DMInput v-model="VoucherSearch" :placeholder="Text.VoucherSearchPlaceholder" @keyup.enter="applyVoucherCode" />
-          <DMButton type="none" :is-tooltip="false" :message="Text.SearchVoucher" class="payment-voucher__apply" @click="applyVoucherCode" />
+          <DMButton type="none" :is-tooltip="false" class="payment-voucher__apply" :aria-label="Text.SearchVoucher" :title="Text.SearchVoucher" @click="applyVoucherCode"><span class="material-symbols-outlined" aria-hidden="true">search</span></DMButton>
         </div>
         <p v-if="VoucherMessage" class="payment-voucher__message" role="alert">{{ VoucherMessage }}</p>
         <div v-if="IsVoucherListVisible" class="voucher-list">
@@ -145,7 +145,7 @@ const placeOrder = () => {
           <div><span>{{ Text.Discount }}</span><strong class="payment-summary__discount">-{{ formatCurrency(DiscountAmount) }}</strong></div>
           <div class="payment-summary__total"><span>{{ Text.TotalPayment }}</span><strong>{{ formatCurrency(TotalPayment) }}</strong></div>
         </div>
-        <div class="payment-summary__action"><DMButton type="none" :is-tooltip="false" :message="Text.PlaceOrder" class="payment-summary__submit" @click="placeOrder" /><p>{{ Text.TermsNotice }}</p></div>
+        <div class="payment-summary__action"><DMButton type="none" :is-tooltip="false" class="payment-summary__submit" :aria-label="Text.PlaceOrder" :title="Text.PlaceOrder" @click="placeOrder"><span class="material-symbols-outlined" aria-hidden="true">shopping_bag</span></DMButton><p>{{ Text.TermsNotice }}</p></div>
       </div>
     </aside>
   </section>

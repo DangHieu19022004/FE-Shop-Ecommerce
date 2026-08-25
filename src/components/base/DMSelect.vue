@@ -14,10 +14,10 @@
         :style="width ? { width: typeof width === 'number' ? width + 'px' : width } : {}" @select="handleSelect"
         @remove="handleRemove" @open="handleFocus" @close="handleBlur">
         <template #noOptions>
-          <span class="ms-multiselect__empty">Không có dữ liệu</span>
+          <span class="ms-multiselect__empty">{{ Text.NoData }}</span>
         </template>
         <template #noResult>
-          <span class="ms-multiselect__empty">Không tìm thấy kết quả</span>
+          <span class="ms-multiselect__empty">{{ Text.NoSearchResults }}</span>
         </template>
         <template #option="slotProps">
           <slot name="option" v-bind="slotProps">
@@ -56,7 +56,9 @@
 
 <script setup>
 import Multiselect from "vue-multiselect";
-import { ref, watch } from "vue";
+import { inject, ref, watch } from "vue";
+
+const Text = inject("i18nCommon").BaseComponents;
 
 // Trạng thái đóng/mở dropdown của multiselect
 const isOpen = ref(false);

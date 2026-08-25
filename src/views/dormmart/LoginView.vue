@@ -65,11 +65,11 @@ const togglePassword = () => {
         <router-link :to="{ name: 'forgotPassword' }">{{ Text.ForgotPassword }}</router-link>
       </div>
 
-      <DMButton native-type="submit" type="none" :is-tooltip="false" :message="Text.SubmitButton" class="auth-form__submit" :un-active="IsSubmitting" />
+      <DMButton native-type="submit" type="none" :is-tooltip="false" class="auth-form__submit" :un-active="IsSubmitting" :aria-label="Text.SubmitButton" :title="Text.SubmitButton"><span class="material-symbols-outlined" aria-hidden="true">login</span></DMButton>
     </form>
 
     <div class="auth-divider"><span>{{ Text.Divider }}</span></div>
-    <DMButton type="none" :is-tooltip="false" :message="Text.GoogleButton" class="auth-form__google" />
+    <DMButton type="none" :is-tooltip="false" class="auth-form__google" :aria-label="Text.GoogleButton" :title="Text.GoogleButton"><span class="material-symbols-outlined" aria-hidden="true">account_circle</span></DMButton>
 
     <p class="auth-card__switch">
       {{ Text.NoAccount }}

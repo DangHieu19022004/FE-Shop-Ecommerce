@@ -15,6 +15,12 @@
       { "ExpenseId": "EXP-004", "CategoryCode": "DOMAIN", "Description": "Gia hạn tên miền", "Amount": 800000, "ExpenseDate": "2026-08-15" }
     ]
   },
+  "Products": [
+    { "ProductId": "PRD-001", "ProductName": "Đèn bàn Lumina Pro", "Sku": "LDM-1042-WHT", "CategoryName": "Đồ gia dụng", "StatusCode": "ACTIVE", "InventoryQuantity": 142, "Price": 45000, "CostPrice": 22000 },
+    { "ProductId": "PRD-002", "ProductName": "Vở năm môn cao cấp", "Sku": "STAT-NB5-NVY", "CategoryName": "Văn phòng phẩm", "StatusCode": "LOW_STOCK", "InventoryQuantity": 12, "Price": 12500, "CostPrice": 4250 },
+    { "ProductId": "PRD-003", "ProductName": "Ấm điện mini 1L", "Sku": "APP-KTL-1L", "CategoryName": "Đồ gia dụng", "StatusCode": "DRAFT", "InventoryQuantity": 0, "Price": 299000, "CostPrice": 145000 },
+    { "ProductId": "PRD-004", "ProductName": "Giấy ghi chú neon", "Sku": "STAT-STKY-5PK", "CategoryName": "Văn phòng phẩm", "StatusCode": "ACTIVE", "InventoryQuantity": 580, "Price": 59000, "CostPrice": 12000 }
+  ],
   "Accounts": [
     { "UserId": "USR-001", "FullName": "Nguyễn Minh Anh", "Email": "minhanh@gmail.com", "Phone": "0901234567", "OrderCount": 12, "StatusCode": "ACTIVE", "CreatedAt": "2026-05-12" },
     { "UserId": "USR-002", "FullName": "Trần Hải Nam", "Email": "hainam@gmail.com", "Phone": "0912345678", "OrderCount": 4, "StatusCode": "LOCKED", "CreatedAt": "2026-06-03" },

@@ -224,8 +224,8 @@ const handleBuyNow = () => navigateToCart(true);
         </div>
 
         <div class="product-actions">
-          <DMButton type="none" :message="Text.AddToCart" :is-tooltip="false" class="product-actions__cart" @click="handleAddToCart" />
-          <DMButton type="none" :message="Text.BuyNow" :is-tooltip="false" class="product-actions__buy" @click="handleBuyNow" />
+          <DMButton type="none" :is-tooltip="false" class="product-actions__cart" :aria-label="Text.AddToCart" :title="Text.AddToCart" @click="handleAddToCart"><span class="material-symbols-outlined" aria-hidden="true">add_shopping_cart</span></DMButton>
+          <DMButton type="none" :is-tooltip="false" class="product-actions__buy" :aria-label="Text.BuyNow" :title="Text.BuyNow" @click="handleBuyNow"><span class="material-symbols-outlined" aria-hidden="true">bolt</span></DMButton>
         </div>
       </div>
     </article>

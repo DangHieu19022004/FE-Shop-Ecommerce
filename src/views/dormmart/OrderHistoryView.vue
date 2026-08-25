@@ -7,7 +7,7 @@ import OrderData from "@/data/orderHistoryData.json";
 const Text = inject("i18nCommon").OrderHistory;
 const SelectedStatusCode = ref("ALL");
 const SearchValue = ref("");
-const StatusFilters = computed(() => [{ StatusCode: "ALL", StatusName: Text.AllOrders }, ...OrderData.OrderStatuses]);
+const StatusFilters = computed(() => [{ StatusCode: "ALL", StatusName: Text.AllOrders, IconName: "receipt_long" }, ...OrderData.OrderStatuses]);
 const FilteredOrders = computed(() => OrderData.Orders.filter((OrderItem) => {
   const Status = OrderData.OrderStatuses.find((StatusItem) => StatusItem.OrderStatusId === OrderItem.OrderStatusId);
   const Items = OrderData.OrderItems.filter((Item) => Item.OrderId === OrderItem.OrderId);
@@ -26,7 +26,7 @@ const formatDate = (DateValue) => new Intl.DateTimeFormat(Text.DateLocale, { day
   <section class="order-history">
     <header class="order-history__heading"><div><h1>{{ Text.PageTitle }}</h1><p>{{ Text.PageSubtitle }}</p></div><div class="order-history__search"><DMInput v-model="SearchValue" :placeholder="Text.SearchPlaceholder" /><span class="material-symbols-outlined" aria-hidden="true">search</span></div></header>
     <nav class="order-status-tabs" :aria-label="Text.PageTitle">
-      <DMButton v-for="StatusItem in StatusFilters" :key="StatusItem.StatusCode" type="none" :is-tooltip="false" :message="StatusItem.StatusName" class="order-status-tabs__button" :class="{ 'order-status-tabs__button--active': SelectedStatusCode === StatusItem.StatusCode }" @click="SelectedStatusCode = StatusItem.StatusCode" />
+      <DMButton v-for="StatusItem in StatusFilters" :key="StatusItem.StatusCode" type="none" :is-tooltip="false" class="order-status-tabs__button" :class="{ 'order-status-tabs__button--active': SelectedStatusCode === StatusItem.StatusCode }" :aria-label="StatusItem.StatusName" @click="SelectedStatusCode = StatusItem.StatusCode"><span v-if="StatusItem.IconName" class="material-symbols-outlined" aria-hidden="true">{{ StatusItem.IconName }}</span><span>{{ StatusItem.StatusName }}</span></DMButton>
     </nav>
     <div v-if="FilteredOrders.length" class="order-list">
       <article v-for="OrderItem in FilteredOrders" :key="OrderItem.OrderId" class="order-card dm-card">

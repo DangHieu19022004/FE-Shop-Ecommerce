@@ -1,19 +1,20 @@
 <script setup>
-import { computed } from "vue";
+import { computed, inject } from "vue";
 import { useRoute } from "vue-router";
 import { Products } from "@/views/dormmart/mock/catalog";
 import QuickAddCartButton from "@/components/dormmart/QuickAddCartButton.vue";
 
-const filters = ["Mini Fridges", "Cooling Fans", "Electric Kettles", "Microwaves"];
+const Text = inject("i18nCommon").ProductList;
+const Filters = Text.FilterOptions;
 const route = useRoute();
 
 const pageTitle = computed(() => {
   const category = route.query.category;
   if (typeof category === "string" && category) {
-    return `Search Results for "${category}"`;
+    return `${Text.SearchResultPrefix} "${category}"`;
   }
 
-  return 'Search Results for "appliances"';
+  return `${Text.SearchResultPrefix} "${Text.DefaultKeyword}"`;
 });
 </script>
 
@@ -21,30 +22,30 @@ const pageTitle = computed(() => {
   <section style="display: flex; flex-direction: column; gap: 20px;">
     <div>
       <h1 style="font-size: 32px; margin-bottom: 6px;">{{ pageTitle }}</h1>
-      <p style="color: var(--dm-text-soft);">Showing 1 - 24 of 1,248 items</p>
+      <p style="color: var(--dm-text-soft);">{{ Text.ResultSummary }}</p>
     </div>
 
     <div style="display: grid; grid-template-columns: minmax(240px, 280px) minmax(0, 1fr); gap: 20px; align-items: start;">
       <aside class="dm-card" style="padding: 18px; position: sticky; top: 110px;">
         <h2 style="display: flex; align-items: center; gap: 8px; font-size: 18px; margin-bottom: 16px; color: var(--dm-primary);">
           <span class="material-symbols-outlined">filter_alt</span>
-          Filters
+          {{ Text.FilterTitle }}
         </h2>
         <div style="display: flex; flex-direction: column; gap: 16px;">
           <section>
-            <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--dm-text-soft); margin-bottom: 10px;">Category</div>
-            <label v-for="item in filters" :key="item" style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px; cursor: pointer;">
-              <input type="checkbox" :checked="item === 'Cooling Fans'" />
-              <span>{{ item }}</span>
+            <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--dm-text-soft); margin-bottom: 10px;">{{ Text.Category }}</div>
+            <label v-for="FilterItem in Filters" :key="FilterItem" style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px; cursor: pointer;">
+              <input type="checkbox" :checked="FilterItem === Text.SelectedFilter" />
+              <span>{{ FilterItem }}</span>
             </label>
           </section>
           <section>
-            <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--dm-text-soft); margin-bottom: 10px;">Price Range</div>
+            <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--dm-text-soft); margin-bottom: 10px;">{{ Text.PriceRange }}</div>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-              <input class="dm-field" placeholder="Min" readonly />
-              <input class="dm-field" placeholder="Max" readonly />
+              <input class="dm-field" :placeholder="Text.MinimumPrice" readonly />
+              <input class="dm-field" :placeholder="Text.MaximumPrice" readonly />
             </div>
-            <button type="button" class="dm-btn" style="width: 100%; margin-top: 10px;">Apply</button>
+            <button type="button" class="dm-btn dm-icon-btn" style="width: 100%; margin-top: 10px;" :aria-label="Text.ApplyFilter" :title="Text.ApplyFilter"><span class="material-symbols-outlined" aria-hidden="true">filter_alt</span></button>
           </section>
         </div>
       </aside>
@@ -52,12 +53,12 @@ const pageTitle = computed(() => {
       <div style="display: flex; flex-direction: column; gap: 18px; min-width: 0;">
         <div class="dm-card" style="padding: 14px 16px; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; align-items: center;">
           <div style="display: flex; align-items: center; gap: 8px; color: var(--dm-text-soft);">
-            <span>Sort by:</span>
-            <div class="dm-pill" style="background: var(--dm-primary); color: #fff;">Relevance</div>
-            <div class="dm-pill" style="background: var(--dm-surface-soft); color: var(--dm-text);">Latest</div>
-            <div class="dm-pill" style="background: var(--dm-surface-soft); color: var(--dm-text);">Top Sales</div>
+            <span>{{ Text.SortBy }}</span>
+            <div class="dm-pill" style="background: var(--dm-primary); color: #fff;">{{ Text.Relevance }}</div>
+            <div class="dm-pill" style="background: var(--dm-surface-soft); color: var(--dm-text);">{{ Text.Latest }}</div>
+            <div class="dm-pill" style="background: var(--dm-surface-soft); color: var(--dm-text);">{{ Text.TopSales }}</div>
           </div>
-          <div class="dm-pill" style="background: var(--dm-surface-soft); color: var(--dm-text);">1 / 52</div>
+          <div class="dm-pill" style="background: var(--dm-surface-soft); color: var(--dm-text);">{{ Text.Pagination }}</div>
         </div>
 
         <div class="dm-grid dm-grid--products">

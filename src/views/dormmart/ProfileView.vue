@@ -20,7 +20,7 @@ const handleLogout = () => {
   <section class="profile-page">
     <header class="profile-page__header">
       <div>
-        <p class="profile-page__eyebrow">Dorm Mart</p>
+        <p class="profile-page__eyebrow">{{ Text.BrandName }}</p>
         <h1>{{ Text.PageTitle }}</h1>
         <p>{{ Text.PageSubtitle }}</p>
       </div>

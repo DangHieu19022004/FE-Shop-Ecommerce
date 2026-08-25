@@ -70,11 +70,11 @@ const togglePassword = () => {
       </DMCheckbox>
       <p v-if="FormErrors.Agreement" class="auth-form__message auth-form__message--error">{{ FormErrors.Agreement }}</p>
       <p v-if="FormErrors.General" class="auth-form__message auth-form__message--error" role="alert">{{ FormErrors.General }}</p>
-      <DMButton native-type="submit" type="none" :is-tooltip="false" :message="Text.SubmitButton" class="auth-form__submit" :un-active="IsSubmitting" />
+      <DMButton native-type="submit" type="none" :is-tooltip="false" class="auth-form__submit" :un-active="IsSubmitting" :aria-label="Text.SubmitButton" :title="Text.SubmitButton"><span class="material-symbols-outlined" aria-hidden="true">person_add</span></DMButton>
     </form>
 
     <div class="auth-divider"><span>{{ Text.Divider }}</span></div>
-    <DMButton type="none" :is-tooltip="false" :message="Text.GoogleButton" class="auth-form__google" />
+    <DMButton type="none" :is-tooltip="false" class="auth-form__google" :aria-label="Text.GoogleButton" :title="Text.GoogleButton"><span class="material-symbols-outlined" aria-hidden="true">account_circle</span></DMButton>
     <p class="auth-card__switch">{{ Text.HasAccount }} <router-link :to="{ name: 'login' }">{{ Text.LoginLink }}</router-link></p>
   </article>
 </template>

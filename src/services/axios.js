@@ -4,8 +4,10 @@ import {
   FallbackApiBaseUrl,
   PrimaryApiBaseUrl,
 } from "@/config/apiConfig";
+import i18nCommon from "@/i18n/i18nCommon";
 
 const RetryableStatusCodes = [502, 503, 504];
+const Text = i18nCommon.ApiErrors;
 
 /**
  * Khởi tạo instance axios và cấu hình các interceptor.
@@ -86,13 +88,13 @@ axiosInstance.interceptors.response.use(
    */
   async (error) => {
     // Lấy status code nếu có, mặc định 0 nếu lỗi không có response (network error)
-    const status = error.response?.status;
+    const Status = error.response?.status;
     const RequestConfig = error.config;
     const ShouldUseFallback =
       RequestConfig &&
       !RequestConfig.HasRetriedWithFallback &&
       RequestConfig.baseURL !== FallbackApiBaseUrl &&
-      (!error.response || RetryableStatusCodes.includes(status));
+      (!error.response || RetryableStatusCodes.includes(Status));
 
     if (ShouldUseFallback) {
       const FallbackRequestConfig = {
@@ -109,37 +111,37 @@ axiosInstance.interceptors.response.use(
     }
 
     // Xử lý lỗi 401 Unauthorized: thường do token hết hạn hoặc không hợp lệ
-    if (status === 401) {
+    if (Status === 401) {
       // TODO: Xử lý khi token hết hạn: redirect login, refresh token, v.v.
       // localStorage.removeItem("access_token");
       // window.location.href = "/login";
-      console.error("[API] Unauthorized - Token không hợp lệ hoặc đã hết hạn");
+      console.error(`[API] ${Text.Unauthorized}`);
     }
 
     // Xử lý lỗi 403 Forbidden: người dùng không có quyền truy cập tài nguyên
-    if (status === 403) {
-      console.error("[API] Forbidden - Không có quyền truy cập");
+    if (Status === 403) {
+      console.error(`[API] ${Text.Forbidden}`);
     }
 
     // Xử lý lỗi 404 Not Found: tài nguyên không tồn tại
-    if (status === 404) {
-      console.error("[API] Not Found - Tài nguyên không tồn tại");
+    if (Status === 404) {
+      console.error(`[API] ${Text.NotFound}`);
     }
 
     // Xử lý lỗi 500 Internal Server Error: lỗi máy chủ
-    if (status === 500) {
-      console.error("[API] Internal Server Error");
+    if (Status === 500) {
+      console.error(`[API] ${Text.InternalServerError}`);
     }
 
     // Xử lý lỗi mạng hoặc lỗi không có response
     if (!error.response) {
-      console.error("[API] Network Error - Không thể kết nối đến server");
+      console.error(`[API] ${Text.NetworkError}`);
     }
 
     // Trả về object lỗi chuẩn để component tự xử lý
     return Promise.reject({
-      status: status || 0,
-      message: error.response?.data?.message || error.message || "Có lỗi xảy ra",
+      status: Status || 0,
+      message: error.response?.data?.message || error.message || Text.UnknownError,
       data: error.response?.data || null,
     });
   }

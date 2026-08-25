@@ -4,6 +4,83 @@ const i18nCommon = {
     CartLabel: "Giỏ hàng",
     OrderHistoryLink: "Đơn mua",
     SupportLink: "Hỗ trợ",
+    AdminLink: "Quản trị",
+    CatalogLink: "Danh mục",
+    PromotionMessage: "Ưu đãi sinh viên mỗi ngày",
+    LoginLink: "Đăng nhập",
+    RegisterLink: "Đăng ký",
+    HomeAriaLabel: "Dorm Mart - Trang chủ",
+    SearchPlaceholder: "Tìm đồ dùng ký túc xá, đồ ăn và thiết bị",
+    SearchProductsValue: "đồ gia dụng",
+    SearchCartValue: "đồ dùng trong giỏ hàng",
+    SearchHomeValue: "đồ dùng ký túc xá",
+    SearchButton: "Tìm kiếm",
+    AccountLabel: "Tài khoản",
+    BrandName: "Dorm Mart",
+    BrandDescription: "Tạp Hóa Sinh Viên - nơi gom đủ đồ cho sinh viên, ký túc xá và ở trọ.",
+    CustomerServiceTitle: "Chăm sóc khách hàng",
+    HelpCenter: "Trung tâm trợ giúp",
+    Blog: "Blog Dorm Mart",
+    ReturnRefund: "Đổi trả và hoàn tiền",
+    AboutTitle: "Về Dorm Mart",
+    OurStory: "Câu chuyện của chúng tôi",
+    StudentSeller: "Người bán sinh viên",
+    Careers: "Tuyển dụng",
+    PaymentTitle: "Thanh toán",
+    Visa: "Visa",
+    Mastercard: "Mastercard",
+    CashOnDelivery: "Thanh toán khi nhận hàng",
+    Copyright: "© 2026 Dorm Mart. Bảo lưu mọi quyền.",
+    Regions: "Việt Nam | Thái Lan | Singapore | Philippines",
+    ContactPrice: "Liên hệ",
+    SoldSuffix: "đã bán",
+    NewBadge: "Mới",
+    CurrencyLocale: "vi-VN",
+    CurrencyCode: "VND",
+  },
+  BaseComponents: {
+    NoData: "Không có dữ liệu",
+    NoSearchResults: "Không tìm thấy kết quả",
+  },
+  ApiErrors: {
+    Unauthorized: "Phiên đăng nhập không hợp lệ hoặc đã hết hạn",
+    Forbidden: "Bạn không có quyền truy cập tài nguyên này",
+    NotFound: "Không tìm thấy tài nguyên yêu cầu",
+    InternalServerError: "Máy chủ đang gặp sự cố",
+    NetworkError: "Không thể kết nối đến máy chủ",
+    UnknownError: "Có lỗi xảy ra",
+  },
+  Home: {
+    HeroAlt: "Không gian sống sinh viên Dorm Mart",
+    PromotionBadge: "Ưu đãi tựu trường",
+    HeroTitle: "Nâng cấp không gian của bạn",
+    HeroDescription: "Đầy đủ đồ dùng thiết yếu cho phòng trọ và ký túc xá với giá phù hợp sinh viên.",
+    ShopCatalog: "Mua sắm ngay",
+    OpenAdmin: "Mở trang quản trị",
+    CategoryTitle: "Mua sắm theo danh mục",
+    SeeAll: "Xem tất cả",
+    FlashSale: "Ưu đãi chớp nhoáng",
+    FlashSaleCountdown: "01 : 45 : 22",
+    DailyDiscover: "Khám phá mỗi ngày",
+    BrowseCatalog: "Xem danh mục",
+  },
+  ProductList: {
+    SearchResultPrefix: "Kết quả tìm kiếm cho",
+    DefaultKeyword: "đồ gia dụng",
+    ResultSummary: "Hiển thị 1 - 24 trong 1.248 sản phẩm",
+    FilterTitle: "Bộ lọc",
+    Category: "Danh mục",
+    PriceRange: "Khoảng giá",
+    MinimumPrice: "Tối thiểu",
+    MaximumPrice: "Tối đa",
+    ApplyFilter: "Áp dụng bộ lọc",
+    SortBy: "Sắp xếp theo:",
+    Relevance: "Liên quan",
+    Latest: "Mới nhất",
+    TopSales: "Bán chạy",
+    Pagination: "Trang 1 / 52",
+    FilterOptions: ["Tủ lạnh mini", "Quạt làm mát", "Ấm điện", "Lò vi sóng"],
+    SelectedFilter: "Quạt làm mát",
   },
   ProductDetail: {
     BreadcrumbHome: "Trang chủ",
@@ -129,6 +206,7 @@ const i18nCommon = {
     SuccessMessage: "Yêu cầu đã được ghi nhận. Tính năng gửi email sẽ hoạt động khi kết nối API.",
   },
   Profile: {
+    BrandName: "Dorm Mart",
     PageTitle: "Thông tin cá nhân",
     PageSubtitle: "Quản lý tài khoản Dorm Mart của bạn.",
     AccountSectionTitle: "Tài khoản của tôi",
@@ -195,7 +273,7 @@ const i18nCommon = {
     PaymentInformation: "Thông tin thanh toán", ProductTitle: "Sản phẩm trong đơn", Recipient: "Người nhận", ShippingAddress: "Địa chỉ",
     ShippingMethod: "Vận chuyển", PaymentMethod: "Thanh toán", ShippingFee: "Phí vận chuyển", Discount: "Giảm giá",
     TotalAmount: "Tổng thanh toán", EstimatedDelivery: "Dự kiến nhận hàng", CurrentStatus: "Trạng thái hiện tại",
-    OrderNotFound: "Không tìm thấy đơn hàng", CurrencyLocale: "vi-VN", CurrencyCode: "VND", DateLocale: "vi-VN",
+    OrderNotFound: "Không tìm thấy đơn hàng", QuantityPrefix: "x", CurrencyLocale: "vi-VN", CurrencyCode: "VND", DateLocale: "vi-VN",
   },
   SupportChat: {
     BubbleLabel: "Chat với nhân viên hỗ trợ", CloseChat: "Đóng cửa sổ chat", Online: "Đang trực tuyến",
@@ -210,6 +288,7 @@ const i18nCommon = {
     WorkingTimeLabel: "Thời gian làm việc", WorkingTimeValue: "08:00 - 22:00, Thứ 2 đến Chủ nhật",
   },
   AdminNavigation: {
+    BrandName: "Dorm Mart",
     Overview: "Tổng quan",
     Finance: "Thu chi & lợi nhuận",
     Accounts: "Tài khoản",
@@ -220,7 +299,9 @@ const i18nCommon = {
     Logout: "Đăng xuất",
     SearchPlaceholder: "Tìm đơn hàng, khách hàng...",
     AdminName: "Quản trị viên",
-    AdminRole: "Quản trị hệ thống"
+    AdminRole: "Quản trị hệ thống",
+    NotificationLabel: "Thông báo",
+    ProfileLabel: "Hồ sơ quản trị viên"
   },
   AdminDashboard: {
     Title: "Trung tâm vận hành",
@@ -238,7 +319,9 @@ const i18nCommon = {
     OrdersDescription: "Cập nhật tiến độ và làm việc với vận chuyển.",
     SupportTitle: "Hỗ trợ khách hàng",
     SupportDescription: "Nhận phản hồi và trả lời khách hàng.",
-    OpenSection: "Mở phân hệ"
+    OpenSection: "Mở phân hệ",
+    CurrencyLocale: "vi-VN",
+    CurrencyCode: "VND"
   },
   AdminFinance: {
     Title: "Quản lý thu chi",
@@ -254,7 +337,19 @@ const i18nCommon = {
     Amount: "Số tiền",
     Date: "Ngày chi",
     Save: "Lưu khoản chi",
-    ExpenseHistory: "Các khoản chi gần đây"
+    ExpenseHistory: "Các khoản chi gần đây",
+    ExpenseCode: "Mã",
+    ExpenseCategory: "Loại chi phí",
+    ExpenseDescription: "Nội dung",
+    ExpenseDate: "Ngày",
+    ExpenseAmount: "Số tiền",
+    Categories: {
+      PRODUCT_CAPITAL: "Tiền vốn nhập hàng",
+      SERVER: "Máy chủ",
+      SHIPPING: "Chi phí vận chuyển",
+      DOMAIN: "Tên miền",
+      OTHER: "Chi phí khác"
+    }
   },
   AdminAccounts: {
     Title: "Quản lý tài khoản",
@@ -264,14 +359,30 @@ const i18nCommon = {
     Unlock: "Mở khóa",
     Delete: "Xóa",
     Active: "Đang hoạt động",
-    Locked: "Đã khóa"
+    Locked: "Đã khóa",
+    Customer: "Khách hàng",
+    Contact: "Liên hệ",
+    OrderCount: "Số đơn",
+    CreatedDate: "Ngày tạo",
+    Status: "Trạng thái"
   },
   AdminOrders: {
     Title: "Vận hành đơn hàng",
     Subtitle: "Liên hệ vận chuyển và cập nhật tiến độ xử lý đơn.",
     ContactCarrier: "Liên hệ vận chuyển",
     UpdateStatus: "Cập nhật",
-    NoTracking: "Chưa có mã vận đơn"
+    NoTracking: "Chưa có mã vận đơn",
+    UpdatedAt: "Cập nhật",
+    CarrierNotSelected: "Chưa chọn",
+    FindingCarrier: "Đang tìm đối tác vận chuyển",
+    Statuses: {
+      PREPARING: "Đang chuẩn bị",
+      READY: "Đã chuẩn bị xong",
+      WAITING_CARRIER: "Đợi đơn vị vận chuyển",
+      SHIPPING: "Đang giao",
+      DELIVERED: "Đã giao",
+      CANCELLED: "Đã hủy"
+    }
   },
   AdminSupport: {
     Title: "Hỗ trợ khách hàng",
@@ -280,6 +391,36 @@ const i18nCommon = {
     ReplyPlaceholder: "Nhập nội dung trả lời khách hàng...",
     SendReply: "Gửi phản hồi",
     SelectTicket: "Chọn một yêu cầu để xem chi tiết"
+  },
+  AdminProducts: {
+    Title: "Sản phẩm",
+    Subtitle: "Quản lý tồn kho, giá bán và trạng thái hiển thị sản phẩm.",
+    Export: "Xuất dữ liệu",
+    AddProduct: "Thêm sản phẩm",
+    AllProducts: "Tất cả sản phẩm (1.248)",
+    Active: "Đang bán",
+    Draft: "Bản nháp",
+    OutOfStock: "Hết hàng",
+    Filter: "Lọc",
+    Sort: "Sắp xếp",
+    Product: "Sản phẩm",
+    Category: "Danh mục",
+    Status: "Trạng thái",
+    Inventory: "Tồn kho",
+    Price: "Giá bán",
+    Actions: "Thao tác",
+    ProductCode: "Mã SP",
+    Cost: "Giá vốn",
+    Edit: "Chỉnh sửa",
+    Delete: "Xóa",
+    InStockSuffix: "sản phẩm trong kho",
+    CurrencyLocale: "vi-VN",
+    CurrencyCode: "VND",
+    Statuses: {
+      ACTIVE: "Đang bán",
+      LOW_STOCK: "Sắp hết hàng",
+      DRAFT: "Bản nháp"
+    }
   }
 };
 export default i18nCommon;

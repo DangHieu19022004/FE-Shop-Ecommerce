@@ -39,9 +39,10 @@
 .admin-order-card__actions { display: grid; min-width: 210px; gap: 10px; }
 .admin-support { display: grid; grid-template-columns: minmax(280px, .75fr) minmax(0, 1.5fr); min-height: 520px; }
 .admin-ticket-list { border-right: 1px solid var(--dm-border); }
-.admin-ticket { width: 100%; padding: 16px; border: 0; border-bottom: 1px solid var(--dm-border); background: var(--dm-surface); text-align: left; cursor: pointer; }
+.admin-ticket { display: grid; width: 100%; grid-template-columns: 24px minmax(0, 1fr); column-gap: 10px; padding: 16px; border: 0; border-bottom: 1px solid var(--dm-border); background: var(--dm-surface); text-align: left; cursor: pointer; }
 .admin-ticket--active { background: var(--dm-primary-soft); }
 .admin-ticket strong, .admin-ticket span { display: block; margin-bottom: 5px; }
+.admin-ticket > .admin-ticket__icon { grid-row: 1 / span 3; margin: 0; color: var(--dm-primary); font-size: 20px; }
 .admin-ticket small { color: var(--dm-text-soft); }
 .admin-conversation { display: flex; flex-direction: column; padding: 22px; gap: 16px; }
 .admin-message { max-width: 78%; padding: 12px 14px; border-radius: 14px; background: var(--dm-surface-soft); }

@@ -1,7 +1,4 @@
 import { createRouter, createWebHistory } from "vue-router";
-import DemoView from "@/views/DemoView.vue";
-import SalaryComposition from "@/feat/salarycomposition/SalaryComposition.vue";
-import SalaryCompositionSystem from "@/feat/salarycompositionsystems/SalaryCompositionSystem.vue";
 import DormMartPublicLayout from "@/views/dormmart/layouts/DormMartPublicLayout.vue";
 import DormMartAdminLayout from "@/views/dormmart/layouts/DormMartAdminLayout.vue";
 import DormMartAuthLayout from "@/views/dormmart/layouts/DormMartAuthLayout.vue";
@@ -147,21 +144,6 @@ const routes = [
         component: AdminSupportView,
       },
     ],
-  },
-  {
-    path: "/demo",
-    name: "demoView",
-    component: DemoView,
-  },
-  {
-    path: "/salarycomposition",
-    name: "salaryComposition",
-    component: SalaryComposition,
-  },
-  {
-    path: "/salarycomposition/salarycomposition-system",
-    name: "salaryCompositionSystem",
-    component: SalaryCompositionSystem,
   },
 ];
 

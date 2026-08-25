@@ -29,7 +29,7 @@ watch([ChatMessages, IsChatOpen], scrollToLatest, { deep: true });
         <div v-for="MessageItem in ChatMessages" :key="MessageItem.ChatMessageId" class="support-message" :class="`support-message--${MessageItem.SenderType.toLowerCase()}`"><p>{{ MessageItem.MessageContent }}</p><time>{{ formatTime(MessageItem.SentAt) }}</time></div>
         <div v-if="IsAdminTyping" class="support-message support-message--admin support-message--typing"><span></span><span></span><span></span><small>{{ Text.AdminTyping }}</small></div>
       </div>
-      <div class="support-chat__quick-replies"><button v-for="QuickReplyItem in SupportChatData.QuickReplies" :key="QuickReplyItem.QuickReplyId" type="button" @click="handleQuickReply(QuickReplyItem.QuickReplyText)">{{ QuickReplyItem.QuickReplyText }}</button></div>
+      <div class="support-chat__quick-replies"><button v-for="QuickReplyItem in SupportChatData.QuickReplies" :key="QuickReplyItem.QuickReplyId" type="button" @click="handleQuickReply(QuickReplyItem.QuickReplyText)"><span class="material-symbols-outlined" aria-hidden="true">{{ QuickReplyItem.IconName }}</span>{{ QuickReplyItem.QuickReplyText }}</button></div>
       <form class="support-chat__composer" @submit.prevent="handleSend"><input v-model="MessageInput" :placeholder="Text.InputPlaceholder" maxlength="500" /><DMButton type="none" :is-tooltip="false" class="support-chat__send" :aria-label="Text.SendMessage" @click="handleSend"><span class="material-symbols-outlined" aria-hidden="true">send</span></DMButton></form>
       <router-link v-if="!IsEmbedded" :to="{ name: 'support' }" class="support-chat__center-link" @click="toggleChat">{{ Text.ViewSupportCenter }}</router-link>
     </section>

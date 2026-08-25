@@ -8,13 +8,7 @@ import AdminData from "@/data/adminData.json";
 const Text = inject("i18nCommon").AdminFinance;
 const Expenses = ref(structuredClone(AdminData.Finance.Expenses));
 const RevenueByMonth = ref(structuredClone(AdminData.Finance.RevenueByMonth));
-const ExpenseCategories = [
-  { Value: "PRODUCT_CAPITAL", Label: "Tiền vốn nhập hàng" },
-  { Value: "SERVER", Label: "Máy chủ" },
-  { Value: "SHIPPING", Label: "Chi phí vận chuyển" },
-  { Value: "DOMAIN", Label: "Tên miền" },
-  { Value: "OTHER", Label: "Chi phí khác" }
-];
+const ExpenseCategories = Object.entries(Text.Categories).map(([Value, Label]) => ({ Value, Label }));
 const ExpenseForm = reactive({ CategoryCode: "SERVER", Description: "", Amount: "", ExpenseDate: new Date().toISOString().slice(0, 10) });
 const CurrentRevenue = computed(() => RevenueByMonth.value.at(-1).Revenue);
 const CurrentExpense = computed(() => Expenses.value.reduce((Total, Item) => Total + Item.Amount, 0));
@@ -60,13 +54,13 @@ const addExpense = () => {
           <DMInput v-model="ExpenseForm.Description" :label="Text.Description" />
           <DMInput v-model="ExpenseForm.Amount" type="number" :label="Text.Amount" />
           <DMInput v-model="ExpenseForm.ExpenseDate" type="date" :label="Text.Date" />
-          <DMButton native-type="submit" type="none" :is-tooltip="false" :message="Text.Save" class="admin-button" />
+          <DMButton native-type="submit" type="none" :is-tooltip="false" class="admin-button" :aria-label="Text.Save" :title="Text.Save"><span class="material-symbols-outlined" aria-hidden="true">save</span></DMButton>
         </form>
       </article>
     </div>
     <article class="dm-card admin-panel">
       <div class="admin-panel__header"><h2>{{ Text.ExpenseHistory }}</h2></div>
-      <div class="admin-table-wrap"><table class="dm-table"><thead><tr><th>Mã</th><th>Loại chi phí</th><th>Nội dung</th><th>Ngày</th><th>Số tiền</th></tr></thead><tbody><tr v-for="Item in Expenses" :key="Item.ExpenseId"><td>{{ Item.ExpenseId }}</td><td>{{ getCategoryLabel(Item.CategoryCode) }}</td><td>{{ Item.Description }}</td><td>{{ Item.ExpenseDate }}</td><td><strong>{{ formatCurrency(Item.Amount) }}</strong></td></tr></tbody></table></div>
+      <div class="admin-table-wrap"><table class="dm-table"><thead><tr><th>{{ Text.ExpenseCode }}</th><th>{{ Text.ExpenseCategory }}</th><th>{{ Text.ExpenseDescription }}</th><th>{{ Text.ExpenseDate }}</th><th>{{ Text.ExpenseAmount }}</th></tr></thead><tbody><tr v-for="Item in Expenses" :key="Item.ExpenseId"><td>{{ Item.ExpenseId }}</td><td>{{ getCategoryLabel(Item.CategoryCode) }}</td><td>{{ Item.Description }}</td><td>{{ Item.ExpenseDate }}</td><td><strong>{{ formatCurrency(Item.Amount) }}</strong></td></tr></tbody></table></div>
     </article>
   </section>
 </template>

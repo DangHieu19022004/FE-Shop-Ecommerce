@@ -3,7 +3,7 @@
     <aside class="dm-admin__sidebar">
       <router-link to="/admin" class="dm-brand">
         <span class="dm-brand-icon dm-brand-icon--app-icon admin-brand__icon" aria-hidden="true"></span>
-        <div class="admin-brand__name">Dorm Mart</div>
+        <div class="admin-brand__name">{{ Text.BrandName }}</div>
       </router-link>
 
       <nav class="dm-admin__nav">
@@ -42,7 +42,7 @@
         </label>
 
         <div class="dm-public-actions">
-          <button type="button" class="dm-icon-btn" aria-label="Notifications">
+          <button type="button" class="dm-icon-btn" :aria-label="Text.NotificationLabel" :title="Text.NotificationLabel">
             <span class="material-symbols-outlined">notifications</span>
             <span class="dm-badge-dot">1</span>
           </button>
@@ -51,7 +51,7 @@
               <div style="font-weight: 600; color: var(--dm-text);">{{ Text.AdminName }}</div>
               <div style="font-size: 12px; color: var(--dm-text-soft);">{{ Text.AdminRole }}</div>
             </div>
-            <div class="dm-icon-btn">
+            <div class="dm-icon-btn" :aria-label="Text.ProfileLabel" :title="Text.ProfileLabel">
               <span class="material-symbols-outlined">person</span>
             </div>
           </div>

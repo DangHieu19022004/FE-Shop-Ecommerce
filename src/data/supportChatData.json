@@ -6,9 +6,9 @@
     { "ChatMessageId": "MSG-001", "SupportAgentId": 1, "SenderType": "ADMIN", "MessageContent": "Xin chào! Dorm Mart có thể hỗ trợ gì cho bạn?", "SentAt": "2026-08-17T08:00:00.000Z", "IsRead": true }
   ],
   "QuickReplies": [
-    { "QuickReplyId": 1, "QuickReplyCode": "ORDER_STATUS", "QuickReplyText": "Kiểm tra trạng thái đơn hàng" },
-    { "QuickReplyId": 2, "QuickReplyCode": "PAYMENT_SUPPORT", "QuickReplyText": "Hỗ trợ thanh toán" },
-    { "QuickReplyId": 3, "QuickReplyCode": "RETURN_POLICY", "QuickReplyText": "Chính sách đổi trả" }
+    { "QuickReplyId": 1, "QuickReplyCode": "ORDER_STATUS", "QuickReplyText": "Kiểm tra trạng thái đơn hàng", "IconName": "package_2" },
+    { "QuickReplyId": 2, "QuickReplyCode": "PAYMENT_SUPPORT", "QuickReplyText": "Hỗ trợ thanh toán", "IconName": "payments" },
+    { "QuickReplyId": 3, "QuickReplyCode": "RETURN_POLICY", "QuickReplyText": "Chính sách đổi trả", "IconName": "assignment_return" }
   ],
   "SupportTopics": [
     { "SupportTopicId": 1, "TopicCode": "ORDER", "TopicName": "Đơn hàng", "TopicDescription": "Theo dõi, thay đổi hoặc hủy đơn", "IconName": "package_2" },

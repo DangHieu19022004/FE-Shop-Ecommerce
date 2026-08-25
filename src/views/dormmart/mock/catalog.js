@@ -1,8 +1,11 @@
 import ProductDetailData from "@/data/productDetailData.json";
+import i18nCommon from "@/i18n/i18nCommon";
 
-const CurrencyFormatter = new Intl.NumberFormat("vi-VN", {
+const Text = i18nCommon.Common;
+
+const CurrencyFormatter = new Intl.NumberFormat(Text.CurrencyLocale, {
   style: "currency",
-  currency: "VND",
+  currency: Text.CurrencyCode,
 });
 
 const getImageUrl = (ProductId) =>
@@ -11,7 +14,7 @@ const getImageUrl = (ProductId) =>
   )?.ImageUrl ?? "";
 
 const formatPrice = (Amount) =>
-  Amount === null || Amount === undefined ? "Liên hệ" : CurrencyFormatter.format(Amount);
+  Amount === null || Amount === undefined ? Text.ContactPrice : CurrencyFormatter.format(Amount);
 
 export const Categories = ProductDetailData.Categories.map((CategoryItem) => ({
   Icon: CategoryItem.CategoryCode === "CLEANING" ? "cleaning_services" : "home",
@@ -25,7 +28,7 @@ export const Products = ProductDetailData.Products.map((ProductItem) => ({
   Title: ProductItem.ProductName,
   CategoryId: ProductItem.CategoryId,
   Price: formatPrice(ProductItem.UnitPrice),
-  Sold: `${ProductItem.SoldQuantity} đã bán`,
+  Sold: `${ProductItem.SoldQuantity} ${Text.SoldSuffix}`,
   Location: ProductItem.LocationName,
   Badge: ProductItem.BadgeCode,
   Stock: ProductItem.StockQuantity,
@@ -35,5 +38,5 @@ export const Products = ProductDetailData.Products.map((ProductItem) => ({
 export const FlashProducts = Products.slice(0, 4).map((ProductItem) => ({
   ...ProductItem,
   Name: ProductItem.Title,
-  Discount: "Mới",
+  Discount: Text.NewBadge,
 }));

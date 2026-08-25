@@ -92,7 +92,7 @@ onMounted(addQueryProduct);
         <div><span>{{ Text.Shipping }}</span><strong class="cart-summary__shipping">{{ ShippingAmount ? formatCurrency(ShippingAmount) : Text.Free }}</strong></div>
         <div class="cart-summary__total"><span>{{ Text.Total }}</span><strong>{{ formatCurrency(TotalAmount) }}</strong></div>
       </div>
-      <DMButton type="none" :is-tooltip="false" :message="`${Text.Checkout} (${SelectedQuantity})`" class="cart-summary__checkout" :un-active="SelectedItems.length === 0" @click="navigateToCheckout" />
+      <DMButton type="none" :is-tooltip="false" class="cart-summary__checkout" :aria-label="`${Text.Checkout} (${SelectedQuantity})`" :title="`${Text.Checkout} (${SelectedQuantity})`" :un-active="SelectedItems.length === 0" @click="navigateToCheckout"><span class="material-symbols-outlined" aria-hidden="true">payments</span></DMButton>
       <div class="cart-summary__note"><span class="material-symbols-outlined" aria-hidden="true">local_shipping</span>{{ Text.ShippingNote }}</div>
     </aside>
   </section>

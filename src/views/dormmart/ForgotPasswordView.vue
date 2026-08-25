@@ -29,7 +29,7 @@ const handleSubmit = () => {
     <form class="auth-form" novalidate @submit.prevent="handleSubmit">
       <DMInput v-model="ForgotPasswordForm.Email" class="auth-form__input" type="email" :label="Text.EmailLabel" :placeholder="Text.EmailPlaceholder" :error-messages="EmailError" :is-required="true" />
       <p v-if="SuccessMessage" class="auth-form__message auth-form__message--success" role="status">{{ SuccessMessage }}</p>
-      <DMButton native-type="submit" type="none" :is-tooltip="false" :message="Text.SubmitButton" class="auth-form__submit" />
+      <DMButton native-type="submit" type="none" :is-tooltip="false" class="auth-form__submit" :aria-label="Text.SubmitButton" :title="Text.SubmitButton"><span class="material-symbols-outlined" aria-hidden="true">send</span></DMButton>
     </form>
     <p class="auth-card__switch"><router-link :to="{ name: 'login' }">{{ Text.BackToLogin }}</router-link></p>
   </article>
