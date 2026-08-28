@@ -15,6 +15,9 @@ import LoginView from "@/views/dormmart/LoginView.vue";
 import RegisterView from "@/views/dormmart/RegisterView.vue";
 import ForgotPasswordView from "@/views/dormmart/ForgotPasswordView.vue";
 import ProfileView from "@/views/dormmart/ProfileView.vue";
+import LoyaltyView from "@/views/dormmart/LoyaltyView.vue";
+import NotificationsView from "@/views/dormmart/NotificationsView.vue";
+import MyReviewsView from "@/views/dormmart/MyReviewsView.vue";
 import { getCurrentSession } from "@/services/authService";
 import AdminDashboardView from "@/views/dormmart/admin/AdminDashboardView.vue";
 import AdminProductsView from "@/views/dormmart/admin/AdminProductsView.vue";
@@ -22,6 +25,7 @@ import AdminOrdersView from "@/views/dormmart/admin/AdminOrdersView.vue";
 import AdminFinanceView from "@/views/dormmart/admin/AdminFinanceView.vue";
 import AdminAccountsView from "@/views/dormmart/admin/AdminAccountsView.vue";
 import AdminSupportView from "@/views/dormmart/admin/AdminSupportView.vue";
+import AdminReviewsView from "@/views/dormmart/admin/AdminReviewsView.vue";
 
 /**
  * Khai báo danh sách các tuyến đường (routes) của ứng dụng.
@@ -67,13 +71,32 @@ const routes = [
         meta: { RequiresAuth: true },
       },
       {
+        path: "profile/loyalty",
+        name: "loyalty",
+        component: LoyaltyView,
+        meta: { RequiresAuth: true },
+      },
+      {
+        path: "profile/notifications",
+        name: "notifications",
+        component: NotificationsView,
+        meta: { RequiresAuth: true },
+      },
+      {
+        path: "profile/reviews",
+        name: "myReviews",
+        component: MyReviewsView,
+        meta: { RequiresAuth: true },
+      },
+      {
         path: "payment",
         name: "payment",
         component: PaymentView,
+        meta: { RequiresAuth: true },
       },
-      { path: "orders", name: "orderHistory", component: OrderHistoryView },
-      { path: "orders/:orderCode", name: "orderDetail", component: OrderDetailView },
-      { path: "support", name: "support", component: SupportView },
+      { path: "orders", name: "orderHistory", component: OrderHistoryView, meta: { RequiresAuth: true } },
+      { path: "orders/:orderCode", name: "orderDetail", component: OrderDetailView, meta: { RequiresAuth: true } },
+      { path: "support", name: "support", component: SupportView, meta: { RequiresAuth: true } },
     ],
   },
   {
@@ -112,6 +135,7 @@ const routes = [
   {
     path: "/admin",
     component: DormMartAdminLayout,
+    meta: { RequiresAuth: true, RequiresAdmin: true },
     children: [
       {
         path: "",
@@ -143,6 +167,11 @@ const routes = [
         name: "adminSupport",
         component: AdminSupportView,
       },
+      {
+        path: "reviews",
+        name: "adminReviews",
+        component: AdminReviewsView,
+      },
     ],
   },
 ];
@@ -153,9 +182,16 @@ const router = createRouter({
 });
 
 router.beforeEach((ToRoute) => {
-  if (ToRoute.meta.RequiresAuth && !getCurrentSession()) {
+  const SessionData = getCurrentSession();
+
+  if (ToRoute.meta.RequiresAuth && !SessionData) {
     return { name: "login", query: { Redirect: ToRoute.fullPath } };
   }
+
+  if (ToRoute.meta.RequiresAdmin && !SessionData?.Roles?.includes("Admin")) {
+    return { name: "home" };
+  }
+
   return true;
 });
 

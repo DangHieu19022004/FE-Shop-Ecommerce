@@ -5,17 +5,45 @@ import {
   PrimaryApiBaseUrl,
 } from "@/config/apiConfig";
 import i18nCommon from "@/i18n/i18nCommon";
+import {
+  clearAuthSession,
+  getStoredAccessToken,
+  getStoredRefreshToken,
+  persistAuthSession,
+} from "@/services/authStorage";
 
 const RetryableStatusCodes = [502, 503, 504];
 const Text = i18nCommon.ApiErrors;
 
-/**
- * Khởi tạo instance axios và cấu hình các interceptor.
- *
- * Sử dụng khi: Các API service cần một client HTTP đã được cấu hình sẵn baseURL và xử lý lỗi.
- *
- * CREATED BY: TDHieu (09/06/2026)
- */
+const refreshTokenViaHttp = async () => {
+  const RefreshToken = getStoredRefreshToken();
+  const PersistMode = localStorage.getItem("DORM_MART_SESSION_PERSIST") === "local";
+  if (!RefreshToken) return null;
+
+  const Response = await axios.post(`${PrimaryApiBaseUrl}/auth/refresh-token`, {
+    RefreshToken,
+  }, {
+    timeout: ApiTimeoutMs,
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+  });
+
+  const AuthData = Response.data?.Data;
+  if (!AuthData?.AccessToken || !AuthData?.User) return null;
+
+  persistAuthSession({
+    AccessToken: AuthData.AccessToken,
+    RefreshToken: AuthData.RefreshToken,
+    ExpiresAt: AuthData.ExpiresAt,
+    User: AuthData.User,
+    RememberMe: PersistMode,
+  });
+
+  return AuthData.AccessToken;
+};
+
 const axiosInstance = axios.create({
   baseURL: PrimaryApiBaseUrl,
   timeout: ApiTimeoutMs,
@@ -25,67 +53,20 @@ const axiosInstance = axios.create({
   },
 });
 
-/**
- * Cấu hình interceptor (Chặn một request hoặc response ở giữa quá trình xử lý để thực hiện thêm logic trước khi nó đi tiếp) cho request và response để xử lý token và lỗi toàn cục.
- * Tự động gắn token vào header trước mỗi request.
- *
- * CREATED BY: TDHieu (09/06/2026)
- */
 axiosInstance.interceptors.request.use(
-  /**
-   * Chặn request trước khi gửi đi để đính kèm token hoặc config cần thiết.
-   *
-   * Sử dụng khi: Cần thêm header xác thực cho toàn bộ các call API.
-   *
-   * @param {Object} config Cấu hình của request
-   * @returns {Object} Cấu hình request đã được sửa đổi
-   *
-   * CREATED BY: TDHieu (09/06/2026)
-   */
   (config) => {
-    // TODO: Thay "access_token" bằng key lưu token thật trong localStorage/sessionStorage
-    // const token = localStorage.getItem("access_token");
-    // if (token) {
-    //   config.headers.Authorization = `Bearer ${token}`;
-    // }
+    const Token = getStoredAccessToken();
+    if (Token) {
+      config.headers.Authorization = `Bearer ${Token}`;
+    }
 
-    // TODO: Nếu API yêu cầu thêm header khác (VD: X-Company-Id, X-Branch-Id...) thêm vào đây
-    // config.headers["X-Company-Id"] = localStorage.getItem("company_id");
     return config;
   },
   (error) => Promise.reject(error)
 );
 
-/**
- * Xử lý lỗi toàn cục (200, 400, 500...)
- *
- * CREATED BY: TDHieu (09/06/2026)
- */
 axiosInstance.interceptors.response.use(
-  // Trường hợp thành công: trả thẳng data để component không cần .data.data
-  /**
-   * Trích xuất trực tiếp payload data từ HTTP response.
-   *
-   * Sử dụng khi: API call thành công, bỏ qua vỏ bọc của axios.
-   *
-   * @param {Object} response Phản hồi thành công từ axios
-   * @returns {any} Phần data thực sự từ API trả về
-   *
-   * CREATED BY: TDHieu (09/06/2026)
-   */
   (response) => response.data,
-
-  // Trường hợp lỗi
-  /**
-   * Xử lý tập trung các lỗi HTTP phổ biến.
-   *
-   * Sử dụng khi: Server trả về lỗi (4xx, 5xx) hoặc lỗi mạng.
-   *
-   * @param {Object} error Đối tượng lỗi từ axios
-   * @returns {Promise<any>} Promise bị reject mang cấu trúc lỗi đã chuẩn hóa
-   *
-   * CREATED BY: TDHieu (09/06/2026)
-   */
   async (error) => {
     // Lấy status code nếu có, mặc định 0 nếu lỗi không có response (network error)
     const Status = error.response?.status;
@@ -110,38 +91,55 @@ axiosInstance.interceptors.response.use(
       return axiosInstance(FallbackRequestConfig);
     }
 
-    // Xử lý lỗi 401 Unauthorized: thường do token hết hạn hoặc không hợp lệ
-    if (Status === 401) {
-      // TODO: Xử lý khi token hết hạn: redirect login, refresh token, v.v.
-      // localStorage.removeItem("access_token");
-      // window.location.href = "/login";
-      console.error(`[API] ${Text.Unauthorized}`);
+    const CanRefreshToken =
+      status === 401 &&
+      RequestConfig &&
+      !RequestConfig.HasRetriedAfterRefresh &&
+      !String(RequestConfig.url || "").includes("/auth/login") &&
+      !String(RequestConfig.url || "").includes("/auth/refresh-token");
+
+    if (CanRefreshToken) {
+      try {
+        const NewAccessToken = await refreshTokenViaHttp();
+        if (NewAccessToken) {
+          return axiosInstance({
+            ...RequestConfig,
+            HasRetriedAfterRefresh: true,
+            headers: {
+              ...RequestConfig.headers,
+              Authorization: `Bearer ${NewAccessToken}`,
+            },
+          });
+        }
+      } catch {
+        clearAuthSession();
+      }
     }
 
-    // Xử lý lỗi 403 Forbidden: người dùng không có quyền truy cập tài nguyên
-    if (Status === 403) {
-      console.error(`[API] ${Text.Forbidden}`);
+    if (status === 401) {
+      clearAuthSession();
+      console.error("[API] Unauthorized - Token không hợp lệ hoặc đã hết hạn");
     }
 
-    // Xử lý lỗi 404 Not Found: tài nguyên không tồn tại
-    if (Status === 404) {
-      console.error(`[API] ${Text.NotFound}`);
+    if (status === 403) {
+      console.error("[API] Forbidden - Không có quyền truy cập");
     }
 
-    // Xử lý lỗi 500 Internal Server Error: lỗi máy chủ
-    if (Status === 500) {
-      console.error(`[API] ${Text.InternalServerError}`);
+    if (status === 404) {
+      console.error("[API] Not Found - Tài nguyên không tồn tại");
     }
 
-    // Xử lý lỗi mạng hoặc lỗi không có response
+    if (status === 500) {
+      console.error("[API] Internal Server Error");
+    }
+
     if (!error.response) {
       console.error(`[API] ${Text.NetworkError}`);
     }
 
-    // Trả về object lỗi chuẩn để component tự xử lý
     return Promise.reject({
-      status: Status || 0,
-      message: error.response?.data?.message || error.message || Text.UnknownError,
+      status: status || 0,
+      message: error.response?.data?.UserMessage || error.response?.data?.DevMessage || error.message || "Có lỗi xảy ra",
       data: error.response?.data || null,
     });
   }

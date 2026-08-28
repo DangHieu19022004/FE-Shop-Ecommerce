@@ -1,10 +1,42 @@
 <script setup>
 import { inject } from "vue";
 import { Categories, FlashProducts, Products } from "@/views/dormmart/mock/catalog";
+import { computed, onMounted, ref } from "vue";
 import QuickAddCartButton from "@/components/dormmart/QuickAddCartButton.vue";
+import { getCategories, getProducts } from "@/services/catalogService";
+import { formatCompactNumber, formatCurrency } from "@/utils/shopFormatters";
 
 const DiscoverProducts = Products.slice(0, 4);
 const Text = inject("i18nCommon").Home;
+const Categories = ref([]);
+const FlashProducts = ref([]);
+const DiscoverProducts = ref([]);
+const IsLoading = ref(false);
+const ErrorMessage = ref("");
+
+const HeroProducts = computed(() => DiscoverProducts.value.slice(0, 4));
+
+const loadHomeData = async () => {
+  IsLoading.value = true;
+  ErrorMessage.value = "";
+
+  try {
+    const [CategoryData, ProductData] = await Promise.all([
+      getCategories(),
+      getProducts({ PageSize: 8, Sort: "newest" }),
+    ]);
+
+    Categories.value = CategoryData;
+    FlashProducts.value = (ProductData.Items || []).slice(0, 4);
+    DiscoverProducts.value = ProductData.Items || [];
+  } catch (Error) {
+    ErrorMessage.value = Error.message;
+  } finally {
+    IsLoading.value = false;
+  }
+};
+
+onMounted(loadHomeData);
 </script>
 
 <template>
@@ -22,17 +54,21 @@ const Text = inject("i18nCommon").Home;
     </div>
   </section>
 
+  <div v-if="ErrorMessage" class="dm-card" style="padding: 16px; margin-bottom: 24px; color: var(--dm-danger);">
+    {{ ErrorMessage }}
+  </div>
+
   <section style="margin-bottom: 24px;">
     <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 16px;">
       <h2 style="font-size: 24px;">{{ Text.CategoryTitle }}</h2>
       <router-link to="/products" style="color: var(--dm-primary); font-weight: 600;">{{ Text.SeeAll }}</router-link>
     </div>
     <div class="dm-grid" style="grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));">
-      <router-link v-for="CategoryItem in Categories" :key="CategoryItem.Label" :to="`/products?category=${CategoryItem.Query}`" class="dm-card" style="padding: 18px 12px; text-align: center; display: block; color: inherit;">
+      <router-link v-for="CategoryItem in Categories" :key="CategoryItem.Id" :to="`/products?CategoryId=${CategoryItem.Id}`" class="dm-card" style="padding: 18px 12px; text-align: center; display: block; color: inherit;">
         <div style="width: 52px; height: 52px; border-radius: 50%; margin: 0 auto 10px; background: var(--dm-primary-soft); color: var(--dm-primary); display: grid; place-items: center;">
-          <span class="material-symbols-outlined">{{ CategoryItem.Icon }}</span>
+          <span class="material-symbols-outlined">category</span>
         </div>
-        <div style="font-weight: 600;">{{ CategoryItem.Label }}</div>
+        <div style="font-weight: 600;">{{ CategoryItem.Name }}</div>
       </router-link>
     </div>
   </section>
@@ -45,16 +81,17 @@ const Text = inject("i18nCommon").Home;
       </h2>
       <div class="dm-pill" style="background: rgba(186, 26, 26, 0.08); color: var(--dm-danger);">{{ Text.FlashSaleCountdown }}</div>
     </div>
-    <div class="dm-grid dm-grid--products">
-      <article v-for="ProductItem in FlashProducts" :key="ProductItem.Slug" class="dm-card dm-product-card">
-        <router-link :to="`/products/${ProductItem.Slug}`"><img :src="ProductItem.Image" :alt="ProductItem.Name" class="dm-product-card__image" /></router-link>
+    <div v-if="IsLoading" class="dm-card" style="padding: 16px; text-align: center;">Đang tải sản phẩm...</div>
+    <div v-else class="dm-grid dm-grid--products">
+      <article v-for="ProductItem in FlashProducts" :key="ProductItem.ProductId" class="dm-card dm-product-card">
+        <router-link :to="`/products/${ProductItem.Slug}`"><img :src="ProductItem.PrimaryImageUrl || 'https://placehold.co/400x400?text=No+Image'" :alt="ProductItem.Name" class="dm-product-card__image" /></router-link>
         <div class="dm-product-card__body">
-          <div class="dm-pill" style="align-self: flex-start; background: var(--dm-secondary); color: var(--dm-secondary-text);">{{ ProductItem.Discount }}</div>
+          <div class="dm-pill" style="align-self: flex-start; background: var(--dm-secondary); color: var(--dm-secondary-text);">{{ ProductItem.BrandName || 'Dorm Mart' }}</div>
           <strong>{{ ProductItem.Name }}</strong>
-          <div style="color: var(--dm-danger); font-size: 20px; font-weight: 800;">{{ ProductItem.Price }}</div>
-          <div style="color: var(--dm-text-soft); font-size: 13px;">{{ ProductItem.Sold }}</div>
+          <div style="color: var(--dm-danger); font-size: 20px; font-weight: 800;">{{ formatCurrency(ProductItem.MinSalePrice) }}</div>
+          <div style="color: var(--dm-text-soft); font-size: 13px;">{{ ProductItem.CategoryName }}</div>
         </div>
-        <QuickAddCartButton :ProductId="ProductItem.ProductId" :ImageUrl="ProductItem.Image" />
+        <QuickAddCartButton :ProductSlug="ProductItem.Slug" :ImageUrl="ProductItem.PrimaryImageUrl || ''" />
       </article>
     </div>
   </section>
@@ -64,18 +101,18 @@ const Text = inject("i18nCommon").Home;
       <h2 style="font-size: 24px;">{{ Text.DailyDiscover }}</h2>
       <router-link to="/products" style="color: var(--dm-primary); font-weight: 600;">{{ Text.BrowseCatalog }}</router-link>
     </div>
-    <div class="dm-grid dm-grid--products">
-      <article v-for="ProductItem in DiscoverProducts" :key="ProductItem.Slug" class="dm-card dm-product-card">
-        <router-link :to="`/products/${ProductItem.Slug}`"><img :src="ProductItem.Image" :alt="ProductItem.Title" class="dm-product-card__image" /></router-link>
+    <div v-if="!IsLoading" class="dm-grid dm-grid--products">
+      <article v-for="ProductItem in HeroProducts" :key="ProductItem.ProductId" class="dm-card dm-product-card">
+        <router-link :to="`/products/${ProductItem.Slug}`"><img :src="ProductItem.PrimaryImageUrl || 'https://placehold.co/400x400?text=No+Image'" :alt="ProductItem.Name" class="dm-product-card__image" /></router-link>
         <div class="dm-product-card__body">
-          <div class="dm-pill" style="align-self: flex-start; background: var(--dm-primary-soft); color: var(--dm-primary);">{{ ProductItem.Badge }}</div>
-          <router-link :to="`/products/${ProductItem.Slug}`"><strong style="line-height: 1.4;">{{ ProductItem.Title }}</strong></router-link>
+          <div class="dm-pill" style="align-self: flex-start; background: var(--dm-primary-soft); color: var(--dm-primary);">{{ ProductItem.CategoryName }}</div>
+          <router-link :to="`/products/${ProductItem.Slug}`"><strong style="line-height: 1.4;">{{ ProductItem.Name }}</strong></router-link>
           <div style="display: flex; justify-content: space-between; gap: 10px; align-items: baseline;">
-            <span style="color: var(--dm-danger); font-size: 18px; font-weight: 800;">{{ ProductItem.Price }}</span>
-            <span style="color: var(--dm-text-soft); font-size: 12px;">{{ ProductItem.Sold }}</span>
+            <span style="color: var(--dm-danger); font-size: 18px; font-weight: 800;">{{ formatCurrency(ProductItem.MinSalePrice) }}</span>
+            <span style="color: var(--dm-text-soft); font-size: 12px;">{{ formatCompactNumber(ProductItem.MaxSalePrice) }}</span>
           </div>
         </div>
-        <QuickAddCartButton :ProductId="ProductItem.ProductId" :ImageUrl="ProductItem.Image" />
+        <QuickAddCartButton :ProductSlug="ProductItem.Slug" :ImageUrl="ProductItem.PrimaryImageUrl || ''" />
       </article>
     </div>
   </section>

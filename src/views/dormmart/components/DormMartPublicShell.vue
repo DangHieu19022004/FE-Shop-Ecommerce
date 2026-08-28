@@ -3,15 +3,16 @@
     <header class="dm-public-header">
       <div class="dm-public-header__top">
         <div class="dm-public-header__links">
-          <router-link to="/admin">{{ Text.AdminLink }}</router-link>
-          <router-link to="/products">{{ Text.CatalogLink }}</router-link>
-          <span>{{ Text.PromotionMessage }}</span>
+          <router-link v-if="IsAdmin" to="/admin">Admin</router-link>
+          <router-link to="/products">Catalog</router-link>
+          <span>Student deals daily</span>
         </div>
         <div class="dm-public-header__links">
           <router-link :to="{ name: 'orderHistory' }">{{ Text.OrderHistoryLink }}</router-link>
           <router-link :to="{ name: 'support' }">{{ Text.SupportLink }}</router-link>
-          <router-link to="/login">{{ Text.LoginLink }}</router-link>
-          <router-link to="/register">{{ Text.RegisterLink }}</router-link>
+          <router-link v-if="!SessionData" to="/login">Đăng nhập</router-link>
+          <router-link v-if="!SessionData" to="/register">Đăng ký</router-link>
+          <router-link v-else to="/profile">{{ SessionData.FullName }}</router-link>
         </div>
       </div>
 
@@ -82,11 +83,14 @@
 </template>
 
 <script setup>
-import { inject } from "vue";
+import { computed, inject } from "vue";
 import { CartTotalQuantity } from "@/stores/cartStore";
 import SupportChatWidget from "@/components/dormmart/SupportChatWidget.vue";
+import { getCurrentSession } from "@/services/authService";
 
 const Text = inject("i18nCommon").Common;
+const SessionData = computed(() => getCurrentSession());
+const IsAdmin = computed(() => SessionData.value?.Roles?.includes("Admin"));
 
 defineProps({
   searchValue: {

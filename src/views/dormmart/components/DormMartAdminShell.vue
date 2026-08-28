@@ -22,16 +22,17 @@
           <span>{{ Text.Orders }}</span>
         </router-link>
         <router-link :class="linkClass('/admin/support')" to="/admin/support"><span class="material-symbols-outlined">support_agent</span><span>{{ Text.Support }}</span></router-link>
+        <router-link :class="linkClass('/admin/reviews')" to="/admin/reviews"><span class="material-symbols-outlined">reviews</span><span>Đánh giá</span></router-link>
         <router-link class="dm-admin__link" to="/">
           <span class="material-symbols-outlined">storefront</span>
           <span>{{ Text.Storefront }}</span>
         </router-link>
       </nav>
 
-      <router-link class="dm-admin__link" to="/login" style="margin-top: auto; color: var(--dm-danger);">
+      <button type="button" class="dm-admin__link" style="margin-top: auto; color: var(--dm-danger); width: 100%; background: transparent; border: 0;" @click="handleLogout">
         <span class="material-symbols-outlined">logout</span>
         <span>{{ Text.Logout }}</span>
-      </router-link>
+      </button>
     </aside>
 
     <div class="dm-admin__body">
@@ -48,8 +49,8 @@
           </button>
           <div style="display: flex; align-items: center; gap: 10px;">
             <div style="text-align: right;">
-              <div style="font-weight: 600; color: var(--dm-text);">{{ Text.AdminName }}</div>
-              <div style="font-size: 12px; color: var(--dm-text-soft);">{{ Text.AdminRole }}</div>
+              <div style="font-weight: 600; color: var(--dm-text);">{{ SessionData?.FullName || Text.AdminName }}</div>
+              <div style="font-size: 12px; color: var(--dm-text-soft);">{{ SessionData?.Email || Text.AdminRole }}</div>
             </div>
             <div class="dm-icon-btn" :aria-label="Text.ProfileLabel" :title="Text.ProfileLabel">
               <span class="material-symbols-outlined">person</span>
@@ -66,14 +67,22 @@
 </template>
 
 <script setup>
-import { inject } from "vue";
-import { useRoute } from "vue-router";
+import { computed, inject } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import { getCurrentSession, logoutUser } from "@/services/authService";
 
 const route = useRoute();
+const Router = useRouter();
 const Text = inject("i18nCommon").AdminNavigation;
+const SessionData = computed(() => getCurrentSession());
 
 const linkClass = (path) => {
   const isActive = path === "/admin" ? route.path === path : route.path.startsWith(path);
   return ["dm-admin__link", isActive ? "dm-admin__link--active" : ""];
+};
+
+const handleLogout = async () => {
+  await logoutUser();
+  Router.replace({ name: "login" });
 };
 </script>

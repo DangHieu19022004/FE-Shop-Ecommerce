@@ -1,106 +1,96 @@
 <script setup>
-import { computed, inject, reactive, ref } from "vue";
+import { computed, inject, onMounted, reactive, ref } from "vue";
 import DMButton from "@/components/base/DMButton.vue";
-import DMInput from "@/components/base/DMInput.vue";
 import DMRadio from "@/components/base/DMRadio.vue";
 import DMTextarea from "@/components/base/DMTextarea.vue";
-import PaymentData from "@/data/paymentData.json";
+import { checkoutOrder } from "@/services/checkoutService";
+import { getCurrentSession } from "@/services/authService";
+import { getMyAddresses } from "@/services/authService";
+import { CartItems, CartSummary, loadCart } from "@/stores/cartStore";
+import { formatAddress, formatCurrency } from "@/utils/shopFormatters";
 
 const Text = inject("i18nCommon").Payment;
-const SelectedShippingMethodId = ref(2);
-const SelectedPaymentMethodId = ref(1);
+const SelectedPaymentMethodId = ref(0);
 const OrderNote = ref("");
-const SelectedAddressId = ref(1);
-const IsAddressListVisible = ref(false);
-const SelectedVoucherId = ref(null);
-const IsVoucherListVisible = ref(false);
-const VoucherSearch = ref("");
-const VoucherMessage = ref("");
-const OrderResult = reactive({ IsSuccess: false, OrderCode: "" });
-const ShippingOptions = PaymentData.ShippingMethods.map((ShippingItem) => ({ ...ShippingItem, value: ShippingItem.ShippingMethodId, label: ShippingItem.ShippingName }));
-const PaymentOptions = PaymentData.PaymentMethods.filter((PaymentItem) => PaymentItem.IsActive).map((PaymentItem) => ({ ...PaymentItem, value: PaymentItem.PaymentMethodId, label: PaymentItem.PaymentName }));
-const SelectedAddress = computed(() => PaymentData.Addresses.find((AddressItem) => AddressItem.AddressId === SelectedAddressId.value) ?? PaymentData.Addresses[0]);
-const SelectedShippingMethod = computed(() => PaymentData.ShippingMethods.find((ShippingItem) => ShippingItem.ShippingMethodId === SelectedShippingMethodId.value));
-const MerchandiseSubtotal = computed(() => PaymentData.CheckoutItems.reduce((Total, Item) => Total + Item.UnitPrice * Item.Quantity, 0));
-const SelectedVoucher = computed(() => PaymentData.Vouchers.find((VoucherItem) => VoucherItem.VoucherId === SelectedVoucherId.value));
-const FilteredVouchers = computed(() => {
-  const SearchValue = VoucherSearch.value.trim().toLowerCase();
-  if (!SearchValue) return PaymentData.Vouchers;
-  return PaymentData.Vouchers.filter((VoucherItem) => VoucherItem.VoucherCode.toLowerCase().includes(SearchValue) || VoucherItem.VoucherName.toLowerCase().includes(SearchValue));
-});
-const DiscountAmount = computed(() => {
-  if (!SelectedVoucher.value) return 0;
-  if (SelectedVoucher.value.DiscountType === "PERCENTAGE") return Math.min(MerchandiseSubtotal.value * SelectedVoucher.value.DiscountValue / 100, SelectedVoucher.value.MaximumDiscountAmount);
-  if (SelectedVoucher.value.DiscountType === "SHIPPING_AMOUNT") return Math.min(SelectedShippingMethod.value.ShippingFee, SelectedVoucher.value.DiscountValue);
-  return SelectedVoucher.value.DiscountValue;
-});
-const TotalPayment = computed(() => MerchandiseSubtotal.value + SelectedShippingMethod.value.ShippingFee - DiscountAmount.value);
+const Addresses = ref([]);
+const SelectedAddressId = ref("");
+const ErrorMessage = ref("");
+const SuccessMessage = ref("");
+const IsSubmitting = ref(false);
+const PaymentOptions = [
+  { value: 0, label: "COD", PaymentName: "COD", PaymentDescription: "Thanh toán khi nhận hàng", IconName: "payments" },
+  { value: 1, label: "Bank Transfer", PaymentName: "Chuyển khoản", PaymentDescription: "Chuyển khoản thủ công", IconName: "account_balance" },
+  { value: 2, label: "Gateway", PaymentName: "Cổng thanh toán", PaymentDescription: "Thanh toán qua cổng", IconName: "credit_card" },
+];
+const SelectedAddress = computed(() => Addresses.value.find((AddressItem) => AddressItem.UserAddressId === SelectedAddressId.value));
 
-const formatCurrency = (Amount) => new Intl.NumberFormat(Text.CurrencyLocale, { style: "currency", currency: Text.CurrencyCode }).format(Amount);
-const formatDate = (DateValue) => new Intl.DateTimeFormat(Text.DateLocale, { day: "2-digit", month: "2-digit", year: "numeric" }).format(new Date(`${DateValue}T00:00:00`));
-const getDeliveryRange = (ShippingMethod) => ShippingMethod.EstimatedFromDate === ShippingMethod.EstimatedToDate ? formatDate(ShippingMethod.EstimatedFromDate) : `${formatDate(ShippingMethod.EstimatedFromDate)} - ${formatDate(ShippingMethod.EstimatedToDate)}`;
-const selectAddress = (AddressId) => { SelectedAddressId.value = AddressId; IsAddressListVisible.value = false; };
-const selectVoucher = (VoucherId) => { SelectedVoucherId.value = VoucherId; VoucherMessage.value = ""; IsVoucherListVisible.value = false; };
-const removeVoucher = () => { SelectedVoucherId.value = null; };
-const applyVoucherCode = () => {
-  const VoucherCode = VoucherSearch.value.trim().toUpperCase();
-  const VoucherItem = PaymentData.Vouchers.find((Item) => Item.VoucherCode === VoucherCode && Item.IsActive);
-  if (!VoucherItem || MerchandiseSubtotal.value < VoucherItem.MinimumOrderAmount) { VoucherMessage.value = Text.VoucherNotFound; IsVoucherListVisible.value = true; return; }
-  selectVoucher(VoucherItem.VoucherId);
+const loadCheckoutData = async () => {
+  ErrorMessage.value = "";
+
+  try {
+    await loadCart();
+    Addresses.value = await getMyAddresses();
+    SelectedAddressId.value = Addresses.value.find((AddressItem) => AddressItem.IsDefault)?.UserAddressId || Addresses.value[0]?.UserAddressId || "";
+  } catch (Error) {
+    ErrorMessage.value = Error.message;
+  }
 };
-const placeOrder = () => {
-  OrderResult.OrderCode = `DM${Date.now().toString().slice(-8)}`;
-  OrderResult.IsSuccess = true;
-  window.scrollTo({ top: 0, behavior: "smooth" });
+
+const placeOrder = async () => {
+  if (!SelectedAddressId.value) {
+    ErrorMessage.value = "Cần chọn địa chỉ nhận hàng.";
+    return;
+  }
+
+  IsSubmitting.value = true;
+  ErrorMessage.value = "";
+  SuccessMessage.value = "";
+
+  try {
+    const Result = await checkoutOrder({
+      UserAddressId: SelectedAddressId.value,
+      PaymentMethod: SelectedPaymentMethodId.value,
+      IdempotencyKey: crypto.randomUUID(),
+      Note: OrderNote.value || null,
+    });
+    SuccessMessage.value = `Đặt hàng thành công: ${Result.OrderCode || Result.Order?.OrderCode || ''}`;
+    await loadCart();
+  } catch (Error) {
+    ErrorMessage.value = Error.message;
+  } finally {
+    IsSubmitting.value = false;
+  }
 };
+
+onMounted(loadCheckoutData);
 </script>
 
 <template>
   <section class="payment-page">
     <header class="payment-page__heading"><h1>{{ Text.PageTitle }}</h1></header>
-    <div v-if="OrderResult.IsSuccess" class="payment-success dm-card" role="status">
-      <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
-      <strong>{{ Text.OrderSuccess }} {{ OrderResult.OrderCode }}</strong>
-    </div>
+    <div v-if="ErrorMessage" class="payment-success dm-card" role="alert" style="color: var(--dm-danger);">{{ ErrorMessage }}</div>
+    <div v-if="SuccessMessage" class="payment-success dm-card" role="status"><span class="material-symbols-outlined" aria-hidden="true">check_circle</span><strong>{{ SuccessMessage }}</strong></div>
 
     <article class="payment-section payment-address dm-card">
       <div class="payment-section__title"><span class="material-symbols-outlined" aria-hidden="true">location_on</span><h2>{{ Text.AddressTitle }}</h2></div>
-      <div class="payment-address__content">
-        <strong>{{ SelectedAddress.RecipientName }} · {{ SelectedAddress.Phone }}</strong>
-        <p>{{ SelectedAddress.AddressLine }}</p>
-        <span class="dm-pill">{{ Text.DefaultAddress }}</span>
-        <DMButton type="none" :is-tooltip="false" class="payment-link-button" :aria-label="Text.ChangeAddress" :title="Text.ChangeAddress" @click="IsAddressListVisible = !IsAddressListVisible"><span class="material-symbols-outlined" aria-hidden="true">edit_location_alt</span></DMButton>
-        <div v-if="IsAddressListVisible" class="address-list">
-          <button v-for="AddressItem in PaymentData.Addresses" :key="AddressItem.AddressId" type="button" class="address-item" :class="{ 'address-item--active': SelectedAddressId === AddressItem.AddressId }" @click="selectAddress(AddressItem.AddressId)">
-            <span class="material-symbols-outlined" aria-hidden="true">{{ AddressItem.AddressTypeCode === 'HOME' ? 'home' : AddressItem.AddressTypeCode === 'OFFICE' ? 'apartment' : 'school' }}</span>
-            <span><strong>{{ AddressItem.RecipientName }} · {{ AddressItem.Phone }}</strong><small>{{ AddressItem.AddressType }}</small><p>{{ AddressItem.AddressLine }}</p></span>
-            <span class="address-item__status">{{ SelectedAddressId === AddressItem.AddressId ? Text.SelectedAddress : Text.UseAddress }}</span>
-          </button>
-        </div>
+      <div v-if="Addresses.length" class="payment-address__content">
+        <button v-for="AddressItem in Addresses" :key="AddressItem.UserAddressId" type="button" class="address-item" :class="{ 'address-item--active': SelectedAddressId === AddressItem.UserAddressId }" @click="SelectedAddressId = AddressItem.UserAddressId">
+          <span class="material-symbols-outlined" aria-hidden="true">home</span>
+          <span><strong>{{ AddressItem.RecipientName }} · {{ AddressItem.PhoneNumber }}</strong><p>{{ formatAddress(AddressItem) }}</p></span>
+          <span class="address-item__status">{{ SelectedAddressId === AddressItem.UserAddressId ? Text.SelectedAddress : Text.UseAddress }}</span>
+        </button>
       </div>
+      <p v-else>Chưa có địa chỉ. Vào hồ sơ để tạo địa chỉ trước khi checkout.</p>
     </article>
 
     <article class="payment-section dm-card">
       <div class="payment-section__title"><span class="material-symbols-outlined" aria-hidden="true">shopping_bag</span><h2>{{ Text.ProductTitle }}</h2></div>
       <div class="payment-products__header"><span>{{ Text.ProductTitle }}</span><span>{{ Text.UnitPrice }}</span><span>{{ Text.Quantity }}</span><span>{{ Text.ItemTotal }}</span></div>
-      <div v-for="Item in PaymentData.CheckoutItems" :key="Item.CheckoutItemId" class="payment-product">
-        <img :src="Item.ImageUrl" :alt="Item.ProductName" />
+      <div v-for="Item in CartItems" :key="Item.CartItemId" class="payment-product">
+        <img :src="Item.PrimaryImageUrl || 'https://placehold.co/240x240?text=No+Image'" :alt="Item.ProductName" />
         <div><strong>{{ Item.ProductName }}</strong><span>{{ Item.VariantName }}</span></div>
-        <span>{{ formatCurrency(Item.UnitPrice) }}</span><span>{{ Item.Quantity }}</span><strong>{{ formatCurrency(Item.UnitPrice * Item.Quantity) }}</strong>
+        <span>{{ formatCurrency(Item.UnitPrice) }}</span><span>{{ Item.Quantity }}</span><strong>{{ formatCurrency(Item.LineTotal) }}</strong>
       </div>
-    </article>
-
-    <article class="payment-section dm-card">
-      <div class="payment-section__title"><span class="material-symbols-outlined" aria-hidden="true">local_shipping</span><h2>{{ Text.ShippingTitle }}</h2></div>
-      <DMRadio v-model="SelectedShippingMethodId" class="payment-radio" name="shipping-method" :options="ShippingOptions">
-        <template #option="{ option: ShippingItem }">
-          <div class="shipping-method">
-            <div><strong>{{ ShippingItem.ShippingName }}</strong><span v-if="ShippingItem.IsRecommended" class="dm-pill">{{ Text.Recommended }}</span></div>
-            <p>{{ ShippingItem.ShippingDescription }}</p>
-            <div class="shipping-method__details"><span>{{ Text.ReceiveDate }}: <strong>{{ getDeliveryRange(ShippingItem) }}</strong></span><span>{{ Text.ShippingFee }}: <strong>{{ formatCurrency(ShippingItem.ShippingFee) }}</strong></span></div>
-          </div>
-        </template>
-      </DMRadio>
     </article>
 
     <article class="payment-section dm-card">
@@ -140,15 +130,12 @@ const placeOrder = () => {
       <h2>{{ Text.SummaryTitle }}</h2>
       <div class="payment-summary__content">
         <div class="payment-summary__rows">
-          <div><span>{{ Text.MerchandiseSubtotal }}</span><strong>{{ formatCurrency(MerchandiseSubtotal) }}</strong></div>
-          <div><span>{{ Text.ShippingSubtotal }}</span><strong>{{ formatCurrency(SelectedShippingMethod.ShippingFee) }}</strong></div>
-          <div><span>{{ Text.Discount }}</span><strong class="payment-summary__discount">-{{ formatCurrency(DiscountAmount) }}</strong></div>
-          <div class="payment-summary__total"><span>{{ Text.TotalPayment }}</span><strong>{{ formatCurrency(TotalPayment) }}</strong></div>
+          <div><span>{{ Text.MerchandiseSubtotal }}</span><strong>{{ formatCurrency(CartSummary.Subtotal) }}</strong></div>
+          <div><span>{{ Text.ShippingSubtotal }}</span><strong>{{ formatCurrency(CartSummary.Total - CartSummary.Subtotal) }}</strong></div>
+          <div class="payment-summary__total"><span>{{ Text.TotalPayment }}</span><strong>{{ formatCurrency(CartSummary.Total) }}</strong></div>
         </div>
         <div class="payment-summary__action"><DMButton type="none" :is-tooltip="false" class="payment-summary__submit" :aria-label="Text.PlaceOrder" :title="Text.PlaceOrder" @click="placeOrder"><span class="material-symbols-outlined" aria-hidden="true">shopping_bag</span></DMButton><p>{{ Text.TermsNotice }}</p></div>
       </div>
     </aside>
   </section>
 </template>
-
-<style scoped src="@/assets/styles/screens/payment.css"></style>

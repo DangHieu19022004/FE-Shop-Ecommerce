@@ -32,7 +32,9 @@ const handleSubmit = async () => {
   const RegisterResult = await registerUser(RegisterForm);
   IsSubmitting.value = false;
   if (!RegisterResult.IsSuccess) {
-    FormErrors.General = Text.AccountExists;
+    FormErrors.General = RegisterResult.ErrorCode === "ACCOUNT_EXISTS"
+      ? Text.AccountExists
+      : RegisterResult.Message || Text.RequiredField;
     return;
   }
   Router.push({ name: "login", query: { RegisterMessage: Text.RegisterSuccess } });

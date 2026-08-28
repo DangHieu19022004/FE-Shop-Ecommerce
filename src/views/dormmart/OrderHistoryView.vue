@@ -1,25 +1,42 @@
 <script setup>
-import { computed, inject, ref } from "vue";
-import DMButton from "@/components/base/DMButton.vue";
+import { computed, inject, onMounted, ref } from "vue";
 import DMInput from "@/components/base/DMInput.vue";
-import OrderData from "@/data/orderHistoryData.json";
+import { getOrders } from "@/services/orderService";
+import { formatCurrency, formatDate } from "@/utils/shopFormatters";
 
 const Text = inject("i18nCommon").OrderHistory;
+const Orders = ref([]);
 const SelectedStatusCode = ref("ALL");
 const SearchValue = ref("");
-const StatusFilters = computed(() => [{ StatusCode: "ALL", StatusName: Text.AllOrders, IconName: "receipt_long" }, ...OrderData.OrderStatuses]);
-const FilteredOrders = computed(() => OrderData.Orders.filter((OrderItem) => {
-  const Status = OrderData.OrderStatuses.find((StatusItem) => StatusItem.OrderStatusId === OrderItem.OrderStatusId);
-  const Items = OrderData.OrderItems.filter((Item) => Item.OrderId === OrderItem.OrderId);
-  const SearchText = `${OrderItem.OrderCode} ${Items.map((Item) => Item.ProductName).join(" ")}`.toLowerCase();
-  const IsStatusMatched = SelectedStatusCode.value === "ALL" || Status?.StatusCode === SelectedStatusCode.value;
+const IsLoading = ref(false);
+const ErrorMessage = ref("");
+const StatusFilters = computed(() => [
+  { StatusCode: "ALL", StatusName: Text.AllOrders },
+  ...Array.from(new Set(Orders.value.map((OrderItem) => OrderItem.Status))).map((StatusCode) => ({
+    StatusCode,
+    StatusName: StatusCode,
+  })),
+]);
+const FilteredOrders = computed(() => Orders.value.filter((OrderItem) => {
+  const SearchText = `${OrderItem.OrderCode} ${OrderItem.Status}`.toLowerCase();
+  const IsStatusMatched = SelectedStatusCode.value === "ALL" || OrderItem.Status === SelectedStatusCode.value;
   return IsStatusMatched && SearchText.includes(SearchValue.value.trim().toLowerCase());
 }));
 
-const getStatus = (OrderStatusId) => OrderData.OrderStatuses.find((StatusItem) => StatusItem.OrderStatusId === OrderStatusId);
-const getOrderItems = (OrderId) => OrderData.OrderItems.filter((Item) => Item.OrderId === OrderId);
-const formatCurrency = (Amount) => new Intl.NumberFormat(Text.CurrencyLocale, { style: "currency", currency: Text.CurrencyCode }).format(Amount);
-const formatDate = (DateValue) => new Intl.DateTimeFormat(Text.DateLocale, { day: "2-digit", month: "2-digit", year: "numeric" }).format(new Date(DateValue));
+const loadOrderHistory = async () => {
+  IsLoading.value = true;
+  ErrorMessage.value = "";
+
+  try {
+    Orders.value = await getOrders();
+  } catch (Error) {
+    ErrorMessage.value = Error.message;
+  } finally {
+    IsLoading.value = false;
+  }
+};
+
+onMounted(loadOrderHistory);
 </script>
 
 <template>
@@ -28,17 +45,14 @@ const formatDate = (DateValue) => new Intl.DateTimeFormat(Text.DateLocale, { day
     <nav class="order-status-tabs" :aria-label="Text.PageTitle">
       <DMButton v-for="StatusItem in StatusFilters" :key="StatusItem.StatusCode" type="none" :is-tooltip="false" class="order-status-tabs__button" :class="{ 'order-status-tabs__button--active': SelectedStatusCode === StatusItem.StatusCode }" :aria-label="StatusItem.StatusName" @click="SelectedStatusCode = StatusItem.StatusCode"><span v-if="StatusItem.IconName" class="material-symbols-outlined" aria-hidden="true">{{ StatusItem.IconName }}</span><span>{{ StatusItem.StatusName }}</span></DMButton>
     </nav>
-    <div v-if="FilteredOrders.length" class="order-list">
+    <div v-if="IsLoading" class="order-empty dm-card"><h2>Đang tải đơn hàng...</h2></div>
+    <div v-else-if="ErrorMessage" class="order-empty dm-card"><h2>{{ ErrorMessage }}</h2></div>
+    <div v-else-if="FilteredOrders.length" class="order-list">
       <article v-for="OrderItem in FilteredOrders" :key="OrderItem.OrderId" class="order-card dm-card">
-        <header class="order-card__header"><div><strong>{{ Text.OrderCode }}: {{ OrderItem.OrderCode }}</strong><span>{{ Text.OrderedAt }}: {{ formatDate(OrderItem.CreatedAt) }}</span></div><span class="order-status" :class="`order-status--${getStatus(OrderItem.OrderStatusId)?.StatusCode.toLowerCase().replace('_', '-')}`"><span class="material-symbols-outlined" aria-hidden="true">{{ getStatus(OrderItem.OrderStatusId)?.IconName }}</span>{{ getStatus(OrderItem.OrderStatusId)?.StatusName }}</span></header>
-        <div class="order-card__items">
-          <div v-for="Item in getOrderItems(OrderItem.OrderId)" :key="Item.OrderItemId" class="order-card__item"><img :src="Item.ImageUrl" :alt="Item.ProductName" /><div><strong>{{ Item.ProductName }}</strong><span>{{ Item.VariantName }}</span><span>{{ Text.QuantityPrefix }}{{ Item.Quantity }}</span></div><strong>{{ formatCurrency(Item.UnitPrice * Item.Quantity) }}</strong></div>
-        </div>
-        <footer class="order-card__footer"><div><span>{{ Text.EstimatedDelivery }}: {{ formatDate(OrderItem.EstimatedDeliveryDate) }}</span><strong>{{ Text.TotalAmount }}: {{ formatCurrency(OrderItem.TotalAmount) }}</strong></div><router-link :to="{ name: 'orderDetail', params: { orderCode: OrderItem.OrderCode } }" class="dm-btn">{{ Text.ViewDetail }}</router-link></footer>
+        <header class="order-card__header"><div><strong>{{ Text.OrderCode }}: {{ OrderItem.OrderCode }}</strong><span>{{ Text.OrderedAt }}: {{ formatDate(OrderItem.CreateDate) }}</span></div><span class="order-status">{{ OrderItem.Status }}</span></header>
+        <footer class="order-card__footer"><div><span>{{ Text.ProductCount }}: {{ OrderItem.ItemCount }}</span><strong>{{ Text.TotalAmount }}: {{ formatCurrency(OrderItem.Total) }}</strong></div><router-link :to="{ name: 'orderDetail', params: { orderCode: OrderItem.OrderCode } }" class="dm-btn">{{ Text.ViewDetail }}</router-link></footer>
       </article>
     </div>
     <div v-else class="order-empty dm-card"><span class="material-symbols-outlined" aria-hidden="true">receipt_long</span><h2>{{ Text.EmptyTitle }}</h2><p>{{ Text.EmptyDescription }}</p></div>
   </section>
 </template>
-
-<style scoped src="@/assets/styles/screens/order-history.css"></style>

@@ -39,6 +39,8 @@ __screenshots__/
 *.timestamp-*-*.mjs
 
 converticon.html
+playwright-report
+test-results
 
 .env
 

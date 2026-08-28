@@ -4,7 +4,7 @@ import DMButton from "@/components/base/DMButton.vue";
 import { addProductToCart } from "@/stores/cartStore";
 
 const Props = defineProps({
-  ProductId: { type: Number, required: true },
+  ProductSlug: { type: String, required: true },
   ImageUrl: { type: String, default: "" },
 });
 const Text = inject("i18nCommon").Common;
@@ -39,9 +39,13 @@ const animateToCart = (SourceElement) => {
 const handleQuickAdd = async (Event) => {
   if (IsAnimating.value) return;
   IsAnimating.value = true;
-  await animateToCart(Event.currentTarget);
-  addProductToCart(Props.ProductId);
-  IsAnimating.value = false;
+
+  try {
+    await animateToCart(Event.currentTarget);
+    await addProductToCart({ ProductSlug: Props.ProductSlug });
+  } finally {
+    IsAnimating.value = false;
+  }
 };
 </script>
 
