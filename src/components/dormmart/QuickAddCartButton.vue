@@ -50,7 +50,5 @@ const handleQuickAdd = async (Event) => {
 </script>
 
 <template>
-  <DMButton type="none" :is-tooltip="false" class="quick-add-cart" :aria-label="Text.QuickAddCart" :un-active="IsAnimating" @click="handleQuickAdd">
-    <span class="material-symbols-outlined" aria-hidden="true">add</span>
-  </DMButton>
+  <DMButton type="none" :is-tooltip="false" class="quick-add-cart" icon-name="add" :aria-label="Text.QuickAddCart" :un-active="IsAnimating" @click="handleQuickAdd" />
 </template>

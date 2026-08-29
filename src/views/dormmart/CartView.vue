@@ -79,13 +79,13 @@ onMounted(async () => {
             <div class="cart-item__mobile-price">{{ formatCurrency(CartItem.LineTotal) }}</div>
           </div>
           <div class="cart-quantity">
-            <DMButton type="none" :is-tooltip="false" class="cart-quantity__button" :aria-label="Text.DecreaseQuantity" :un-active="CartItem.Quantity <= 1" @click="changeQuantity(CartItem.CartItemId, -1, CartItem.Quantity)"><span class="material-symbols-outlined" aria-hidden="true">remove</span></DMButton>
+            <DMButton type="none" :is-tooltip="false" class="cart-quantity__button" icon-name="remove" :aria-label="Text.DecreaseQuantity" :un-active="CartItem.Quantity <= 1" @click="changeQuantity(CartItem.CartItemId, -1, CartItem.Quantity)" />
             <strong>{{ CartItem.Quantity }}</strong>
-            <DMButton type="none" :is-tooltip="false" class="cart-quantity__button" :aria-label="Text.IncreaseQuantity" :un-active="CartItem.Quantity >= CartItem.AvailableStock" @click="changeQuantity(CartItem.CartItemId, 1, CartItem.Quantity)"><span class="material-symbols-outlined" aria-hidden="true">add</span></DMButton>
+            <DMButton type="none" :is-tooltip="false" class="cart-quantity__button" icon-name="add" :aria-label="Text.IncreaseQuantity" :un-active="CartItem.Quantity >= CartItem.AvailableStock" @click="changeQuantity(CartItem.CartItemId, 1, CartItem.Quantity)" />
             <small>{{ CartItem.AvailableStock }} {{ Text.InStock }}</small>
           </div>
           <strong class="cart-item__price">{{ formatCurrency(CartItem.LineTotal) }}</strong>
-          <DMButton type="none" :is-tooltip="false" class="cart-item__remove" :aria-label="`${Text.Remove} ${CartItem.ProductName}`" @click="removeItem(CartItem.CartItemId)"><span class="material-symbols-outlined" aria-hidden="true">delete</span></DMButton>
+          <DMButton type="none" :is-tooltip="false" class="cart-item__remove" icon-name="delete" :aria-label="`${Text.Remove} ${CartItem.ProductName}`" @click="removeItem(CartItem.CartItemId)" />
         </article>
       </div>
       <div v-else-if="!CartIsLoading" class="cart-empty">
@@ -100,7 +100,7 @@ onMounted(async () => {
         <div><span>{{ Text.Shipping }}</span><strong class="cart-summary__shipping">{{ Text.Free }}</strong></div>
         <div class="cart-summary__total"><span>{{ Text.Total }}</span><strong>{{ formatCurrency(TotalAmount) }}</strong></div>
       </div>
-      <DMButton type="none" :is-tooltip="false" class="cart-summary__checkout" :aria-label="`${Text.Checkout} (${SelectedQuantity})`" :title="`${Text.Checkout} (${SelectedQuantity})`" :un-active="SelectedItems.length === 0" @click="navigateToCheckout"><span class="material-symbols-outlined" aria-hidden="true">payments</span></DMButton>
+      <DMButton type="none" :is-tooltip="false" class="cart-summary__checkout" icon-name="payments" :message="`${Text.Checkout} (${SelectedQuantity})`" :un-active="SelectedItems.length === 0" @click="navigateToCheckout" />
       <div class="cart-summary__note"><span class="material-symbols-outlined" aria-hidden="true">local_shipping</span>{{ Text.ShippingNote }}</div>
     </aside>
   </section>

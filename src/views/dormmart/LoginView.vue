@@ -91,9 +91,7 @@ const togglePassword = () => {
       <DMInput v-model="LoginForm.Account" class="auth-form__input" :label="Text.AccountLabel" :placeholder="Text.AccountPlaceholder" :error-messages="FormErrors.Account" :is-required="true" />
       <div class="auth-form__password">
         <DMInput v-model="LoginForm.Password" class="auth-form__input" :type="IsPasswordVisible ? 'text' : 'password'" :label="Text.PasswordLabel" :placeholder="Text.PasswordPlaceholder" :error-messages="FormErrors.Password" :is-required="true" :has-trailing-action="true" />
-        <DMButton type="none" :is-tooltip="false" class="auth-form__visibility" :aria-label="IsPasswordVisible ? Text.HidePassword : Text.ShowPassword" @click="togglePassword">
-          <span class="material-symbols-outlined" aria-hidden="true">{{ IsPasswordVisible ? "visibility_off" : "visibility" }}</span>
-        </DMButton>
+        <DMButton type="none" :is-tooltip="false" class="auth-form__visibility" :icon-name="IsPasswordVisible ? 'visibility_off' : 'visibility'" :aria-label="IsPasswordVisible ? Text.HidePassword : Text.ShowPassword" @click="togglePassword" />
       </div>
 
       <p v-if="FormErrors.General" class="auth-form__message auth-form__message--error" role="alert">{{ FormErrors.General }}</p>
@@ -103,7 +101,7 @@ const togglePassword = () => {
         <router-link :to="{ name: 'forgotPassword' }">{{ Text.ForgotPassword }}</router-link>
       </div>
 
-      <DMButton native-type="submit" type="none" :is-tooltip="false" class="auth-form__submit" :un-active="IsSubmitting" :aria-label="Text.SubmitButton" :title="Text.SubmitButton"><span class="material-symbols-outlined" aria-hidden="true">login</span></DMButton>
+      <DMButton native-type="submit" type="none" :is-tooltip="false" class="auth-form__submit" icon-name="login" :message="Text.SubmitButton" :un-active="IsSubmitting" />
     </form>
 
     <div class="auth-divider"><span>{{ Text.Divider }}</span></div>

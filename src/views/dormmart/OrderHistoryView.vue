@@ -43,7 +43,7 @@ onMounted(loadOrderHistory);
   <section class="order-history">
     <header class="order-history__heading"><div><h1>{{ Text.PageTitle }}</h1><p>{{ Text.PageSubtitle }}</p></div><div class="order-history__search"><DMInput v-model="SearchValue" :placeholder="Text.SearchPlaceholder" /><span class="material-symbols-outlined" aria-hidden="true">search</span></div></header>
     <nav class="order-status-tabs" :aria-label="Text.PageTitle">
-      <DMButton v-for="StatusItem in StatusFilters" :key="StatusItem.StatusCode" type="none" :is-tooltip="false" class="order-status-tabs__button" :class="{ 'order-status-tabs__button--active': SelectedStatusCode === StatusItem.StatusCode }" :aria-label="StatusItem.StatusName" @click="SelectedStatusCode = StatusItem.StatusCode"><span v-if="StatusItem.IconName" class="material-symbols-outlined" aria-hidden="true">{{ StatusItem.IconName }}</span><span>{{ StatusItem.StatusName }}</span></DMButton>
+      <DMButton v-for="StatusItem in StatusFilters" :key="StatusItem.StatusCode" type="none" :is-tooltip="false" class="order-status-tabs__button" :class="{ 'order-status-tabs__button--active': SelectedStatusCode === StatusItem.StatusCode }" :icon-name="StatusItem.IconName" :message="StatusItem.StatusName" @click="SelectedStatusCode = StatusItem.StatusCode" />
     </nav>
     <div v-if="IsLoading" class="order-empty dm-card"><h2>Đang tải đơn hàng...</h2></div>
     <div v-else-if="ErrorMessage" class="order-empty dm-card"><h2>{{ ErrorMessage }}</h2></div>

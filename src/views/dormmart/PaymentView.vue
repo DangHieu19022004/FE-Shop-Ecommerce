@@ -268,8 +268,8 @@ onMounted(loadCheckoutData);
       <div class="payment-voucher">
         <div class="payment-voucher__heading"><span class="material-symbols-outlined" aria-hidden="true">confirmation_number</span><div><strong>{{ Text.VoucherTitle }}</strong><p>{{ SelectedVoucher ? SelectedVoucher.VoucherName : Text.NoVoucher }}</p></div></div>
         <div class="payment-voucher__actions">
-          <DMButton v-if="SelectedVoucher" type="none" :is-tooltip="false" class="payment-voucher__remove" :aria-label="Text.RemoveVoucher" :title="Text.RemoveVoucher" @click="removeVoucher"><span class="material-symbols-outlined" aria-hidden="true">close</span></DMButton>
-          <DMButton type="none" :is-tooltip="false" class="payment-voucher__select" :aria-label="Text.SelectVoucher" :title="Text.SelectVoucher" @click="IsVoucherListVisible = !IsVoucherListVisible"><span class="material-symbols-outlined" aria-hidden="true">confirmation_number</span></DMButton>
+          <DMButton v-if="SelectedVoucher" type="none" :is-tooltip="false" class="payment-voucher__remove" icon-name="close" :aria-label="Text.RemoveVoucher" :title="Text.RemoveVoucher" @click="removeVoucher" />
+          <DMButton type="none" :is-tooltip="false" class="payment-voucher__select" icon-name="confirmation_number" :message="Text.SelectVoucher" @click="IsVoucherListVisible = !IsVoucherListVisible" />
         </div>
         <div class="payment-voucher__summary">
           <div>
@@ -287,7 +287,7 @@ onMounted(loadCheckoutData);
         </div>
         <div class="payment-voucher__search">
           <DMInput v-model="VoucherSearch" :placeholder="Text.VoucherSearchPlaceholder" @keyup.enter="applyVoucherCode" />
-          <DMButton type="none" :is-tooltip="false" class="payment-voucher__apply" :aria-label="Text.SearchVoucher" :title="Text.SearchVoucher" @click="applyVoucherCode"><span class="material-symbols-outlined" aria-hidden="true">search</span></DMButton>
+          <DMButton type="none" :is-tooltip="false" class="payment-voucher__apply" icon-name="search" :message="Text.SearchVoucher" @click="applyVoucherCode" />
         </div>
         <p v-if="VoucherMessage" class="payment-voucher__message" :class="{ 'payment-voucher__message--success': SelectedVoucher && IsVoucherEligible }" role="alert">{{ VoucherMessage }}</p>
         <div v-if="IsVoucherListVisible" class="voucher-list">
@@ -312,7 +312,7 @@ onMounted(loadCheckoutData);
           <div class="payment-summary__total"><span>Tổng ước tính</span><strong>{{ formatCurrency(EstimatedTotal) }}</strong></div>
           <small class="payment-summary__note">Tổng trên là ước tính từ cart + shipping quote + voucher hiện chọn. Checkout thật vẫn do backend chốt.</small>
         </div>
-        <div class="payment-summary__action"><DMButton type="none" :is-tooltip="false" class="payment-summary__submit" :aria-label="IsSubmitting ? 'Đang đặt hàng' : Text.PlaceOrder" :title="IsSubmitting ? 'Đang đặt hàng' : Text.PlaceOrder" :un-active="!CanPlaceOrder" @click="placeOrder"><span class="material-symbols-outlined" aria-hidden="true">shopping_bag</span><span>{{ IsSubmitting ? 'Đang đặt hàng...' : Text.PlaceOrder }}</span></DMButton><p>{{ Text.TermsNotice }}</p></div>
+        <div class="payment-summary__action"><DMButton type="none" :is-tooltip="false" class="payment-summary__submit" icon-name="shopping_bag" :message="IsSubmitting ? 'Đang đặt hàng...' : Text.PlaceOrder" :un-active="!CanPlaceOrder" @click="placeOrder" /><p>{{ Text.TermsNotice }}</p></div>
       </div>
     </aside>
   </section>

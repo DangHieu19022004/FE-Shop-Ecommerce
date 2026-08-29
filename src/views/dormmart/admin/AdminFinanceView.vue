@@ -111,7 +111,7 @@ onMounted(loadFinance);
           <DMInput v-model="ExpenseForm.Note" :label="Text.Description" />
           <DMInput v-model="ExpenseForm.Amount" type="number" :label="Text.Amount" />
           <DMInput v-model="ExpenseForm.ExpenseDate" type="date" :label="Text.Date" />
-          <DMButton native-type="submit" type="none" :is-tooltip="false" class="admin-button" :aria-label="Text.Save" :title="Text.Save"><span class="material-symbols-outlined" aria-hidden="true">save</span></DMButton>
+          <DMButton native-type="submit" type="none" :is-tooltip="false" class="admin-button" icon-name="save" :message="Text.Save" />
         </form>
       </article>
     </div>

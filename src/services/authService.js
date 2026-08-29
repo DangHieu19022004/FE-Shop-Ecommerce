@@ -1,4 +1,5 @@
 import axiosInstance from "@/services/axios";
+import AuthDataMock from "@/data/authData.json";
 import {
   clearAuthSession,
   getStoredRefreshToken,
@@ -49,26 +50,39 @@ export const registerUser = async (RegisterPayload) => {
 };
 
 export const loginUser = async (LoginPayload) => {
-  try {
-    const Response = await axiosInstance.post("/auth/login", {
-      Email: LoginPayload.Account.trim().toLowerCase(),
-      Password: LoginPayload.Password,
-    });
-    const AuthData = unwrapData(Response);
+  // TẠM THỜI: bỏ qua API đăng nhập để kiểm thử giao diện admin khi backend chưa chạy.
+  // Khôi phục khối gọi API bên dưới khi backend sẵn sàng.
+  /*
+    try {
+      const Response = await axiosInstance.post("/auth/login", {
+        Email: LoginPayload.Account.trim().toLowerCase(),
+        Password: LoginPayload.Password,
+      });
+      const AuthData = unwrapData(Response);
 
-    if (!AuthData?.AccessToken || !AuthData?.User) {
-      return { IsSuccess: false, ErrorCode: "INVALID_RESPONSE", Message: unwrapMessage(Response) };
+      if (!AuthData?.AccessToken || !AuthData?.User) {
+        return { IsSuccess: false, ErrorCode: "INVALID_RESPONSE", Message: unwrapMessage(Response) };
+      }
+
+      return toSessionPayload(AuthData, LoginPayload.RememberMe);
+    } catch (Error) {
+      return {
+        IsSuccess: false,
+        ErrorCode: Error.status === 401 ? "INVALID_CREDENTIALS" : "LOGIN_FAILED",
+        Message: Error.message,
+        Errors: Error.data?.errors || [],
+      };
     }
+  */
 
-    return toSessionPayload(AuthData, LoginPayload.RememberMe);
-  } catch (Error) {
-    return {
-      IsSuccess: false,
-      ErrorCode: Error.status === 401 ? "INVALID_CREDENTIALS" : "LOGIN_FAILED",
-      Message: Error.message,
-      Errors: Error.data?.errors || [],
-    };
-  }
+  const MockAuthData = {
+    AccessToken: "FRONTEND_ADMIN_TEST_ACCESS_TOKEN",
+    RefreshToken: "FRONTEND_ADMIN_TEST_REFRESH_TOKEN",
+    ExpiresAt: new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString(),
+    User: AuthDataMock.MockAdminUser,
+  };
+
+  return toSessionPayload(MockAuthData, LoginPayload.RememberMe);
 };
 
 export const refreshSession = async () => {

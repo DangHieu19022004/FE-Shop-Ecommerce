@@ -110,10 +110,7 @@ onMounted(loadAddresses);
         <h1>{{ Text.PageTitle }}</h1>
         <p>{{ Text.PageSubtitle }}</p>
       </div>
-      <DMButton type="none" :is-tooltip="false" class="profile-page__logout" @click="handleLogout">
-        <span class="material-symbols-outlined" aria-hidden="true">logout</span>
-        {{ Text.LogoutButton }}
-      </DMButton>
+      <DMButton type="none" :is-tooltip="false" class="profile-page__logout" icon-name="logout" :message="Text.LogoutButton" @click="handleLogout" />
     </header>
 
     <div class="profile-page__grid">

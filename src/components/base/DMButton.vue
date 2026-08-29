@@ -9,7 +9,7 @@
     `ms-button--tooltip-${tooltipPosition}`,
     { 'ms-button--line-left': normalizedLineLeft, 'ms-button--line-right': normalizedLineRight },
     { 'ms-button--no-tooltip': !normalizedIsTooltip },
-    { 'ms-button--icon-only': !message && (iconLeft || iconRight) },
+    { 'ms-button--icon-only': !message && !$slots.default && (iconName || iconLeft || iconRight) },
     { 'ms-button--spread-icon': normalizedSpreadIcon },
     { 'ms-button--unactive': normalizedUnActive },
     { [`ms-button--shape-${shapeBtn}`]: shapeBtn },
@@ -20,6 +20,7 @@
   @mouseenter="showTooltip"
   @mouseleave="hideTooltip"
 >
+    <span v-if="iconName" class="material-symbols-outlined ms-button__icon ms-button__icon--left" aria-hidden="true">{{ iconName }}</span>
     <i v-if="iconLeft" :class="[iconLeft, 'ms-button__icon']"></i>
     <span v-if="message || $slots.default" class="ms-button__content">
     <!-- <span class="ms-button__content"> -->
@@ -65,6 +66,10 @@ const props = defineProps({
     default: "none",
   },
   iconLeft: {
+    type: String,
+    default: "",
+  },
+  iconName: {
     type: String,
     default: "",
   },
@@ -188,6 +193,9 @@ const hideTooltip = () => {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+.ms-button:not(.ms-button--icon-only) .ms-button__icon--left {
+  margin-right: 8px;
 }
 .ms-button--icon-only {
   padding: 6px;

@@ -98,7 +98,7 @@ const togglePassword = () => {
       <div class="auth-form__grid">
         <div class="auth-form__password">
           <DMInput v-model="RegisterForm.Password" class="auth-form__input" :type="IsPasswordVisible ? 'text' : 'password'" :label="Text.PasswordLabel" :placeholder="Text.PasswordPlaceholder" :error-messages="FormErrors.Password" :is-required="true" :has-trailing-action="true" />
-          <DMButton type="none" :is-tooltip="false" class="auth-form__visibility" :aria-label="IsPasswordVisible ? Text.HidePassword : Text.ShowPassword" @click="togglePassword"><span class="material-symbols-outlined" aria-hidden="true">{{ IsPasswordVisible ? "visibility_off" : "visibility" }}</span></DMButton>
+          <DMButton type="none" :is-tooltip="false" class="auth-form__visibility" :icon-name="IsPasswordVisible ? 'visibility_off' : 'visibility'" :aria-label="IsPasswordVisible ? Text.HidePassword : Text.ShowPassword" @click="togglePassword" />
         </div>
         <DMInput v-model="RegisterForm.ConfirmPassword" class="auth-form__input" :type="IsPasswordVisible ? 'text' : 'password'" :label="Text.ConfirmPasswordLabel" :placeholder="Text.ConfirmPasswordPlaceholder" :error-messages="FormErrors.ConfirmPassword" :is-required="true" />
       </div>
@@ -108,7 +108,7 @@ const togglePassword = () => {
       </DMCheckbox>
       <p v-if="FormErrors.Agreement" class="auth-form__message auth-form__message--error">{{ FormErrors.Agreement }}</p>
       <p v-if="FormErrors.General" class="auth-form__message auth-form__message--error" role="alert">{{ FormErrors.General }}</p>
-      <DMButton native-type="submit" type="none" :is-tooltip="false" class="auth-form__submit" :un-active="IsSubmitting" :aria-label="Text.SubmitButton" :title="Text.SubmitButton"><span class="material-symbols-outlined" aria-hidden="true">person_add</span></DMButton>
+      <DMButton native-type="submit" type="none" :is-tooltip="false" class="auth-form__submit" icon-name="person_add" :message="Text.SubmitButton" :un-active="IsSubmitting" />
     </form>
 
     <div class="auth-divider"><span>{{ Text.Divider }}</span></div>

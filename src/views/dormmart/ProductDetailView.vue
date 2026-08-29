@@ -171,16 +171,16 @@ const handleAddToCart = async (Checkout) => {
           <div class="product-options__row">
             <span class="product-options__label">{{ Text.QuantityLabel }}</span>
             <div class="product-quantity">
-              <DMButton type="none" :is-tooltip="false" class="product-quantity__button" :aria-label="Text.DecreaseQuantity" :un-active="Quantity <= 1" @click="changeQuantity(-1)"><span class="material-symbols-outlined" aria-hidden="true">remove</span></DMButton>
+              <DMButton type="none" :is-tooltip="false" class="product-quantity__button" icon-name="remove" :aria-label="Text.DecreaseQuantity" :un-active="Quantity <= 1" @click="changeQuantity(-1)" />
               <strong>{{ Quantity }}</strong>
-              <DMButton type="none" :is-tooltip="false" class="product-quantity__button" :aria-label="Text.IncreaseQuantity" @click="changeQuantity(1)"><span class="material-symbols-outlined" aria-hidden="true">add</span></DMButton>
+              <DMButton type="none" :is-tooltip="false" class="product-quantity__button" icon-name="add" :aria-label="Text.IncreaseQuantity" @click="changeQuantity(1)" />
             </div>
           </div>
         </div>
 
         <div class="product-actions">
-          <DMButton type="none" :message="Text.AddToCart" :is-tooltip="false" class="product-actions__cart" @click="handleAddToCart(false)" />
-          <DMButton type="none" :message="Text.BuyNow" :is-tooltip="false" class="product-actions__buy" @click="handleAddToCart(true)" />
+          <DMButton type="none" icon-name="add_shopping_cart" :message="Text.AddToCart" :is-tooltip="false" class="product-actions__cart" @click="handleAddToCart(false)" />
+          <DMButton type="none" icon-name="shopping_bag" :message="Text.BuyNow" :is-tooltip="false" class="product-actions__buy" @click="handleAddToCart(true)" />
         </div>
       </div>
     </article>
