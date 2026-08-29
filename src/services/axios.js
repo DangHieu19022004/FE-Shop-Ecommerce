@@ -150,7 +150,7 @@ axiosInstance.interceptors.response.use(
     }
 
     return Promise.reject({
-      status: status || 0,
+      status: Status || 0,
       message: error.response?.data?.UserMessage || error.response?.data?.DevMessage || error.message || "Có lỗi xảy ra",
       data: error.response?.data || null,
     });
