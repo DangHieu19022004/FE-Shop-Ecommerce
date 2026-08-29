@@ -1,9 +1,11 @@
 <script setup>
-import { computed, onMounted, reactive, ref, watch } from "vue";
+import { computed, inject, onMounted, reactive, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import QuickAddCartButton from "@/components/dormmart/QuickAddCartButton.vue";
 import { getBrands, getCategories, getProducts } from "@/services/catalogService";
 import { formatCurrency } from "@/utils/shopFormatters";
+
+const Text = inject("i18nCommon").ProductList;
 
 const Route = useRoute();
 const Categories = ref([]);

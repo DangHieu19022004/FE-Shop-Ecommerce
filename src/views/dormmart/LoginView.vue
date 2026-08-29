@@ -4,17 +4,25 @@ import { useRoute, useRouter } from "vue-router";
 import DMButton from "@/components/base/DMButton.vue";
 import DMCheckbox from "@/components/base/DMCheckbox.vue";
 import DMInput from "@/components/base/DMInput.vue";
-import { loginUser, loginWithFacebook, loginWithGoogle } from "@/services/authService";
+import { loginUser, loginWithGoogle } from "@/services/authService";
+import { hasGoogleLoginConfig, signInWithGoogle } from "@/services/socialAuthService";
 
 const Text = inject("i18nCommon").Login;
 const Route = useRoute();
 const Router = useRouter();
-const LoginForm = reactive({ Account: "", Password: "", RememberMe: true, FacebookAccessToken: "", GoogleIdToken: "" });
+const LoginForm = reactive({ Account: "", Password: "", RememberMe: true });
 const FormErrors = reactive({ Account: "", Password: "", General: "", Facebook: "", Google: "" });
 const IsPasswordVisible = ref(false);
 const IsSubmitting = ref(false);
-const IsFacebookSubmitting = ref(false);
 const IsGoogleSubmitting = ref(false);
+const HasGoogleLoginConfig = hasGoogleLoginConfig();
+
+const redirectAfterLogin = () => {
+  const RedirectPath = typeof Route.query.Redirect === "string" ? Route.query.Redirect : "/";
+  Router.push({ path: RedirectPath, query: { AuthMessage: Text.LoginSuccess } });
+};
+
+const mapSocialAuthError = (Error, FallbackMessage) => Error?.message || FallbackMessage;
 
 const validateForm = () => {
   FormErrors.Account = LoginForm.Account.trim() ? "" : Text.AccountRequired;
@@ -36,48 +44,34 @@ const handleSubmit = async () => {
     return;
   }
 
-  const RedirectPath = typeof Route.query.Redirect === "string" ? Route.query.Redirect : "/";
-  Router.push({ path: RedirectPath, query: { AuthMessage: Text.LoginSuccess } });
-};
-
-const handleFacebookLogin = async () => {
-  FormErrors.Facebook = "";
-  if (!LoginForm.FacebookAccessToken.trim()) {
-    FormErrors.Facebook = "Nhập Facebook access token để test local.";
-    return;
-  }
-
-  IsFacebookSubmitting.value = true;
-  const LoginResult = await loginWithFacebook(LoginForm.FacebookAccessToken, LoginForm.RememberMe);
-  IsFacebookSubmitting.value = false;
-
-  if (!LoginResult.IsSuccess) {
-    FormErrors.Facebook = LoginResult.Message || "Facebook login chưa sẵn sàng trên local.";
-    return;
-  }
-
-  const RedirectPath = typeof Route.query.Redirect === "string" ? Route.query.Redirect : "/";
-  Router.push({ path: RedirectPath, query: { AuthMessage: Text.LoginSuccess } });
+  redirectAfterLogin();
 };
 
 const handleGoogleLogin = async () => {
   FormErrors.Google = "";
-  if (!LoginForm.GoogleIdToken.trim()) {
-    FormErrors.Google = "Nhập Google ID token để test local.";
+  FormErrors.General = "";
+  if (!HasGoogleLoginConfig) {
+    FormErrors.Google = Text.GoogleUnavailable;
     return;
   }
 
   IsGoogleSubmitting.value = true;
-  const LoginResult = await loginWithGoogle(LoginForm.GoogleIdToken, LoginForm.RememberMe);
-  IsGoogleSubmitting.value = false;
 
-  if (!LoginResult.IsSuccess) {
-    FormErrors.Google = LoginResult.Message || "Google login chưa sẵn sàng trên local.";
-    return;
+  try {
+    const IdToken = await signInWithGoogle();
+    const LoginResult = await loginWithGoogle(IdToken, LoginForm.RememberMe);
+
+    if (!LoginResult.IsSuccess) {
+      FormErrors.Google = LoginResult.Message || Text.GoogleFailed;
+      return;
+    }
+
+    redirectAfterLogin();
+  } catch (Error) {
+    FormErrors.Google = mapSocialAuthError(Error, Text.GoogleFailed);
+  } finally {
+    IsGoogleSubmitting.value = false;
   }
-
-  const RedirectPath = typeof Route.query.Redirect === "string" ? Route.query.Redirect : "/";
-  Router.push({ path: RedirectPath, query: { AuthMessage: Text.LoginSuccess } });
 };
 
 const togglePassword = () => {
@@ -113,13 +107,12 @@ const togglePassword = () => {
     </form>
 
     <div class="auth-divider"><span>{{ Text.Divider }}</span></div>
-    <div class="auth-form" style="margin-top: 12px;">
-      <DMInput v-model="LoginForm.GoogleIdToken" class="auth-form__input" label="Google ID token" placeholder="Dán ID token để test /api/auth/google" :error-messages="FormErrors.Google" />
-      <DMButton type="none" :is-tooltip="false" message="Đăng nhập với Google token" class="auth-form__google" :un-active="IsGoogleSubmitting" @click="handleGoogleLogin" />
-    </div>
-    <div class="auth-form" style="margin-top: 12px;">
-      <DMInput v-model="LoginForm.FacebookAccessToken" class="auth-form__input" label="Facebook access token" placeholder="Dán access token để test /api/auth/facebook" :error-messages="FormErrors.Facebook" />
-      <DMButton type="none" :is-tooltip="false" message="Đăng nhập với Facebook token" class="auth-form__google" :un-active="IsFacebookSubmitting" @click="handleFacebookLogin" />
+    <div class="auth-social-actions">
+      <DMButton type="none" :is-tooltip="false" class="auth-form__social auth-form__google" :un-active="IsGoogleSubmitting" :aria-label="Text.GoogleButton" :title="Text.GoogleButton" @click="handleGoogleLogin">
+        <span class="auth-form__social-label">{{ IsGoogleSubmitting ? Text.GoogleLoading : Text.GoogleButton }}</span>
+      </DMButton>
+      <p v-if="FormErrors.Google" class="auth-form__message auth-form__message--error" role="alert">{{ FormErrors.Google }}</p>
+
     </div>
 
     <p class="auth-card__switch">

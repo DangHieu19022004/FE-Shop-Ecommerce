@@ -2,6 +2,82 @@ import axiosInstance from "@/services/axios";
 
 const unwrapData = (Response) => Response?.Data ?? null;
 
+export const getAdminInventories = async (Params = {}) => {
+  const Response = await axiosInstance.get("/admin/inventories", { params: Params });
+  return unwrapData(Response);
+};
+
+export const getAdminInventoryTransactions = async (VariantId) => {
+  const Response = await axiosInstance.get(`/admin/inventories/${VariantId}/transactions`);
+  return unwrapData(Response) || [];
+};
+
+export const importAdminInventory = async (VariantId, Payload) => {
+  const Response = await axiosInstance.post(`/admin/inventories/${VariantId}/import`, Payload);
+  return unwrapData(Response);
+};
+
+export const adjustAdminInventory = async (VariantId, Payload) => {
+  const Response = await axiosInstance.post(`/admin/inventories/${VariantId}/adjust`, Payload);
+  return unwrapData(Response);
+};
+
+export const getAdminVouchers = async () => {
+  const Response = await axiosInstance.get("/admin/vouchers");
+  return unwrapData(Response) || [];
+};
+
+export const createAdminVoucher = async (Payload) => {
+  const Response = await axiosInstance.post("/admin/vouchers", Payload);
+  return unwrapData(Response);
+};
+
+export const updateAdminVoucher = async (VoucherId, Payload) => {
+  const Response = await axiosInstance.put(`/admin/vouchers/${VoucherId}`, Payload);
+  return unwrapData(Response);
+};
+
+export const deleteAdminVoucher = async (VoucherId) => {
+  const Response = await axiosInstance.delete(`/admin/vouchers/${VoucherId}`);
+  return unwrapData(Response);
+};
+
+export const getAdminFlashSales = async () => {
+  const Response = await axiosInstance.get("/admin/flash-sales");
+  return unwrapData(Response) || [];
+};
+
+export const createAdminFlashSale = async (Payload) => {
+  const Response = await axiosInstance.post("/admin/flash-sales", Payload);
+  return unwrapData(Response);
+};
+
+export const updateAdminFlashSale = async (FlashSaleId, Payload) => {
+  const Response = await axiosInstance.put(`/admin/flash-sales/${FlashSaleId}`, Payload);
+  return unwrapData(Response);
+};
+
+export const deleteAdminFlashSale = async (FlashSaleId) => {
+  const Response = await axiosInstance.delete(`/admin/flash-sales/${FlashSaleId}`);
+  return unwrapData(Response);
+};
+
+export const getShippingQuote = async (Payload) => {
+  const Response = await axiosInstance.post("/shipping/quote", Payload);
+  return unwrapData(Response);
+};
+
+export const uploadPaymentProof = async (PaymentId, File) => {
+  const FormDataPayload = new FormData();
+  FormDataPayload.append("file", File);
+  const Response = await axiosInstance.post(`/payments/${PaymentId}/proofs`, FormDataPayload, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+  return unwrapData(Response);
+};
+
 export const getAdminOrders = async () => {
   const Response = await axiosInstance.get("/admin/orders");
   return unwrapData(Response) || [];

@@ -23,6 +23,7 @@
         </router-link>
         <router-link :class="linkClass('/admin/support')" to="/admin/support"><span class="material-symbols-outlined">support_agent</span><span>{{ Text.Support }}</span></router-link>
         <router-link :class="linkClass('/admin/reviews')" to="/admin/reviews"><span class="material-symbols-outlined">reviews</span><span>Đánh giá</span></router-link>
+        <router-link :class="linkClass('/admin/promotions')" to="/admin/promotions"><span class="material-symbols-outlined">sell</span><span>Khuyến mãi</span></router-link>
         <router-link class="dm-admin__link" to="/">
           <span class="material-symbols-outlined">storefront</span>
           <span>{{ Text.Storefront }}</span>
@@ -37,10 +38,20 @@
 
     <div class="dm-admin__body">
       <header class="dm-admin__topbar">
-        <label class="dm-search" style="max-width: 420px;">
+        <div
+          class="dm-search"
+          style="max-width: 420px;"
+          role="button"
+          tabindex="0"
+          :aria-label="`${Text.SearchPlaceholder} - tính năng đang phát triển`"
+          :title="`${Text.SearchPlaceholder} - tính năng đang phát triển`"
+          @click="openSearchPlaceholder"
+          @keydown.enter.prevent="openSearchPlaceholder"
+          @keydown.space.prevent="openSearchPlaceholder"
+        >
           <span class="material-symbols-outlined">search</span>
-          <input type="text" :placeholder="Text.SearchPlaceholder" readonly />
-        </label>
+          <input type="text" :placeholder="`${Text.SearchPlaceholder} · Tính năng đang phát triển`" readonly />
+        </div>
 
         <div class="dm-public-actions">
           <button type="button" class="dm-icon-btn" :aria-label="Text.NotificationLabel" :title="Text.NotificationLabel">
@@ -75,6 +86,15 @@ const route = useRoute();
 const Router = useRouter();
 const Text = inject("i18nCommon").AdminNavigation;
 const SessionData = computed(() => getCurrentSession());
+const openSearchPlaceholder = () => {
+  Router.push({
+    name: "featureUnavailable",
+    query: {
+      title: "Tìm kiếm quản trị đang phát triển",
+      description: "Ô tìm kiếm nhanh trong khu vực admin chưa hoàn thiện. Tạm thời vào từng màn quản trị để tra cứu dữ liệu trực tiếp.",
+    },
+  });
+};
 
 const linkClass = (path) => {
   const isActive = path === "/admin" ? route.path === path : route.path.startsWith(path);

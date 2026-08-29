@@ -28,8 +28,9 @@
 .order-empty h1, .order-empty h2, .order-empty p { margin: 0; }
 .order-empty p { color: var(--dm-text-soft); }
 .order-detail__back { display: inline-flex; align-items: center; gap: 7px; color: var(--dm-primary); font-weight: 700; }
+.order-detail__alert { padding: 16px 18px; color: var(--dm-primary); background: var(--dm-primary-soft); border-color: var(--dm-primary); }
 .order-detail__header { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 22px; }
-.order-detail__timeline, .order-detail__products, .order-detail__grid > article { padding: 22px; }
+.order-detail__timeline, .order-detail__products, .order-detail__grid > article, .order-detail__shipment { padding: 22px; }
 .order-detail h2 { margin: 0 0 18px; color: var(--dm-primary); font-size: 20px; }
 .order-timeline { display: flex; overflow-x: auto; }
 .order-timeline__item { position: relative; min-width: 220px; flex: 1; padding: 0 20px 0 0; }
@@ -43,4 +44,15 @@
 .order-detail dt { color: var(--dm-text-soft); }
 .order-detail dd { margin: 0; font-weight: 600; }
 .order-detail__total { color: var(--dm-danger); font-size: 20px; }
-@media (max-width: 720px) { .order-history__heading, .order-card__header, .order-card__footer, .order-detail__header { align-items: flex-start; flex-direction: column; } .order-history__search { width: 100%; } .order-detail__grid { grid-template-columns: 1fr; } .order-card__item, .order-detail__product { grid-template-columns: 64px minmax(0, 1fr); } .order-card__item > strong, .order-detail__product > strong { grid-column: 2; } .order-detail dl div { grid-template-columns: 1fr; gap: 4px; } }
+.order-detail__proof { display: grid; gap: 12px; margin-top: 16px; padding: 16px; background: linear-gradient(180deg, var(--dm-overlay-soft), var(--dm-surface)); }
+.order-detail__proof-head, .order-detail__proof-meta { display: flex; justify-content: space-between; gap: 12px; }
+.order-detail__proof-head { align-items: flex-start; }
+.order-detail__proof-head p, .order-detail__review-head small, .order-detail__proof small { margin: 4px 0 0; color: var(--dm-text-soft); }
+.order-detail__proof-meta > div { display: grid; gap: 4px; }
+.order-detail__proof-meta span { color: var(--dm-text-soft); font-size: 12px; text-transform: uppercase; }
+.order-detail__proof-upload { display: grid; gap: 8px; }
+.order-detail__product-stack { display: grid; gap: 12px; }
+.order-detail__review { display: grid; gap: 12px; padding: 16px; background: var(--dm-overlay-soft); }
+.order-detail__review-head { display: grid; gap: 4px; }
+.order-detail__review-grid { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 12px; }
+@media (max-width: 720px) { .order-history__heading, .order-card__header, .order-card__footer, .order-detail__header, .order-detail__proof-head, .order-detail__proof-meta { align-items: flex-start; flex-direction: column; } .order-history__search { width: 100%; } .order-detail__grid, .order-detail__review-grid { grid-template-columns: 1fr; } .order-card__item, .order-detail__product { grid-template-columns: 64px minmax(0, 1fr); } .order-card__item > strong, .order-detail__product > strong { grid-column: 2; } .order-detail dl div { grid-template-columns: 1fr; gap: 4px; } }

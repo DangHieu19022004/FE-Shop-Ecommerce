@@ -4,8 +4,9 @@
       <div class="dm-public-header__top">
         <div class="dm-public-header__links">
           <router-link v-if="IsAdmin" to="/admin">Admin</router-link>
-          <router-link to="/products">Catalog</router-link>
-          <span>Student deals daily</span>
+          <router-link to="/">Trang chủ</router-link>
+          <router-link to="/products">Danh sách sản phẩm</router-link>
+          <router-link to="/about">Về chúng tôi</router-link>
         </div>
         <div class="dm-public-header__links">
           <router-link :to="{ name: 'orderHistory' }">{{ Text.OrderHistoryLink }}</router-link>
@@ -21,11 +22,20 @@
           <span class="dm-brand-icon dm-brand-icon--horizontal-logo" aria-hidden="true"></span>
         </router-link>
 
-        <label class="dm-search">
+        <div
+          class="dm-search"
+          role="button"
+          tabindex="0"
+          :aria-label="`${Text.SearchButton} - tính năng đang phát triển`"
+          :title="`${Text.SearchButton} - tính năng đang phát triển`"
+          @click="openSearchPlaceholder"
+          @keydown.enter.prevent="openSearchPlaceholder"
+          @keydown.space.prevent="openSearchPlaceholder"
+        >
           <span class="material-symbols-outlined">search</span>
-          <input :value="searchValue" type="text" :placeholder="Text.SearchPlaceholder" readonly />
-          <button type="button" class="dm-btn dm-icon-btn" :aria-label="Text.SearchButton" :title="Text.SearchButton"><span class="material-symbols-outlined" aria-hidden="true">search</span></button>
-        </label>
+          <input :value="searchValue" type="text" :placeholder="`${Text.SearchPlaceholder} · Tính năng đang phát triển`" readonly />
+          <span class="dm-btn dm-icon-btn"><span class="material-symbols-outlined" aria-hidden="true">search</span></span>
+        </div>
 
         <div class="dm-public-actions">
           <router-link class="dm-icon-btn dm-cart-button" to="/cart" :aria-label="Text.CartLabel">
@@ -84,13 +94,24 @@
 
 <script setup>
 import { computed, inject } from "vue";
+import { useRouter } from "vue-router";
 import { CartTotalQuantity } from "@/stores/cartStore";
 import SupportChatWidget from "@/components/dormmart/SupportChatWidget.vue";
 import { getCurrentSession } from "@/services/authService";
 
+const Router = useRouter();
 const Text = inject("i18nCommon").Common;
 const SessionData = computed(() => getCurrentSession());
 const IsAdmin = computed(() => SessionData.value?.Roles?.includes("Admin"));
+const openSearchPlaceholder = () => {
+  Router.push({
+    name: "featureUnavailable",
+    query: {
+      title: "Tìm kiếm đang phát triển",
+      description: "Tìm kiếm nhanh trong header chưa hoàn thiện. Tạm thời dùng danh sách sản phẩm để lọc và duyệt hàng.",
+    },
+  });
+};
 
 defineProps({
   searchValue: {

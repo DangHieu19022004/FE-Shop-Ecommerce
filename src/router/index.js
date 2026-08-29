@@ -3,6 +3,7 @@ import DormMartPublicLayout from "@/views/dormmart/layouts/DormMartPublicLayout.
 import DormMartAdminLayout from "@/views/dormmart/layouts/DormMartAdminLayout.vue";
 import DormMartAuthLayout from "@/views/dormmart/layouts/DormMartAuthLayout.vue";
 import HomeView from "@/views/dormmart/HomeView.vue";
+import AboutView from "@/views/dormmart/AboutView.vue";
 import ProductListView from "@/views/dormmart/ProductListView.vue";
 import ProductDetailView from "@/views/dormmart/ProductDetailView.vue";
 import CartView from "@/views/dormmart/CartView.vue";
@@ -26,6 +27,24 @@ import AdminFinanceView from "@/views/dormmart/admin/AdminFinanceView.vue";
 import AdminAccountsView from "@/views/dormmart/admin/AdminAccountsView.vue";
 import AdminSupportView from "@/views/dormmart/admin/AdminSupportView.vue";
 import AdminReviewsView from "@/views/dormmart/admin/AdminReviewsView.vue";
+import AdminPromotionsView from "@/views/dormmart/admin/AdminPromotionsView.vue";
+
+const placeholderRouteName = "featureUnavailable";
+const defaultComingSoonTitle = "Tính năng đang phát triển";
+const defaultComingSoonDescription = "Khu vực này chưa hoàn thiện. Quay lại sau để dùng bản đầy đủ hơn.";
+
+const inactiveRouteMeta = (Overrides = {}) => ({
+  isActive: false,
+  comingSoonTitle: defaultComingSoonTitle,
+  comingSoonDescription: defaultComingSoonDescription,
+  ...Overrides,
+});
+
+const buildInactiveRedirectQuery = (ToRoute) => ({
+  from: ToRoute.fullPath,
+  title: ToRoute.meta?.comingSoonTitle || defaultComingSoonTitle,
+  description: ToRoute.meta?.comingSoonDescription || defaultComingSoonDescription,
+});
 
 /**
  * Khai báo danh sách các tuyến đường (routes) của ứng dụng.
@@ -43,60 +62,94 @@ const routes = [
         path: "",
         name: "home",
         component: HomeView,
+        meta: { isActive: true },
       },
       {
         path: "products",
         name: "productList",
         component: ProductListView,
+        meta: { isActive: true },
+      },
+      {
+        path: "about",
+        name: "about",
+        component: AboutView,
+        meta: inactiveRouteMeta({
+          comingSoonDescription: "Trang giới thiệu Dorm Mart đang được hoàn thiện nội dung và các phần trải nghiệm. Tạm thời dùng các khu vực mua hàng và hỗ trợ hiện có.",
+        }),
+      },
+      {
+        path: "feature-unavailable",
+        name: placeholderRouteName,
+        component: AboutView,
+        meta: { isActive: true },
       },
       {
         path: "products/:slug",
         name: "productDetail",
         component: ProductDetailView,
+        meta: { isActive: true },
       },
       {
         path: "cart",
         name: "cart",
         component: CartView,
+        meta: { isActive: true },
       },
       {
         path: "checkout",
         name: "checkout",
         component: CheckoutView,
+        meta: { isActive: true },
       },
       {
         path: "profile",
         name: "profile",
         component: ProfileView,
-        meta: { RequiresAuth: true },
+        meta: { RequiresAuth: true, isActive: true },
       },
       {
         path: "profile/loyalty",
         name: "loyalty",
         component: LoyaltyView,
-        meta: { RequiresAuth: true },
+        meta: { RequiresAuth: true, isActive: true },
       },
       {
         path: "profile/notifications",
         name: "notifications",
         component: NotificationsView,
-        meta: { RequiresAuth: true },
+        meta: { RequiresAuth: true, isActive: true },
       },
       {
         path: "profile/reviews",
         name: "myReviews",
         component: MyReviewsView,
-        meta: { RequiresAuth: true },
+        meta: { RequiresAuth: true, isActive: true },
       },
       {
         path: "payment",
         name: "payment",
         component: PaymentView,
-        meta: { RequiresAuth: true },
+        meta: { RequiresAuth: true, isActive: true },
       },
-      { path: "orders", name: "orderHistory", component: OrderHistoryView, meta: { RequiresAuth: true } },
-      { path: "orders/:orderCode", name: "orderDetail", component: OrderDetailView, meta: { RequiresAuth: true } },
-      { path: "support", name: "support", component: SupportView, meta: { RequiresAuth: true } },
+      {
+        path: "orders",
+        name: "orderHistory",
+        component: OrderHistoryView,
+        meta: { RequiresAuth: true, isActive: true },
+      },
+      {
+        path: "orders/:orderCode",
+        name: "orderDetail",
+        component: OrderDetailView,
+        meta: { RequiresAuth: true, isActive: true },
+      },
+      {
+        path: "support",
+        name: "support",
+        component: SupportView,
+        meta: { RequiresAuth: true, isActive: true },
+      },
     ],
   },
   {
@@ -107,6 +160,7 @@ const routes = [
         path: "",
         name: "login",
         component: LoginView,
+        meta: { isActive: true },
       },
     ],
   },
@@ -118,6 +172,7 @@ const routes = [
         path: "",
         name: "register",
         component: RegisterView,
+        meta: { isActive: true },
       },
     ],
   },
@@ -129,48 +184,62 @@ const routes = [
         path: "",
         name: "forgotPassword",
         component: ForgotPasswordView,
+        meta: { isActive: true },
       },
     ],
   },
   {
     path: "/admin",
     component: DormMartAdminLayout,
-    meta: { RequiresAuth: true, RequiresAdmin: true },
+    meta: { RequiresAuth: true, RequiresAdmin: true, isActive: true },
     children: [
       {
         path: "",
         name: "adminDashboard",
         component: AdminDashboardView,
+        meta: { isActive: true },
       },
       {
         path: "finance",
         name: "adminFinance",
         component: AdminFinanceView,
+        meta: { isActive: true },
       },
       {
         path: "accounts",
         name: "adminAccounts",
         component: AdminAccountsView,
+        meta: { isActive: true },
       },
       {
         path: "products",
         name: "adminProducts",
         component: AdminProductsView,
+        meta: { isActive: true },
       },
       {
         path: "orders",
         name: "adminOrders",
         component: AdminOrdersView,
+        meta: { isActive: true },
       },
       {
         path: "support",
         name: "adminSupport",
         component: AdminSupportView,
+        meta: { isActive: true },
       },
       {
         path: "reviews",
         name: "adminReviews",
         component: AdminReviewsView,
+        meta: { isActive: true },
+      },
+      {
+        path: "promotions",
+        name: "adminPromotions",
+        component: AdminPromotionsView,
+        meta: { isActive: true },
       },
     ],
   },
@@ -190,6 +259,13 @@ router.beforeEach((ToRoute) => {
 
   if (ToRoute.meta.RequiresAdmin && !SessionData?.Roles?.includes("Admin")) {
     return { name: "home" };
+  }
+
+  if (ToRoute.name !== placeholderRouteName && ToRoute.meta?.isActive === false) {
+    return {
+      name: placeholderRouteName,
+      query: buildInactiveRedirectQuery(ToRoute),
+    };
   }
 
   return true;

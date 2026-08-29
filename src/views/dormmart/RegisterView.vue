@@ -4,14 +4,50 @@ import { useRouter } from "vue-router";
 import DMButton from "@/components/base/DMButton.vue";
 import DMCheckbox from "@/components/base/DMCheckbox.vue";
 import DMInput from "@/components/base/DMInput.vue";
-import { registerUser } from "@/services/authService";
+import { loginWithGoogle, registerUser } from "@/services/authService";
+import { hasGoogleLoginConfig, signInWithGoogle } from "@/services/socialAuthService";
 
 const Text = inject("i18nCommon").Register;
 const Router = useRouter();
 const RegisterForm = reactive({ FullName: "", Email: "", Phone: "", Password: "", ConfirmPassword: "", HasAgreed: false });
-const FormErrors = reactive({ FullName: "", Email: "", Phone: "", Password: "", ConfirmPassword: "", Agreement: "", General: "" });
+const FormErrors = reactive({ FullName: "", Email: "", Phone: "", Password: "", ConfirmPassword: "", Agreement: "", General: "", Google: "", Facebook: "" });
 const IsPasswordVisible = ref(false);
 const IsSubmitting = ref(false);
+const IsGoogleSubmitting = ref(false);
+const HasGoogleLoginConfig = hasGoogleLoginConfig();
+
+const redirectAfterSocialLogin = () => {
+  Router.push({ path: "/", query: { AuthMessage: Text.SocialLoginSuccess } });
+};
+
+const mapSocialAuthError = (Error, FallbackMessage) => Error?.message || FallbackMessage;
+
+const handleGoogleLogin = async () => {
+  FormErrors.Google = "";
+  FormErrors.General = "";
+  if (!HasGoogleLoginConfig) {
+    FormErrors.Google = Text.GoogleUnavailable;
+    return;
+  }
+
+  IsGoogleSubmitting.value = true;
+
+  try {
+    const IdToken = await signInWithGoogle();
+    const LoginResult = await loginWithGoogle(IdToken, true);
+
+    if (!LoginResult.IsSuccess) {
+      FormErrors.Google = LoginResult.Message || Text.GoogleFailed;
+      return;
+    }
+
+    redirectAfterSocialLogin();
+  } catch (Error) {
+    FormErrors.Google = mapSocialAuthError(Error, Text.GoogleFailed);
+  } finally {
+    IsGoogleSubmitting.value = false;
+  }
+};
 
 const validateForm = () => {
   const EmailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -76,7 +112,13 @@ const togglePassword = () => {
     </form>
 
     <div class="auth-divider"><span>{{ Text.Divider }}</span></div>
-    <DMButton type="none" :is-tooltip="false" class="auth-form__google" :aria-label="Text.GoogleButton" :title="Text.GoogleButton"><span class="material-symbols-outlined" aria-hidden="true">account_circle</span></DMButton>
+    <div class="auth-social-actions">
+      <DMButton type="none" :is-tooltip="false" class="auth-form__social auth-form__google" :un-active="IsGoogleSubmitting" :aria-label="Text.GoogleButton" :title="Text.GoogleButton" @click="handleGoogleLogin">
+        <span class="auth-form__social-label">{{ IsGoogleSubmitting ? Text.GoogleLoading : Text.GoogleButton }}</span>
+      </DMButton>
+      <p v-if="FormErrors.Google" class="auth-form__message auth-form__message--error" role="alert">{{ FormErrors.Google }}</p>
+
+    </div>
     <p class="auth-card__switch">{{ Text.HasAccount }} <router-link :to="{ name: 'login' }">{{ Text.LoginLink }}</router-link></p>
   </article>
 </template>

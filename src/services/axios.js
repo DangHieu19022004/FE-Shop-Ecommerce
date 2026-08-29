@@ -13,7 +13,18 @@ import {
 } from "@/services/authStorage";
 
 const RetryableStatusCodes = [502, 503, 504];
+const LoginPath = "/login";
 const Text = i18nCommon.ApiErrors;
+
+const redirectToLogin = () => {
+  if (typeof window === "undefined") return;
+
+  const CurrentPath = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+  if (window.location.pathname === LoginPath) return;
+
+  const RedirectQuery = new URLSearchParams({ Redirect: CurrentPath });
+  window.location.replace(`${LoginPath}?${RedirectQuery.toString()}`);
+};
 
 const refreshTokenViaHttp = async () => {
   const RefreshToken = getStoredRefreshToken();
@@ -92,7 +103,7 @@ axiosInstance.interceptors.response.use(
     }
 
     const CanRefreshToken =
-      status === 401 &&
+      Status === 401 &&
       RequestConfig &&
       !RequestConfig.HasRetriedAfterRefresh &&
       !String(RequestConfig.url || "").includes("/auth/login") &&
@@ -116,20 +127,21 @@ axiosInstance.interceptors.response.use(
       }
     }
 
-    if (status === 401) {
+    if (Status === 401) {
       clearAuthSession();
       console.error("[API] Unauthorized - Token không hợp lệ hoặc đã hết hạn");
+      redirectToLogin();
     }
 
-    if (status === 403) {
+    if (Status === 403) {
       console.error("[API] Forbidden - Không có quyền truy cập");
     }
 
-    if (status === 404) {
+    if (Status === 404) {
       console.error("[API] Not Found - Tài nguyên không tồn tại");
     }
 
-    if (status === 500) {
+    if (Status === 500) {
       console.error("[API] Internal Server Error");
     }
 
