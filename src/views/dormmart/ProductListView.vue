@@ -1,9 +1,8 @@
 <script setup>
 import { computed, inject, onMounted, reactive, ref, watch } from "vue";
 import { useRoute } from "vue-router";
-import QuickAddCartButton from "@/components/dormmart/QuickAddCartButton.vue";
+import ProductCard from "@/components/dormmart/ProductCard.vue";
 import { getBrands, getCategories, getProducts } from "@/services/catalogService";
-import { formatCurrency } from "@/utils/shopFormatters";
 
 const Text = inject("i18nCommon").ProductList;
 
@@ -105,11 +104,13 @@ onMounted(async () => {
               <input :checked="Filters.CategoryId === item.Id" type="radio" name="category" @change="$router.push({ query: { ...$route.query, CategoryId: item.Id, PageIndex: 1 } })" />
               <span>{{ item.Name }}</span>
             </div>
+            <div v-if="!Categories.length" style="color: var(--dm-text-soft);">{{ Text.DataFakeCategories }}</div>
           </section>
           <section>
             <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--dm-text-soft); margin-bottom: 10px;">Brand</div>
             <select class="dm-field" :value="Filters.BrandId" @change="$router.push({ query: { ...$route.query, BrandId: $event.target.value, PageIndex: 1 } })">
               <option value="">Tất cả</option>
+              <option v-if="!Brands.length" disabled>{{ Text.DataFakeBrands }}</option>
               <option v-for="item in Brands" :key="item.Id" :value="item.Id">{{ item.Name }}</option>
             </select>
           </section>
@@ -134,23 +135,9 @@ onMounted(async () => {
 
         <div v-if="IsLoading" class="dm-card" style="padding: 16px; text-align: center;">Đang tải sản phẩm...</div>
         <div v-else-if="Products.length" class="dm-grid dm-grid--products">
-          <article v-for="ProductItem in Products" :key="ProductItem.ProductId" class="dm-card dm-product-card">
-            <router-link :to="`/products/${ProductItem.Slug}`"><img :src="ProductItem.PrimaryImageUrl || 'https://placehold.co/400x400?text=No+Image'" :alt="ProductItem.Name" class="dm-product-card__image" /></router-link>
-            <div class="dm-product-card__body">
-              <div class="dm-pill" style="align-self: flex-start; background: var(--dm-secondary); color: var(--dm-secondary-text);">{{ ProductItem.BrandName || ProductItem.CategoryName }}</div>
-              <router-link :to="`/products/${ProductItem.Slug}`"><strong style="line-height: 1.4;">{{ ProductItem.Name }}</strong></router-link>
-              <div style="display: flex; justify-content: space-between; gap: 8px; align-items: baseline;">
-                <span style="color: var(--dm-danger); font-size: 18px; font-weight: 800;">{{ formatCurrency(ProductItem.MinSalePrice) }}</span>
-                <span style="color: var(--dm-text-soft); font-size: 12px;">{{ ProductItem.ProductCode }}</span>
-              </div>
-              <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; color: var(--dm-text-soft); font-size: 12px;">
-                <span>{{ ProductItem.CategoryName }}</span>
-              </div>
-            </div>
-            <QuickAddCartButton :ProductSlug="ProductItem.Slug" :ImageUrl="ProductItem.PrimaryImageUrl || ''" />
-          </article>
+          <ProductCard v-for="ProductItem in Products" :key="ProductItem.ProductId" :Product="ProductItem" />
         </div>
-        <div v-else class="dm-card" style="padding: 16px;">Không có sản phẩm phù hợp.</div>
+        <div v-else class="dm-card" style="padding: 16px;">{{ Text.DataFakeProducts }}</div>
       </div>
     </div>
   </section>

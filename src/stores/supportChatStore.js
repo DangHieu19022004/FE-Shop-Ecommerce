@@ -1,9 +1,8 @@
 import { computed, ref, watch } from "vue";
-import SupportChatData from "@/data/supportChatData.json";
 
 const CHAT_STORAGE_KEY = "DORM_MART_SUPPORT_CHAT";
 const StoredMessages = localStorage.getItem(CHAT_STORAGE_KEY);
-export const ChatMessages = ref(StoredMessages ? JSON.parse(StoredMessages) : SupportChatData.ChatMessages);
+export const ChatMessages = ref(StoredMessages ? JSON.parse(StoredMessages) : []);
 export const IsChatOpen = ref(false);
 export const IsAdminTyping = ref(false);
 export const UnreadMessageCount = computed(() => ChatMessages.value.filter((MessageItem) => MessageItem.SenderType === "ADMIN" && !MessageItem.IsRead).length);

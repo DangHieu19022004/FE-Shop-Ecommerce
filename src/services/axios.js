@@ -10,6 +10,7 @@ import {
   getStoredAccessToken,
   getStoredRefreshToken,
   persistAuthSession,
+  SESSION_PERSIST_STORAGE_KEY,
 } from "@/services/authStorage";
 
 const RetryableStatusCodes = [502, 503, 504];
@@ -28,7 +29,7 @@ const redirectToLogin = () => {
 
 const refreshTokenViaHttp = async () => {
   const RefreshToken = getStoredRefreshToken();
-  const PersistMode = localStorage.getItem("DORM_MART_SESSION_PERSIST") === "local";
+  const PersistMode = localStorage.getItem(SESSION_PERSIST_STORAGE_KEY) === "local";
   if (!RefreshToken) return null;
 
   const Response = await axios.post(`${PrimaryApiBaseUrl}/auth/refresh-token`, {

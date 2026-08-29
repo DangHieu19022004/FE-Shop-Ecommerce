@@ -1,10 +1,10 @@
 import axiosInstance from "@/services/axios";
-import AuthDataMock from "@/data/authData.json";
 import {
   clearAuthSession,
   getStoredRefreshToken,
   getStoredSession,
   persistAuthSession,
+  SESSION_PERSIST_STORAGE_KEY,
 } from "@/services/authStorage";
 
 const unwrapData = (Response) => Response?.Data ?? null;
@@ -50,39 +50,26 @@ export const registerUser = async (RegisterPayload) => {
 };
 
 export const loginUser = async (LoginPayload) => {
-  // TẠM THỜI: bỏ qua API đăng nhập để kiểm thử giao diện admin khi backend chưa chạy.
-  // Khôi phục khối gọi API bên dưới khi backend sẵn sàng.
-  /*
-    try {
-      const Response = await axiosInstance.post("/auth/login", {
-        Email: LoginPayload.Account.trim().toLowerCase(),
-        Password: LoginPayload.Password,
-      });
-      const AuthData = unwrapData(Response);
+  try {
+    const Response = await axiosInstance.post("/auth/login", {
+      Email: LoginPayload.Account.trim().toLowerCase(),
+      Password: LoginPayload.Password,
+    });
+    const AuthData = unwrapData(Response);
 
-      if (!AuthData?.AccessToken || !AuthData?.User) {
-        return { IsSuccess: false, ErrorCode: "INVALID_RESPONSE", Message: unwrapMessage(Response) };
-      }
-
-      return toSessionPayload(AuthData, LoginPayload.RememberMe);
-    } catch (Error) {
-      return {
-        IsSuccess: false,
-        ErrorCode: Error.status === 401 ? "INVALID_CREDENTIALS" : "LOGIN_FAILED",
-        Message: Error.message,
-        Errors: Error.data?.errors || [],
-      };
+    if (!AuthData?.AccessToken || !AuthData?.User) {
+      return { IsSuccess: false, ErrorCode: "INVALID_RESPONSE", Message: unwrapMessage(Response) };
     }
-  */
 
-  const MockAuthData = {
-    AccessToken: "FRONTEND_ADMIN_TEST_ACCESS_TOKEN",
-    RefreshToken: "FRONTEND_ADMIN_TEST_REFRESH_TOKEN",
-    ExpiresAt: new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString(),
-    User: AuthDataMock.MockAdminUser,
-  };
-
-  return toSessionPayload(MockAuthData, LoginPayload.RememberMe);
+    return toSessionPayload(AuthData, LoginPayload.RememberMe);
+  } catch (Error) {
+    return {
+      IsSuccess: false,
+      ErrorCode: Error.status === 401 ? "INVALID_CREDENTIALS" : "LOGIN_FAILED",
+      Message: Error.message,
+      Errors: Error.data?.errors || [],
+    };
+  }
 };
 
 export const refreshSession = async () => {
@@ -94,7 +81,7 @@ export const refreshSession = async () => {
     const AuthData = unwrapData(Response);
     const CurrentSession = getStoredSession();
     if (!AuthData?.AccessToken || !AuthData?.User || !CurrentSession) return null;
-    return toSessionPayload(AuthData, localStorage.getItem("DORM_MART_SESSION_PERSIST") === "local");
+    return toSessionPayload(AuthData, localStorage.getItem(SESSION_PERSIST_STORAGE_KEY) === "local");
   } catch {
     clearAuthSession();
     return null;

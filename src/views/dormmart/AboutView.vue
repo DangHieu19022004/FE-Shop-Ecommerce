@@ -2,11 +2,13 @@
 import { computed } from "vue";
 import { useRoute } from "vue-router";
 import FeatureInDevelopmentNotice from "@/components/dormmart/FeatureInDevelopmentNotice.vue";
+import i18nCommon from "@/i18n/i18nCommon";
 
 const Route = useRoute();
-const Title = computed(() => String(Route.query.title || "Tính năng đang phát triển"));
+const Text = i18nCommon.FeatureUnavailable;
+const Title = computed(() => String(Route.query.title || Text.DefaultTitle));
 const Description = computed(() => String(
-  Route.query.description || "Khu vực này chưa hoàn thiện. Quay lại sau để dùng bản đầy đủ hơn.",
+  Route.query.description || Text.DefaultDescription,
 ));
 </script>
 
@@ -14,7 +16,7 @@ const Description = computed(() => String(
   <FeatureInDevelopmentNotice
     :title="Title"
     :description="Description"
-    back-label="Quay lại"
-    home-label="Về trang chủ"
+    :back-label="Text.BackLabel"
+    :home-label="Text.HomeLabel"
   />
 </template>

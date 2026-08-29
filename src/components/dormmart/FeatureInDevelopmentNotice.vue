@@ -2,23 +2,26 @@
 import { computed } from "vue";
 import { useRouter } from "vue-router";
 import DMButton from "@/components/base/DMButton.vue";
+import i18nCommon from "@/i18n/i18nCommon";
+
+const Text = i18nCommon.FeatureUnavailable;
 
 const Props = defineProps({
   title: {
     type: String,
-    default: "Tính năng đang phát triển",
+    default: i18nCommon.FeatureUnavailable.DefaultTitle,
   },
   description: {
     type: String,
-    default: "Khu vực này chưa hoàn thiện. Quay lại sau để dùng bản đầy đủ hơn.",
+    default: i18nCommon.FeatureUnavailable.DefaultDescription,
   },
   backLabel: {
     type: String,
-    default: "Quay lại trang trước",
+    default: i18nCommon.FeatureUnavailable.BackToPrevious,
   },
   homeLabel: {
     type: String,
-    default: "Về trang chủ",
+    default: i18nCommon.FeatureUnavailable.HomeLabel,
   },
   compact: {
     type: Boolean,
@@ -45,7 +48,7 @@ const goBack = () => {
       <span class="material-symbols-outlined" aria-hidden="true">construction</span>
     </div>
     <div class="feature-dev-notice__content">
-      <div class="dm-pill feature-dev-notice__pill">Coming soon</div>
+      <div class="dm-pill feature-dev-notice__pill">{{ Text.Badge }}</div>
       <h2>{{ title }}</h2>
       <p>{{ description }}</p>
     </div>

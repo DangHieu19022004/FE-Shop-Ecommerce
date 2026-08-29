@@ -28,10 +28,12 @@ import AdminAccountsView from "@/views/dormmart/admin/AdminAccountsView.vue";
 import AdminSupportView from "@/views/dormmart/admin/AdminSupportView.vue";
 import AdminReviewsView from "@/views/dormmart/admin/AdminReviewsView.vue";
 import AdminPromotionsView from "@/views/dormmart/admin/AdminPromotionsView.vue";
+import i18nCommon from "@/i18n/i18nCommon";
 
 const placeholderRouteName = "featureUnavailable";
-const defaultComingSoonTitle = "Tính năng đang phát triển";
-const defaultComingSoonDescription = "Khu vực này chưa hoàn thiện. Quay lại sau để dùng bản đầy đủ hơn.";
+const FeatureUnavailableText = i18nCommon.FeatureUnavailable;
+const defaultComingSoonTitle = FeatureUnavailableText.DefaultTitle;
+const defaultComingSoonDescription = FeatureUnavailableText.DefaultDescription;
 
 const inactiveRouteMeta = (Overrides = {}) => ({
   isActive: false,
@@ -75,7 +77,8 @@ const routes = [
         name: "about",
         component: AboutView,
         meta: inactiveRouteMeta({
-          comingSoonDescription: "Trang giới thiệu Dorm Mart đang được hoàn thiện nội dung và các phần trải nghiệm. Tạm thời dùng các khu vực mua hàng và hỗ trợ hiện có.",
+          comingSoonTitle: FeatureUnavailableText.AboutTitle,
+          comingSoonDescription: FeatureUnavailableText.AboutDescription,
         }),
       },
       {
@@ -100,7 +103,10 @@ const routes = [
         path: "checkout",
         name: "checkout",
         component: CheckoutView,
-        meta: { isActive: true },
+        meta: inactiveRouteMeta({
+          comingSoonTitle: FeatureUnavailableText.CheckoutTitle,
+          comingSoonDescription: FeatureUnavailableText.CheckoutDescription,
+        }),
       },
       {
         path: "profile",

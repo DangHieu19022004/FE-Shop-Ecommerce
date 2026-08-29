@@ -1,15 +1,15 @@
 .quick-add-cart {
-  position: absolute;
-  right: 12px;
-  bottom: 12px;
+  position: absolute !important;
+  right: 12px !important;
+  bottom: 12px !important;
   z-index: 2;
-  width: 42px;
-  height: 42px;
-  padding: 0;
+  width: 42px !important;
+  height: 42px !important;
+  padding: 0 !important;
   border: 2px solid var(--dm-surface);
   border-radius: 50%;
-  background: var(--dm-secondary);
-  color: var(--dm-secondary-text);
+  background: var(--dm-secondary) !important;
+  color: var(--dm-secondary-text) !important;
   box-shadow: var(--dm-shadow);
 }
 .quick-add-cart:hover { transform: scale(1.08); background: var(--dm-secondary); }
