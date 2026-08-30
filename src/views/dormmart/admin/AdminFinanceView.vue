@@ -121,4 +121,4 @@ onMounted(loadFinance);
     </article>
   </section>
 </template>
-<style scoped src="@/assets/styles/screens/admin-operations.css"></style>
+<style scoped lang="scss" src="@/assets/styles/screens/admin-operations.scss"></style>

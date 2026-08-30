@@ -60,7 +60,7 @@ const IsAvailable = computed(() => Number(Props.Product.Status) === 1);
   </article>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
 .product-card {
   position: relative;
   display: flex;

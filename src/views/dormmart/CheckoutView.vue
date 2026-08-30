@@ -13,7 +13,7 @@ const Text = inject("i18nCommon").Checkout;
   </section>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
 .checkout-state {
   display: flex;
   min-height: 420px;

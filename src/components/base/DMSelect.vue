@@ -37,11 +37,11 @@
             </span>
           </slot>
         </template>
-        <!-- Custom caret: dùng icon font mi-chevron-down, xoay khi mở -->
+        <!-- Custom caret dùng Material Symbols và xoay khi mở -->
         <template #caret="{ toggle }">
           <span class="ms-multiselect__caret" :class="{ 'ms-multiselect__caret--open': isOpen }"
             @mousedown.prevent.stop="toggle">
-            <i class="mi-chevron-down"></i>
+            <span class="material-symbols-outlined" aria-hidden="true">expand_more</span>
           </span>
         </template>
       </Multiselect>
@@ -168,8 +168,8 @@ defineExpose({
 });
 </script>
 
-<style>
-@import "vue-multiselect/dist/vue-multiselect.css";
+<style lang="scss">
+@use "vue-multiselect/dist/vue-multiselect";
 
 /* ══════════════════════════
    Wrapper
@@ -348,6 +348,11 @@ defineExpose({
 .ms-multiselect__caret--open {
   transform: translateY(-50%) rotate(180deg);
   color: #0E9A62;
+}
+
+.ms-multiselect__caret .material-symbols-outlined {
+  font-size: 20px;
+  line-height: 1;
 }
 
 /* ══════════════════════════

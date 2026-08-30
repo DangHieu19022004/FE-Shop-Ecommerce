@@ -61,6 +61,7 @@ onMounted(loadHomeData);
       <p style="font-size: 16px; line-height: 1.6; margin-bottom: 22px;">{{ Text.HeroDescription }}</p>
       <div style="display: flex; gap: 12px; flex-wrap: wrap;">
         <router-link to="/products" class="dm-btn-ghost" style="background: #fff;">{{ Text.ShopCatalog }}</router-link>
+        <router-link :to="{ name: 'comboList' }" class="dm-btn-ghost" style="background: var(--dm-primary-soft); color: var(--dm-primary);">{{ Text.ExploreCombos }}</router-link>
         <router-link to="/admin" class="dm-btn" style="background: var(--dm-secondary); color: var(--dm-secondary-text);">{{ Text.OpenAdmin }}</router-link>
       </div>
     </div>
@@ -141,7 +142,7 @@ onMounted(loadHomeData);
   </section>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
 .dm-home-flash {
   display: grid;
   gap: 18px;

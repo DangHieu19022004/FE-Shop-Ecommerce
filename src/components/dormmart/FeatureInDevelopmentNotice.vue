@@ -59,7 +59,7 @@ const goBack = () => {
   </section>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
 .feature-dev-notice {
   display: grid;
   gap: 18px;

@@ -1,0 +1,151 @@
+{
+  "Categories": [
+    { "CategoryCode": "ALL", "Name": "Tất cả combo", "Icon": "apps" },
+    { "CategoryCode": "STUDY", "Name": "Combo học tập", "Icon": "school" },
+    { "CategoryCode": "ESSENTIAL", "Name": "Combo đồ thiết yếu", "Icon": "inventory_2" },
+    { "CategoryCode": "HOUSEHOLD", "Name": "Combo đồ gia dụng", "Icon": "home_and_garden" },
+    { "CategoryCode": "STARTER", "Name": "Combo nhập trọ", "Icon": "apartment" }
+  ],
+  "Combos": [
+    {
+      "ComboId": "CMB-0001",
+      "ComboCode": "CBHT01",
+      "Name": "Combo học tập tập trung",
+      "Slug": "combo-hoc-tap-tap-trung",
+      "CategoryCode": "STUDY",
+      "CategoryName": "Combo học tập",
+      "Description": "Góc học tập gọn gàng, đủ ánh sáng và luôn sẵn sàng cho những buổi học dài.",
+      "Badge": "Sinh viên chọn nhiều",
+      "Icon": "menu_book",
+      "Theme": "BLUE",
+      "OriginalPrice": 429000,
+      "ComboPrice": 349000,
+      "ImageUrl": "https://placehold.co/900x560/0D2B63/FFC107?text=Combo+hoc+tap",
+      "Rating": 4.9,
+      "SoldCount": 286,
+      "IsFeatured": true,
+      "Items": [
+        { "ComboItemId": "CMBI-0001", "ProductId": "PRD-DENHOC", "ProductVariantId": "", "ProductSlug": "den-hoc-de-ban", "ProductCode": "DENHOC", "ProductName": "Đèn học để bàn chống mỏi mắt", "Quantity": 1, "UnitPrice": 189000, "ImageUrl": "https://placehold.co/180x180/F5F7FF/0D2B63?text=Den+hoc", "IsRequired": true },
+        { "ComboItemId": "CMBI-0002", "ProductId": "PRD-DNHT", "ProductVariantId": "", "ProductSlug": "dem-ngoi-tron-hoa-tiet-mix-mau", "ProductCode": "DNHT", "ProductName": "Đệm ngồi tròn họa tiết Mix màu", "Quantity": 1, "UnitPrice": 95000, "ImageUrl": "https://placehold.co/180x180/F5F7FF/0D2B63?text=Dem+ngoi", "IsRequired": true },
+        { "ComboItemId": "CMBI-0003", "ProductId": "PRD-OD5M", "ProductVariantId": "", "ProductSlug": "o-dien-5m-dai-nhieu-mau-moi", "ProductCode": "OD5M", "ProductName": "Ổ điện 5M dài nhiều màu mới", "Quantity": 1, "UnitPrice": 145000, "ImageUrl": "https://placehold.co/180x180/F5F7FF/0D2B63?text=O+dien", "IsRequired": true }
+      ]
+    },
+    {
+      "ComboId": "CMB-0002",
+      "ComboCode": "CBHT02",
+      "Name": "Combo học tập tối giản",
+      "Slug": "combo-hoc-tap-toi-gian",
+      "CategoryCode": "STUDY",
+      "CategoryName": "Combo học tập",
+      "Description": "Bộ cơ bản cho bàn học nhỏ, ưu tiên sự ngăn nắp và tiết kiệm diện tích.",
+      "Badge": "Giá dễ bắt đầu",
+      "Icon": "edit_square",
+      "Theme": "YELLOW",
+      "OriginalPrice": 259000,
+      "ComboPrice": 219000,
+      "ImageUrl": "https://placehold.co/900x560/FFF4CC/0D2B63?text=Hoc+tap+toi+gian",
+      "Rating": 4.7,
+      "SoldCount": 174,
+      "IsFeatured": false,
+      "Items": [
+        { "ComboItemId": "CMBI-0004", "ProductId": "PRD-DENHOC", "ProductVariantId": "", "ProductSlug": "den-hoc-de-ban", "ProductCode": "DENHOC", "ProductName": "Đèn học để bàn", "Quantity": 1, "UnitPrice": 169000, "ImageUrl": "https://placehold.co/180x180/F5F7FF/0D2B63?text=Den+hoc", "IsRequired": true },
+        { "ComboItemId": "CMBI-0005", "ProductId": "PRD-TUI", "ProductVariantId": "", "ProductSlug": "tui-dung-phu-kien-de-ban", "ProductCode": "TUI01", "ProductName": "Túi đựng phụ kiện để bàn", "Quantity": 1, "UnitPrice": 90000, "ImageUrl": "https://placehold.co/180x180/F5F7FF/0D2B63?text=Tui+dung", "IsRequired": true }
+      ]
+    },
+    {
+      "ComboId": "CMB-0003",
+      "ComboCode": "CBTY01",
+      "Name": "Combo thiết yếu tuần đầu",
+      "Slug": "combo-thiet-yeu-tuan-dau",
+      "CategoryCode": "ESSENTIAL",
+      "CategoryName": "Combo đồ thiết yếu",
+      "Description": "Những món dùng ngay khi vừa chuyển vào phòng trọ hoặc ký túc xá.",
+      "Badge": "Tiết kiệm nhất",
+      "Icon": "featured_seasonal_and_gifts",
+      "Theme": "GREEN",
+      "OriginalPrice": 318000,
+      "ComboPrice": 259000,
+      "ImageUrl": "https://placehold.co/900x560/E7F7F0/0D2B63?text=Do+thiet+yeu",
+      "Rating": 4.8,
+      "SoldCount": 412,
+      "IsFeatured": true,
+      "Items": [
+        { "ComboItemId": "CMBI-0006", "ProductId": "PRD-SCTT", "ProductVariantId": "", "ProductSlug": "tui-dung-thuc-pham", "ProductCode": "SCTT", "ProductName": "Túi đựng thực phẩm", "Quantity": 3, "UnitPrice": 33500, "ImageUrl": "https://placehold.co/180x180/F5F7FF/0D2B63?text=Tui+thuc+pham", "IsRequired": true },
+        { "ComboItemId": "CMBI-0007", "ProductId": "PRD-KGIAY", "ProductVariantId": "", "ProductSlug": "tui-khan-giay-uot-mini", "ProductCode": "KGIAY", "ProductName": "Túi khăn giấy ướt mini tiện lợi", "Quantity": 2, "UnitPrice": 28000, "ImageUrl": "https://placehold.co/180x180/F5F7FF/0D2B63?text=Khan+giay", "IsRequired": true },
+        { "ComboItemId": "CMBI-0008", "ProductId": "PRD-DAO", "ProductVariantId": "", "ProductSlug": "set-3-mon-dao-thich-nhua", "ProductCode": "DAO03", "ProductName": "Set 3 món dao thích nhựa", "Quantity": 1, "UnitPrice": 75000, "ImageUrl": "https://placehold.co/180x180/F5F7FF/0D2B63?text=Set+dao", "IsRequired": true }
+      ]
+    },
+    {
+      "ComboId": "CMB-0004",
+      "ComboCode": "CBGD01",
+      "Name": "Combo gia dụng sạch phòng",
+      "Slug": "combo-gia-dung-sach-phong",
+      "CategoryCode": "HOUSEHOLD",
+      "CategoryName": "Combo đồ gia dụng",
+      "Description": "Bộ vệ sinh phòng đầy đủ từ quét, lau đến làm sạch các góc nhỏ.",
+      "Badge": "Phòng sạch mỗi ngày",
+      "Icon": "cleaning_services",
+      "Theme": "PURPLE",
+      "OriginalPrice": 379000,
+      "ComboPrice": 299000,
+      "ImageUrl": "https://placehold.co/900x560/F2EDFF/0D2B63?text=Gia+dung+sach+phong",
+      "Rating": 4.8,
+      "SoldCount": 238,
+      "IsFeatured": true,
+      "Items": [
+        { "ComboItemId": "CMBI-0009", "ProductId": "PRD-T200", "ProductVariantId": "", "ProductSlug": "cay-lau-bui-home-stick-10cm", "ProductCode": "T200", "ProductName": "Cây lau bụi home stick 10 cm kèm 1 lõi", "Quantity": 1, "UnitPrice": 89000, "ImageUrl": "https://placehold.co/180x180/F5F7FF/0D2B63?text=Lau+bui", "IsRequired": true },
+        { "ComboItemId": "CMBI-0010", "ProductId": "PRD-T1500", "ProductVariantId": "", "ProductSlug": "choi-lau-ve-sinh-lau-khu-rua-bat", "ProductCode": "T1500", "ProductName": "Chổi lau vệ sinh, lau khu rửa bát", "Quantity": 1, "UnitPrice": 85000, "ImageUrl": "https://placehold.co/180x180/F5F7FF/0D2B63?text=Choi+lau", "IsRequired": true },
+        { "ComboItemId": "CMBI-0011", "ProductId": "PRD-T60", "ProductVariantId": "", "ProductSlug": "choi-lau-nha-kem-hot-rac", "ProductCode": "T60", "ProductName": "Chổi lau nhà kèm hốt rác", "Quantity": 1, "UnitPrice": 205000, "ImageUrl": "https://placehold.co/180x180/F5F7FF/0D2B63?text=Choi+nha", "IsRequired": true }
+      ]
+    },
+    {
+      "ComboId": "CMB-0005",
+      "ComboCode": "CBNT01",
+      "Name": "Combo nhập trọ cơ bản",
+      "Slug": "combo-nhap-tro-co-ban",
+      "CategoryCode": "STARTER",
+      "CategoryName": "Combo nhập trọ",
+      "Description": "Một lần chọn, đủ nhóm đồ điện, bếp và vệ sinh cần thiết cho phòng mới.",
+      "Badge": "Trọn bộ phòng mới",
+      "Icon": "move_to_inbox",
+      "Theme": "ORANGE",
+      "OriginalPrice": 749000,
+      "ComboPrice": 619000,
+      "ImageUrl": "https://placehold.co/900x560/FFF0E5/0D2B63?text=Nhap+tro+co+ban",
+      "Rating": 4.9,
+      "SoldCount": 327,
+      "IsFeatured": true,
+      "Items": [
+        { "ComboItemId": "CMBI-0012", "ProductId": "PRD-OD5M", "ProductVariantId": "", "ProductSlug": "o-dien-5m-dai-nhieu-mau-moi", "ProductCode": "OD5M", "ProductName": "Ổ điện 5M dài nhiều màu mới", "Quantity": 1, "UnitPrice": 145000, "ImageUrl": "https://placehold.co/180x180/F5F7FF/0D2B63?text=O+dien", "IsRequired": true },
+        { "ComboItemId": "CMBI-0013", "ProductId": "PRD-T4000", "ProductVariantId": "", "ProductSlug": "moc-dan-don", "ProductCode": "T4000", "ProductName": "Móc dán đơn", "Quantity": 5, "UnitPrice": 12000, "ImageUrl": "https://placehold.co/180x180/F5F7FF/0D2B63?text=Moc+dan", "IsRequired": true },
+        { "ComboItemId": "CMBI-0014", "ProductId": "PRD-CHAO", "ProductVariantId": "", "ProductSlug": "chao-lau-nha-kem-hot-rac", "ProductCode": "T50", "ProductName": "Chổi lau nhà kèm hốt rác", "Quantity": 1, "UnitPrice": 185000, "ImageUrl": "https://placehold.co/180x180/F5F7FF/0D2B63?text=Choi+lau", "IsRequired": true },
+        { "ComboItemId": "CMBI-0015", "ProductId": "PRD-DNHT", "ProductVariantId": "", "ProductSlug": "dem-ngoi-tron-hoa-tiet-mix-mau", "ProductCode": "DNHT", "ProductName": "Đệm ngồi tròn họa tiết Mix màu", "Quantity": 1, "UnitPrice": 95000, "ImageUrl": "https://placehold.co/180x180/F5F7FF/0D2B63?text=Dem+ngoi", "IsRequired": true }
+      ]
+    },
+    {
+      "ComboId": "CMB-0006",
+      "ComboCode": "CBNT02",
+      "Name": "Combo phòng trọ đủ đầy",
+      "Slug": "combo-phong-tro-du-day",
+      "CategoryCode": "STARTER",
+      "CategoryName": "Combo nhập trọ",
+      "Description": "Gói nâng cấp cho người muốn sắm đủ ngay từ đầu và tiết kiệm nhiều hơn.",
+      "Badge": "Combo 2 · Nâng cấp",
+      "Icon": "workspace_premium",
+      "Theme": "BLUE",
+      "OriginalPrice": 1099000,
+      "ComboPrice": 899000,
+      "ImageUrl": "https://placehold.co/900x560/E7EEFF/0D2B63?text=Phong+tro+du+day",
+      "Rating": 5,
+      "SoldCount": 96,
+      "IsFeatured": false,
+      "Items": [
+        { "ComboItemId": "CMBI-0016", "ProductId": "PRD-OD5M", "ProductVariantId": "", "ProductSlug": "o-dien-5m-dai-nhieu-mau-moi", "ProductCode": "OD5M", "ProductName": "Ổ điện 5M dài nhiều màu mới", "Quantity": 1, "UnitPrice": 145000, "ImageUrl": "https://placehold.co/180x180/F5F7FF/0D2B63?text=O+dien", "IsRequired": true },
+        { "ComboItemId": "CMBI-0017", "ProductId": "PRD-DENHOC", "ProductVariantId": "", "ProductSlug": "den-hoc-de-ban", "ProductCode": "DENHOC", "ProductName": "Đèn học để bàn chống mỏi mắt", "Quantity": 1, "UnitPrice": 189000, "ImageUrl": "https://placehold.co/180x180/F5F7FF/0D2B63?text=Den+hoc", "IsRequired": true },
+        { "ComboItemId": "CMBI-0018", "ProductId": "PRD-T60", "ProductVariantId": "", "ProductSlug": "choi-lau-nha-kem-hot-rac", "ProductCode": "T60", "ProductName": "Chổi lau nhà kèm hốt rác", "Quantity": 1, "UnitPrice": 205000, "ImageUrl": "https://placehold.co/180x180/F5F7FF/0D2B63?text=Choi+nha", "IsRequired": true },
+        { "ComboItemId": "CMBI-0019", "ProductId": "PRD-DAO", "ProductVariantId": "", "ProductSlug": "set-3-mon-dao-thich-nhua", "ProductCode": "DAO03", "ProductName": "Set 3 món dao thích nhựa", "Quantity": 1, "UnitPrice": 75000, "ImageUrl": "https://placehold.co/180x180/F5F7FF/0D2B63?text=Set+dao", "IsRequired": true },
+        { "ComboItemId": "CMBI-0020", "ProductId": "PRD-DNHT", "ProductVariantId": "", "ProductSlug": "dem-ngoi-tron-hoa-tiet-mix-mau", "ProductCode": "DNHT", "ProductName": "Đệm ngồi tròn họa tiết Mix màu", "Quantity": 1, "UnitPrice": 95000, "ImageUrl": "https://placehold.co/180x180/F5F7FF/0D2B63?text=Dem+ngoi", "IsRequired": true }
+      ]
+    }
+  ]
+}

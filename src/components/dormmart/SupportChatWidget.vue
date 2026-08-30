@@ -35,4 +35,4 @@ watch([ChatMessages, IsChatOpen], scrollToLatest, { deep: true });
   </div>
 </template>
 
-<style scoped src="@/assets/styles/screens/support-chat.css"></style>
+<style scoped lang="scss" src="@/assets/styles/screens/support-chat.scss"></style>

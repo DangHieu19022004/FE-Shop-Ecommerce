@@ -6,6 +6,7 @@
           <router-link v-if="IsAdmin" to="/admin">Admin</router-link>
           <router-link to="/">Trang chủ</router-link>
           <router-link to="/products">Danh sách sản phẩm</router-link>
+          <router-link :to="{ name: 'comboList' }">{{ Text.ComboLink }}</router-link>
           <router-link to="/about">Về chúng tôi</router-link>
         </div>
         <div class="dm-public-header__links">
@@ -19,7 +20,10 @@
 
       <div class="dm-public-header__main">
         <router-link to="/" class="dm-brand" :aria-label="Text.HomeAriaLabel">
-          <span class="dm-brand-icon dm-brand-icon--horizontal-logo" aria-hidden="true"></span>
+          <span class="dm-brand__lockup" aria-hidden="true">
+            <span class="dm-brand-icon dm-brand-icon--horizontal-logo"></span>
+            <span class="dm-brand__tagline">{{ Text.BrandTagline }}</span>
+          </span>
         </router-link>
 
         <div

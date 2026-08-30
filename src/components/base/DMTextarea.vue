@@ -21,7 +21,7 @@ const handleInput = (Event) => Emit("update:modelValue", Event.target.value);
   </label>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
 .dm-textarea { display: flex; flex-direction: column; gap: 8px; }
 .dm-textarea__label { color: var(--dm-text); font-size: 14px; font-weight: 700; }
 .dm-textarea__control { position: relative; display: block; }

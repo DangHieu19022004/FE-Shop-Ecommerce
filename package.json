@@ -1,5 +1,5 @@
 {
-  "name": "homework",
+  "name": "dorm-mart-frontend",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -20,6 +20,7 @@
   "devDependencies": {
     "@playwright/test": "^1.55.0",
     "@vitejs/plugin-vue": "^6.0.6",
+    "sass": "^1.103.1",
     "vite": "^8.0.8",
     "vite-plugin-vue-devtools": "^8.1.1"
   },

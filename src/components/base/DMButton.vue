@@ -174,7 +174,7 @@ const hideTooltip = () => {
   isShowTooltip.value = false;
 };
 </script>
-<style scoped>
+<style scoped lang="scss">
 .ms-button {
   display: inline-flex;
   align-items: center;

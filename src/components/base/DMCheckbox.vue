@@ -104,7 +104,7 @@ const handleChange = (e) => {
 };
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 /* ══════════════════════════════════
    Wrapper label
 ══════════════════════════════════ */

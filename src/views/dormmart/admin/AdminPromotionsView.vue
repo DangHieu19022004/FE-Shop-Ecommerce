@@ -408,8 +408,8 @@ onMounted(loadPromotions);
   </section>
 </template>
 
-<style scoped src="@/assets/styles/screens/admin-operations.css"></style>
-<style scoped>
+<style scoped lang="scss" src="@/assets/styles/screens/admin-operations.scss"></style>
+<style scoped lang="scss">
 .admin-promotions__metrics {
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
 }

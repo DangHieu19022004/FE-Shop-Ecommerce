@@ -9,6 +9,9 @@
       :placeholder="placeholder"
       :name="name"
       :id="id"
+      :autocomplete="autocomplete"
+      :inputmode="inputmode"
+      :autocapitalize="autocapitalize"
       :accept="accept"
       :disabled="disabled"
       @input="handleInput"
@@ -56,6 +59,18 @@ const props = defineProps({
   name: {
     type: String,
     default: "",
+  },
+  autocomplete: {
+    type: String,
+    default: "off",
+  },
+  inputmode: {
+    type: String,
+    default: "text",
+  },
+  autocapitalize: {
+    type: String,
+    default: "sentences",
   },
   id: {
     type: String,
@@ -107,7 +122,7 @@ const handleFocus = () => {
   emit("focus");
 };
 </script>
-<style>
+<style lang="scss">
 .ms-input {
   position: relative;
   display: flex;

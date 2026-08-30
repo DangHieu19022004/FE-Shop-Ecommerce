@@ -592,6 +592,6 @@ onMounted(async () => {
   </section>
 </template>
 
-<style scoped src="@/assets/styles/screens/admin-operations.css"></style>
+<style scoped lang="scss" src="@/assets/styles/screens/admin-operations.scss"></style>
 
 <!-- ponytail: giữ CRUD + form trong cùng view; tách composable/component khi admin product flow lớn thêm hoặc cần paging/filter thật. -->

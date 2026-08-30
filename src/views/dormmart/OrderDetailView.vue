@@ -243,4 +243,4 @@ onMounted(loadOrderDetail);
   </section>
 </template>
 
-<style scoped src="@/assets/styles/screens/order-history.css"></style>
+<style scoped lang="scss" src="@/assets/styles/screens/order-history.scss"></style>
