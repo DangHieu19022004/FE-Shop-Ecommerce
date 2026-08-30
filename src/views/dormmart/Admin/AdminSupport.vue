@@ -1,21 +1,8 @@
-<template>
-  <section class="admin-page">
-    <header class="admin-page__header"><div><h1>{{ Text.Title }}</h1><p>{{ Text.Subtitle }}</p></div></header>
-    <div v-if="ErrorMessage" class="dm-card" style="padding: 16px; color: var(--dm-danger);">{{ ErrorMessage }}</div>
-    <article class="dm-card admin-support">
-      <div class="admin-ticket-list"><button v-for="TicketItem in Tickets" :key="TicketItem.SupportTicketId" type="button" :class="['admin-ticket', { 'admin-ticket--active': TicketItem.SupportTicketId === SelectedTicketId }]" @click="selectTicket(TicketItem.SupportTicketId)"><strong>{{ TicketItem.Subject }}</strong><span>{{ TicketItem.UserName }} · {{ TicketItem.OrderCode || TicketItem.SupportTicketId }}</span><small>{{ TicketItem.Status }}</small></button></div>
-      <div v-if="SelectedTicket" class="admin-conversation"><div class="admin-panel__header"><div><h2>{{ Text.Conversation }}</h2><p>{{ formatI18nText(Text.ConversationMetadata, { name: SelectedTicket.UserName, date: formatDateTime(SelectedTicket.CreateDate) }) }}</p></div><span class="admin-status admin-status--warning">{{ SelectedTicket.Status }}</span></div><div v-for="ReplyItem in SelectedTicket.Messages" :key="ReplyItem.SupportMessageId" :class="['admin-message', { 'admin-message--admin': String(ReplyItem.SenderType).includes('Admin') }]"><strong>{{ ReplyItem.SenderName }}</strong><div>{{ ReplyItem.Content }}</div><small>{{ formatDateTime(ReplyItem.CreateDate) }}</small></div><form class="admin-reply" @submit.prevent="sendReply"><DMInput v-model="ReplyMessage" :placeholder="Text.ReplyPlaceholder"/><DMButton native-type="submit" type="none" :is-tooltip="false" :message="Text.SendReply" class="admin-button"/></form><div class="admin-order-card__actions"><DMButton type="none" :is-tooltip="false" message="Resolve" class="admin-button" @click="resolveTicket" /><DMButton type="none" :is-tooltip="false" message="Close" class="admin-button admin-button--danger" @click="closeTicket" /></div></div>
-      <div v-else class="admin-conversation"><p>{{ Text.SelectTicket }}</p></div>
-    </article>
-  </section>
-</template>
-
 <script setup>
 import { computed, inject, onMounted, ref } from "vue";
 import DMButton from "@/components/base/DMButton.vue";
 import DMInput from "@/components/base/DMInput.vue";
 import { closeAdminSupportTicket, getAdminSupportTicketById, getAdminSupportTickets, resolveAdminSupportTicket, sendAdminSupportMessage } from "@/services/adminService";
-import { formatI18nText } from "@/utils/i18n";
 import { formatDateTime } from "@/utils/shopFormatters";
 
 const Text = inject("i18nCommon").AdminSupport;
@@ -64,5 +51,15 @@ const closeTicket = async () => {
 
 onMounted(loadTickets);
 </script>
-
+<template>
+  <section class="admin-page">
+    <header class="admin-page__header"><div><h1>{{ Text.Title }}</h1><p>{{ Text.Subtitle }}</p></div></header>
+    <div v-if="ErrorMessage" class="dm-card" style="padding: 16px; color: var(--dm-danger);">{{ ErrorMessage }}</div>
+    <article class="dm-card admin-support">
+      <div class="admin-ticket-list"><button v-for="TicketItem in Tickets" :key="TicketItem.SupportTicketId" type="button" :class="['admin-ticket', { 'admin-ticket--active': TicketItem.SupportTicketId === SelectedTicketId }]" @click="selectTicket(TicketItem.SupportTicketId)"><strong>{{ TicketItem.Subject }}</strong><span>{{ TicketItem.UserName }} · {{ TicketItem.OrderCode || TicketItem.SupportTicketId }}</span><small>{{ TicketItem.Status }}</small></button></div>
+      <div v-if="SelectedTicket" class="admin-conversation"><div class="admin-panel__header"><div><h2>{{ Text.Conversation }}</h2><p>{{ SelectedTicket.UserName }} · {{ formatDateTime(SelectedTicket.CreateDate) }}</p></div><span class="admin-status admin-status--warning">{{ SelectedTicket.Status }}</span></div><div v-for="ReplyItem in SelectedTicket.Messages" :key="ReplyItem.SupportMessageId" :class="['admin-message', { 'admin-message--admin': String(ReplyItem.SenderType).includes('Admin') }]"><strong>{{ ReplyItem.SenderName }}</strong><div>{{ ReplyItem.Content }}</div><small>{{ formatDateTime(ReplyItem.CreateDate) }}</small></div><form class="admin-reply" @submit.prevent="sendReply"><DMInput v-model="ReplyMessage" :placeholder="Text.ReplyPlaceholder"/><DMButton native-type="submit" type="none" :is-tooltip="false" :message="Text.SendReply" class="admin-button"/></form><div class="admin-order-card__actions"><DMButton type="none" :is-tooltip="false" message="Resolve" class="admin-button" @click="resolveTicket" /><DMButton type="none" :is-tooltip="false" message="Close" class="admin-button admin-button--danger" @click="closeTicket" /></div></div>
+      <div v-else class="admin-conversation"><p>{{ Text.SelectTicket }}</p></div>
+    </article>
+  </section>
+</template>
 <style scoped lang="scss" src="@/assets/styles/screens/admin-operations.scss"></style>

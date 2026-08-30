@@ -1,3 +1,199 @@
+<script setup>
+import { computed, inject, onMounted, ref } from "vue";
+import DMButton from "@/components/base/DMButton.vue";
+import DMInput from "@/components/base/DMInput.vue";
+import DMRadio from "@/components/base/DMRadio.vue";
+import DMTextarea from "@/components/base/DMTextarea.vue";
+import { getMyAddresses } from "@/services/authService";
+import { checkoutOrder, getActiveVouchers } from "@/services/checkoutService";
+import { getShippingQuote } from "@/services/adminService";
+import { CartItems, CartSummary, loadCart } from "@/stores/cartStore";
+import { formatAddress, formatCurrency, formatDate } from "@/utils/shopFormatters";
+
+const Text = inject("i18nCommon").Payment;
+const SelectedPaymentMethodId = ref(0);
+const OrderNote = ref("");
+const Addresses = ref([]);
+const Vouchers = ref([]);
+const SelectedAddressId = ref("");
+const SelectedVoucherId = ref("");
+const VoucherSearch = ref("");
+const VoucherMessage = ref("");
+const ErrorMessage = ref("");
+const SuccessMessage = ref("");
+const IsSubmitting = ref(false);
+const IsVoucherListVisible = ref(false);
+const ShippingQuote = ref(null);
+const ShippingQuoteMessage = ref("");
+const PaymentOptions = [
+  { value: 0, label: "COD", PaymentName: "COD", PaymentDescription: "Thanh toán khi nhận hàng", IconName: "payments" },
+  { value: 1, label: "Bank Transfer", PaymentName: "Chuyển khoản", PaymentDescription: "Chuyển khoản thủ công", IconName: "account_balance" },
+  { value: 2, label: "Gateway", PaymentName: "Cổng thanh toán", PaymentDescription: "Thanh toán qua cổng", IconName: "credit_card" },
+];
+const MerchandiseSubtotal = computed(() => CartSummary.value.Subtotal || 0);
+const SelectedVoucher = computed(() =>
+  Vouchers.value.find((VoucherItem) => VoucherItem.VoucherId === SelectedVoucherId.value) || null,
+);
+const FilteredVouchers = computed(() => {
+  const Keyword = VoucherSearch.value.trim().toLowerCase();
+  if (!Keyword) return Vouchers.value;
+
+  return Vouchers.value.filter((VoucherItem) =>
+    [VoucherItem.Code, VoucherItem.VoucherCode].some((Value) => String(Value || "").toLowerCase().includes(Keyword)),
+  );
+});
+const SelectedAddress = computed(() =>
+  Addresses.value.find((AddressItem) => AddressItem.UserAddressId === SelectedAddressId.value) || null,
+);
+const VoucherDiscountPreview = computed(() => {
+  if (!SelectedVoucher.value) return 0;
+
+  if (Number(SelectedVoucher.value.DiscountType) === 0) {
+    const RawDiscount = MerchandiseSubtotal.value * (Number(SelectedVoucher.value.DiscountValue) || 0) / 100;
+    const MaxDiscount = SelectedVoucher.value.MaxDiscountAmount == null ? null : Number(SelectedVoucher.value.MaxDiscountAmount);
+    return MaxDiscount == null ? RawDiscount : Math.min(RawDiscount, MaxDiscount);
+  }
+
+  return Number(SelectedVoucher.value.DiscountValue) || 0;
+});
+const ShippingFee = computed(() => Number(ShippingQuote.value?.Fee || 0));
+const EstimatedTotal = computed(() => Math.max(MerchandiseSubtotal.value + ShippingFee.value - VoucherDiscountPreview.value, 0));
+const IsVoucherEligible = computed(() => {
+  if (!SelectedVoucher.value) return true;
+  return MerchandiseSubtotal.value >= (SelectedVoucher.value.MinimumOrderAmount || 0);
+});
+const CanPlaceOrder = computed(() => !IsSubmitting.value && Boolean(SelectedAddressId.value));
+
+const resetCheckoutState = () => {
+  SelectedVoucherId.value = "";
+  VoucherSearch.value = "";
+  VoucherMessage.value = "";
+  ShippingQuote.value = null;
+  ShippingQuoteMessage.value = "";
+};
+
+const loadCheckoutData = async () => {
+  ErrorMessage.value = "";
+  VoucherMessage.value = "";
+  ShippingQuoteMessage.value = "";
+
+  try {
+    const [_, AddressData, VoucherData] = await Promise.all([
+      loadCart(),
+      getMyAddresses(),
+      getActiveVouchers(),
+    ]);
+    Addresses.value = AddressData;
+    Vouchers.value = VoucherData.map((VoucherItem) => ({
+      ...VoucherItem,
+      VoucherCode: VoucherItem.Code,
+      VoucherName: VoucherItem.Code,
+      VoucherDescription: VoucherItem.DiscountType === 0
+        ? `Giảm ${VoucherItem.DiscountValue}%`
+        : `Giảm ${formatCurrency(VoucherItem.DiscountValue)}`,
+      ExpiryDate: VoucherItem.ExpiresAt,
+      MinimumOrderAmount: VoucherItem.MinOrderAmount || 0,
+    }));
+    SelectedAddressId.value = Addresses.value.find((AddressItem) => AddressItem.IsDefault)?.UserAddressId || Addresses.value[0]?.UserAddressId || "";
+    await loadShippingQuote(AddressData);
+  } catch (Error) {
+    ErrorMessage.value = Error.message;
+  }
+};
+
+const loadShippingQuote = async (AddressData = Addresses.value) => {
+  const SelectedAddressData = AddressData.find((AddressItem) => AddressItem.UserAddressId === SelectedAddressId.value)
+    || AddressData.find((AddressItem) => AddressItem.IsDefault)
+    || AddressData[0];
+
+  if (!SelectedAddressData) {
+    ShippingQuote.value = null;
+    ShippingQuoteMessage.value = "Chưa có địa chỉ để tính phí vận chuyển.";
+    return;
+  }
+
+  try {
+    ShippingQuote.value = await getShippingQuote({
+      Province: SelectedAddressData.Province || "",
+      District: SelectedAddressData.District || "",
+      Items: CartItems.value.map((Item) => ({
+        ProductVariantId: Item.ProductVariantId,
+        Quantity: Item.Quantity,
+      })),
+    });
+    ShippingQuoteMessage.value = "Đã lấy phí vận chuyển ước tính từ API.";
+  } catch (Error) {
+    ShippingQuote.value = null;
+    ShippingQuoteMessage.value = Error.message;
+  }
+};
+
+const handleSelectAddress = async (AddressId) => {
+  SelectedAddressId.value = AddressId;
+  await loadShippingQuote();
+};
+
+const selectVoucher = (VoucherId) => {
+  SelectedVoucherId.value = VoucherId;
+  VoucherMessage.value = "Đã áp dụng voucher cho đơn hàng hiện tại.";
+  IsVoucherListVisible.value = false;
+};
+
+const removeVoucher = () => {
+  SelectedVoucherId.value = "";
+  VoucherMessage.value = "Đã gỡ voucher khỏi đơn hàng.";
+};
+
+const applyVoucherCode = () => {
+  const Keyword = VoucherSearch.value.trim().toLowerCase();
+  const MatchedVoucher = Vouchers.value.find((VoucherItem) =>
+    String(VoucherItem.VoucherCode || "").toLowerCase() === Keyword,
+  );
+
+  if (!MatchedVoucher) {
+    VoucherMessage.value = Text.VoucherNotFound;
+    return;
+  }
+
+  if (MerchandiseSubtotal.value < (MatchedVoucher.MinimumOrderAmount || 0)) {
+    VoucherMessage.value = `Đơn tối thiểu ${formatCurrency(MatchedVoucher.MinimumOrderAmount)} để áp dụng voucher này.`;
+    return;
+  }
+
+  selectVoucher(MatchedVoucher.VoucherId);
+};
+
+const placeOrder = async () => {
+  if (!SelectedAddressId.value) {
+    ErrorMessage.value = "Cần chọn địa chỉ nhận hàng.";
+    return;
+  }
+
+  IsSubmitting.value = true;
+  ErrorMessage.value = "";
+  SuccessMessage.value = "";
+
+  try {
+    const Result = await checkoutOrder({
+      UserAddressId: SelectedAddressId.value,
+      PaymentMethod: SelectedPaymentMethodId.value,
+      IdempotencyKey: crypto.randomUUID(),
+      VoucherCode: SelectedVoucher.value?.VoucherCode || null,
+      Note: OrderNote.value || null,
+    });
+    SuccessMessage.value = `Đặt hàng thành công: ${Result.OrderCode || Result.Order?.OrderCode || ""}`;
+    resetCheckoutState();
+    await loadCart();
+  } catch (Error) {
+    ErrorMessage.value = Error.message;
+  } finally {
+    IsSubmitting.value = false;
+  }
+};
+
+onMounted(loadCheckoutData);
+</script>
+
 <template>
   <section class="payment-page">
     <header class="payment-page__heading">
@@ -29,13 +225,9 @@
     <article class="payment-section dm-card">
       <div class="payment-section__title"><span class="material-symbols-outlined" aria-hidden="true">shopping_bag</span><h2>{{ Text.ProductTitle }}</h2></div>
       <div class="payment-products__header"><span>{{ Text.ProductTitle }}</span><span>{{ Text.UnitPrice }}</span><span>{{ Text.Quantity }}</span><span>{{ Text.ItemTotal }}</span></div>
-      <div v-for="Item in CheckoutItems" :key="`${Item.Type}-${Item.Id}`" class="payment-product">
-        <img :src="Item.ImageUrl || 'https://placehold.co/240x240?text=No+Image'" :alt="Item.ProductName" />
-        <div>
-          <strong>{{ Item.ProductName }}</strong>
-          <span>{{ Item.VariantName }}</span>
-          <small v-if="Item.Type === 'Combo'">{{ (Item.Items || []).map((ComboItem) => `${ComboItem.ProductName} × ${ComboItem.Quantity}`).join(', ') }}</small>
-        </div>
+      <div v-for="Item in CartItems" :key="Item.CartItemId" class="payment-product">
+        <img :src="Item.PrimaryImageUrl || 'https://placehold.co/240x240?text=No+Image'" :alt="Item.ProductName" />
+        <div><strong>{{ Item.ProductName }}</strong><span>{{ Item.VariantName }}</span></div>
         <span>{{ formatCurrency(Item.UnitPrice) }}</span><span>{{ Item.Quantity }}</span><strong>{{ formatCurrency(Item.LineTotal) }}</strong>
       </div>
 
@@ -101,7 +293,7 @@
         <div v-if="IsVoucherListVisible" class="voucher-list">
           <button v-for="VoucherItem in FilteredVouchers" :key="VoucherItem.VoucherId" type="button" class="voucher-item" :class="{ 'voucher-item--active': SelectedVoucherId === VoucherItem.VoucherId }" :disabled="MerchandiseSubtotal < VoucherItem.MinimumOrderAmount" @click="selectVoucher(VoucherItem.VoucherId)">
             <span class="voucher-item__icon">%</span>
-            <span class="voucher-item__content"><strong>{{ VoucherItem.VoucherName }}</strong><small>{{ formatI18nText(Text.VoucherCodeValue, { code: VoucherItem.VoucherCode }) }}</small><small>{{ VoucherItem.VoucherDescription }}</small><small>{{ formatI18nText(Text.VoucherExpiryValue, { date: formatDate(VoucherItem.ExpiryDate) }) }}</small></span>
+            <span class="voucher-item__content"><strong>{{ VoucherItem.VoucherName }}</strong><small>{{ Text.VoucherCodeLabel }}: {{ VoucherItem.VoucherCode }}</small><small>{{ VoucherItem.VoucherDescription }}</small><small>{{ Text.VoucherExpiry }}: {{ formatDate(VoucherItem.ExpiryDate) }}</small></span>
             <span class="voucher-item__action">{{ SelectedVoucherId === VoucherItem.VoucherId ? Text.AppliedVoucher : Text.ApplyVoucher }}</span>
           </button>
           <p v-if="!FilteredVouchers.length" class="voucher-list__empty">{{ Text.VoucherNotFound }}</p>
@@ -125,200 +317,5 @@
     </aside>
   </section>
 </template>
-
-<script setup>
-import { computed, inject, onMounted, ref } from "vue";
-import DMButton from "@/components/base/DMButton.vue";
-import DMInput from "@/components/base/DMInput.vue";
-import DMRadio from "@/components/base/DMRadio.vue";
-import DMTextarea from "@/components/base/DMTextarea.vue";
-import { getMyAddresses } from "@/services/authService";
-import { checkoutOrder, getActiveVouchers } from "@/services/checkoutService";
-import { getShippingQuote } from "@/services/adminService";
-import { CartSummary, getCheckoutItems, getShippingQuoteItems, loadCart } from "@/stores/cartStore";
-import { formatI18nText } from "@/utils/i18n";
-import { formatAddress, formatCurrency, formatDate } from "@/utils/shopFormatters";
-
-const Text = inject("i18nCommon").Payment;
-const SelectedPaymentMethodId = ref(0);
-const OrderNote = ref("");
-const Addresses = ref([]);
-const Vouchers = ref([]);
-const SelectedAddressId = ref("");
-const SelectedVoucherId = ref("");
-const VoucherSearch = ref("");
-const VoucherMessage = ref("");
-const ErrorMessage = ref("");
-const SuccessMessage = ref("");
-const IsSubmitting = ref(false);
-const IsVoucherListVisible = ref(false);
-const ShippingQuote = ref(null);
-const ShippingQuoteMessage = ref("");
-const PaymentOptions = [
-  { value: 0, label: "COD", PaymentName: "COD", PaymentDescription: "Thanh toán khi nhận hàng", IconName: "payments" },
-  { value: 1, label: "Bank Transfer", PaymentName: "Chuyển khoản", PaymentDescription: "Chuyển khoản thủ công", IconName: "account_balance" },
-  { value: 2, label: "Gateway", PaymentName: "Cổng thanh toán", PaymentDescription: "Thanh toán qua cổng", IconName: "credit_card" },
-];
-const MerchandiseSubtotal = computed(() => CartSummary.value.Subtotal || 0);
-const SelectedVoucher = computed(() =>
-  Vouchers.value.find((VoucherItem) => VoucherItem.VoucherId === SelectedVoucherId.value) || null,
-);
-const FilteredVouchers = computed(() => {
-  const Keyword = VoucherSearch.value.trim().toLowerCase();
-  if (!Keyword) return Vouchers.value;
-
-  return Vouchers.value.filter((VoucherItem) =>
-    [VoucherItem.Code, VoucherItem.VoucherCode].some((Value) => String(Value || "").toLowerCase().includes(Keyword)),
-  );
-});
-const SelectedAddress = computed(() =>
-  Addresses.value.find((AddressItem) => AddressItem.UserAddressId === SelectedAddressId.value) || null,
-);
-const VoucherDiscountPreview = computed(() => {
-  if (!SelectedVoucher.value) return 0;
-
-  if (Number(SelectedVoucher.value.DiscountType) === 0) {
-    const RawDiscount = MerchandiseSubtotal.value * (Number(SelectedVoucher.value.DiscountValue) || 0) / 100;
-    const MaxDiscount = SelectedVoucher.value.MaxDiscountAmount == null ? null : Number(SelectedVoucher.value.MaxDiscountAmount);
-    return MaxDiscount == null ? RawDiscount : Math.min(RawDiscount, MaxDiscount);
-  }
-
-  return Number(SelectedVoucher.value.DiscountValue) || 0;
-});
-const CheckoutItems = computed(() => getCheckoutItems());
-const ShippingFee = computed(() => Number(ShippingQuote.value?.Fee || 0));
-const EstimatedTotal = computed(() => Math.max(MerchandiseSubtotal.value + ShippingFee.value - VoucherDiscountPreview.value, 0));
-const IsVoucherEligible = computed(() => {
-  if (!SelectedVoucher.value) return true;
-  return MerchandiseSubtotal.value >= (SelectedVoucher.value.MinimumOrderAmount || 0);
-});
-const CanPlaceOrder = computed(() => !IsSubmitting.value && Boolean(SelectedAddressId.value));
-
-const resetCheckoutState = () => {
-  SelectedVoucherId.value = "";
-  VoucherSearch.value = "";
-  VoucherMessage.value = "";
-  ShippingQuote.value = null;
-  ShippingQuoteMessage.value = "";
-};
-
-const loadCheckoutData = async () => {
-  ErrorMessage.value = "";
-  VoucherMessage.value = "";
-  ShippingQuoteMessage.value = "";
-
-  try {
-    const [_, AddressData, VoucherData] = await Promise.all([
-      loadCart(),
-      getMyAddresses(),
-      getActiveVouchers(),
-    ]);
-    Addresses.value = AddressData;
-    Vouchers.value = VoucherData.map((VoucherItem) => ({
-      ...VoucherItem,
-      VoucherCode: VoucherItem.Code,
-      VoucherName: VoucherItem.Code,
-      VoucherDescription: VoucherItem.DiscountType === 0
-        ? formatI18nText(Text.VoucherPercentDiscount, { percent: VoucherItem.DiscountValue })
-        : formatI18nText(Text.VoucherAmountDiscount, { amount: formatCurrency(VoucherItem.DiscountValue) }),
-      ExpiryDate: VoucherItem.ExpiresAt,
-      MinimumOrderAmount: VoucherItem.MinOrderAmount || 0,
-    }));
-    SelectedAddressId.value = Addresses.value.find((AddressItem) => AddressItem.IsDefault)?.UserAddressId || Addresses.value[0]?.UserAddressId || "";
-    await loadShippingQuote(AddressData);
-  } catch (Error) {
-    ErrorMessage.value = Error.message;
-  }
-};
-
-const loadShippingQuote = async (AddressData = Addresses.value) => {
-  const SelectedAddressData = AddressData.find((AddressItem) => AddressItem.UserAddressId === SelectedAddressId.value)
-    || AddressData.find((AddressItem) => AddressItem.IsDefault)
-    || AddressData[0];
-
-  if (!SelectedAddressData) {
-    ShippingQuote.value = null;
-    ShippingQuoteMessage.value = "Chưa có địa chỉ để tính phí vận chuyển.";
-    return;
-  }
-
-  try {
-    ShippingQuote.value = await getShippingQuote({
-      Province: SelectedAddressData.Province || "",
-      District: SelectedAddressData.District || "",
-      Items: getShippingQuoteItems(),
-    });
-    ShippingQuoteMessage.value = "Đã lấy phí vận chuyển ước tính từ API.";
-  } catch (Error) {
-    ShippingQuote.value = null;
-    ShippingQuoteMessage.value = Error.message;
-  }
-};
-
-const handleSelectAddress = async (AddressId) => {
-  SelectedAddressId.value = AddressId;
-  await loadShippingQuote();
-};
-
-const selectVoucher = (VoucherId) => {
-  SelectedVoucherId.value = VoucherId;
-  VoucherMessage.value = "Đã áp dụng voucher cho đơn hàng hiện tại.";
-  IsVoucherListVisible.value = false;
-};
-
-const removeVoucher = () => {
-  SelectedVoucherId.value = "";
-  VoucherMessage.value = "Đã gỡ voucher khỏi đơn hàng.";
-};
-
-const applyVoucherCode = () => {
-  const Keyword = VoucherSearch.value.trim().toLowerCase();
-  const MatchedVoucher = Vouchers.value.find((VoucherItem) =>
-    String(VoucherItem.VoucherCode || "").toLowerCase() === Keyword,
-  );
-
-  if (!MatchedVoucher) {
-    VoucherMessage.value = Text.VoucherNotFound;
-    return;
-  }
-
-  if (MerchandiseSubtotal.value < (MatchedVoucher.MinimumOrderAmount || 0)) {
-    VoucherMessage.value = formatI18nText(Text.VoucherMinimumRequired, { amount: formatCurrency(MatchedVoucher.MinimumOrderAmount) });
-    return;
-  }
-
-  selectVoucher(MatchedVoucher.VoucherId);
-};
-
-const placeOrder = async () => {
-  if (!SelectedAddressId.value) {
-    ErrorMessage.value = "Cần chọn địa chỉ nhận hàng.";
-    return;
-  }
-
-  IsSubmitting.value = true;
-  ErrorMessage.value = "";
-  SuccessMessage.value = "";
-
-  try {
-    const Result = await checkoutOrder({
-      UserAddressId: SelectedAddressId.value,
-      PaymentMethod: SelectedPaymentMethodId.value,
-      IdempotencyKey: crypto.randomUUID(),
-      VoucherCode: SelectedVoucher.value?.VoucherCode || null,
-      Note: OrderNote.value || null,
-    });
-    SuccessMessage.value = formatI18nText(Text.OrderSuccessWithCode, { code: Result.OrderCode || Result.Order?.OrderCode || "" });
-    resetCheckoutState();
-    await loadCart();
-  } catch (Error) {
-    ErrorMessage.value = Error.message;
-  } finally {
-    IsSubmitting.value = false;
-  }
-};
-
-onMounted(loadCheckoutData);
-</script>
 
 <style scoped lang="scss" src="@/assets/styles/screens/payment.scss"></style>

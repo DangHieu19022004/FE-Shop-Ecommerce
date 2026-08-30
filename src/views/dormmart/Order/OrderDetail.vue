@@ -1,3 +1,113 @@
+<script setup>
+import { computed, inject, onMounted, ref } from "vue";
+import { useRoute } from "vue-router";
+import DMButton from "@/components/base/DMButton.vue";
+import DMInput from "@/components/base/DMInput.vue";
+import DMTextarea from "@/components/base/DMTextarea.vue";
+import { cancelOrder, getOrders, getOrderById } from "@/services/orderService";
+import { uploadPaymentProof } from "@/services/adminService";
+import { createReview, getProductReviews } from "@/services/expansionService";
+import { formatAddress, formatCurrency, formatDateTime } from "@/utils/shopFormatters";
+
+const Route = useRoute();
+const Text = inject("i18nCommon").OrderDetail;
+const Order = ref(null);
+const ReviewSummaries = ref({});
+const ReviewForms = ref({});
+const IsLoading = ref(false);
+const ErrorMessage = ref("");
+const ActionMessage = ref("");
+const IsUploadingProof = ref(false);
+
+const loadOrderDetail = async () => {
+  IsLoading.value = true;
+  ErrorMessage.value = "";
+
+  try {
+    const Orders = await getOrders();
+    const Summary = Orders.find((OrderItem) => OrderItem.OrderCode === Route.params.orderCode);
+    if (!Summary) {
+      Order.value = null;
+      return;
+    }
+
+    Order.value = await getOrderById(Summary.OrderId);
+    await Promise.all((Order.value?.Items || []).map(async (Item) => {
+      ReviewForms.value[Item.OrderItemId] = ReviewForms.value[Item.OrderItemId] || { Rating: 5, Title: "", Content: "" };
+      try {
+        ReviewSummaries.value[Item.ProductId] = await getProductReviews(Item.ProductId);
+      } catch {
+        // ponytail: skip per-product review summary failure on order detail; add inline retry when review UX matters.
+      }
+    }));
+  } catch (Error) {
+    ErrorMessage.value = Error.message;
+  } finally {
+    IsLoading.value = false;
+  }
+};
+
+const handleCancelOrder = async () => {
+  if (!Order.value) return;
+
+  try {
+    Order.value = await cancelOrder(Order.value.OrderId);
+    ActionMessage.value = "Đã gửi yêu cầu hủy đơn.";
+  } catch (Error) {
+    ActionMessage.value = Error.message;
+  }
+};
+
+const IsCancelable = computed(() => ["PendingApproval"].includes(Order.value?.Status));
+const canReviewOrder = computed(() => ["Completed"].includes(Order.value?.Status));
+const ProofCount = computed(() => Order.value?.Payment?.ProofCount || Order.value?.Payment?.Proofs?.length || 0);
+
+const submitReview = async (Item) => {
+  const Form = ReviewForms.value[Item.OrderItemId];
+  if (!Form || !Form.Title.trim()) {
+    ActionMessage.value = "Nhập tiêu đề review trước khi gửi.";
+    return;
+  }
+
+  try {
+    await createReview({
+      ProductId: Item.ProductId,
+      OrderItemId: Item.OrderItemId,
+      Rating: Number(Form.Rating) || 5,
+      Title: Form.Title.trim(),
+      Content: Form.Content.trim() || null,
+    });
+    ActionMessage.value = `Đã gửi review cho ${Item.ProductName}.`;
+    ReviewSummaries.value[Item.ProductId] = await getProductReviews(Item.ProductId);
+  } catch (Error) {
+    ActionMessage.value = Error.message;
+  }
+};
+
+const handleProofChange = async (Event) => {
+  const File = Event.target.files?.[0];
+  const PaymentId = Order.value?.Payment?.PaymentId;
+  if (!File || !PaymentId) return;
+
+  IsUploadingProof.value = true;
+  try {
+    const PaymentData = await uploadPaymentProof(PaymentId, File);
+    Order.value = {
+      ...Order.value,
+      Payment: PaymentData,
+    };
+    ActionMessage.value = "Đã upload payment proof.";
+  } catch (Error) {
+    ActionMessage.value = Error.message;
+  } finally {
+    Event.target.value = "";
+    IsUploadingProof.value = false;
+  }
+};
+
+onMounted(loadOrderDetail);
+</script>
+
 <template>
   <section v-if="IsLoading" class="order-empty dm-card">
     <h1>Đang tải đơn hàng...</h1>
@@ -132,116 +242,5 @@
     <h1>{{ ErrorMessage || Text.OrderNotFound }}</h1><router-link :to="{ name: 'orderHistory' }" class="dm-btn">{{ Text.BackToOrders }}</router-link>
   </section>
 </template>
-
-<script setup>
-import { computed, inject, onMounted, ref } from "vue";
-import { useRoute } from "vue-router";
-import DMButton from "@/components/base/DMButton.vue";
-import DMInput from "@/components/base/DMInput.vue";
-import DMTextarea from "@/components/base/DMTextarea.vue";
-import { cancelOrder, getOrders, getOrderById } from "@/services/orderService";
-import { uploadPaymentProof } from "@/services/adminService";
-import { createReview, getProductReviews } from "@/services/expansionService";
-import { formatI18nText } from "@/utils/i18n";
-import { formatAddress, formatCurrency, formatDateTime } from "@/utils/shopFormatters";
-
-const Route = useRoute();
-const Text = inject("i18nCommon").OrderDetail;
-const Order = ref(null);
-const ReviewSummaries = ref({});
-const ReviewForms = ref({});
-const IsLoading = ref(false);
-const ErrorMessage = ref("");
-const ActionMessage = ref("");
-const IsUploadingProof = ref(false);
-
-const loadOrderDetail = async () => {
-  IsLoading.value = true;
-  ErrorMessage.value = "";
-
-  try {
-    const Orders = await getOrders();
-    const Summary = Orders.find((OrderItem) => OrderItem.OrderCode === Route.params.orderCode);
-    if (!Summary) {
-      Order.value = null;
-      return;
-    }
-
-    Order.value = await getOrderById(Summary.OrderId);
-    await Promise.all((Order.value?.Items || []).map(async (Item) => {
-      ReviewForms.value[Item.OrderItemId] = ReviewForms.value[Item.OrderItemId] || { Rating: 5, Title: "", Content: "" };
-      try {
-        ReviewSummaries.value[Item.ProductId] = await getProductReviews(Item.ProductId);
-      } catch {
-        // ponytail: skip per-product review summary failure on order detail; add inline retry when review UX matters.
-      }
-    }));
-  } catch (Error) {
-    ErrorMessage.value = Error.message;
-  } finally {
-    IsLoading.value = false;
-  }
-};
-
-const handleCancelOrder = async () => {
-  if (!Order.value) return;
-
-  try {
-    Order.value = await cancelOrder(Order.value.OrderId);
-    ActionMessage.value = "Đã gửi yêu cầu hủy đơn.";
-  } catch (Error) {
-    ActionMessage.value = Error.message;
-  }
-};
-
-const IsCancelable = computed(() => ["PendingApproval"].includes(Order.value?.Status));
-const canReviewOrder = computed(() => ["Completed"].includes(Order.value?.Status));
-const ProofCount = computed(() => Order.value?.Payment?.ProofCount || Order.value?.Payment?.Proofs?.length || 0);
-
-const submitReview = async (Item) => {
-  const Form = ReviewForms.value[Item.OrderItemId];
-  if (!Form || !Form.Title.trim()) {
-    ActionMessage.value = "Nhập tiêu đề review trước khi gửi.";
-    return;
-  }
-
-  try {
-    await createReview({
-      ProductId: Item.ProductId,
-      OrderItemId: Item.OrderItemId,
-      Rating: Number(Form.Rating) || 5,
-      Title: Form.Title.trim(),
-      Content: Form.Content.trim() || null,
-    });
-    ActionMessage.value = formatI18nText(Text.ReviewSubmitted, { name: Item.ProductName });
-    ReviewSummaries.value[Item.ProductId] = await getProductReviews(Item.ProductId);
-  } catch (Error) {
-    ActionMessage.value = Error.message;
-  }
-};
-
-const handleProofChange = async (Event) => {
-  const File = Event.target.files?.[0];
-  const PaymentId = Order.value?.Payment?.PaymentId;
-  if (!File || !PaymentId) return;
-
-  IsUploadingProof.value = true;
-  try {
-    const PaymentData = await uploadPaymentProof(PaymentId, File);
-    Order.value = {
-      ...Order.value,
-      Payment: PaymentData,
-    };
-    ActionMessage.value = "Đã upload payment proof.";
-  } catch (Error) {
-    ActionMessage.value = Error.message;
-  } finally {
-    Event.target.value = "";
-    IsUploadingProof.value = false;
-  }
-};
-
-onMounted(loadOrderDetail);
-</script>
 
 <style scoped lang="scss" src="@/assets/styles/screens/order-history.scss"></style>

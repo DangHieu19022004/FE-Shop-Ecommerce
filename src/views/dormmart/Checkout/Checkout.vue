@@ -1,3 +1,9 @@
+<script setup>
+import { inject } from "vue";
+
+const Text = inject("i18nCommon").Checkout;
+</script>
+
 <template>
   <section class="checkout-state dm-card">
     <span class="material-symbols-outlined" aria-hidden="true">payments</span>
@@ -6,12 +12,6 @@
     <router-link :to="{ name: 'cart' }" class="dm-btn">{{ Text.BackToCart }}</router-link>
   </section>
 </template>
-
-<script setup>
-import { inject } from "vue";
-
-const Text = inject("i18nCommon").Checkout;
-</script>
 
 <style scoped lang="scss">
 .checkout-state {

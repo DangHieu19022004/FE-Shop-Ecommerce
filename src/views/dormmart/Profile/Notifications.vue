@@ -1,37 +1,3 @@
-<template>
-  <section class="profile-page">
-    <header class="profile-page__header">
-      <div>
-        <p class="profile-page__eyebrow">Dorm Mart</p>
-        <h1>Thông báo</h1>
-        <p>{{ UnreadCount }} thông báo chưa đọc.</p>
-      </div>
-      <router-link :to="{ name: 'profile' }" class="dm-btn">Quay lại hồ sơ</router-link>
-    </header>
-
-    <div v-if="ErrorMessage" class="dm-card" style="padding: 16px; color: var(--dm-danger);">{{ ErrorMessage }}</div>
-    <section v-if="IsLoading" class="dm-card" style="padding: 16px;">Đang tải thông báo...</section>
-
-    <article v-else class="profile-details dm-card">
-      <h2>Danh sách thông báo</h2>
-      <div v-if="Notifications.length" style="display: grid; gap: 12px; margin-top: 16px;">
-        <div v-for="Item in Notifications" :key="Item.NotificationId" class="dm-card" style="padding: 16px; border: 1px solid var(--dm-border);">
-          <div style="display: flex; justify-content: space-between; gap: 12px; align-items: start;">
-            <div>
-              <strong>{{ Item.Title }}</strong>
-              <div>{{ Item.Content }}</div>
-              <small>{{ Item.Type }} · {{ formatDateTime(Item.CreateDate) }}</small>
-            </div>
-            <DMButton v-if="!Item.IsRead" type="none" :is-tooltip="false" message="Đánh dấu đã đọc" class="admin-button" @click="handleRead(Item.NotificationId)" />
-            <span v-else class="admin-status">Đã đọc</span>
-          </div>
-        </div>
-      </div>
-      <p v-else style="margin-top: 16px; color: var(--dm-text-soft);">Chưa có thông báo nào.</p>
-    </article>
-  </section>
-</template>
-
 <script setup>
 import { onMounted, ref } from "vue";
 import DMButton from "@/components/base/DMButton.vue";
@@ -72,5 +38,39 @@ const handleRead = async (NotificationId) => {
 
 onMounted(loadNotifications);
 </script>
+
+<template>
+  <section class="profile-page">
+    <header class="profile-page__header">
+      <div>
+        <p class="profile-page__eyebrow">Dorm Mart</p>
+        <h1>Thông báo</h1>
+        <p>{{ UnreadCount }} thông báo chưa đọc.</p>
+      </div>
+      <router-link :to="{ name: 'profile' }" class="dm-btn">Quay lại hồ sơ</router-link>
+    </header>
+
+    <div v-if="ErrorMessage" class="dm-card" style="padding: 16px; color: var(--dm-danger);">{{ ErrorMessage }}</div>
+    <section v-if="IsLoading" class="dm-card" style="padding: 16px;">Đang tải thông báo...</section>
+
+    <article v-else class="profile-details dm-card">
+      <h2>Danh sách thông báo</h2>
+      <div v-if="Notifications.length" style="display: grid; gap: 12px; margin-top: 16px;">
+        <div v-for="Item in Notifications" :key="Item.NotificationId" class="dm-card" style="padding: 16px; border: 1px solid var(--dm-border);">
+          <div style="display: flex; justify-content: space-between; gap: 12px; align-items: start;">
+            <div>
+              <strong>{{ Item.Title }}</strong>
+              <div>{{ Item.Content }}</div>
+              <small>{{ Item.Type }} · {{ formatDateTime(Item.CreateDate) }}</small>
+            </div>
+            <DMButton v-if="!Item.IsRead" type="none" :is-tooltip="false" message="Đánh dấu đã đọc" class="admin-button" @click="handleRead(Item.NotificationId)" />
+            <span v-else class="admin-status">Đã đọc</span>
+          </div>
+        </div>
+      </div>
+      <p v-else style="margin-top: 16px; color: var(--dm-text-soft);">Chưa có thông báo nào.</p>
+    </article>
+  </section>
+</template>
 
 <style scoped lang="scss" src="@/assets/styles/screens/profile.scss"></style>

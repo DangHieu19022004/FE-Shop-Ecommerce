@@ -1,13 +1,3 @@
-<template>
-  <section class="admin-page">
-    <header class="admin-page__header"><div><h1>{{ Text.Title }}</h1><p>{{ Text.Subtitle }}</p></div></header>
-    <div v-if="ErrorMessage" class="dm-card" style="padding: 16px; color: var(--dm-danger);">{{ ErrorMessage }}</div>
-    <div v-if="IsLoading" class="dm-card" style="padding: 16px;">Đang tải dashboard...</div>
-    <div v-else class="admin-metrics"><article v-for="Item in Metrics" :key="Item.Label" :class="['dm-card', 'admin-metric', `admin-metric--${Item.Tone}`]"><span class="material-symbols-outlined">{{ Item.Icon }}</span><div class="admin-metric__label">{{ Item.Label }}</div><div class="admin-metric__value">{{ Item.Value }}</div></article></div>
-    <article class="dm-card admin-panel"><div class="admin-panel__header"><h2>{{ Text.SectionsTitle }}</h2></div><div class="admin-section-grid"><router-link v-for="Item in Sections" :key="Item.RouteName" :to="{ name: Item.RouteName }" class="admin-section-card"><span class="material-symbols-outlined">{{ Item.Icon }}</span><div><h3>{{ Item.Title }}</h3><p>{{ Item.Description }}</p><strong>{{ Text.OpenSection }} →</strong></div></router-link></div></article>
-  </section>
-</template>
-
 <script setup>
 import { computed, inject, onMounted, ref } from "vue";
 import { getAdminOrders, getExpenses, getFinanceSummary } from "@/services/adminService";
@@ -55,5 +45,13 @@ const loadDashboard = async () => {
 
 onMounted(loadDashboard);
 </script>
-
+<template>
+  <section class="admin-page">
+    <header class="admin-page__header"><div><h1>{{ Text.Title }}</h1><p>{{ Text.Subtitle }}</p></div></header>
+    <div v-if="ErrorMessage" class="dm-card" style="padding: 16px; color: var(--dm-danger);">{{ ErrorMessage }}</div>
+    <div v-if="IsLoading" class="dm-card" style="padding: 16px;">Đang tải dashboard...</div>
+    <div v-else class="admin-metrics"><article v-for="Item in Metrics" :key="Item.Label" :class="['dm-card', 'admin-metric', `admin-metric--${Item.Tone}`]"><span class="material-symbols-outlined">{{ Item.Icon }}</span><div class="admin-metric__label">{{ Item.Label }}</div><div class="admin-metric__value">{{ Item.Value }}</div></article></div>
+    <article class="dm-card admin-panel"><div class="admin-panel__header"><h2>{{ Text.SectionsTitle }}</h2></div><div class="admin-section-grid"><router-link v-for="Item in Sections" :key="Item.RouteName" :to="{ name: Item.RouteName }" class="admin-section-card"><span class="material-symbols-outlined">{{ Item.Icon }}</span><div><h3>{{ Item.Title }}</h3><p>{{ Item.Description }}</p><strong>{{ Text.OpenSection }} →</strong></div></router-link></div></article>
+  </section>
+</template>
 <style scoped lang="scss" src="@/assets/styles/screens/admin-operations.scss"></style>

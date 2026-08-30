@@ -1,3 +1,34 @@
+<script setup>
+import { onMounted, ref } from "vue";
+import { getLoyaltyBalance, getLoyaltyHistory } from "@/services/expansionService";
+import { formatDateTime } from "@/utils/shopFormatters";
+
+const Balance = ref(null);
+const History = ref([]);
+const ErrorMessage = ref("");
+const IsLoading = ref(false);
+
+const loadLoyalty = async () => {
+  IsLoading.value = true;
+  ErrorMessage.value = "";
+
+  try {
+    const [BalanceData, HistoryData] = await Promise.all([
+      getLoyaltyBalance(),
+      getLoyaltyHistory(),
+    ]);
+    Balance.value = BalanceData;
+    History.value = HistoryData.length ? HistoryData : (BalanceData?.History || []);
+  } catch (Error) {
+    ErrorMessage.value = Error.message;
+  } finally {
+    IsLoading.value = false;
+  }
+};
+
+onMounted(loadLoyalty);
+</script>
+
 <template>
   <section class="profile-page">
     <header class="profile-page__header">
@@ -35,36 +66,5 @@
     </div>
   </section>
 </template>
-
-<script setup>
-import { onMounted, ref } from "vue";
-import { getLoyaltyBalance, getLoyaltyHistory } from "@/services/expansionService";
-import { formatDateTime } from "@/utils/shopFormatters";
-
-const Balance = ref(null);
-const History = ref([]);
-const ErrorMessage = ref("");
-const IsLoading = ref(false);
-
-const loadLoyalty = async () => {
-  IsLoading.value = true;
-  ErrorMessage.value = "";
-
-  try {
-    const [BalanceData, HistoryData] = await Promise.all([
-      getLoyaltyBalance(),
-      getLoyaltyHistory(),
-    ]);
-    Balance.value = BalanceData;
-    History.value = HistoryData.length ? HistoryData : (BalanceData?.History || []);
-  } catch (Error) {
-    ErrorMessage.value = Error.message;
-  } finally {
-    IsLoading.value = false;
-  }
-};
-
-onMounted(loadLoyalty);
-</script>
 
 <style scoped lang="scss" src="@/assets/styles/screens/profile.scss"></style>

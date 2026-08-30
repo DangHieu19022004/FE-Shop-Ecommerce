@@ -1,14 +1,3 @@
-<template>
-  <label class="dm-textarea">
-    <span v-if="Props.label" class="dm-textarea__label">{{ Props.label }}</span>
-    <span class="dm-textarea__control">
-      <span class="material-symbols-outlined dm-textarea__icon" aria-hidden="true">edit_note</span>
-      <textarea :value="Props.modelValue" :placeholder="Props.placeholder" :maxlength="Props.maxLength" :rows="Props.rows" @input="handleInput"></textarea>
-      <small>{{ Props.modelValue.length }}/{{ Props.maxLength }}</small>
-    </span>
-  </label>
-</template>
-
 <script setup>
 const Props = defineProps({
   modelValue: { type: String, default: "" },
@@ -20,6 +9,17 @@ const Props = defineProps({
 const Emit = defineEmits(["update:modelValue"]);
 const handleInput = (Event) => Emit("update:modelValue", Event.target.value);
 </script>
+
+<template>
+  <label class="dm-textarea">
+    <span v-if="Props.label" class="dm-textarea__label">{{ Props.label }}</span>
+    <span class="dm-textarea__control">
+      <span class="material-symbols-outlined dm-textarea__icon" aria-hidden="true">edit_note</span>
+      <textarea :value="Props.modelValue" :placeholder="Props.placeholder" :maxlength="Props.maxLength" :rows="Props.rows" @input="handleInput"></textarea>
+      <small>{{ Props.modelValue.length }}/{{ Props.maxLength }}</small>
+    </span>
+  </label>
+</template>
 
 <style scoped lang="scss">
 .dm-textarea { display: flex; flex-direction: column; gap: 8px; }

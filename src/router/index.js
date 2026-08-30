@@ -1,9 +1,8 @@
 import { createRouter, createWebHistory } from "vue-router";
-import DormMartPublicLayout from "@/layouts/dormmart/PublicLayout.vue";
+import DormMartPublicLayout from "@/views/dormmart/layouts/DormMartPublicLayout.vue";
 import DormMartAdminLayout from "@/layouts/dormmart/AdminLayout.vue";
 import DormMartAuthLayout from "@/layouts/dormmart/AuthLayout.vue";
 import Home from "@/views/dormmart/Home/Home.vue";
-import FeatureUnavailable from "@/views/dormmart/Shared/FeatureUnavailable.vue";
 import CatalogList from "@/views/dormmart/Catalog/CatalogList.vue";
 import CatalogDetail from "@/views/dormmart/Catalog/CatalogDetail.vue";
 import ComboList from "@/views/dormmart/Combo/ComboList.vue";
@@ -61,67 +60,58 @@ const routes = [
       {
         path: "",
         name: "home",
-        component: Home,
+        component: HomeView,
         meta: { isActive: true },
       },
       {
         path: "products",
         name: "productList",
-        component: CatalogList,
+        component: ProductListView,
         meta: { isActive: true },
       },
       {
         path: "combos",
         name: "comboList",
-        component: ComboList,
+        component: ComboListView,
         meta: { isActive: true },
       },
       {
         path: "combos/:slug",
         name: "comboDetail",
-        component: ComboDetail,
+        component: ComboDetailView,
         meta: { isActive: true },
       },
       {
         path: "about",
         name: "about",
-        component: FeatureUnavailable,
+        component: AboutView,
         meta: inactiveRouteMeta({
           comingSoonTitle: FeatureUnavailableText.AboutTitle,
           comingSoonDescription: FeatureUnavailableText.AboutDescription,
         }),
       },
       {
-        path: "terms",
-        name: "terms",
-        component: FeatureUnavailable,
-        meta: inactiveRouteMeta({
-          comingSoonTitle: FeatureUnavailableText.TermsTitle,
-          comingSoonDescription: FeatureUnavailableText.TermsDescription,
-        }),
-      },
-      {
         path: "feature-unavailable",
         name: placeholderRouteName,
-        component: FeatureUnavailable,
+        component: AboutView,
         meta: { isActive: true },
       },
       {
         path: "products/:slug",
         name: "productDetail",
-        component: CatalogDetail,
+        component: ProductDetailView,
         meta: { isActive: true },
       },
       {
         path: "shop",
         name: "cart",
-        component: Cart,
+        component: CartView,
         meta: { isActive: true },
       },
       {
         path: "checkout",
         name: "checkout",
-        component: Checkout,
+        component: CheckoutView,
         meta: inactiveRouteMeta({
           comingSoonTitle: FeatureUnavailableText.CheckoutTitle,
           comingSoonDescription: FeatureUnavailableText.CheckoutDescription,
@@ -130,49 +120,49 @@ const routes = [
       {
         path: "profile",
         name: "profile",
-        component: Profile,
+        component: ProfileView,
         meta: { RequiresAuth: true, isActive: true },
       },
       {
         path: "profile/loyalty",
         name: "loyalty",
-        component: Loyalty,
+        component: LoyaltyView,
         meta: { RequiresAuth: true, isActive: true },
       },
       {
         path: "profile/notifications",
         name: "notifications",
-        component: Notifications,
+        component: NotificationsView,
         meta: { RequiresAuth: true, isActive: true },
       },
       {
         path: "profile/reviews",
         name: "myReviews",
-        component: MyReviews,
+        component: MyReviewsView,
         meta: { RequiresAuth: true, isActive: true },
       },
       {
         path: "payment",
         name: "payment",
-        component: Payment,
+        component: PaymentView,
         meta: { RequiresAuth: true, isActive: true },
       },
       {
         path: "orders",
         name: "orderHistory",
-        component: OrderHistory,
+        component: OrderHistoryView,
         meta: { RequiresAuth: true, isActive: true },
       },
       {
         path: "orders/:orderCode",
         name: "orderDetail",
-        component: OrderDetail,
+        component: OrderDetailView,
         meta: { RequiresAuth: true, isActive: true },
       },
       {
         path: "support",
         name: "support",
-        component: Support,
+        component: SupportView,
         meta: { RequiresAuth: true, isActive: true },
       },
     ],
@@ -184,7 +174,7 @@ const routes = [
       {
         path: "",
         name: "login",
-        component: Login,
+        component: LoginView,
         meta: { isActive: true },
       },
     ],
@@ -196,7 +186,7 @@ const routes = [
       {
         path: "",
         name: "register",
-        component: Register,
+        component: RegisterView,
         meta: { isActive: true },
       },
     ],
@@ -208,7 +198,7 @@ const routes = [
       {
         path: "",
         name: "forgotPassword",
-        component: ForgotPassword,
+        component: ForgotPasswordView,
         meta: { isActive: true },
       },
     ],
@@ -221,61 +211,61 @@ const routes = [
       {
         path: "",
         name: "adminDashboard",
-        component: AdminDashboard,
+        component: AdminDashboardView,
         meta: { isActive: true },
       },
       {
         path: "finance",
         name: "adminFinance",
-        component: AdminFinance,
+        component: AdminFinanceView,
         meta: { isActive: true },
       },
       {
         path: "accounts",
         name: "adminAccounts",
-        component: AdminAccounts,
+        component: AdminAccountsView,
         meta: { isActive: true },
       },
       {
         path: "products",
         name: "adminProducts",
-        component: AdminProducts,
+        component: AdminProductsView,
         meta: { isActive: true },
       },
       {
         path: "categories",
         name: "adminCategories",
-        component: AdminCategories,
+        component: AdminCategoriesView,
         meta: { isActive: true },
       },
       {
         path: "brands",
         name: "adminBrands",
-        component: AdminBrands,
+        component: AdminBrandsView,
         meta: { isActive: true },
       },
       {
         path: "orders",
         name: "adminOrders",
-        component: AdminOrders,
+        component: AdminOrdersView,
         meta: { isActive: true },
       },
       {
         path: "support",
         name: "adminSupport",
-        component: AdminSupport,
+        component: AdminSupportView,
         meta: { isActive: true },
       },
       {
         path: "reviews",
         name: "adminReviews",
-        component: AdminReviews,
+        component: AdminReviewsView,
         meta: { isActive: true },
       },
       {
         path: "promotions",
         name: "adminPromotions",
-        component: AdminPromotions,
+        component: AdminPromotionsView,
         meta: { isActive: true },
       },
       {

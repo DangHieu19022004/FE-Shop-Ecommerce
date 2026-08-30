@@ -1,26 +1,28 @@
+<script setup>
+import { inject, nextTick, ref, watch } from "vue";
+import DMButton from "@/components/base/DMButton.vue";
+import { ChatMessages, IsAdminTyping, IsChatOpen, UnreadMessageCount, sendChatMessage, toggleChat } from "@/stores/supportChatStore";
+
+defineProps({ IsEmbedded: { type: Boolean, default: false } });
+const Text = inject("i18nCommon").SupportChat;
+const MessageInput = ref("");
+const MessageListRef = ref(null);
+
+const scrollToLatest = () => nextTick(() => { if (MessageListRef.value) MessageListRef.value.scrollTop = MessageListRef.value.scrollHeight; });
+const handleSend = () => { if (sendChatMessage(MessageInput.value, Text.AutoReply)) { MessageInput.value = ""; scrollToLatest(); } };
+const handleQuickReply = (QuickReplyText) => { MessageInput.value = QuickReplyText; handleSend(); };
+const formatTime = (DateValue) => new Intl.DateTimeFormat("vi-VN", { hour: "2-digit", minute: "2-digit" }).format(new Date(DateValue));
+watch([ChatMessages, IsChatOpen], scrollToLatest, { deep: true });
+</script>
+
 <template>
   <div class="support-chat" :class="{ 'support-chat--embedded': IsEmbedded }">
-    <button
-      v-if="!IsEmbedded && IsWidgetCollapsed"
-      type="button"
-      class="support-chat__restore"
-      :aria-label="Text.RestoreWidget"
-      :title="Text.RestoreWidget"
-      @click="restoreWidget"
-    >
-      <span class="material-symbols-outlined" aria-hidden="true">chevron_left</span>
+    <button v-if="!IsEmbedded" type="button" class="support-chat__bubble" :aria-label="Text.BubbleLabel" @click="toggleChat">
+      <span class="material-symbols-outlined" aria-hidden="true">{{ IsChatOpen ? "close" : "support_agent" }}</span>
+      <span v-if="UnreadMessageCount" class="support-chat__badge">{{ UnreadMessageCount }}</span>
     </button>
-    <div v-else-if="!IsEmbedded" class="support-chat__launcher">
-      <button type="button" class="support-chat__bubble" :aria-label="Text.BubbleLabel" @click="toggleChat">
-        <span class="material-symbols-outlined" aria-hidden="true">support_agent</span>
-        <span v-if="UnreadMessageCount" class="support-chat__badge">{{ UnreadMessageCount }}</span>
-      </button>
-      <button type="button" class="support-chat__collapse" :aria-label="Text.CollapseWidget" :title="Text.CollapseWidget" @click="collapseWidget">
-        <span class="material-symbols-outlined" aria-hidden="true">close</span>
-      </button>
-    </div>
     <section v-if="IsEmbedded || IsChatOpen" class="support-chat__panel" aria-live="polite">
-      <header class="support-chat__header"><span class="support-chat__avatar material-symbols-outlined" aria-hidden="true">support_agent</span><div><strong>{{ Text.DataFakeSupportAgentDisplayName }}</strong><span><i></i>{{ formatI18nText(Text.StatusSummary, { status: Text.Online, responseTime: Text.ResponseTime }) }}</span></div><DMButton v-if="!IsEmbedded" type="none" :is-tooltip="false" class="support-chat__close" icon-name="close" :aria-label="Text.CollapseWidget" @click="collapseWidget" /></header>
+      <header class="support-chat__header"><span class="support-chat__avatar material-symbols-outlined" aria-hidden="true">support_agent</span><div><strong>{{ Text.DataFakeSupportAgentDisplayName }}</strong><span><i></i>{{ Text.Online }} · {{ Text.ResponseTime }}</span></div><DMButton v-if="!IsEmbedded" type="none" :is-tooltip="false" class="support-chat__close" icon-name="close" :aria-label="Text.CloseChat" @click="toggleChat" /></header>
       <div ref="MessageListRef" class="support-chat__messages">
         <p v-if="!ChatMessages.length">{{ Text.DataFakeChatMessages }}</p>
         <div v-for="MessageItem in ChatMessages" :key="MessageItem.ChatMessageId" class="support-message" :class="`support-message--${MessageItem.SenderType.toLowerCase()}`"><p>{{ MessageItem.MessageContent }}</p><time>{{ formatTime(MessageItem.SentAt) }}</time></div>
@@ -32,29 +34,5 @@
     </section>
   </div>
 </template>
-
-<script setup>
-import { inject, nextTick, ref, watch } from "vue";
-import DMButton from "@/components/base/DMButton.vue";
-import { ChatMessages, IsAdminTyping, IsChatOpen, UnreadMessageCount, sendChatMessage, toggleChat } from "@/stores/supportChatStore";
-import { formatI18nText } from "@/utils/i18n";
-
-defineProps({ IsEmbedded: { type: Boolean, default: false } });
-const Text = inject("i18nCommon").SupportChat;
-const MessageInput = ref("");
-const MessageListRef = ref(null);
-const IsWidgetCollapsed = ref(false);
-
-const scrollToLatest = () => nextTick(() => { if (MessageListRef.value) MessageListRef.value.scrollTop = MessageListRef.value.scrollHeight; });
-const collapseWidget = () => {
-  if (IsChatOpen.value) toggleChat();
-  IsWidgetCollapsed.value = true;
-};
-const restoreWidget = () => { IsWidgetCollapsed.value = false; };
-const handleSend = () => { if (sendChatMessage(MessageInput.value, Text.AutoReply)) { MessageInput.value = ""; scrollToLatest(); } };
-const handleQuickReply = (QuickReplyText) => { MessageInput.value = QuickReplyText; handleSend(); };
-const formatTime = (DateValue) => new Intl.DateTimeFormat("vi-VN", { hour: "2-digit", minute: "2-digit" }).format(new Date(DateValue));
-watch([ChatMessages, IsChatOpen], scrollToLatest, { deep: true });
-</script>
 
 <style scoped lang="scss" src="@/assets/styles/screens/support-chat.scss"></style>

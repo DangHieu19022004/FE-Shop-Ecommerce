@@ -1,48 +1,3 @@
-<template>
-  <article class="auth-card dm-card">
-    <header class="auth-card__header">
-      <span class="dm-brand-icon dm-brand-icon--app-icon" aria-hidden="true"></span>
-      <h1>{{ Text.Title }}</h1>
-      <p>{{ Text.Subtitle }}</p>
-    </header>
-
-    <form class="auth-form" novalidate @submit.prevent="handleSubmit">
-      <DMInput v-model="LoginForm.Account" id="login-account" name="username" autocomplete="username" inputmode="email" autocapitalize="none" class="auth-form__input" :label="Text.AccountLabel" :placeholder="Text.AccountPlaceholder" :error-messages="FormErrors.Account" :is-required="true" @blur="validateAccount" />
-      <div class="auth-form__password">
-        <DMInput v-model="LoginForm.Password" id="login-password" name="password" autocomplete="current-password" autocapitalize="none" class="auth-form__input" :type="IsPasswordVisible ? 'text' : 'password'" :label="Text.PasswordLabel" :placeholder="Text.PasswordPlaceholder" :error-messages="FormErrors.Password" :is-required="true" :has-trailing-action="true" @blur="validatePassword" />
-        <DMButton type="none" :is-tooltip="false" class="auth-form__visibility" :icon-name="IsPasswordVisible ? 'visibility_off' : 'visibility'" :aria-label="IsPasswordVisible ? Text.HidePassword : Text.ShowPassword" @click="togglePassword" />
-      </div>
-
-      <p v-if="FormErrors.General" class="auth-form__message auth-form__message--error" role="alert">{{ FormErrors.General }}</p>
-
-      <div class="auth-form__options">
-        <DMCheckbox v-model="LoginForm.RememberMe" :label="Text.RememberMe" />
-        <router-link :to="{ name: 'forgotPassword' }">{{ Text.ForgotPassword }}</router-link>
-      </div>
-
-      <DMButton native-type="submit" type="none" :is-tooltip="false" class="auth-form__submit" icon-name="login" :message="Text.SubmitButton" :un-active="IsSubmitting" />
-      <p class="auth-form__terms">
-        {{ Text.TermsPrefix }}
-        <router-link :to="{ name: 'terms' }">{{ Text.TermsLink }}</router-link>.
-      </p>
-    </form>
-
-    <div class="auth-divider"><span>{{ Text.Divider }}</span></div>
-    <div class="auth-social-actions">
-      <DMButton type="none" :is-tooltip="false" class="auth-form__social auth-form__google" :un-active="IsGoogleSubmitting" :aria-label="Text.GoogleButton" :title="Text.GoogleButton" @click="handleGoogleLogin">
-        <span class="auth-form__social-content"><span class="dm-brand-icon dm-brand-icon--google" aria-hidden="true"></span><span class="auth-form__social-label">{{ IsGoogleSubmitting ? Text.GoogleLoading : Text.GoogleButton }}</span></span>
-      </DMButton>
-      <p v-if="FormErrors.Google" class="auth-form__message auth-form__message--error" role="alert">{{ FormErrors.Google }}</p>
-
-    </div>
-
-    <p class="auth-card__switch">
-      {{ Text.NoAccount }}
-      <router-link :to="{ name: 'register' }">{{ Text.RegisterLink }}</router-link>
-    </p>
-  </article>
-</template>
-
 <script setup>
 import { inject, reactive, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
@@ -140,5 +95,46 @@ const togglePassword = () => {
   IsPasswordVisible.value = !IsPasswordVisible.value;
 };
 </script>
+
+<template>
+  <article class="auth-card dm-card">
+    <header class="auth-card__header">
+      <span class="dm-brand-icon dm-brand-icon--app-icon" aria-hidden="true"></span>
+      <h1>{{ Text.Title }}</h1>
+      <p>{{ Text.Subtitle }}</p>
+    </header>
+
+    <form class="auth-form" novalidate @submit.prevent="handleSubmit">
+      <DMInput v-model="LoginForm.Account" id="login-account" name="username" autocomplete="username" inputmode="email" autocapitalize="none" class="auth-form__input" :label="Text.AccountLabel" :placeholder="Text.AccountPlaceholder" :error-messages="FormErrors.Account" :is-required="true" @blur="validateAccount" />
+      <div class="auth-form__password">
+        <DMInput v-model="LoginForm.Password" id="login-password" name="password" autocomplete="current-password" autocapitalize="none" class="auth-form__input" :type="IsPasswordVisible ? 'text' : 'password'" :label="Text.PasswordLabel" :placeholder="Text.PasswordPlaceholder" :error-messages="FormErrors.Password" :is-required="true" :has-trailing-action="true" @blur="validatePassword" />
+        <DMButton type="none" :is-tooltip="false" class="auth-form__visibility" :icon-name="IsPasswordVisible ? 'visibility_off' : 'visibility'" :aria-label="IsPasswordVisible ? Text.HidePassword : Text.ShowPassword" @click="togglePassword" />
+      </div>
+
+      <p v-if="FormErrors.General" class="auth-form__message auth-form__message--error" role="alert">{{ FormErrors.General }}</p>
+
+      <div class="auth-form__options">
+        <DMCheckbox v-model="LoginForm.RememberMe" :label="Text.RememberMe" />
+        <router-link :to="{ name: 'forgotPassword' }">{{ Text.ForgotPassword }}</router-link>
+      </div>
+
+      <DMButton native-type="submit" type="none" :is-tooltip="false" class="auth-form__submit" icon-name="login" :message="Text.SubmitButton" :un-active="IsSubmitting" />
+    </form>
+
+    <div class="auth-divider"><span>{{ Text.Divider }}</span></div>
+    <div class="auth-social-actions">
+      <DMButton type="none" :is-tooltip="false" class="auth-form__social auth-form__google" :un-active="IsGoogleSubmitting" :aria-label="Text.GoogleButton" :title="Text.GoogleButton" @click="handleGoogleLogin">
+        <span class="auth-form__social-content"><span class="dm-brand-icon dm-brand-icon--google" aria-hidden="true"></span><span class="auth-form__social-label">{{ IsGoogleSubmitting ? Text.GoogleLoading : Text.GoogleButton }}</span></span>
+      </DMButton>
+      <p v-if="FormErrors.Google" class="auth-form__message auth-form__message--error" role="alert">{{ FormErrors.Google }}</p>
+
+    </div>
+
+    <p class="auth-card__switch">
+      {{ Text.NoAccount }}
+      <router-link :to="{ name: 'register' }">{{ Text.RegisterLink }}</router-link>
+    </p>
+  </article>
+</template>
 
 <style scoped lang="scss" src="@/assets/styles/screens/auth.scss"></style>

@@ -1,3 +1,28 @@
+<script setup>
+import { onMounted, ref } from "vue";
+import { getMyReviews } from "@/services/expansionService";
+import { formatDateTime } from "@/utils/shopFormatters";
+
+const Reviews = ref([]);
+const ErrorMessage = ref("");
+const IsLoading = ref(false);
+
+const loadReviews = async () => {
+  IsLoading.value = true;
+  ErrorMessage.value = "";
+
+  try {
+    Reviews.value = await getMyReviews();
+  } catch (Error) {
+    ErrorMessage.value = Error.message;
+  } finally {
+    IsLoading.value = false;
+  }
+};
+
+onMounted(loadReviews);
+</script>
+
 <template>
   <section class="profile-page">
     <header class="profile-page__header">
@@ -26,30 +51,5 @@
     </article>
   </section>
 </template>
-
-<script setup>
-import { onMounted, ref } from "vue";
-import { getMyReviews } from "@/services/expansionService";
-import { formatDateTime } from "@/utils/shopFormatters";
-
-const Reviews = ref([]);
-const ErrorMessage = ref("");
-const IsLoading = ref(false);
-
-const loadReviews = async () => {
-  IsLoading.value = true;
-  ErrorMessage.value = "";
-
-  try {
-    Reviews.value = await getMyReviews();
-  } catch (Error) {
-    ErrorMessage.value = Error.message;
-  } finally {
-    IsLoading.value = false;
-  }
-};
-
-onMounted(loadReviews);
-</script>
 
 <style scoped lang="scss" src="@/assets/styles/screens/profile.scss"></style>

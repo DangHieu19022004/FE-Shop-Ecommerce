@@ -1,46 +1,3 @@
-<template>
-  <article class="auth-card auth-card--wide dm-card">
-    <header class="auth-card__header">
-      <span class="dm-brand-icon dm-brand-icon--app-icon" aria-hidden="true"></span>
-      <h1>{{ Text.Title }}</h1>
-      <p>{{ Text.Subtitle }}</p>
-    </header>
-
-    <form class="auth-form" novalidate @submit.prevent="handleSubmit">
-      <div class="auth-form__grid">
-        <DMInput v-model="RegisterForm.FullName" id="register-full-name" name="name" autocomplete="name" autocapitalize="words" class="auth-form__input" :label="Text.FullNameLabel" :placeholder="Text.FullNamePlaceholder" :error-messages="FormErrors.FullName" :is-required="true" @blur="validateFullName" />
-        <DMInput v-model="RegisterForm.Phone" id="register-phone" name="tel" autocomplete="tel" inputmode="tel" autocapitalize="none" class="auth-form__input" :label="Text.PhoneLabel" :placeholder="Text.PhonePlaceholder" :error-messages="FormErrors.Phone" :is-required="true" @blur="validatePhone" />
-      </div>
-      <DMInput v-model="RegisterForm.Email" id="register-email" name="email" autocomplete="email" inputmode="email" autocapitalize="none" class="auth-form__input" type="email" :label="Text.EmailLabel" :placeholder="Text.EmailPlaceholder" :error-messages="FormErrors.Email" :is-required="true" @blur="validateEmail" />
-      <div class="auth-form__grid">
-        <div class="auth-form__password">
-          <DMInput v-model="RegisterForm.Password" id="register-password" name="new-password" autocomplete="new-password" autocapitalize="none" class="auth-form__input" :type="IsPasswordVisible ? 'text' : 'password'" :label="Text.PasswordLabel" :placeholder="Text.PasswordPlaceholder" :error-messages="FormErrors.Password" :is-required="true" :has-trailing-action="true" @blur="validatePassword" />
-          <DMButton type="none" :is-tooltip="false" class="auth-form__visibility" :icon-name="IsPasswordVisible ? 'visibility_off' : 'visibility'" :aria-label="IsPasswordVisible ? Text.HidePassword : Text.ShowPassword" @click="togglePassword" />
-        </div>
-        <DMInput v-model="RegisterForm.ConfirmPassword" id="register-confirm-password" name="new-password-confirmation" autocomplete="new-password" autocapitalize="none" class="auth-form__input" :type="IsPasswordVisible ? 'text' : 'password'" :label="Text.ConfirmPasswordLabel" :placeholder="Text.ConfirmPasswordPlaceholder" :error-messages="FormErrors.ConfirmPassword" :is-required="true" @blur="validateConfirmPassword" />
-      </div>
-
-      <DMCheckbox v-model="RegisterForm.HasAgreed" @update:model-value="validateAgreement">
-        {{ Text.AgreementPrefix }}
-        <router-link class="auth-form__terms-link" :to="{ name: 'terms' }" @click.stop>{{ Text.TermsLink }}</router-link>
-      </DMCheckbox>
-      <p v-if="FormErrors.Agreement" class="auth-form__message auth-form__message--error">{{ FormErrors.Agreement }}</p>
-      <p v-if="FormErrors.General" class="auth-form__message auth-form__message--error" role="alert">{{ FormErrors.General }}</p>
-      <DMButton native-type="submit" type="none" :is-tooltip="false" class="auth-form__submit" icon-name="person_add" :message="Text.SubmitButton" :un-active="IsSubmitting" />
-    </form>
-
-    <div class="auth-divider"><span>{{ Text.Divider }}</span></div>
-    <div class="auth-social-actions">
-      <DMButton type="none" :is-tooltip="false" class="auth-form__social auth-form__google" :un-active="IsGoogleSubmitting" :aria-label="Text.GoogleButton" :title="Text.GoogleButton" @click="handleGoogleLogin">
-        <span class="auth-form__social-content"><span class="dm-brand-icon dm-brand-icon--google" aria-hidden="true"></span><span class="auth-form__social-label">{{ IsGoogleSubmitting ? Text.GoogleLoading : Text.GoogleButton }}</span></span>
-      </DMButton>
-      <p v-if="FormErrors.Google" class="auth-form__message auth-form__message--error" role="alert">{{ FormErrors.Google }}</p>
-
-    </div>
-    <p class="auth-card__switch">{{ Text.HasAccount }} <router-link :to="{ name: 'login' }">{{ Text.LoginLink }}</router-link></p>
-  </article>
-</template>
-
 <script setup>
 import { inject, reactive, ref } from "vue";
 import { useRouter } from "vue-router";
@@ -154,5 +111,47 @@ const togglePassword = () => {
   IsPasswordVisible.value = !IsPasswordVisible.value;
 };
 </script>
+
+<template>
+  <article class="auth-card auth-card--wide dm-card">
+    <header class="auth-card__header">
+      <span class="dm-brand-icon dm-brand-icon--app-icon" aria-hidden="true"></span>
+      <h1>{{ Text.Title }}</h1>
+      <p>{{ Text.Subtitle }}</p>
+    </header>
+
+    <form class="auth-form" novalidate @submit.prevent="handleSubmit">
+      <div class="auth-form__grid">
+        <DMInput v-model="RegisterForm.FullName" id="register-full-name" name="name" autocomplete="name" autocapitalize="words" class="auth-form__input" :label="Text.FullNameLabel" :placeholder="Text.FullNamePlaceholder" :error-messages="FormErrors.FullName" :is-required="true" @blur="validateFullName" />
+        <DMInput v-model="RegisterForm.Phone" id="register-phone" name="tel" autocomplete="tel" inputmode="tel" autocapitalize="none" class="auth-form__input" :label="Text.PhoneLabel" :placeholder="Text.PhonePlaceholder" :error-messages="FormErrors.Phone" :is-required="true" @blur="validatePhone" />
+      </div>
+      <DMInput v-model="RegisterForm.Email" id="register-email" name="email" autocomplete="email" inputmode="email" autocapitalize="none" class="auth-form__input" type="email" :label="Text.EmailLabel" :placeholder="Text.EmailPlaceholder" :error-messages="FormErrors.Email" :is-required="true" @blur="validateEmail" />
+      <div class="auth-form__grid">
+        <div class="auth-form__password">
+          <DMInput v-model="RegisterForm.Password" id="register-password" name="new-password" autocomplete="new-password" autocapitalize="none" class="auth-form__input" :type="IsPasswordVisible ? 'text' : 'password'" :label="Text.PasswordLabel" :placeholder="Text.PasswordPlaceholder" :error-messages="FormErrors.Password" :is-required="true" :has-trailing-action="true" @blur="validatePassword" />
+          <DMButton type="none" :is-tooltip="false" class="auth-form__visibility" :icon-name="IsPasswordVisible ? 'visibility_off' : 'visibility'" :aria-label="IsPasswordVisible ? Text.HidePassword : Text.ShowPassword" @click="togglePassword" />
+        </div>
+        <DMInput v-model="RegisterForm.ConfirmPassword" id="register-confirm-password" name="new-password-confirmation" autocomplete="new-password" autocapitalize="none" class="auth-form__input" :type="IsPasswordVisible ? 'text' : 'password'" :label="Text.ConfirmPasswordLabel" :placeholder="Text.ConfirmPasswordPlaceholder" :error-messages="FormErrors.ConfirmPassword" :is-required="true" @blur="validateConfirmPassword" />
+      </div>
+
+      <DMCheckbox v-model="RegisterForm.HasAgreed" @update:model-value="validateAgreement">
+        {{ Text.AgreementPrefix }} <strong>{{ Text.TermsLink }}</strong>
+      </DMCheckbox>
+      <p v-if="FormErrors.Agreement" class="auth-form__message auth-form__message--error">{{ FormErrors.Agreement }}</p>
+      <p v-if="FormErrors.General" class="auth-form__message auth-form__message--error" role="alert">{{ FormErrors.General }}</p>
+      <DMButton native-type="submit" type="none" :is-tooltip="false" class="auth-form__submit" icon-name="person_add" :message="Text.SubmitButton" :un-active="IsSubmitting" />
+    </form>
+
+    <div class="auth-divider"><span>{{ Text.Divider }}</span></div>
+    <div class="auth-social-actions">
+      <DMButton type="none" :is-tooltip="false" class="auth-form__social auth-form__google" :un-active="IsGoogleSubmitting" :aria-label="Text.GoogleButton" :title="Text.GoogleButton" @click="handleGoogleLogin">
+        <span class="auth-form__social-content"><span class="dm-brand-icon dm-brand-icon--google" aria-hidden="true"></span><span class="auth-form__social-label">{{ IsGoogleSubmitting ? Text.GoogleLoading : Text.GoogleButton }}</span></span>
+      </DMButton>
+      <p v-if="FormErrors.Google" class="auth-form__message auth-form__message--error" role="alert">{{ FormErrors.Google }}</p>
+
+    </div>
+    <p class="auth-card__switch">{{ Text.HasAccount }} <router-link :to="{ name: 'login' }">{{ Text.LoginLink }}</router-link></p>
+  </article>
+</template>
 
 <style scoped lang="scss" src="@/assets/styles/screens/auth.scss"></style>
