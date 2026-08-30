@@ -78,6 +78,6 @@ onMounted(loadAccounts);
     <article class="dm-card admin-panel"><div class="admin-table-wrap"><table class="dm-table"><thead><tr><th>Khách hàng</th><th>Liên hệ</th><th>Số đơn</th><th>Ngày tạo</th><th>Trạng thái</th><th></th></tr></thead><tbody><tr v-for="Item in FilteredAccounts" :key="Item.UserId"><td><strong>{{ Item.FullName }}</strong><br><small>{{ Item.UserId }}</small></td><td>{{ Item.Email }}<br><small>{{ Item.Phone || 'Chưa có số' }}</small></td><td>{{ Item.OrderCount }}</td><td>{{ formatDateTime(Item.CreatedAt) }}</td><td><span :class="['admin-status', { 'admin-status--warning': Item.StatusCode === 'LOCKED' }]">{{ Item.StatusCode === 'ACTIVE' ? Text.Active : Text.Locked }}</span></td><td><div class="admin-table-actions"><DMButton type="none" :is-tooltip="false" :message="Item.StatusCode === 'ACTIVE' ? Text.Lock : Text.Unlock" class="admin-button" :un-active="PendingUserId === Item.UserId" @click="toggleAccount(Item)"/><DMButton type="none" :is-tooltip="false" :message="Text.Delete" class="admin-button admin-button--danger" :un-active="PendingUserId === Item.UserId" @click="deleteAccount(Item.UserId)"/></div></td></tr></tbody></table></div></article>
   </section>
 </template>
-<style scoped src="@/assets/styles/screens/admin-operations.css"></style>
+<style scoped lang="scss" src="@/assets/styles/screens/admin-operations.scss"></style>
 
 <!-- ponytail: no pagination or confirm dialog; add when account volume or destructive-safety needs grow. -->

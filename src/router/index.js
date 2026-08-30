@@ -6,6 +6,8 @@ import HomeView from "@/views/dormmart/HomeView.vue";
 import AboutView from "@/views/dormmart/AboutView.vue";
 import ProductListView from "@/views/dormmart/ProductListView.vue";
 import ProductDetailView from "@/views/dormmart/ProductDetailView.vue";
+import ComboListView from "@/views/dormmart/ComboListView.vue";
+import ComboDetailView from "@/views/dormmart/ComboDetailView.vue";
 import CartView from "@/views/dormmart/CartView.vue";
 import CheckoutView from "@/views/dormmart/CheckoutView.vue";
 import PaymentView from "@/views/dormmart/PaymentView.vue";
@@ -70,6 +72,18 @@ const routes = [
         path: "products",
         name: "productList",
         component: ProductListView,
+        meta: { isActive: true },
+      },
+      {
+        path: "combos",
+        name: "comboList",
+        component: ComboListView,
+        meta: { isActive: true },
+      },
+      {
+        path: "combos/:slug",
+        name: "comboDetail",
+        component: ComboDetailView,
         meta: { isActive: true },
       },
       {

@@ -73,4 +73,4 @@ onMounted(loadNotifications);
   </section>
 </template>
 
-<style scoped src="@/assets/styles/screens/profile.css"></style>
+<style scoped lang="scss" src="@/assets/styles/screens/profile.scss"></style>

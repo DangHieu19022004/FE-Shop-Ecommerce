@@ -55,6 +55,18 @@ export const addProductToCart = async ({ ProductVariantId, Quantity = 1, Product
   return Cart;
 };
 
+export const addComboToCart = async (ComboItems = []) => {
+  for (const ComboItem of ComboItems) {
+    await addProductToCart({
+      ProductVariantId: ComboItem.ProductVariantId,
+      ProductSlug: ComboItem.ProductSlug,
+      Quantity: ComboItem.Quantity || 1,
+    });
+  }
+
+  return CartItems.value;
+};
+
 export const changeCartItemQuantity = async (CartItemId, Quantity) => {
   const Cart = await updateCartItemQuantity(CartItemId, Quantity);
   applyCart(Cart);

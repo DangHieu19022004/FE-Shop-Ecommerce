@@ -318,4 +318,4 @@ onMounted(loadCheckoutData);
   </section>
 </template>
 
-<style scoped src="@/assets/styles/screens/payment.css"></style>
+<style scoped lang="scss" src="@/assets/styles/screens/payment.scss"></style>

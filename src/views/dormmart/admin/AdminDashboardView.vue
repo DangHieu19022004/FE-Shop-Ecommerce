@@ -54,4 +54,4 @@ onMounted(loadDashboard);
     <article class="dm-card admin-panel"><div class="admin-panel__header"><h2>{{ Text.SectionsTitle }}</h2></div><div class="admin-section-grid"><router-link v-for="Item in Sections" :key="Item.RouteName" :to="{ name: Item.RouteName }" class="admin-section-card"><span class="material-symbols-outlined">{{ Item.Icon }}</span><div><h3>{{ Item.Title }}</h3><p>{{ Item.Description }}</p><strong>{{ Text.OpenSection }} →</strong></div></router-link></div></article>
   </section>
 </template>
-<style scoped src="@/assets/styles/screens/admin-operations.css"></style>
+<style scoped lang="scss" src="@/assets/styles/screens/admin-operations.scss"></style>

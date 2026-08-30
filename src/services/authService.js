@@ -146,7 +146,7 @@ export const forgotPassword = async (Email) => {
   }
 };
 
-export const loginWithFacebook = async (AccessToken, RememberMe = true) => {
+export const loginWithFacebook = async (AccessToken, RememberMe = false) => {
   try {
     const Response = await axiosInstance.post("/auth/facebook", { AccessToken: AccessToken.trim() });
     const AuthData = unwrapData(Response);
@@ -166,7 +166,7 @@ export const loginWithFacebook = async (AccessToken, RememberMe = true) => {
   }
 };
 
-export const loginWithGoogle = async (IdToken, RememberMe = true) => {
+export const loginWithGoogle = async (IdToken, RememberMe = false) => {
   try {
     const Response = await axiosInstance.post("/auth/google", { IdToken: IdToken.trim() });
     const AuthData = unwrapData(Response);

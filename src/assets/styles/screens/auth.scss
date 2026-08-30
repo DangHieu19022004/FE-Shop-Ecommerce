@@ -108,11 +108,11 @@
   background: var(--dm-surface);
 }
 
-.auth-form__social-label {
+.auth-form__social-content {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 100%;
+  gap: 10px;
 }
 
 .auth-form__google {

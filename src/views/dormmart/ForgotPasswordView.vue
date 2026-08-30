@@ -52,4 +52,4 @@ const handleSubmit = async () => {
   </article>
 </template>
 
-<style scoped src="@/assets/styles/screens/auth.css"></style>
+<style scoped lang="scss" src="@/assets/styles/screens/auth.scss"></style>

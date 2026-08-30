@@ -10,12 +10,14 @@ import { hasGoogleLoginConfig, signInWithGoogle } from "@/services/socialAuthSer
 const Text = inject("i18nCommon").Login;
 const Route = useRoute();
 const Router = useRouter();
-const LoginForm = reactive({ Account: "", Password: "", RememberMe: true });
+const LoginForm = reactive({ Account: "", Password: "", RememberMe: false });
 const FormErrors = reactive({ Account: "", Password: "", General: "", Facebook: "", Google: "" });
 const IsPasswordVisible = ref(false);
 const IsSubmitting = ref(false);
 const IsGoogleSubmitting = ref(false);
 const HasGoogleLoginConfig = hasGoogleLoginConfig();
+const EmailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const PhonePattern = /^(0|\+84)[0-9]{9}$/;
 
 const redirectAfterLogin = () => {
   const RedirectPath = typeof Route.query.Redirect === "string" ? Route.query.Redirect : "/";
@@ -24,11 +26,26 @@ const redirectAfterLogin = () => {
 
 const mapSocialAuthError = (Error, FallbackMessage) => Error?.message || FallbackMessage;
 
-const validateForm = () => {
-  FormErrors.Account = LoginForm.Account.trim() ? "" : Text.AccountRequired;
+const validateAccount = () => {
+  const AccountValue = LoginForm.Account.trim();
+  FormErrors.Account = !AccountValue
+    ? Text.AccountRequired
+    : EmailPattern.test(AccountValue) || PhonePattern.test(AccountValue)
+      ? ""
+      : Text.AccountInvalid;
+  return !FormErrors.Account;
+};
+
+const validatePassword = () => {
   FormErrors.Password = LoginForm.Password ? "" : Text.PasswordRequired;
+  return !FormErrors.Password;
+};
+
+const validateForm = () => {
+  const IsAccountValid = validateAccount();
+  const IsPasswordValid = validatePassword();
   FormErrors.General = "";
-  return !FormErrors.Account && !FormErrors.Password;
+  return IsAccountValid && IsPasswordValid;
 };
 
 const handleSubmit = async () => {
@@ -88,9 +105,9 @@ const togglePassword = () => {
     </header>
 
     <form class="auth-form" novalidate @submit.prevent="handleSubmit">
-      <DMInput v-model="LoginForm.Account" class="auth-form__input" :label="Text.AccountLabel" :placeholder="Text.AccountPlaceholder" :error-messages="FormErrors.Account" :is-required="true" />
+      <DMInput v-model="LoginForm.Account" id="login-account" name="username" autocomplete="username" inputmode="email" autocapitalize="none" class="auth-form__input" :label="Text.AccountLabel" :placeholder="Text.AccountPlaceholder" :error-messages="FormErrors.Account" :is-required="true" @blur="validateAccount" />
       <div class="auth-form__password">
-        <DMInput v-model="LoginForm.Password" class="auth-form__input" :type="IsPasswordVisible ? 'text' : 'password'" :label="Text.PasswordLabel" :placeholder="Text.PasswordPlaceholder" :error-messages="FormErrors.Password" :is-required="true" :has-trailing-action="true" />
+        <DMInput v-model="LoginForm.Password" id="login-password" name="password" autocomplete="current-password" autocapitalize="none" class="auth-form__input" :type="IsPasswordVisible ? 'text' : 'password'" :label="Text.PasswordLabel" :placeholder="Text.PasswordPlaceholder" :error-messages="FormErrors.Password" :is-required="true" :has-trailing-action="true" @blur="validatePassword" />
         <DMButton type="none" :is-tooltip="false" class="auth-form__visibility" :icon-name="IsPasswordVisible ? 'visibility_off' : 'visibility'" :aria-label="IsPasswordVisible ? Text.HidePassword : Text.ShowPassword" @click="togglePassword" />
       </div>
 
@@ -107,7 +124,7 @@ const togglePassword = () => {
     <div class="auth-divider"><span>{{ Text.Divider }}</span></div>
     <div class="auth-social-actions">
       <DMButton type="none" :is-tooltip="false" class="auth-form__social auth-form__google" :un-active="IsGoogleSubmitting" :aria-label="Text.GoogleButton" :title="Text.GoogleButton" @click="handleGoogleLogin">
-        <span class="auth-form__social-label">{{ IsGoogleSubmitting ? Text.GoogleLoading : Text.GoogleButton }}</span>
+        <span class="auth-form__social-content"><span class="dm-brand-icon dm-brand-icon--google" aria-hidden="true"></span><span class="auth-form__social-label">{{ IsGoogleSubmitting ? Text.GoogleLoading : Text.GoogleButton }}</span></span>
       </DMButton>
       <p v-if="FormErrors.Google" class="auth-form__message auth-form__message--error" role="alert">{{ FormErrors.Google }}</p>
 
@@ -120,4 +137,4 @@ const togglePassword = () => {
   </article>
 </template>
 
-<style scoped src="@/assets/styles/screens/auth.css"></style>
+<style scoped lang="scss" src="@/assets/styles/screens/auth.scss"></style>

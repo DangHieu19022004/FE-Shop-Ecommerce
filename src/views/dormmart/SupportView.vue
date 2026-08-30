@@ -79,4 +79,4 @@ onMounted(loadTickets);
   </section>
 </template>
 
-<style scoped src="@/assets/styles/screens/support-page.css"></style>
+<style scoped lang="scss" src="@/assets/styles/screens/support-page.scss"></style>
