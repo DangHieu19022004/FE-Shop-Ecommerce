@@ -17,6 +17,14 @@
           <span class="material-symbols-outlined">inventory_2</span>
           <span>{{ Text.Products }}</span>
         </router-link>
+        <router-link :class="linkClass('/admin/categories')" to="/admin/categories">
+          <span class="material-symbols-outlined">category</span>
+          <span>{{ Text.Categories }}</span>
+        </router-link>
+        <router-link :class="linkClass('/admin/brands')" to="/admin/brands">
+          <span class="material-symbols-outlined">branding_watermark</span>
+          <span>{{ Text.Brands }}</span>
+        </router-link>
         <router-link :class="linkClass('/admin/orders')" to="/admin/orders">
           <span class="material-symbols-outlined">shopping_cart</span>
           <span>{{ Text.Orders }}</span>

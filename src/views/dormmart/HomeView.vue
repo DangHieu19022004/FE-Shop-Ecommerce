@@ -86,14 +86,13 @@ onMounted(loadHomeData);
     </div>
   </section>
 
-  <section class="dm-home-flash dm-card">
+  <section class="dm-home-flash dm-card" v-if="FlashProducts.length">
     <div class="dm-home-flash__header">
       <div>
         <div class="dm-home-flash__title">
           <span class="material-symbols-outlined">bolt</span>
           <h2>{{ Text.FlashSale }}</h2>
         </div>
-        <p>Ưu đãi thật đang lấy trực tiếp từ API flash sale.</p>
       </div>
       <div class="dm-home-flash__badges">
         <div class="dm-pill dm-home-flash__pill">{{ Text.FlashSaleCountdown }}</div>

@@ -42,6 +42,61 @@ export const deleteAdminVoucher = async (VoucherId) => {
   return unwrapData(Response);
 };
 
+export const createAdminCategory = async (Payload) => {
+  const Response = await axiosInstance.post("/admin/categories", Payload);
+  return unwrapData(Response);
+};
+
+export const updateAdminCategory = async (CategoryId, Payload) => {
+  const Response = await axiosInstance.put(`/admin/categories/${CategoryId}`, Payload);
+  return unwrapData(Response);
+};
+
+export const deleteAdminCategory = async (CategoryId) => {
+  const Response = await axiosInstance.delete(`/admin/categories/${CategoryId}`);
+  return unwrapData(Response);
+};
+
+export const createAdminBrand = async (Payload) => {
+  const Response = await axiosInstance.post("/admin/brands", Payload);
+  return unwrapData(Response);
+};
+
+export const updateAdminBrand = async (BrandId, Payload) => {
+  const Response = await axiosInstance.put(`/admin/brands/${BrandId}`, Payload);
+  return unwrapData(Response);
+};
+
+export const deleteAdminBrand = async (BrandId) => {
+  const Response = await axiosInstance.delete(`/admin/brands/${BrandId}`);
+  return unwrapData(Response);
+};
+
+export const getAdminProducts = async (Params = {}) => {
+  const Response = await axiosInstance.get("/admin/products", { params: Params });
+  return unwrapData(Response);
+};
+
+export const getAdminProductById = async (ProductId) => {
+  const Response = await axiosInstance.get(`/admin/products/${ProductId}`);
+  return unwrapData(Response);
+};
+
+export const createAdminProduct = async (Payload) => {
+  const Response = await axiosInstance.post("/admin/products", Payload);
+  return unwrapData(Response);
+};
+
+export const updateAdminProduct = async (ProductId, Payload) => {
+  const Response = await axiosInstance.put(`/admin/products/${ProductId}`, Payload);
+  return unwrapData(Response);
+};
+
+export const deleteAdminProduct = async (ProductId) => {
+  const Response = await axiosInstance.delete(`/admin/products/${ProductId}`);
+  return unwrapData(Response);
+};
+
 export const getAdminFlashSales = async () => {
   const Response = await axiosInstance.get("/admin/flash-sales");
   return unwrapData(Response) || [];

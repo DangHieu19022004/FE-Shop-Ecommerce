@@ -22,6 +22,8 @@ import MyReviewsView from "@/views/dormmart/MyReviewsView.vue";
 import { getCurrentSession } from "@/services/authService";
 import AdminDashboardView from "@/views/dormmart/admin/AdminDashboardView.vue";
 import AdminProductsView from "@/views/dormmart/admin/AdminProductsView.vue";
+import AdminCategoriesView from "@/views/dormmart/admin/AdminCategoriesView.vue";
+import AdminBrandsView from "@/views/dormmart/admin/AdminBrandsView.vue";
 import AdminOrdersView from "@/views/dormmart/admin/AdminOrdersView.vue";
 import AdminFinanceView from "@/views/dormmart/admin/AdminFinanceView.vue";
 import AdminAccountsView from "@/views/dormmart/admin/AdminAccountsView.vue";
@@ -221,6 +223,18 @@ const routes = [
         path: "products",
         name: "adminProducts",
         component: AdminProductsView,
+        meta: { isActive: true },
+      },
+      {
+        path: "categories",
+        name: "adminCategories",
+        component: AdminCategoriesView,
+        meta: { isActive: true },
+      },
+      {
+        path: "brands",
+        name: "adminBrands",
+        component: AdminBrandsView,
         meta: { isActive: true },
       },
       {
