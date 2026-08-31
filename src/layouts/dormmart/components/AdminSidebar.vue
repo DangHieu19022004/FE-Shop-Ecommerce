@@ -1,6 +1,11 @@
 <template>
-  <aside class="dm-admin__sidebar">
-    <router-link to="/admin" class="dm-brand"><span class="dm-brand-icon dm-brand-icon--app-icon admin-brand__icon" aria-hidden="true"></span><div class="admin-brand__name">{{ Text.BrandName }}</div></router-link>
+  <aside class="dm-admin__sidebar" :class="{ 'dm-admin__sidebar--open': IsOpen }">
+    <div class="dm-admin__sidebar-header">
+      <router-link to="/admin" class="dm-brand"><span class="dm-brand-icon dm-brand-icon--app-icon admin-brand__icon" aria-hidden="true"></span><div class="admin-brand__name">{{ Text.BrandName }}</div></router-link>
+      <button type="button" class="dm-icon-btn dm-admin__sidebar-close" :aria-label="Text.CloseMenu" @click="Emit('close')">
+        <span class="material-symbols-outlined" aria-hidden="true">close</span>
+      </button>
+    </div>
     <nav class="dm-admin__nav">
       <router-link :class="linkClass('/admin')" to="/admin"><span class="material-symbols-outlined">dashboard</span><span>{{ Text.Overview }}</span></router-link>
       <router-link :class="linkClass('/admin/finance')" to="/admin/finance"><span class="material-symbols-outlined">monitoring</span><span>{{ Text.Finance }}</span></router-link>
@@ -26,6 +31,13 @@ import { logoutUser } from "@/services/authService";
 const Route = useRoute();
 const Router = useRouter();
 const Text = inject("i18nCommon").AdminNavigation;
+defineProps({
+  IsOpen: {
+    type: Boolean,
+    default: false,
+  },
+});
+const Emit = defineEmits(["close"]);
 const linkClass = (Path) => {
   const IsActive = Path === "/admin" ? Route.path === Path : Route.path.startsWith(Path);
   return ["dm-admin__link", IsActive ? "dm-admin__link--active" : ""];

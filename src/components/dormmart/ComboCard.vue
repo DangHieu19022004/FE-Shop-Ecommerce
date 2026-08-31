@@ -17,11 +17,16 @@
       <p class="combo-card__description">{{ Combo.Description }}</p>
 
       <div class="combo-card__items">
-        <span v-for="Item in Combo.Items.slice(0, 3)" :key="Item.ComboItemId" :title="Item.ProductName">
-          <img :src="Item.ImageUrl" :alt="Item.ProductName" />
-        </span>
-        <span v-if="Combo.Items.length > 3" class="combo-card__more">+{{ Combo.Items.length - 3 }}</span>
-        <strong>{{ formatI18nText(Text.ProductCount, { count: TotalQuantity }) }}</strong>
+        <div class="combo-card__item-images" aria-hidden="true">
+          <span v-for="Item in Combo.Items.slice(0, 3)" :key="Item.ComboItemId" :title="Item.ProductName">
+            <img :src="Item.ImageUrl" alt="" />
+          </span>
+          <span v-if="Combo.Items.length > 3" class="combo-card__more">+{{ Combo.Items.length - 3 }}</span>
+        </div>
+        <div class="combo-card__item-count">
+          <span class="material-symbols-outlined" aria-hidden="true">inventory_2</span>
+          <strong>{{ formatI18nText(Text.ProductCount, { count: TotalQuantity }) }}</strong>
+        </div>
       </div>
 
       <div class="combo-card__price-row">

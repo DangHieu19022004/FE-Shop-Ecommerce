@@ -6,9 +6,7 @@
         :alt="Product.Name"
         class="product-card__image"
       />
-      <span class="product-card__status" :class="{ 'product-card__status--inactive': !IsAvailable }">
-        {{ IsAvailable ? Text.Available : Text.Unavailable }}
-      </span>
+      <span v-if="!IsAvailable" class="product-card__status">{{ Text.Unavailable }}</span>
     </router-link>
 
     <div class="product-card__body">
@@ -102,15 +100,10 @@ const IsAvailable = computed(() => Number(Props.Product.Status) === 1);
   right: 10px;
   padding: 5px 9px;
   border-radius: 999px;
-  background: var(--dm-success-soft);
-  color: var(--dm-success);
-  font-size: 11px;
-  font-weight: 800;
-}
-
-.product-card__status--inactive {
   background: var(--dm-danger-soft);
   color: var(--dm-danger);
+  font-size: 11px;
+  font-weight: 800;
 }
 
 .product-card__body {

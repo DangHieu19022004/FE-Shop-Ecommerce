@@ -22,7 +22,7 @@
       </router-link>
       <div class="dm-search" role="button" tabindex="0" :aria-label="formatI18nText(Text.SearchDevelopingAria, { action: Text.SearchButton })" :title="formatI18nText(Text.SearchDevelopingAria, { action: Text.SearchButton })" @click="openSearchPlaceholder" @keydown.enter.prevent="openSearchPlaceholder" @keydown.space.prevent="openSearchPlaceholder">
         <span class="material-symbols-outlined">search</span>
-        <input :value="searchValue" type="text" :placeholder="formatI18nText(Text.SearchDevelopingPlaceholder, { placeholder: Text.SearchPlaceholder })" readonly />
+        <input type="text" :placeholder="Text.SearchPlaceholder" readonly />
         <span class="dm-btn dm-icon-btn"><span class="material-symbols-outlined" aria-hidden="true">search</span></span>
       </div>
       <div class="dm-public-actions">
@@ -39,8 +39,6 @@ import { useRouter } from "vue-router";
 import { CartTotalQuantity } from "@/stores/cartStore";
 import { getCurrentSession } from "@/services/authService";
 import { formatI18nText } from "@/utils/i18n";
-
-defineProps({ searchValue: { type: String, default: "" } });
 
 const Router = useRouter();
 const Text = inject("i18nCommon").Common;

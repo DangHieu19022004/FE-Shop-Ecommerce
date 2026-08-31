@@ -266,6 +266,8 @@
 }
 
 .dm-admin__sidebar {
+  z-index: 30;
+  flex: 0 0 250px;
   width: 250px;
   background: var(--dm-surface);
   border-right: 1px solid var(--dm-border);
@@ -316,6 +318,19 @@
   justify-content: space-between;
   gap: 16px;
   padding: 14px 24px;
+}
+
+.dm-admin__sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.dm-admin__sidebar-close,
+.dm-admin__menu-toggle,
+.dm-admin__sidebar-backdrop {
+  display: none;
 }
 
 .dm-admin__topbar .dm-icon-btn {
@@ -418,6 +433,10 @@
 }
 
 @media (max-width: 960px) {
+  body.dm-sidebar-open {
+    overflow: hidden;
+  }
+
   .dm-public-header__main,
   .dm-public-header__top,
   .dm-footer__inner,
@@ -429,14 +448,42 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .dm-admin {
-    flex-direction: column;
+  .dm-admin__sidebar {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: min(82vw, 300px);
+    height: 100dvh;
+    overflow-y: auto;
+    box-shadow: 18px 0 50px rgba(var(--dm-brand-blue-rgb), 0.18);
+    transform: translateX(-105%);
+    transition: transform 220ms ease;
   }
 
-  .dm-admin__sidebar {
+  .dm-admin__sidebar--open {
+    transform: translateX(0);
+  }
+
+  .dm-admin__sidebar-close,
+  .dm-admin__menu-toggle {
+    display: inline-grid;
+    flex: 0 0 auto;
+  }
+
+  .dm-admin__sidebar-backdrop {
+    position: fixed;
+    z-index: 20;
+    inset: 0;
+    display: block;
+    padding: 0;
+    border: 0;
+    background: rgba(var(--dm-brand-blue-rgb), 0.46);
+    backdrop-filter: blur(2px);
+  }
+
+  .dm-admin__body {
     width: 100%;
-    height: auto;
-    position: relative;
   }
 }
 
@@ -469,5 +516,24 @@
   .dm-admin__topbar,
   .dm-admin__content {
     padding: 16px;
+  }
+
+  .dm-admin__topbar {
+    flex-wrap: wrap;
+  }
+
+  .dm-admin__topbar > .dm-search {
+    order: 3;
+    max-width: none !important;
+  }
+
+  .dm-admin__topbar > .dm-public-actions {
+    margin-left: auto;
+  }
+
+  .dm-admin__sidebar .dm-brand {
+    width: auto;
+    min-width: 0;
+    justify-content: flex-start;
   }
 }

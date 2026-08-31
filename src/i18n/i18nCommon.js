@@ -11,11 +11,7 @@ const i18nCommon = {
     LoginLink: "Đăng nhập",
     RegisterLink: "Đăng ký",
     HomeAriaLabel: "Dorm Mart - Trang chủ",
-    SearchPlaceholder: "Tìm đồ dùng ký túc xá, đồ ăn và thiết bị",
-    SearchProductsValue: "đồ gia dụng",
-    SearchComboValue: "combo sinh viên tiết kiệm",
-    SearchCartValue: "đồ dùng trong giỏ hàng",
-    SearchHomeValue: "đồ dùng ký túc xá",
+    SearchPlaceholder: "Tìm kiếm",
     SearchButton: "Tìm kiếm",
     SearchDevelopingAria: "{action} - tính năng đang phát triển",
     SearchDevelopingPlaceholder: "{placeholder} · Tính năng đang phát triển",
@@ -95,7 +91,6 @@ const i18nCommon = {
     DataFakeProducts: "DataFake-Products",
   },
   ProductCard: {
-    Available: "Đang bán",
     Unavailable: "Tạm ngừng bán",
     Uncategorized: "Chưa phân loại",
     NoBrand: "Chưa có thương hiệu",
@@ -390,6 +385,8 @@ const i18nCommon = {
   },
   SupportChat: {
     BubbleLabel: "Chat với nhân viên hỗ trợ", CloseChat: "Đóng cửa sổ chat", Online: "Đang trực tuyến",
+    CollapseWidget: "Thu gọn chatbot",
+    RestoreWidget: "Hiện lại chatbot",
     ResponseTime: "Thường phản hồi trong vài phút", StatusSummary: "{status} · {responseTime}", InputPlaceholder: "Nhập nội dung cần hỗ trợ...", SendMessage: "Gửi tin nhắn",
     ViewSupportCenter: "Mở trung tâm hỗ trợ", AdminTyping: "Nhân viên hỗ trợ đang nhập...",
     AutoReply: "Dorm Mart đã nhận được tin nhắn. Nhân viên hỗ trợ sẽ phản hồi bạn sớm nhất.",
@@ -421,7 +418,14 @@ const i18nCommon = {
     AdminName: "Quản trị viên",
     AdminRole: "Quản trị hệ thống",
     NotificationLabel: "Thông báo",
-    ProfileLabel: "Hồ sơ quản trị viên"
+    NotificationsLoading: "Đang tải thông báo…",
+    NotificationsEmpty: "Bạn chưa có thông báo mới.",
+    NotificationsError: "Chưa thể cập nhật thông báo. Vui lòng thử lại.",
+    RetryNotifications: "Thử lại",
+    AllNotifications: "Xem tất cả thông báo",
+    ProfileLabel: "Hồ sơ quản trị viên",
+    OpenMenu: "Mở menu quản trị",
+    CloseMenu: "Đóng menu quản trị"
   },
   AdminDashboard: {
     Title: "Trung tâm vận hành",

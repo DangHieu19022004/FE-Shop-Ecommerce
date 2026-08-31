@@ -459,22 +459,35 @@
 }
 
 .combo-card__items {
-  min-height: 38px;
-}
-
-.combo-card__items > span {
-  display: grid;
-  width: 34px;
-  height: 34px;
-  overflow: hidden;
-  place-items: center;
-  margin-left: -7px;
-  border: 2px solid var(--dm-surface);
-  border-radius: 50%;
+  justify-content: space-between;
+  min-height: 58px;
+  gap: 12px;
+  padding: 8px 10px;
+  border: 1px solid var(--dm-border);
+  border-radius: 14px;
   background: var(--dm-surface-soft);
 }
 
-.combo-card__items > span:first-child {
+.combo-card__item-images {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+}
+
+.combo-card__item-images > span {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  overflow: hidden;
+  place-items: center;
+  margin-left: -8px;
+  border: 2px solid var(--dm-surface);
+  border-radius: 12px;
+  background: var(--dm-surface);
+  box-shadow: 0 3px 9px rgba(var(--dm-brand-blue-rgb), 0.1);
+}
+
+.combo-card__item-images > span:first-child {
   margin-left: 0;
 }
 
@@ -485,16 +498,32 @@
 }
 
 .combo-card__items .combo-card__more {
-  background: var(--dm-primary-soft);
-  color: var(--dm-primary);
-  font-size: 11px;
-  font-weight: 800;
+  border-color: var(--dm-surface);
+  background: var(--dm-primary);
+  color: var(--dm-surface);
+  font-size: 12px;
+  font-weight: 900;
 }
 
-.combo-card__items strong {
-  margin-left: 8px;
-  color: var(--dm-text-soft);
+.combo-card__item-count {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 9px;
+  border-radius: 10px;
+  background: var(--dm-primary-soft);
+  color: var(--dm-primary);
+}
+
+.combo-card__item-count .material-symbols-outlined {
+  font-size: 17px;
+}
+
+.combo-card__item-count strong {
+  white-space: nowrap;
   font-size: 12px;
+  font-weight: 850;
 }
 
 .combo-card__price-row {
