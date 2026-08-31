@@ -24,6 +24,59 @@ const Category = computed(() => Product.value?.CategoryName || "Sản phẩm");
 const BrandName = computed(() => Product.value?.BrandName || "Dorm Mart");
 const ProductImages = computed(() => Product.value?.Images || []);
 const ProductVariants = computed(() => Product.value?.Variants || []);
+const SelectedVariant = computed(() =>
+  ProductVariants.value.find((VariantItem) => VariantItem.ProductVariantId === SelectedVariantId.value)
+  || ProductVariants.value[0]
+  || null,
+);
+const HasDiscount = computed(() => Number(Product.value?.MaxSalePrice) > Number(Product.value?.MinSalePrice));
+const DiscountPercent = computed(() => {
+  const OriginalPrice = Number(Product.value?.MaxSalePrice || 0);
+  const SalePrice = Number(Product.value?.MinSalePrice || 0);
+
+  if (OriginalPrice <= SalePrice || OriginalPrice <= 0) return 0;
+  return Math.round(((OriginalPrice - SalePrice) / OriginalPrice) * 100);
+});
+const IsAvailable = computed(() => Number(Product.value?.Status) === 1);
+const AvailabilityText = computed(() => (IsAvailable.value ? "Còn bán" : "Ngừng bán"));
+const ReviewCount = computed(() => Number(ReviewSummary.value?.ReviewCount || 0));
+const AverageRating = computed(() => Number(ReviewSummary.value?.AverageRating || 0));
+const ReviewLabel = computed(() => `${AverageRating.value.toFixed(1)}/5 · ${ReviewCount.value} ${Text.ReviewLabel}`);
+const ProductMetrics = computed(() => [
+  Product.value?.ProductCode ? { Label: "Mã SP", Value: Product.value.ProductCode } : null,
+  Product.value?.CategoryName ? { Label: "Danh mục", Value: Product.value.CategoryName } : null,
+  SelectedVariant.value?.Sku ? { Label: "SKU", Value: SelectedVariant.value.Sku } : null,
+].filter(Boolean));
+const ProtectionItems = computed(() => [
+  Product.value?.ProductCode
+    ? {
+      Icon: "inventory_2",
+      Label: "Mã sản phẩm",
+      Value: Product.value.ProductCode,
+    }
+    : null,
+  Product.value?.CategoryName
+    ? {
+      Icon: "category",
+      Label: "Danh mục",
+      Value: Product.value.CategoryName,
+    }
+    : null,
+  Product.value?.BrandName
+    ? {
+      Icon: "verified",
+      Label: "Thương hiệu",
+      Value: Product.value.BrandName,
+    }
+    : null,
+  SelectedVariant.value?.Sku
+    ? {
+      Icon: "qr_code_2",
+      Label: "SKU biến thể",
+      Value: SelectedVariant.value.Sku,
+    }
+    : null,
+].filter(Boolean));
 
 const loadProduct = async () => {
   IsLoading.value = true;
@@ -106,8 +159,12 @@ const handleAddToCart = async (Checkout) => {
       <div class="product-gallery">
         <div class="product-gallery__main">
           <img :src="SelectedImageUrl" :alt="Product.Name" />
+          <span v-if="HasDiscount" class="product-gallery__discount">-{{ DiscountPercent }}%</span>
+          <span class="product-gallery__status" :class="{ 'product-gallery__status--inactive': !IsAvailable }">
+            {{ AvailabilityText }}
+          </span>
         </div>
-        <div class="product-gallery__thumbnails">
+        <div v-if="ProductImages.length" class="product-gallery__thumbnails">
           <button
             v-for="ImageItem in ProductImages"
             :key="ImageItem.ProductImageId"
@@ -124,27 +181,36 @@ const handleAddToCart = async (Checkout) => {
 
       <div class="product-summary">
         <div class="product-summary__heading">
-          <div class="product-summary__brand">
-            <span class="material-symbols-outlined" aria-hidden="true">verified</span>
-            {{ BrandName }} · {{ Text.AuthenticBrand }}
+          <div class="product-summary__brand-row">
+            <div class="product-summary__brand">
+              <span class="material-symbols-outlined" aria-hidden="true">verified</span>
+              {{ BrandName }} · {{ Text.AuthenticBrand }}
+            </div>
+            <div v-if="ReviewSummary" class="product-summary__rating">
+              <span class="material-symbols-outlined" aria-hidden="true">star</span>
+              {{ ReviewLabel }}
+            </div>
           </div>
           <h1>{{ Product.Name }}</h1>
           <p>{{ Product.ShortDescription || Product.Description }}</p>
-          <div class="product-summary__metrics">
-            <span>{{ Product.ProductCode }}</span>
-            <span>{{ Category }}</span>
+          <div v-if="ProductMetrics.length" class="product-summary__metrics">
+            <span v-for="MetricItem in ProductMetrics" :key="MetricItem.Label">
+              <strong>{{ MetricItem.Label }}:</strong> {{ MetricItem.Value }}
+            </span>
           </div>
         </div>
 
         <div class="product-price">
           <div class="product-price__values">
-            <strong>{{ formatCurrency(Product.MinSalePrice) }}</strong>
-            <del v-if="Product.MaxSalePrice > Product.MinSalePrice">
+            <strong>
+              {{ Product.MinSalePrice > 0 ? formatCurrency(Product.MinSalePrice) : Text.ContactPrice }}
+            </strong>
+            <del v-if="HasDiscount">
               {{ formatCurrency(Product.MaxSalePrice) }}
             </del>
           </div>
           <div class="product-price__badges">
-            <span class="dm-pill product-price__deal">{{ Product.Status }}</span>
+            <span v-if="HasDiscount" class="dm-pill product-price__deal">{{ Text.FlashDeal }} -{{ DiscountPercent }}%</span>
             <span class="dm-pill product-price__shipping">
               <span class="material-symbols-outlined" aria-hidden="true">local_shipping</span>
               {{ Text.FreeShipping }}
@@ -188,13 +254,15 @@ const handleAddToCart = async (Checkout) => {
     <div class="product-detail__content">
       <article class="product-information dm-card">
         <section>
-          <h2>{{ Text.DescriptionTitle }}</h2>
+          <div class="product-information__section-heading">
+            <h2>{{ Text.DescriptionTitle }}</h2>
+          </div>
           <p>{{ Product.Description || Product.ShortDescription || 'Chưa có mô tả.' }}</p>
         </section>
         <section v-if="ReviewSummary">
           <div class="product-information__heading">
             <h2>Đánh giá sản phẩm</h2>
-            <span>{{ ReviewSummary.AverageRating?.toFixed?.(1) || 0 }}/5 · {{ ReviewSummary.ReviewCount || 0 }} đánh giá</span>
+            <span>{{ ReviewLabel }}</span>
           </div>
           <div v-if="ReviewSummary.Reviews?.length" class="product-reviews">
             <article v-for="ReviewItem in ReviewSummary.Reviews" :key="ReviewItem.ReviewId" class="product-review dm-card">
@@ -227,20 +295,17 @@ const handleAddToCart = async (Checkout) => {
         </section>
       </article>
 
-      <aside class="product-protection dm-card">
+      <aside v-if="ProtectionItems.length" class="product-protection dm-card">
         <h2>{{ Text.ProtectionTitle }}</h2>
-        <div class="product-protection__item">
-          <span class="material-symbols-outlined" aria-hidden="true">inventory</span>
+        <div
+          v-for="ProtectionItem in ProtectionItems"
+          :key="ProtectionItem.Label"
+          class="product-protection__item"
+        >
+          <span class="material-symbols-outlined" aria-hidden="true">{{ ProtectionItem.Icon }}</span>
           <div>
-            <strong>Mã sản phẩm</strong>
-            <p>{{ Product.ProductCode }}</p>
-          </div>
-        </div>
-        <div class="product-protection__item">
-          <span class="material-symbols-outlined" aria-hidden="true">category</span>
-          <div>
-            <strong>Danh mục</strong>
-            <p>{{ Category }}</p>
+            <strong>{{ ProtectionItem.Label }}</strong>
+            <p>{{ ProtectionItem.Value }}</p>
           </div>
         </div>
       </aside>

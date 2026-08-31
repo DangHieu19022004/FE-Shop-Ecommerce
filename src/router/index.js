@@ -32,6 +32,7 @@ import AdminAccountsView from "@/views/dormmart/admin/AdminAccountsView.vue";
 import AdminSupportView from "@/views/dormmart/admin/AdminSupportView.vue";
 import AdminReviewsView from "@/views/dormmart/admin/AdminReviewsView.vue";
 import AdminPromotionsView from "@/views/dormmart/admin/AdminPromotionsView.vue";
+import AdminCombosView from "@/views/dormmart/admin/AdminCombosView.vue";
 import i18nCommon from "@/i18n/i18nCommon";
 
 const placeholderRouteName = "featureUnavailable";
@@ -273,6 +274,12 @@ const routes = [
         path: "promotions",
         name: "adminPromotions",
         component: AdminPromotionsView,
+        meta: { isActive: true },
+      },
+      {
+        path: "combos",
+        name: "adminCombos",
+        component: AdminCombosView,
         meta: { isActive: true },
       },
     ],

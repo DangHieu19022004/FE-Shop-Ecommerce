@@ -8,6 +8,7 @@ import "./assets/styles/utility.scss";
 import "./assets/styles/dormmart.scss";
 import "./assets/styles/cart-animation.scss";
 import "./assets/styles/screens/combo.scss";
+import "./assets/styles/screens/product-detail.scss";
 
 const AppInstance = createApp(App);
 AppInstance.provide("i18nCommon", i18nCommon);

@@ -97,6 +97,46 @@ export const deleteAdminProduct = async (ProductId) => {
   return unwrapData(Response);
 };
 
+export const getAdminCombos = async () => {
+  const Response = await axiosInstance.get("/admin/combos");
+  return unwrapData(Response) || [];
+};
+
+export const getAdminComboById = async (ComboId) => {
+  const Response = await axiosInstance.get(`/admin/combos/${ComboId}`);
+  return unwrapData(Response);
+};
+
+export const createAdminCombo = async (Payload) => {
+  const Response = await axiosInstance.post("/admin/combos", Payload);
+  return unwrapData(Response);
+};
+
+export const updateAdminCombo = async (ComboId, Payload) => {
+  const Response = await axiosInstance.put(`/admin/combos/${ComboId}`, Payload);
+  return unwrapData(Response);
+};
+
+export const deleteAdminCombo = async (ComboId) => {
+  const Response = await axiosInstance.delete(`/admin/combos/${ComboId}`);
+  return unwrapData(Response);
+};
+
+export const createAdminComboDiscount = async (ComboId, Payload) => {
+  const Response = await axiosInstance.post(`/admin/combos/${ComboId}/discounts`, Payload);
+  return unwrapData(Response);
+};
+
+export const updateAdminComboDiscount = async (ComboId, DiscountId, Payload) => {
+  const Response = await axiosInstance.put(`/admin/combos/${ComboId}/discounts/${DiscountId}`, Payload);
+  return unwrapData(Response);
+};
+
+export const deleteAdminComboDiscount = async (ComboId, DiscountId) => {
+  const Response = await axiosInstance.delete(`/admin/combos/${ComboId}/discounts/${DiscountId}`);
+  return unwrapData(Response);
+};
+
 export const getAdminFlashSales = async () => {
   const Response = await axiosInstance.get("/admin/flash-sales");
   return unwrapData(Response) || [];

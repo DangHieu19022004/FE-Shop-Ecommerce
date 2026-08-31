@@ -198,6 +198,23 @@ onMounted(loadOrderDetail);
     </div>
     <article class="order-detail__products dm-card">
       <h2>{{ Text.ProductTitle }}</h2>
+
+      <div v-if="Order.Combos?.length" class="order-detail__combo-list">
+        <article v-for="Combo in Order.Combos" :key="Combo.OrderComboId" class="order-detail__product-stack">
+          <div class="order-detail__product">
+            <img :src="Combo.ImageUrl || 'https://placehold.co/240x240?text=No+Image'" :alt="Combo.Name" />
+            <div>
+              <strong>{{ Combo.Name }}</strong>
+              <span>{{ Combo.ComboCode }} · x{{ Combo.Quantity }}</span>
+              <small style="display: block; color: var(--dm-text-soft);">
+                {{ (Combo.Items || []).map((ComboItem) => `${ComboItem.ProductName} × ${ComboItem.Quantity}`).join(', ') }}
+              </small>
+            </div>
+            <strong>{{ formatCurrency(Combo.LineTotal) }}</strong>
+          </div>
+        </article>
+      </div>
+
       <div v-for="Item in Order.Items" :key="Item.OrderItemId" class="order-detail__product-stack">
         <div class="order-detail__product"><img :src="Item.PrimaryImageUrl || 'https://placehold.co/240x240?text=No+Image'" :alt="Item.ProductName" />
           <div><strong>{{ Item.ProductName }}</strong><span>{{ Item.VariantName }} · x{{ Item.Quantity }}</span><small style="display: block; color: var(--dm-text-soft);">Review hiện có: {{ ReviewSummaries[Item.ProductId]?.ReviewCount || 0 }}</small></div><strong>{{ formatCurrency(Item.LineTotal) }}</strong>

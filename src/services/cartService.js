@@ -12,13 +12,28 @@ export const addCartItem = async ({ ProductVariantId, Quantity }) => {
   return unwrapData(Response);
 };
 
+export const addCartCombo = async ({ ComboId, Quantity = 1 }) => {
+  const Response = await axiosInstance.post("/cart/combos", { ComboId, Quantity });
+  return unwrapData(Response);
+};
+
 export const updateCartItemQuantity = async (CartItemId, Quantity) => {
   const Response = await axiosInstance.patch(`/cart/items/${CartItemId}`, { Quantity });
   return unwrapData(Response);
 };
 
+export const updateCartComboQuantity = async (CartComboId, Quantity) => {
+  const Response = await axiosInstance.patch(`/cart/combos/${CartComboId}`, { Quantity });
+  return unwrapData(Response);
+};
+
 export const removeCartItem = async (CartItemId) => {
   const Response = await axiosInstance.delete(`/cart/items/${CartItemId}`);
+  return unwrapData(Response);
+};
+
+export const removeCartCombo = async (CartComboId) => {
+  const Response = await axiosInstance.delete(`/cart/combos/${CartComboId}`);
   return unwrapData(Response);
 };
 

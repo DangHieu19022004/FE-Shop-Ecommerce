@@ -32,6 +32,7 @@
         <router-link :class="linkClass('/admin/support')" to="/admin/support"><span class="material-symbols-outlined">support_agent</span><span>{{ Text.Support }}</span></router-link>
         <router-link :class="linkClass('/admin/reviews')" to="/admin/reviews"><span class="material-symbols-outlined">reviews</span><span>Đánh giá</span></router-link>
         <router-link :class="linkClass('/admin/promotions')" to="/admin/promotions"><span class="material-symbols-outlined">sell</span><span>Khuyến mãi</span></router-link>
+        <router-link :class="linkClass('/admin/combos')" to="/admin/combos"><span class="material-symbols-outlined">redeem</span><span>Combo</span></router-link>
         <router-link class="dm-admin__link" to="/">
           <span class="material-symbols-outlined">storefront</span>
           <span>{{ Text.Storefront }}</span>

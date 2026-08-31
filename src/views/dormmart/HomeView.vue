@@ -73,7 +73,8 @@ onMounted(loadHomeData);
 
   <section style="margin-bottom: 24px;">
     <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 16px;">
-      <h2 style="font-size: 24px;">{{ Text.CategoryTitle }}</h2>
+      <h2 style="font-size: 24px;">{{ Text.CategoryTitle }}
+      </h2>
       <router-link to="/products" style="color: var(--dm-primary); font-weight: 600;">{{ Text.SeeAll }}</router-link>
     </div>
     <div class="dm-grid" style="grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));">

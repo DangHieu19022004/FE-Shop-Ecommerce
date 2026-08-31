@@ -41,18 +41,48 @@ onMounted(loadOrderHistory);
 
 <template>
   <section class="order-history">
-    <header class="order-history__heading"><div><h1>{{ Text.PageTitle }}</h1><p>{{ Text.PageSubtitle }}</p></div><div class="order-history__search"><DMInput v-model="SearchValue" :placeholder="Text.SearchPlaceholder" /><span class="material-symbols-outlined" aria-hidden="true">search</span></div></header>
+    <header class="order-history__heading">
+      <div>
+        <h1>
+           {{ Text.PageTitle }}</h1>
+        <p>{{ Text.PageSubtitle }}</p>
+      </div>
+      <div class="order-history__search">
+        <DMInput v-model="SearchValue" :placeholder="Text.SearchPlaceholder" /><span class="material-symbols-outlined"
+          aria-hidden="true">search</span>
+      </div>
+    </header>
     <nav class="order-status-tabs" :aria-label="Text.PageTitle">
-      <DMButton v-for="StatusItem in StatusFilters" :key="StatusItem.StatusCode" type="none" :is-tooltip="false" class="order-status-tabs__button" :class="{ 'order-status-tabs__button--active': SelectedStatusCode === StatusItem.StatusCode }" :icon-name="StatusItem.IconName" :message="StatusItem.StatusName" @click="SelectedStatusCode = StatusItem.StatusCode" />
+      <DMButton v-for="StatusItem in StatusFilters" :key="StatusItem.StatusCode" type="none" :is-tooltip="false"
+        class="order-status-tabs__button"
+        :class="{ 'order-status-tabs__button--active': SelectedStatusCode === StatusItem.StatusCode }"
+        :icon-name="StatusItem.IconName" :message="StatusItem.StatusName"
+        @click="SelectedStatusCode = StatusItem.StatusCode" />
     </nav>
-    <div v-if="IsLoading" class="order-empty dm-card"><h2>Đang tải đơn hàng...</h2></div>
-    <div v-else-if="ErrorMessage" class="order-empty dm-card"><h2>{{ ErrorMessage }}</h2></div>
+    <div v-if="IsLoading" class="order-empty dm-card">
+      <h2>Đang tải đơn hàng...</h2>
+    </div>
+    <div v-else-if="ErrorMessage" class="order-empty dm-card">
+      <h2>{{ ErrorMessage }}</h2>
+    </div>
     <div v-else-if="FilteredOrders.length" class="order-list">
       <article v-for="OrderItem in FilteredOrders" :key="OrderItem.OrderId" class="order-card dm-card">
-        <header class="order-card__header"><div><strong>{{ Text.OrderCode }}: {{ OrderItem.OrderCode }}</strong><span>{{ Text.OrderedAt }}: {{ formatDate(OrderItem.CreateDate) }}</span></div><span class="order-status">{{ OrderItem.Status }}</span></header>
-        <footer class="order-card__footer"><div><span>{{ Text.ProductCount }}: {{ OrderItem.ItemCount }}</span><strong>{{ Text.TotalAmount }}: {{ formatCurrency(OrderItem.Total) }}</strong></div><router-link :to="{ name: 'orderDetail', params: { orderCode: OrderItem.OrderCode } }" class="dm-btn">{{ Text.ViewDetail }}</router-link></footer>
+        <header class="order-card__header">
+          <div><strong>{{ Text.OrderCode }}: {{ OrderItem.OrderCode }}</strong><span>{{ Text.OrderedAt }}: {{
+            formatDate(OrderItem.CreateDate) }}</span></div><span class="order-status">{{ OrderItem.Status }}</span>
+        </header>
+        <footer class="order-card__footer">
+          <div><span>{{ Text.ProductCount }}: {{ OrderItem.ItemCount }}</span><strong>{{ Text.TotalAmount }}: {{
+            formatCurrency(OrderItem.Total) }}</strong></div><router-link
+            :to="{ name: 'orderDetail', params: { orderCode: OrderItem.OrderCode } }" class="dm-btn">{{ Text.ViewDetail
+            }}</router-link>
+        </footer>
       </article>
     </div>
-    <div v-else class="order-empty dm-card"><span class="material-symbols-outlined" aria-hidden="true">receipt_long</span><h2>{{ Text.EmptyTitle }}</h2><p>{{ Text.EmptyDescription }}</p></div>
+    <div v-else class="order-empty dm-card"><span class="material-symbols-outlined"
+        aria-hidden="true">receipt_long</span>
+      <h2>{{ Text.EmptyTitle }}</h2>
+      <p>{{ Text.EmptyDescription }}</p>
+    </div>
   </section>
 </template>

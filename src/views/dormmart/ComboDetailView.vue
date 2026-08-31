@@ -34,7 +34,7 @@ const addCurrentCombo = async () => {
   ActionMessage.value = "";
 
   try {
-    await addComboToCart(Combo.value.Items);
+    await addComboToCart({ ComboId: Combo.value.ComboId, Quantity: 1 });
     ActionTone.value = "success";
     ActionMessage.value = Text.AddSuccess;
   } catch {
