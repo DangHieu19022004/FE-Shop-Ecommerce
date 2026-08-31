@@ -1,3 +1,7 @@
+<template>
+  <DMButton type="none" :is-tooltip="false" class="quick-add-cart" icon-name="add" :aria-label="Text.QuickAddCart" :un-active="IsAnimating" @click="handleQuickAdd" />
+</template>
+
 <script setup>
 import { inject, ref } from "vue";
 import DMButton from "@/components/base/DMButton.vue";
@@ -48,7 +52,3 @@ const handleQuickAdd = async (Event) => {
   }
 };
 </script>
-
-<template>
-  <DMButton type="none" :is-tooltip="false" class="quick-add-cart" icon-name="add" :aria-label="Text.QuickAddCart" :un-active="IsAnimating" @click="handleQuickAdd" />
-</template>

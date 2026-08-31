@@ -1,28 +1,3 @@
-<script setup>
-import { computed, inject } from "vue";
-import DMButton from "@/components/base/DMButton.vue";
-import { formatCompactNumber, formatCurrency } from "@/utils/shopFormatters";
-
-const Props = defineProps({
-  Combo: {
-    type: Object,
-    required: true,
-  },
-  IsAdding: {
-    type: Boolean,
-    default: false,
-  },
-});
-
-const Emit = defineEmits(["add"]);
-const Text = inject("i18nCommon").Combo;
-const SavingAmount = computed(() => Math.max(0, Props.Combo.OriginalPrice - Props.Combo.ComboPrice));
-const SavingPercent = computed(() => Props.Combo.OriginalPrice
-  ? Math.round((SavingAmount.value / Props.Combo.OriginalPrice) * 100)
-  : 0);
-const TotalQuantity = computed(() => Props.Combo.Items.reduce((Total, Item) => Total + Item.Quantity, 0));
-</script>
-
 <template>
   <article class="combo-card" :class="`combo-card--${Combo.Theme.toLowerCase()}`">
     <router-link :to="{ name: 'comboDetail', params: { slug: Combo.Slug } }" class="combo-card__visual">
@@ -46,7 +21,7 @@ const TotalQuantity = computed(() => Props.Combo.Items.reduce((Total, Item) => T
           <img :src="Item.ImageUrl" :alt="Item.ProductName" />
         </span>
         <span v-if="Combo.Items.length > 3" class="combo-card__more">+{{ Combo.Items.length - 3 }}</span>
-        <strong>{{ TotalQuantity }} {{ Text.ProductCountSuffix }}</strong>
+        <strong>{{ formatI18nText(Text.ProductCount, { count: TotalQuantity }) }}</strong>
       </div>
 
       <div class="combo-card__price-row">
@@ -55,7 +30,7 @@ const TotalQuantity = computed(() => Props.Combo.Items.reduce((Total, Item) => T
           <strong>{{ formatCurrency(Combo.ComboPrice) }}</strong>
           <del>{{ formatCurrency(Combo.OriginalPrice) }}</del>
         </div>
-        <small>{{ Text.SoldPrefix }} {{ formatCompactNumber(Combo.SoldCount) }}</small>
+        <small>{{ formatI18nText(Text.SoldCount, { count: formatCompactNumber(Combo.SoldCount) }) }}</small>
       </div>
 
       <div class="combo-card__actions">
@@ -72,3 +47,29 @@ const TotalQuantity = computed(() => Props.Combo.Items.reduce((Total, Item) => T
     </div>
   </article>
 </template>
+
+<script setup>
+import { computed, inject } from "vue";
+import DMButton from "@/components/base/DMButton.vue";
+import { formatI18nText } from "@/utils/i18n";
+import { formatCompactNumber, formatCurrency } from "@/utils/shopFormatters";
+
+const Props = defineProps({
+  Combo: {
+    type: Object,
+    required: true,
+  },
+  IsAdding: {
+    type: Boolean,
+    default: false,
+  },
+});
+
+const Emit = defineEmits(["add"]);
+const Text = inject("i18nCommon").Combo;
+const SavingAmount = computed(() => Math.max(0, Props.Combo.OriginalPrice - Props.Combo.ComboPrice));
+const SavingPercent = computed(() => Props.Combo.OriginalPrice
+  ? Math.round((SavingAmount.value / Props.Combo.OriginalPrice) * 100)
+  : 0);
+const TotalQuantity = computed(() => Props.Combo.Items.reduce((Total, Item) => Total + Item.Quantity, 0));
+</script>

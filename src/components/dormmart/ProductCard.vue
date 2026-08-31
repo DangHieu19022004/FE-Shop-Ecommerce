@@ -1,22 +1,3 @@
-<script setup>
-import { computed, inject } from "vue";
-import QuickAddCartButton from "@/components/dormmart/QuickAddCartButton.vue";
-import { formatCurrency } from "@/utils/shopFormatters";
-
-const Props = defineProps({
-  Product: {
-    type: Object,
-    required: true,
-  },
-});
-
-const Text = inject("i18nCommon").ProductCard;
-const ProductLink = computed(() => `/products/${Props.Product.Slug}`);
-const HasPrice = computed(() => Number(Props.Product.MinSalePrice) > 0);
-const HasPriceRange = computed(() => Number(Props.Product.MaxSalePrice) > Number(Props.Product.MinSalePrice));
-const IsAvailable = computed(() => Number(Props.Product.Status) === 1);
-</script>
-
 <template>
   <article class="dm-card product-card">
     <router-link :to="ProductLink" class="product-card__media">
@@ -47,7 +28,7 @@ const IsAvailable = computed(() => Number(Props.Product.Status) === 1);
         <div class="product-card__price">
           <strong v-if="HasPrice">{{ formatCurrency(Product.MinSalePrice) }}</strong>
           <strong v-else class="product-card__price--pending">{{ Text.PricePending }}</strong>
-          <span v-if="HasPriceRange">{{ Text.ToPrice }} {{ formatCurrency(Product.MaxSalePrice) }}</span>
+          <span v-if="HasPriceRange">{{ formatI18nText(Text.ToPriceAmount, { amount: formatCurrency(Product.MaxSalePrice) }) }}</span>
         </div>
       </div>
     </div>
@@ -59,6 +40,26 @@ const IsAvailable = computed(() => Number(Props.Product.Status) === 1);
     />
   </article>
 </template>
+
+<script setup>
+import { computed, inject } from "vue";
+import QuickAddCartButton from "@/components/dormmart/QuickAddCartButton.vue";
+import { formatI18nText } from "@/utils/i18n";
+import { formatCurrency } from "@/utils/shopFormatters";
+
+const Props = defineProps({
+  Product: {
+    type: Object,
+    required: true,
+  },
+});
+
+const Text = inject("i18nCommon").ProductCard;
+const ProductLink = computed(() => `/products/${Props.Product.Slug}`);
+const HasPrice = computed(() => Number(Props.Product.MinSalePrice) > 0);
+const HasPriceRange = computed(() => Number(Props.Product.MaxSalePrice) > Number(Props.Product.MinSalePrice));
+const IsAvailable = computed(() => Number(Props.Product.Status) === 1);
+</script>
 
 <style scoped lang="scss">
 .product-card {
