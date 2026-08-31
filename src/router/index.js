@@ -1,38 +1,38 @@
 import { createRouter, createWebHistory } from "vue-router";
-import DormMartPublicLayout from "@/views/dormmart/layouts/DormMartPublicLayout.vue";
-import DormMartAdminLayout from "@/views/dormmart/layouts/DormMartAdminLayout.vue";
-import DormMartAuthLayout from "@/views/dormmart/layouts/DormMartAuthLayout.vue";
-import HomeView from "@/views/dormmart/HomeView.vue";
-import AboutView from "@/views/dormmart/AboutView.vue";
-import ProductListView from "@/views/dormmart/ProductListView.vue";
-import ProductDetailView from "@/views/dormmart/ProductDetailView.vue";
-import ComboListView from "@/views/dormmart/ComboListView.vue";
-import ComboDetailView from "@/views/dormmart/ComboDetailView.vue";
-import CartView from "@/views/dormmart/CartView.vue";
-import CheckoutView from "@/views/dormmart/CheckoutView.vue";
-import PaymentView from "@/views/dormmart/PaymentView.vue";
-import OrderHistoryView from "@/views/dormmart/OrderHistoryView.vue";
-import OrderDetailView from "@/views/dormmart/OrderDetailView.vue";
-import SupportView from "@/views/dormmart/SupportView.vue";
-import LoginView from "@/views/dormmart/LoginView.vue";
-import RegisterView from "@/views/dormmart/RegisterView.vue";
-import ForgotPasswordView from "@/views/dormmart/ForgotPasswordView.vue";
-import ProfileView from "@/views/dormmart/ProfileView.vue";
-import LoyaltyView from "@/views/dormmart/LoyaltyView.vue";
-import NotificationsView from "@/views/dormmart/NotificationsView.vue";
-import MyReviewsView from "@/views/dormmart/MyReviewsView.vue";
+import DormMartPublicLayout from "@/layouts/dormmart/PublicLayout.vue";
+import DormMartAdminLayout from "@/layouts/dormmart/AdminLayout.vue";
+import DormMartAuthLayout from "@/layouts/dormmart/AuthLayout.vue";
+import Home from "@/views/dormmart/Home/Home.vue";
+import FeatureUnavailable from "@/views/dormmart/Shared/FeatureUnavailable.vue";
+import CatalogList from "@/views/dormmart/Catalog/CatalogList.vue";
+import CatalogDetail from "@/views/dormmart/Catalog/CatalogDetail.vue";
+import ComboList from "@/views/dormmart/Combo/ComboList.vue";
+import ComboDetail from "@/views/dormmart/Combo/ComboDetail.vue";
+import Cart from "@/views/dormmart/Cart/Cart.vue";
+import Checkout from "@/views/dormmart/Checkout/Checkout.vue";
+import Payment from "@/views/dormmart/Checkout/Payment.vue";
+import OrderHistory from "@/views/dormmart/Order/OrderHistory.vue";
+import OrderDetail from "@/views/dormmart/Order/OrderDetail.vue";
+import Support from "@/views/dormmart/Support/Support.vue";
+import Login from "@/views/dormmart/Auth/Login.vue";
+import Register from "@/views/dormmart/Auth/Register.vue";
+import ForgotPassword from "@/views/dormmart/Auth/ForgotPassword.vue";
+import Profile from "@/views/dormmart/Profile/Profile.vue";
+import Loyalty from "@/views/dormmart/Profile/Loyalty.vue";
+import Notifications from "@/views/dormmart/Profile/Notifications.vue";
+import MyReviews from "@/views/dormmart/Profile/MyReviews.vue";
 import { getCurrentSession } from "@/services/authService";
-import AdminDashboardView from "@/views/dormmart/admin/AdminDashboardView.vue";
-import AdminProductsView from "@/views/dormmart/admin/AdminProductsView.vue";
-import AdminCategoriesView from "@/views/dormmart/admin/AdminCategoriesView.vue";
-import AdminBrandsView from "@/views/dormmart/admin/AdminBrandsView.vue";
-import AdminOrdersView from "@/views/dormmart/admin/AdminOrdersView.vue";
-import AdminFinanceView from "@/views/dormmart/admin/AdminFinanceView.vue";
-import AdminAccountsView from "@/views/dormmart/admin/AdminAccountsView.vue";
-import AdminSupportView from "@/views/dormmart/admin/AdminSupportView.vue";
-import AdminReviewsView from "@/views/dormmart/admin/AdminReviewsView.vue";
-import AdminPromotionsView from "@/views/dormmart/admin/AdminPromotionsView.vue";
-import AdminCombosView from "@/views/dormmart/admin/AdminCombosView.vue";
+import AdminDashboard from "@/views/dormmart/Admin/AdminDashboard.vue";
+import AdminProducts from "@/views/dormmart/Admin/AdminProducts.vue";
+import AdminCategories from "@/views/dormmart/Admin/AdminCategories.vue";
+import AdminBrands from "@/views/dormmart/Admin/AdminBrands.vue";
+import AdminOrders from "@/views/dormmart/Admin/AdminOrders.vue";
+import AdminFinance from "@/views/dormmart/Admin/AdminFinance.vue";
+import AdminAccounts from "@/views/dormmart/Admin/AdminAccounts.vue";
+import AdminSupport from "@/views/dormmart/Admin/AdminSupport.vue";
+import AdminReviews from "@/views/dormmart/Admin/AdminReviews.vue";
+import AdminPromotions from "@/views/dormmart/Admin/AdminPromotions.vue";
+import AdminCombos from "@/views/dormmart/Admin/AdminCombosView.vue";
 import i18nCommon from "@/i18n/i18nCommon";
 
 const placeholderRouteName = "featureUnavailable";
@@ -53,13 +53,6 @@ const buildInactiveRedirectQuery = (ToRoute) => ({
   description: ToRoute.meta?.comingSoonDescription || defaultComingSoonDescription,
 });
 
-/**
- * Khai báo danh sách các tuyến đường (routes) của ứng dụng.
- *
- * Sử dụng khi: Khởi tạo router để Vue biết cách điều hướng.
- *
- * CREATED BY: TDHieu (09/06/2026)
- */
 const routes = [
   {
     path: "/",
@@ -68,58 +61,67 @@ const routes = [
       {
         path: "",
         name: "home",
-        component: HomeView,
+        component: Home,
         meta: { isActive: true },
       },
       {
         path: "products",
         name: "productList",
-        component: ProductListView,
+        component: CatalogList,
         meta: { isActive: true },
       },
       {
         path: "combos",
         name: "comboList",
-        component: ComboListView,
+        component: ComboList,
         meta: { isActive: true },
       },
       {
         path: "combos/:slug",
         name: "comboDetail",
-        component: ComboDetailView,
+        component: ComboDetail,
         meta: { isActive: true },
       },
       {
         path: "about",
         name: "about",
-        component: AboutView,
+        component: FeatureUnavailable,
         meta: inactiveRouteMeta({
           comingSoonTitle: FeatureUnavailableText.AboutTitle,
           comingSoonDescription: FeatureUnavailableText.AboutDescription,
         }),
       },
       {
+        path: "terms",
+        name: "terms",
+        component: FeatureUnavailable,
+        meta: inactiveRouteMeta({
+          comingSoonTitle: FeatureUnavailableText.TermsTitle,
+          comingSoonDescription: FeatureUnavailableText.TermsDescription,
+        }),
+      },
+      {
         path: "feature-unavailable",
         name: placeholderRouteName,
-        component: AboutView,
+        component: FeatureUnavailable,
         meta: { isActive: true },
       },
       {
         path: "products/:slug",
         name: "productDetail",
-        component: ProductDetailView,
+        component: CatalogDetail,
         meta: { isActive: true },
       },
       {
         path: "cart",
         name: "cart",
-        component: CartView,
+        component: Cart,
         meta: { isActive: true },
       },
       {
         path: "checkout",
         name: "checkout",
-        component: CheckoutView,
+        component: Checkout,
         meta: inactiveRouteMeta({
           comingSoonTitle: FeatureUnavailableText.CheckoutTitle,
           comingSoonDescription: FeatureUnavailableText.CheckoutDescription,
@@ -128,49 +130,49 @@ const routes = [
       {
         path: "profile",
         name: "profile",
-        component: ProfileView,
+        component: Profile,
         meta: { RequiresAuth: true, isActive: true },
       },
       {
         path: "profile/loyalty",
         name: "loyalty",
-        component: LoyaltyView,
+        component: Loyalty,
         meta: { RequiresAuth: true, isActive: true },
       },
       {
         path: "profile/notifications",
         name: "notifications",
-        component: NotificationsView,
+        component: Notifications,
         meta: { RequiresAuth: true, isActive: true },
       },
       {
         path: "profile/reviews",
         name: "myReviews",
-        component: MyReviewsView,
+        component: MyReviews,
         meta: { RequiresAuth: true, isActive: true },
       },
       {
         path: "payment",
         name: "payment",
-        component: PaymentView,
+        component: Payment,
         meta: { RequiresAuth: true, isActive: true },
       },
       {
         path: "orders",
         name: "orderHistory",
-        component: OrderHistoryView,
+        component: OrderHistory,
         meta: { RequiresAuth: true, isActive: true },
       },
       {
         path: "orders/:orderCode",
         name: "orderDetail",
-        component: OrderDetailView,
+        component: OrderDetail,
         meta: { RequiresAuth: true, isActive: true },
       },
       {
         path: "support",
         name: "support",
-        component: SupportView,
+        component: Support,
         meta: { RequiresAuth: true, isActive: true },
       },
     ],
@@ -182,7 +184,7 @@ const routes = [
       {
         path: "",
         name: "login",
-        component: LoginView,
+        component: Login,
         meta: { isActive: true },
       },
     ],
@@ -194,7 +196,7 @@ const routes = [
       {
         path: "",
         name: "register",
-        component: RegisterView,
+        component: Register,
         meta: { isActive: true },
       },
     ],
@@ -206,7 +208,7 @@ const routes = [
       {
         path: "",
         name: "forgotPassword",
-        component: ForgotPasswordView,
+        component: ForgotPassword,
         meta: { isActive: true },
       },
     ],
@@ -219,67 +221,67 @@ const routes = [
       {
         path: "",
         name: "adminDashboard",
-        component: AdminDashboardView,
+        component: AdminDashboard,
         meta: { isActive: true },
       },
       {
         path: "finance",
         name: "adminFinance",
-        component: AdminFinanceView,
+        component: AdminFinance,
         meta: { isActive: true },
       },
       {
         path: "accounts",
         name: "adminAccounts",
-        component: AdminAccountsView,
+        component: AdminAccounts,
         meta: { isActive: true },
       },
       {
         path: "products",
         name: "adminProducts",
-        component: AdminProductsView,
+        component: AdminProducts,
         meta: { isActive: true },
       },
       {
         path: "categories",
         name: "adminCategories",
-        component: AdminCategoriesView,
+        component: AdminCategories,
         meta: { isActive: true },
       },
       {
         path: "brands",
         name: "adminBrands",
-        component: AdminBrandsView,
+        component: AdminBrands,
         meta: { isActive: true },
       },
       {
         path: "orders",
         name: "adminOrders",
-        component: AdminOrdersView,
+        component: AdminOrders,
         meta: { isActive: true },
       },
       {
         path: "support",
         name: "adminSupport",
-        component: AdminSupportView,
+        component: AdminSupport,
         meta: { isActive: true },
       },
       {
         path: "reviews",
         name: "adminReviews",
-        component: AdminReviewsView,
+        component: AdminReviews,
         meta: { isActive: true },
       },
       {
         path: "promotions",
         name: "adminPromotions",
-        component: AdminPromotionsView,
+        component: AdminPromotions,
         meta: { isActive: true },
       },
       {
         path: "combos",
         name: "adminCombos",
-        component: AdminCombosView,
+        component: AdminCombos,
         meta: { isActive: true },
       },
     ],

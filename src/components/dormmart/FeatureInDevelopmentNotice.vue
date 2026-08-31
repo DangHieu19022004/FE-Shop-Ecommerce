@@ -1,3 +1,20 @@
+<template>
+  <section :class="NoticeClass" class="dm-card" role="status" aria-live="polite">
+    <div class="feature-dev-notice__icon-wrap">
+      <span class="material-symbols-outlined" aria-hidden="true">construction</span>
+    </div>
+    <div class="feature-dev-notice__content">
+      <div class="dm-pill feature-dev-notice__pill">{{ Text.Badge }}</div>
+      <h2>{{ title }}</h2>
+      <p>{{ description }}</p>
+    </div>
+    <div class="feature-dev-notice__actions">
+      <DMButton type="none" :is-tooltip="false" :message="backLabel" class="admin-button" @click="goBack" />
+      <RouterLink to="/" class="dm-btn dm-btn-ghost">{{ homeLabel }}</RouterLink>
+    </div>
+  </section>
+</template>
+
 <script setup>
 import { computed } from "vue";
 import { useRouter } from "vue-router";
@@ -41,23 +58,6 @@ const goBack = () => {
   Router.push({ name: "home" });
 };
 </script>
-
-<template>
-  <section :class="NoticeClass" class="dm-card" role="status" aria-live="polite">
-    <div class="feature-dev-notice__icon-wrap">
-      <span class="material-symbols-outlined" aria-hidden="true">construction</span>
-    </div>
-    <div class="feature-dev-notice__content">
-      <div class="dm-pill feature-dev-notice__pill">{{ Text.Badge }}</div>
-      <h2>{{ title }}</h2>
-      <p>{{ description }}</p>
-    </div>
-    <div class="feature-dev-notice__actions">
-      <DMButton type="none" :is-tooltip="false" :message="backLabel" class="admin-button" @click="goBack" />
-      <RouterLink to="/" class="dm-btn dm-btn-ghost">{{ homeLabel }}</RouterLink>
-    </div>
-  </section>
-</template>
 
 <style scoped lang="scss">
 .feature-dev-notice {
