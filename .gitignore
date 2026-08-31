@@ -51,3 +51,5 @@ dist-check-sticky-actions/
 .vercel
 .env*
 !.env.example
+
+.codegraph/
