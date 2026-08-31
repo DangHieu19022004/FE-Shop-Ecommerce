@@ -1,3 +1,120 @@
+<script setup>
+import { computed, inject, onMounted, reactive, ref } from "vue";
+import DMButton from "@/components/base/DMButton.vue";
+import DMInput from "@/components/base/DMInput.vue";
+import { createAdminCategory, deleteAdminCategory, updateAdminCategory } from "@/services/adminService";
+import { getCategories } from "@/services/catalogService";
+
+const Text = inject("i18nCommon").AdminCategories;
+const Categories = ref([]);
+const ErrorMessage = ref("");
+const SuccessMessage = ref("");
+const IsLoading = ref(false);
+const IsSaving = ref(false);
+const EditingCategoryId = ref("");
+const Form = reactive({
+  Name: "",
+  Description: "",
+});
+
+const isEditing = computed(() => Boolean(EditingCategoryId.value));
+const formatText = (Template, Values = {}) =>
+  Object.entries(Values).reduce((Result, [Key, Value]) => Result.replaceAll(`{${Key}}`, Value), Template);
+
+const resetMessages = () => {
+  ErrorMessage.value = "";
+  SuccessMessage.value = "";
+};
+
+const resetForm = () => {
+  Form.Name = "";
+  Form.Description = "";
+  EditingCategoryId.value = "";
+};
+
+const loadCategories = async () => {
+  IsLoading.value = true;
+  ErrorMessage.value = "";
+
+  try {
+    Categories.value = await getCategories();
+  } catch (Error) {
+    ErrorMessage.value = Error.message;
+  } finally {
+    IsLoading.value = false;
+  }
+};
+
+const validateForm = () => {
+  if (!Form.Name.trim()) return Text.ValidationNameRequired;
+  return "";
+};
+
+const buildPayload = () => ({
+  Name: Form.Name.trim(),
+  Description: Form.Description.trim() || null,
+});
+
+const startCreate = () => {
+  resetMessages();
+  resetForm();
+};
+
+const startEdit = (Category) => {
+  resetMessages();
+  EditingCategoryId.value = Category.Id;
+  Form.Name = Category.Name || "";
+  Form.Description = Category.Description || "";
+};
+
+const submitForm = async () => {
+  resetMessages();
+  const ValidationError = validateForm();
+  if (ValidationError) {
+    ErrorMessage.value = ValidationError;
+    return;
+  }
+
+  const Payload = buildPayload();
+  IsSaving.value = true;
+
+  try {
+    if (isEditing.value) {
+      await updateAdminCategory(EditingCategoryId.value, Payload);
+      SuccessMessage.value = formatText(Text.UpdateSuccess, { name: Payload.Name });
+    } else {
+      await createAdminCategory(Payload);
+      SuccessMessage.value = formatText(Text.CreateSuccess, { name: Payload.Name });
+    }
+
+    resetForm();
+    await loadCategories();
+  } catch (Error) {
+    ErrorMessage.value = Error.message;
+  } finally {
+    IsSaving.value = false;
+  }
+};
+
+const removeCategory = async (Category) => {
+  resetMessages();
+  if (!window.confirm(formatText(Text.ConfirmDelete, { name: Category.Name }))) return;
+
+  try {
+    await deleteAdminCategory(Category.Id);
+    if (EditingCategoryId.value === Category.Id) {
+      resetForm();
+    }
+    SuccessMessage.value = formatText(Text.DeleteSuccess, { name: Category.Name });
+    await loadCategories();
+  } catch (Error) {
+    ErrorMessage.value = Error.message;
+  }
+};
+
+onMounted(loadCategories);
+</script>
+
 <template>
   <section class="admin-page" style="display: grid; gap: 18px;">
     <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;">
@@ -64,121 +181,5 @@
     </div>
   </section>
 </template>
-
-<script setup>
-import { computed, inject, onMounted, reactive, ref } from "vue";
-import DMButton from "@/components/base/DMButton.vue";
-import DMInput from "@/components/base/DMInput.vue";
-import { createAdminCategory, deleteAdminCategory, updateAdminCategory } from "@/services/adminService";
-import { getCategories } from "@/services/catalogService";
-import { formatI18nText } from "@/utils/i18n";
-
-const Text = inject("i18nCommon").AdminCategories;
-const Categories = ref([]);
-const ErrorMessage = ref("");
-const SuccessMessage = ref("");
-const IsLoading = ref(false);
-const IsSaving = ref(false);
-const EditingCategoryId = ref("");
-const Form = reactive({
-  Name: "",
-  Description: "",
-});
-
-const isEditing = computed(() => Boolean(EditingCategoryId.value));
-const resetMessages = () => {
-  ErrorMessage.value = "";
-  SuccessMessage.value = "";
-};
-
-const resetForm = () => {
-  Form.Name = "";
-  Form.Description = "";
-  EditingCategoryId.value = "";
-};
-
-const loadCategories = async () => {
-  IsLoading.value = true;
-  ErrorMessage.value = "";
-
-  try {
-    Categories.value = await getCategories();
-  } catch (Error) {
-    ErrorMessage.value = Error.message;
-  } finally {
-    IsLoading.value = false;
-  }
-};
-
-const validateForm = () => {
-  if (!Form.Name.trim()) return Text.ValidationNameRequired;
-  return "";
-};
-
-const buildPayload = () => ({
-  Name: Form.Name.trim(),
-  Description: Form.Description.trim() || null,
-});
-
-const startCreate = () => {
-  resetMessages();
-  resetForm();
-};
-
-const startEdit = (Category) => {
-  resetMessages();
-  EditingCategoryId.value = Category.Id;
-  Form.Name = Category.Name || "";
-  Form.Description = Category.Description || "";
-};
-
-const submitForm = async () => {
-  resetMessages();
-  const ValidationError = validateForm();
-  if (ValidationError) {
-    ErrorMessage.value = ValidationError;
-    return;
-  }
-
-  const Payload = buildPayload();
-  IsSaving.value = true;
-
-  try {
-    if (isEditing.value) {
-      await updateAdminCategory(EditingCategoryId.value, Payload);
-      SuccessMessage.value = formatI18nText(Text.UpdateSuccess, { name: Payload.Name });
-    } else {
-      await createAdminCategory(Payload);
-      SuccessMessage.value = formatI18nText(Text.CreateSuccess, { name: Payload.Name });
-    }
-
-    resetForm();
-    await loadCategories();
-  } catch (Error) {
-    ErrorMessage.value = Error.message;
-  } finally {
-    IsSaving.value = false;
-  }
-};
-
-const removeCategory = async (Category) => {
-  resetMessages();
-  if (!window.confirm(formatI18nText(Text.ConfirmDelete, { name: Category.Name }))) return;
-
-  try {
-    await deleteAdminCategory(Category.Id);
-    if (EditingCategoryId.value === Category.Id) {
-      resetForm();
-    }
-    SuccessMessage.value = formatI18nText(Text.DeleteSuccess, { name: Category.Name });
-    await loadCategories();
-  } catch (Error) {
-    ErrorMessage.value = Error.message;
-  }
-};
-
-onMounted(loadCategories);
-</script>
-
 
 <style scoped lang="scss" src="@/assets/styles/screens/admin-operations.scss"></style>

@@ -52,7 +52,7 @@ const addCombo = async (Combo) => {
   ActionMessage.value = "";
 
   try {
-    await addComboToCart(Combo.Items);
+    await addComboToCart({ ComboId: Combo.ComboId, Quantity: 1 });
     ActionTone.value = "success";
     ActionMessage.value = Text.AddSuccess;
   } catch {

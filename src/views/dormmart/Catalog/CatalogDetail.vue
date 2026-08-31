@@ -1,183 +1,3 @@
-<template>
-  <section v-if="IsLoading" class="dm-card" style="padding: 24px; text-align: center;">Đang tải sản phẩm...</section>
-  <section v-else-if="Product" class="product-detail">
-    <nav class="product-detail__breadcrumb" :aria-label="Text.BreadcrumbProducts">
-      <router-link :to="{ name: 'home' }">{{ Text.BreadcrumbHome }}</router-link>
-      <span class="material-symbols-outlined" aria-hidden="true">chevron_right</span>
-      <router-link :to="{ name: 'productList', query: { CategoryId: Product.CategoryId } }">
-        {{ Category }}
-      </router-link>
-      <span class="material-symbols-outlined" aria-hidden="true">chevron_right</span>
-      <strong>{{ Product.Name }}</strong>
-    </nav>
-
-    <div v-if="ActionMessage" class="dm-card" style="padding: 16px; margin-bottom: 16px; color: var(--dm-primary);">{{ ActionMessage }}</div>
-
-    <article class="product-detail__overview dm-card">
-      <div class="product-gallery">
-        <div class="product-gallery__main">
-          <img :src="SelectedImageUrl" :alt="Product.Name" />
-          <span v-if="HasDiscount" class="product-gallery__discount">-{{ DiscountPercent }}%</span>
-          <span class="product-gallery__status" :class="{ 'product-gallery__status--inactive': !IsAvailable }">
-            {{ AvailabilityText }}
-          </span>
-        </div>
-        <div v-if="ProductImages.length" class="product-gallery__thumbnails">
-          <button
-            v-for="ImageItem in ProductImages"
-            :key="ImageItem.ProductImageId"
-            type="button"
-            class="product-gallery__thumbnail"
-            :class="{ 'product-gallery__thumbnail--active': SelectedImageUrl === ImageItem.ImageUrl }"
-            :aria-label="ImageItem.AltText || Product.Name"
-            @click="SelectedImageUrl = ImageItem.ImageUrl"
-          >
-            <img :src="ImageItem.ImageUrl" :alt="ImageItem.AltText || Product.Name" />
-          </button>
-        </div>
-      </div>
-
-      <div class="product-summary">
-        <div class="product-summary__heading">
-          <div class="product-summary__brand-row">
-            <div class="product-summary__brand">
-              <span class="material-symbols-outlined" aria-hidden="true">verified</span>
-              {{ formatI18nText(Text.AuthenticBrandWithName, { brand: BrandName }) }}
-            </div>
-            <div v-if="ReviewSummary" class="product-summary__rating">
-              <span class="material-symbols-outlined" aria-hidden="true">star</span>
-              {{ ReviewLabel }}
-            </div>
-          </div>
-          <h1>{{ Product.Name }}</h1>
-          <p>{{ Product.ShortDescription || Product.Description }}</p>
-          <div v-if="ProductMetrics.length" class="product-summary__metrics">
-            <span v-for="MetricItem in ProductMetrics" :key="MetricItem.Label">
-              <strong>{{ MetricItem.Label }}:</strong> {{ MetricItem.Value }}
-            </span>
-          </div>
-        </div>
-
-        <div class="product-price">
-          <div class="product-price__values">
-            <strong>
-              {{ Product.MinSalePrice > 0 ? formatCurrency(Product.MinSalePrice) : Text.ContactPrice }}
-            </strong>
-            <del v-if="HasDiscount">
-              {{ formatCurrency(Product.MaxSalePrice) }}
-            </del>
-          </div>
-          <div class="product-price__badges">
-            <span v-if="HasDiscount" class="dm-pill product-price__deal">{{ Text.FlashDeal }} -{{ DiscountPercent }}%</span>
-            <span class="dm-pill product-price__shipping">
-              <span class="material-symbols-outlined" aria-hidden="true">local_shipping</span>
-              {{ Text.FreeShipping }}
-            </span>
-          </div>
-        </div>
-
-        <div class="product-options">
-          <div v-if="ProductVariants.length" class="product-options__row">
-            <span class="product-options__label">{{ Text.VariantLabel }}</span>
-            <div class="product-options__choices">
-              <DMButton
-                v-for="VariantItem in ProductVariants"
-                :key="VariantItem.ProductVariantId"
-                type="none"
-                :message="VariantItem.Name"
-                :is-tooltip="false"
-                class="product-options__choice"
-                :class="{ 'product-options__choice--active': SelectedVariantId === VariantItem.ProductVariantId }"
-                @click="SelectedVariantId = VariantItem.ProductVariantId"
-              />
-            </div>
-          </div>
-          <div class="product-options__row">
-            <span class="product-options__label">{{ Text.QuantityLabel }}</span>
-            <div class="product-quantity">
-              <DMButton type="none" :is-tooltip="false" class="product-quantity__button" icon-name="remove" :aria-label="Text.DecreaseQuantity" :un-active="Quantity <= 1" @click="changeQuantity(-1)" />
-              <strong>{{ Quantity }}</strong>
-              <DMButton type="none" :is-tooltip="false" class="product-quantity__button" icon-name="add" :aria-label="Text.IncreaseQuantity" @click="changeQuantity(1)" />
-            </div>
-          </div>
-        </div>
-
-        <div class="product-actions">
-          <DMButton type="none" icon-name="add_shopping_cart" :message="Text.AddToCart" :is-tooltip="false" class="product-actions__cart" @click="handleAddToCart(false)" />
-          <DMButton type="none" icon-name="shopping_bag" :message="Text.BuyNow" :is-tooltip="false" class="product-actions__buy" @click="handleAddToCart(true)" />
-        </div>
-      </div>
-    </article>
-
-    <div class="product-detail__content">
-      <article class="product-information dm-card">
-        <section>
-          <div class="product-information__section-heading">
-            <h2>{{ Text.DescriptionTitle }}</h2>
-          </div>
-          <p>{{ Product.Description || Product.ShortDescription || 'Chưa có mô tả.' }}</p>
-        </section>
-        <section v-if="ReviewSummary">
-          <div class="product-information__heading">
-            <h2>Đánh giá sản phẩm</h2>
-            <span>{{ ReviewLabel }}</span>
-          </div>
-          <div v-if="ReviewSummary.Reviews?.length" class="product-reviews">
-            <article v-for="ReviewItem in ReviewSummary.Reviews" :key="ReviewItem.ReviewId" class="product-review dm-card">
-              <div class="product-review__header">
-                <strong>{{ ReviewItem.UserName }}</strong>
-                <span>{{ ReviewItem.Rating }}/5 · {{ ReviewItem.Status }}</span>
-              </div>
-              <h3>{{ ReviewItem.Title || 'Không có tiêu đề' }}</h3>
-              <p>{{ ReviewItem.Content || 'Không có nội dung.' }}</p>
-              <small>{{ formatDateTime(ReviewItem.CreateDate) }}</small>
-            </article>
-          </div>
-          <p v-else>Chưa có đánh giá nào.</p>
-        </section>
-        <section v-if="RelatedProducts.length">
-          <div class="product-information__heading">
-            <h2>{{ Text.RelatedTitle }}</h2>
-            <router-link :to="{ name: 'productList' }">{{ Text.BackToCatalog }}</router-link>
-          </div>
-          <div class="related-products">
-            <router-link v-for="RelatedItem in RelatedProducts" :key="RelatedItem.ProductId" :to="{ name: 'productDetail', params: { slug: RelatedItem.Slug } }" class="related-product dm-card">
-              <img :src="RelatedItem.PrimaryImageUrl || 'https://placehold.co/240x240?text=No+Image'" :alt="RelatedItem.Name" />
-              <div class="related-product__body">
-                <strong>{{ RelatedItem.Name }}</strong>
-                <span>{{ formatCurrency(RelatedItem.MinSalePrice) }}</span>
-                <small>{{ formatCompactNumber(RelatedItem.MaxSalePrice) }}</small>
-              </div>
-            </router-link>
-          </div>
-        </section>
-      </article>
-
-      <aside v-if="ProtectionItems.length" class="product-protection dm-card">
-        <h2>{{ Text.ProtectionTitle }}</h2>
-        <div
-          v-for="ProtectionItem in ProtectionItems"
-          :key="ProtectionItem.Label"
-          class="product-protection__item"
-        >
-          <span class="material-symbols-outlined" aria-hidden="true">{{ ProtectionItem.Icon }}</span>
-          <div>
-            <strong>{{ ProtectionItem.Label }}</strong>
-            <p>{{ ProtectionItem.Value }}</p>
-          </div>
-        </div>
-      </aside>
-    </div>
-  </section>
-
-  <section v-else class="product-not-found dm-card">
-    <span class="material-symbols-outlined" aria-hidden="true">inventory_2</span>
-    <h1>{{ Text.ProductNotFound }}</h1>
-    <p>{{ ErrorMessage || Text.ProductNotFoundDescription }}</p>
-    <router-link :to="{ name: 'home' }" class="dm-btn">{{ Text.BackHome }}</router-link>
-  </section>
-</template>
-
 <script setup>
 import { computed, inject, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
@@ -185,7 +5,6 @@ import DMButton from "@/components/base/DMButton.vue";
 import { getProducts, getProductBySlug } from "@/services/catalogService";
 import { getProductReviews } from "@/services/expansionService";
 import { addProductToCart } from "@/stores/cartStore";
-import { formatI18nText } from "@/utils/i18n";
 import { formatCompactNumber, formatCurrency, formatDateTime } from "@/utils/shopFormatters";
 
 const Route = useRoute();
@@ -320,3 +139,183 @@ const handleAddToCart = async (Checkout) => {
   }
 };
 </script>
+
+<template>
+  <section v-if="IsLoading" class="dm-card" style="padding: 24px; text-align: center;">Đang tải sản phẩm...</section>
+  <section v-else-if="Product" class="product-detail">
+    <nav class="product-detail__breadcrumb" :aria-label="Text.BreadcrumbProducts">
+      <router-link :to="{ name: 'home' }">{{ Text.BreadcrumbHome }}</router-link>
+      <span class="material-symbols-outlined" aria-hidden="true">chevron_right</span>
+      <router-link :to="{ name: 'productList', query: { CategoryId: Product.CategoryId } }">
+        {{ Category }}
+      </router-link>
+      <span class="material-symbols-outlined" aria-hidden="true">chevron_right</span>
+      <strong>{{ Product.Name }}</strong>
+    </nav>
+
+    <div v-if="ActionMessage" class="dm-card" style="padding: 16px; margin-bottom: 16px; color: var(--dm-primary);">{{ ActionMessage }}</div>
+
+    <article class="product-detail__overview dm-card">
+      <div class="product-gallery">
+        <div class="product-gallery__main">
+          <img :src="SelectedImageUrl" :alt="Product.Name" />
+          <span v-if="HasDiscount" class="product-gallery__discount">-{{ DiscountPercent }}%</span>
+          <span class="product-gallery__status" :class="{ 'product-gallery__status--inactive': !IsAvailable }">
+            {{ AvailabilityText }}
+          </span>
+        </div>
+        <div v-if="ProductImages.length" class="product-gallery__thumbnails">
+          <button
+            v-for="ImageItem in ProductImages"
+            :key="ImageItem.ProductImageId"
+            type="button"
+            class="product-gallery__thumbnail"
+            :class="{ 'product-gallery__thumbnail--active': SelectedImageUrl === ImageItem.ImageUrl }"
+            :aria-label="ImageItem.AltText || Product.Name"
+            @click="SelectedImageUrl = ImageItem.ImageUrl"
+          >
+            <img :src="ImageItem.ImageUrl" :alt="ImageItem.AltText || Product.Name" />
+          </button>
+        </div>
+      </div>
+
+      <div class="product-summary">
+        <div class="product-summary__heading">
+          <div class="product-summary__brand-row">
+            <div class="product-summary__brand">
+              <span class="material-symbols-outlined" aria-hidden="true">verified</span>
+              {{ BrandName }} · {{ Text.AuthenticBrand }}
+            </div>
+            <div v-if="ReviewSummary" class="product-summary__rating">
+              <span class="material-symbols-outlined" aria-hidden="true">star</span>
+              {{ ReviewLabel }}
+            </div>
+          </div>
+          <h1>{{ Product.Name }}</h1>
+          <p>{{ Product.ShortDescription || Product.Description }}</p>
+          <div v-if="ProductMetrics.length" class="product-summary__metrics">
+            <span v-for="MetricItem in ProductMetrics" :key="MetricItem.Label">
+              <strong>{{ MetricItem.Label }}:</strong> {{ MetricItem.Value }}
+            </span>
+          </div>
+        </div>
+
+        <div class="product-price">
+          <div class="product-price__values">
+            <strong>
+              {{ Product.MinSalePrice > 0 ? formatCurrency(Product.MinSalePrice) : Text.ContactPrice }}
+            </strong>
+            <del v-if="HasDiscount">
+              {{ formatCurrency(Product.MaxSalePrice) }}
+            </del>
+          </div>
+          <div class="product-price__badges">
+            <span v-if="HasDiscount" class="dm-pill product-price__deal">{{ Text.FlashDeal }} -{{ DiscountPercent }}%</span>
+            <span class="dm-pill product-price__shipping">
+              <span class="material-symbols-outlined" aria-hidden="true">local_shipping</span>
+              {{ Text.FreeShipping }}
+            </span>
+          </div>
+        </div>
+
+        <div class="product-options">
+          <div v-if="ProductVariants.length" class="product-options__row">
+            <span class="product-options__label">{{ Text.VariantLabel }}</span>
+            <div class="product-options__choices">
+              <DMButton
+                v-for="VariantItem in ProductVariants"
+                :key="VariantItem.ProductVariantId"
+                type="none"
+                :message="VariantItem.Name"
+                :is-tooltip="false"
+                class="product-options__choice"
+                :class="{ 'product-options__choice--active': SelectedVariantId === VariantItem.ProductVariantId }"
+                @click="SelectedVariantId = VariantItem.ProductVariantId"
+              />
+            </div>
+          </div>
+          <div class="product-options__row">
+            <span class="product-options__label">{{ Text.QuantityLabel }}</span>
+            <div class="product-quantity">
+              <DMButton type="none" :is-tooltip="false" class="product-quantity__button" icon-name="remove" :aria-label="Text.DecreaseQuantity" :un-active="Quantity <= 1" @click="changeQuantity(-1)" />
+              <strong>{{ Quantity }}</strong>
+              <DMButton type="none" :is-tooltip="false" class="product-quantity__button" icon-name="add" :aria-label="Text.IncreaseQuantity" @click="changeQuantity(1)" />
+            </div>
+          </div>
+        </div>
+
+        <div class="product-actions">
+          <DMButton type="none" icon-name="add_shopping_cart" :message="Text.AddToCart" :is-tooltip="false" class="product-actions__cart" @click="handleAddToCart(false)" />
+          <DMButton type="none" icon-name="shopping_bag" :message="Text.BuyNow" :is-tooltip="false" class="product-actions__buy" @click="handleAddToCart(true)" />
+        </div>
+      </div>
+    </article>
+
+    <div class="product-detail__content">
+      <article class="product-information dm-card">
+        <section>
+          <div class="product-information__section-heading">
+            <h2>{{ Text.DescriptionTitle }}</h2>
+          </div>
+          <p>{{ Product.Description || Product.ShortDescription || 'Chưa có mô tả.' }}</p>
+        </section>
+        <section v-if="ReviewSummary">
+          <div class="product-information__heading">
+            <h2>Đánh giá sản phẩm</h2>
+            <span>{{ ReviewLabel }}</span>
+          </div>
+          <div v-if="ReviewSummary.Reviews?.length" class="product-reviews">
+            <article v-for="ReviewItem in ReviewSummary.Reviews" :key="ReviewItem.ReviewId" class="product-review dm-card">
+              <div class="product-review__header">
+                <strong>{{ ReviewItem.UserName }}</strong>
+                <span>{{ ReviewItem.Rating }}/5 · {{ ReviewItem.Status }}</span>
+              </div>
+              <h3>{{ ReviewItem.Title || 'Không có tiêu đề' }}</h3>
+              <p>{{ ReviewItem.Content || 'Không có nội dung.' }}</p>
+              <small>{{ formatDateTime(ReviewItem.CreateDate) }}</small>
+            </article>
+          </div>
+          <p v-else>Chưa có đánh giá nào.</p>
+        </section>
+        <section v-if="RelatedProducts.length">
+          <div class="product-information__heading">
+            <h2>{{ Text.RelatedTitle }}</h2>
+            <router-link :to="{ name: 'productList' }">{{ Text.BackToCatalog }}</router-link>
+          </div>
+          <div class="related-products">
+            <router-link v-for="RelatedItem in RelatedProducts" :key="RelatedItem.ProductId" :to="{ name: 'productDetail', params: { slug: RelatedItem.Slug } }" class="related-product dm-card">
+              <img :src="RelatedItem.PrimaryImageUrl || 'https://placehold.co/240x240?text=No+Image'" :alt="RelatedItem.Name" />
+              <div class="related-product__body">
+                <strong>{{ RelatedItem.Name }}</strong>
+                <span>{{ formatCurrency(RelatedItem.MinSalePrice) }}</span>
+                <small>{{ formatCompactNumber(RelatedItem.MaxSalePrice) }}</small>
+              </div>
+            </router-link>
+          </div>
+        </section>
+      </article>
+
+      <aside v-if="ProtectionItems.length" class="product-protection dm-card">
+        <h2>{{ Text.ProtectionTitle }}</h2>
+        <div
+          v-for="ProtectionItem in ProtectionItems"
+          :key="ProtectionItem.Label"
+          class="product-protection__item"
+        >
+          <span class="material-symbols-outlined" aria-hidden="true">{{ ProtectionItem.Icon }}</span>
+          <div>
+            <strong>{{ ProtectionItem.Label }}</strong>
+            <p>{{ ProtectionItem.Value }}</p>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section v-else class="product-not-found dm-card">
+    <span class="material-symbols-outlined" aria-hidden="true">inventory_2</span>
+    <h1>{{ Text.ProductNotFound }}</h1>
+    <p>{{ ErrorMessage || Text.ProductNotFoundDescription }}</p>
+    <router-link :to="{ name: 'home' }" class="dm-btn">{{ Text.BackHome }}</router-link>
+  </section>
+</template>

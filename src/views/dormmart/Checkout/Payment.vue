@@ -7,7 +7,7 @@ import DMTextarea from "@/components/base/DMTextarea.vue";
 import { getMyAddresses } from "@/services/authService";
 import { checkoutOrder, getActiveVouchers } from "@/services/checkoutService";
 import { getShippingQuote } from "@/services/adminService";
-import { CartItems, CartSummary, loadCart } from "@/stores/cartStore";
+import { CartSummary, getCheckoutItems, getShippingQuoteItems, loadCart } from "@/stores/cartStore";
 import { formatAddress, formatCurrency, formatDate } from "@/utils/shopFormatters";
 
 const Text = inject("i18nCommon").Payment;
@@ -56,6 +56,7 @@ const VoucherDiscountPreview = computed(() => {
 
   return Number(SelectedVoucher.value.DiscountValue) || 0;
 });
+const CheckoutItems = computed(() => getCheckoutItems());
 const ShippingFee = computed(() => Number(ShippingQuote.value?.Fee || 0));
 const EstimatedTotal = computed(() => Math.max(MerchandiseSubtotal.value + ShippingFee.value - VoucherDiscountPreview.value, 0));
 const IsVoucherEligible = computed(() => {
@@ -116,10 +117,7 @@ const loadShippingQuote = async (AddressData = Addresses.value) => {
     ShippingQuote.value = await getShippingQuote({
       Province: SelectedAddressData.Province || "",
       District: SelectedAddressData.District || "",
-      Items: CartItems.value.map((Item) => ({
-        ProductVariantId: Item.ProductVariantId,
-        Quantity: Item.Quantity,
-      })),
+      Items: getShippingQuoteItems(),
     });
     ShippingQuoteMessage.value = "Đã lấy phí vận chuyển ước tính từ API.";
   } catch (Error) {
@@ -225,9 +223,13 @@ onMounted(loadCheckoutData);
     <article class="payment-section dm-card">
       <div class="payment-section__title"><span class="material-symbols-outlined" aria-hidden="true">shopping_bag</span><h2>{{ Text.ProductTitle }}</h2></div>
       <div class="payment-products__header"><span>{{ Text.ProductTitle }}</span><span>{{ Text.UnitPrice }}</span><span>{{ Text.Quantity }}</span><span>{{ Text.ItemTotal }}</span></div>
-      <div v-for="Item in CartItems" :key="Item.CartItemId" class="payment-product">
-        <img :src="Item.PrimaryImageUrl || 'https://placehold.co/240x240?text=No+Image'" :alt="Item.ProductName" />
-        <div><strong>{{ Item.ProductName }}</strong><span>{{ Item.VariantName }}</span></div>
+      <div v-for="Item in CheckoutItems" :key="`${Item.Type}-${Item.Id}`" class="payment-product">
+        <img :src="Item.ImageUrl || 'https://placehold.co/240x240?text=No+Image'" :alt="Item.ProductName" />
+        <div>
+          <strong>{{ Item.ProductName }}</strong>
+          <span>{{ Item.VariantName }}</span>
+          <small v-if="Item.Type === 'Combo'">{{ (Item.Items || []).map((ComboItem) => `${ComboItem.ProductName} × ${ComboItem.Quantity}`).join(', ') }}</small>
+        </div>
         <span>{{ formatCurrency(Item.UnitPrice) }}</span><span>{{ Item.Quantity }}</span><strong>{{ formatCurrency(Item.LineTotal) }}</strong>
       </div>
 
