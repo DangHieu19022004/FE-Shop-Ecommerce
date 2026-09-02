@@ -26,7 +26,7 @@
         <span class="dm-btn dm-icon-btn"><span class="material-symbols-outlined" aria-hidden="true">search</span></span>
       </div>
       <div class="dm-public-actions">
-        <router-link class="dm-icon-btn dm-cart-button" to="/cart" :aria-label="Text.CartLabel"><span class="material-symbols-outlined">shopping_cart</span><span v-if="CartTotalQuantity" class="dm-badge-dot">{{ CartTotalQuantity }}</span></router-link>
+        <router-link class="dm-icon-btn dm-cart-button" to="/shop" :aria-label="Text.CartLabel"><span class="material-symbols-outlined">shopping_cart</span><span v-if="CartTotalQuantity" class="dm-badge-dot">{{ CartTotalQuantity }}</span></router-link>
         <router-link class="dm-icon-btn" to="/profile" :aria-label="Text.AccountLabel"><span class="material-symbols-outlined">person</span></router-link>
       </div>
     </div>
@@ -34,9 +34,9 @@
 </template>
 
 <script setup>
-import { computed, inject } from "vue";
+import { computed, inject, onMounted } from "vue";
 import { useRouter } from "vue-router";
-import { CartTotalQuantity } from "@/stores/cartStore";
+import { CartTotalQuantity, loadCart } from "@/stores/cartStore";
 import { getCurrentSession } from "@/services/authService";
 import { formatI18nText } from "@/utils/i18n";
 
@@ -45,4 +45,12 @@ const Text = inject("i18nCommon").Common;
 const SessionData = computed(() => getCurrentSession());
 const IsAdmin = computed(() => SessionData.value?.Roles?.includes("Admin"));
 const openSearchPlaceholder = () => Router.push({ name: "featureUnavailable", query: { title: "Tìm kiếm đang phát triển", description: "Tìm kiếm nhanh trong header chưa hoàn thiện. Tạm thời dùng danh sách sản phẩm để lọc và duyệt hàng." } });
+
+onMounted(() => {
+  if (!SessionData.value) {
+    return;
+  }
+
+  loadCart();
+});
 </script>

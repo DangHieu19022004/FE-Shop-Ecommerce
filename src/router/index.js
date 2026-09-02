@@ -113,7 +113,7 @@ const routes = [
         meta: { isActive: true },
       },
       {
-        path: "cart",
+        path: "shop",
         name: "cart",
         component: Cart,
         meta: { isActive: true },
