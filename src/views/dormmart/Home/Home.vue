@@ -62,7 +62,6 @@ onMounted(loadHomeData);
       <div style="display: flex; gap: 12px; flex-wrap: wrap;">
         <router-link to="/products" class="dm-btn-ghost" style="background: #fff;">{{ Text.ShopCatalog }}</router-link>
         <router-link :to="{ name: 'comboList' }" class="dm-btn-ghost" style="background: var(--dm-primary-soft); color: var(--dm-primary);">{{ Text.ExploreCombos }}</router-link>
-        <router-link to="/admin" class="dm-btn" style="background: var(--dm-secondary); color: var(--dm-secondary-text);">{{ Text.OpenAdmin }}</router-link>
       </div>
     </div>
   </section>
