@@ -277,12 +277,14 @@ const removeItem = async (CartItem) => {
 };
 
 const removeSelectedItems = async () => {
-  const Targets = SelectedItems.value;
+  const Targets = [...SelectedItems.value];
   if (!Targets.length) {
     return;
   }
 
-  await Promise.all(Targets.map((CartItem) => removeItem(CartItem)));
+  for (const CartItem of Targets) {
+    await removeItem(CartItem);
+  }
 };
 
 const navigateToCheckout = () => Router.push({ name: "payment" });

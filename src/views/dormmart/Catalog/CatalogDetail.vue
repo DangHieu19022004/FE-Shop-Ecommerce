@@ -1,145 +1,3 @@
-<script setup>
-import { computed, inject, onMounted, ref, watch } from "vue";
-import { useRoute, useRouter } from "vue-router";
-import DMButton from "@/components/base/DMButton.vue";
-import { getProducts, getProductBySlug } from "@/services/catalogService";
-import { getProductReviews } from "@/services/expansionService";
-import { addProductToCart } from "@/stores/cartStore";
-import { formatCompactNumber, formatCurrency, formatDateTime } from "@/utils/shopFormatters";
-
-const Route = useRoute();
-const Router = useRouter();
-const Text = inject("i18nCommon").ProductDetail;
-const Quantity = ref(1);
-const SelectedImageUrl = ref("");
-const SelectedVariantId = ref(null);
-const Product = ref(null);
-const RelatedProducts = ref([]);
-const ReviewSummary = ref(null);
-const IsLoading = ref(false);
-const ErrorMessage = ref("");
-const ActionMessage = ref("");
-
-const Category = computed(() => Product.value?.CategoryName || "Sản phẩm");
-const BrandName = computed(() => Product.value?.BrandName || "Dorm Mart");
-const ProductImages = computed(() => Product.value?.Images || []);
-const ProductVariants = computed(() => Product.value?.Variants || []);
-const SelectedVariant = computed(() =>
-  ProductVariants.value.find((VariantItem) => VariantItem.ProductVariantId === SelectedVariantId.value)
-  || ProductVariants.value[0]
-  || null,
-);
-const HasDiscount = computed(() => Number(Product.value?.MaxSalePrice) > Number(Product.value?.MinSalePrice));
-const DiscountPercent = computed(() => {
-  const OriginalPrice = Number(Product.value?.MaxSalePrice || 0);
-  const SalePrice = Number(Product.value?.MinSalePrice || 0);
-
-  if (OriginalPrice <= SalePrice || OriginalPrice <= 0) return 0;
-  return Math.round(((OriginalPrice - SalePrice) / OriginalPrice) * 100);
-});
-const IsAvailable = computed(() => Number(Product.value?.Status) === 1);
-const AvailabilityText = computed(() => (IsAvailable.value ? "Còn bán" : "Ngừng bán"));
-const ReviewCount = computed(() => Number(ReviewSummary.value?.ReviewCount || 0));
-const AverageRating = computed(() => Number(ReviewSummary.value?.AverageRating || 0));
-const ReviewLabel = computed(() => `${AverageRating.value.toFixed(1)}/5 · ${ReviewCount.value} ${Text.ReviewLabel}`);
-const ProductMetrics = computed(() => [
-  Product.value?.ProductCode ? { Label: "Mã SP", Value: Product.value.ProductCode } : null,
-  Product.value?.CategoryName ? { Label: "Danh mục", Value: Product.value.CategoryName } : null,
-  SelectedVariant.value?.Sku ? { Label: "SKU", Value: SelectedVariant.value.Sku } : null,
-].filter(Boolean));
-const ProtectionItems = computed(() => [
-  Product.value?.ProductCode
-    ? {
-      Icon: "inventory_2",
-      Label: "Mã sản phẩm",
-      Value: Product.value.ProductCode,
-    }
-    : null,
-  Product.value?.CategoryName
-    ? {
-      Icon: "category",
-      Label: "Danh mục",
-      Value: Product.value.CategoryName,
-    }
-    : null,
-  Product.value?.BrandName
-    ? {
-      Icon: "verified",
-      Label: "Thương hiệu",
-      Value: Product.value.BrandName,
-    }
-    : null,
-  SelectedVariant.value?.Sku
-    ? {
-      Icon: "qr_code_2",
-      Label: "SKU biến thể",
-      Value: SelectedVariant.value.Sku,
-    }
-    : null,
-].filter(Boolean));
-
-const loadProduct = async () => {
-  IsLoading.value = true;
-  ErrorMessage.value = "";
-  ActionMessage.value = "";
-
-  try {
-    const ProductData = await getProductBySlug(Route.params.slug);
-    Product.value = ProductData;
-    SelectedVariantId.value = ProductData?.Variants?.find((VariantItem) => VariantItem.IsDefault)?.ProductVariantId
-      || ProductData?.Variants?.[0]?.ProductVariantId
-      || null;
-    SelectedImageUrl.value = ProductData?.Images?.find((ImageItem) => ImageItem.IsPrimary)?.ImageUrl
-      || ProductData?.Images?.[0]?.ImageUrl
-      || "https://placehold.co/600x600?text=No+Image";
-    Quantity.value = 1;
-
-    if (ProductData?.CategoryId) {
-      const RelatedData = await getProducts({ CategoryId: ProductData.CategoryId, PageSize: 4 });
-      RelatedProducts.value = (RelatedData.Items || []).filter((Item) => Item.ProductId !== ProductData.ProductId).slice(0, 3);
-    }
-
-    try {
-      ReviewSummary.value = await getProductReviews(ProductData.ProductId);
-    } catch {
-      ReviewSummary.value = null;
-    }
-  } catch (Error) {
-    Product.value = null;
-    RelatedProducts.value = [];
-    ErrorMessage.value = Error.message;
-  } finally {
-    IsLoading.value = false;
-  }
-};
-
-watch(() => Route.params.slug, loadProduct);
-onMounted(loadProduct);
-
-const changeQuantity = (Delta) => {
-  if (!Product.value) return;
-  Quantity.value = Math.max(1, Quantity.value + Delta);
-};
-
-const handleAddToCart = async (Checkout) => {
-  if (!Product.value) return;
-
-  try {
-    await addProductToCart({
-      ProductSlug: Product.value.Slug,
-      ProductVariantId: SelectedVariantId.value,
-      Quantity: Quantity.value,
-    });
-    ActionMessage.value = "Đã thêm sản phẩm vào giỏ hàng.";
-    if (Checkout) {
-      Router.push({ name: "cart" });
-    }
-  } catch (Error) {
-    ActionMessage.value = Error.message;
-  }
-};
-</script>
-
 <template>
   <section v-if="IsLoading" class="dm-card" style="padding: 24px; text-align: center;">Đang tải sản phẩm...</section>
   <section v-else-if="Product" class="product-detail">
@@ -184,7 +42,7 @@ const handleAddToCart = async (Checkout) => {
           <div class="product-summary__brand-row">
             <div class="product-summary__brand">
               <span class="material-symbols-outlined" aria-hidden="true">verified</span>
-              {{ BrandName }} · {{ Text.AuthenticBrand }}
+              {{ formatI18nText(Text.AuthenticBrandWithName, { brand: BrandName }) }}
             </div>
             <div v-if="ReviewSummary" class="product-summary__rating">
               <span class="material-symbols-outlined" aria-hidden="true">star</span>
@@ -237,16 +95,16 @@ const handleAddToCart = async (Checkout) => {
           <div class="product-options__row">
             <span class="product-options__label">{{ Text.QuantityLabel }}</span>
             <div class="product-quantity">
-              <DMButton type="none" :is-tooltip="false" class="product-quantity__button" icon-name="remove" :aria-label="Text.DecreaseQuantity" :un-active="Quantity <= 1" @click="changeQuantity(-1)" />
+              <DMButton type="none" :is-tooltip="false" class="product-quantity__button" icon-name="remove" :aria-label="Text.DecreaseQuantity" :un-active="Quantity <= 1 || !CanAddToCart" @click="changeQuantity(-1)" />
               <strong>{{ Quantity }}</strong>
-              <DMButton type="none" :is-tooltip="false" class="product-quantity__button" icon-name="add" :aria-label="Text.IncreaseQuantity" @click="changeQuantity(1)" />
+              <DMButton type="none" :is-tooltip="false" class="product-quantity__button" icon-name="add" :aria-label="Text.IncreaseQuantity" :un-active="!CanIncreaseQuantity" @click="changeQuantity(1)" />
             </div>
           </div>
         </div>
 
         <div class="product-actions">
-          <DMButton type="none" icon-name="add_shopping_cart" :message="Text.AddToCart" :is-tooltip="false" class="product-actions__cart" @click="handleAddToCart(false)" />
-          <DMButton type="none" icon-name="shopping_bag" :message="Text.BuyNow" :is-tooltip="false" class="product-actions__buy" @click="handleAddToCart(true)" />
+          <DMButton type="none" icon-name="add_shopping_cart" :message="Text.AddToCart" :is-tooltip="false" class="product-actions__cart" :un-active="!CanAddToCart" @click="handleAddToCart(false)" />
+          <DMButton type="none" icon-name="shopping_bag" :message="Text.BuyNow" :is-tooltip="false" class="product-actions__buy" :un-active="!CanAddToCart" @click="handleAddToCart(true)" />
         </div>
       </div>
     </article>
@@ -319,3 +177,180 @@ const handleAddToCart = async (Checkout) => {
     <router-link :to="{ name: 'home' }" class="dm-btn">{{ Text.BackHome }}</router-link>
   </section>
 </template>
+
+<script setup>
+import { computed, inject, onMounted, ref, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import DMButton from "@/components/base/DMButton.vue";
+import { getProducts, getProductBySlug } from "@/services/catalogService";
+import { getProductReviews } from "@/services/expansionService";
+import { addProductToCart, getCartQuantityByVariantId } from "@/stores/cartStore";
+import { formatI18nText } from "@/utils/i18n";
+import { formatCompactNumber, formatCurrency, formatDateTime } from "@/utils/shopFormatters";
+
+const Route = useRoute();
+const Router = useRouter();
+const Text = inject("i18nCommon").ProductDetail;
+const Quantity = ref(1);
+const SelectedImageUrl = ref("");
+const SelectedVariantId = ref(null);
+const Product = ref(null);
+const RelatedProducts = ref([]);
+const ReviewSummary = ref(null);
+const IsLoading = ref(false);
+const ErrorMessage = ref("");
+const ActionMessage = ref("");
+
+const Category = computed(() => Product.value?.CategoryName || "Sản phẩm");
+const BrandName = computed(() => Product.value?.BrandName || "Dorm Mart");
+const ProductImages = computed(() => Product.value?.Images || []);
+const ProductVariants = computed(() => Product.value?.Variants || []);
+const isSellableVariant = (VariantItem) => Number(VariantItem?.Status ?? 1) === 1 && Number(VariantItem?.AvailableStock ?? 0) > 0;
+const SelectedVariant = computed(() =>
+  ProductVariants.value.find((VariantItem) => VariantItem.ProductVariantId === SelectedVariantId.value)
+  || ProductVariants.value[0]
+  || null,
+);
+const FirstSellableVariant = computed(() => ProductVariants.value.find(isSellableVariant) || null);
+const HasDiscount = computed(() => Number(Product.value?.MaxSalePrice) > Number(Product.value?.MinSalePrice));
+const SelectedVariantStock = computed(() => Number(SelectedVariant.value?.AvailableStock ?? 0));
+const ReservedVariantQuantity = computed(() => getCartQuantityByVariantId(SelectedVariant.value?.ProductVariantId));
+const DisplayedVariantStock = computed(() => Math.max(0, SelectedVariantStock.value - ReservedVariantQuantity.value));
+const IsAvailable = computed(() => Number(Product.value?.Status) === 1);
+const CanAddToCart = computed(() => IsAvailable.value && isSellableVariant(SelectedVariant.value) && DisplayedVariantStock.value > 0);
+const CanIncreaseQuantity = computed(() => CanAddToCart.value && Quantity.value < DisplayedVariantStock.value);
+const AvailabilityText = computed(() => {
+  if (!IsAvailable.value) {
+    return Text.Unavailable || "Ngừng bán";
+  }
+
+  if (!SelectedVariant.value && !FirstSellableVariant.value) {
+    return Text.OutOfStock;
+  }
+
+  if (CanAddToCart.value) {
+    return Text.AvailableStock.replace("{count}", String(DisplayedVariantStock.value));
+  }
+
+  return Text.OutOfStock;
+});
+const DiscountPercent = computed(() => {
+  const OriginalPrice = Number(Product.value?.MaxSalePrice || 0);
+  const SalePrice = Number(Product.value?.MinSalePrice || 0);
+
+  if (OriginalPrice <= SalePrice || OriginalPrice <= 0) return 0;
+  return Math.round(((OriginalPrice - SalePrice) / OriginalPrice) * 100);
+});
+const ReviewCount = computed(() => Number(ReviewSummary.value?.ReviewCount || 0));
+const AverageRating = computed(() => Number(ReviewSummary.value?.AverageRating || 0));
+const ReviewLabel = computed(() => `${AverageRating.value.toFixed(1)}/5 · ${ReviewCount.value} ${Text.ReviewLabel}`);
+const ProductMetrics = computed(() => [
+  Product.value?.ProductCode ? { Label: "Mã SP", Value: Product.value.ProductCode } : null,
+  Product.value?.CategoryName ? { Label: "Danh mục", Value: Product.value.CategoryName } : null,
+  SelectedVariant.value?.Sku ? { Label: "SKU", Value: SelectedVariant.value.Sku } : null,
+].filter(Boolean));
+const ProtectionItems = computed(() => [
+  Product.value?.ProductCode
+    ? {
+      Icon: "inventory_2",
+      Label: "Mã sản phẩm",
+      Value: Product.value.ProductCode,
+    }
+    : null,
+  Product.value?.CategoryName
+    ? {
+      Icon: "category",
+      Label: "Danh mục",
+      Value: Product.value.CategoryName,
+    }
+    : null,
+  Product.value?.BrandName
+    ? {
+      Icon: "verified",
+      Label: "Thương hiệu",
+      Value: Product.value.BrandName,
+    }
+    : null,
+  SelectedVariant.value?.Sku
+    ? {
+      Icon: "qr_code_2",
+      Label: "SKU biến thể",
+      Value: SelectedVariant.value.Sku,
+    }
+    : null,
+].filter(Boolean));
+
+const loadProduct = async () => {
+  IsLoading.value = true;
+  ErrorMessage.value = "";
+  ActionMessage.value = "";
+
+  try {
+    const ProductData = await getProductBySlug(Route.params.slug);
+    Product.value = ProductData;
+    SelectedVariantId.value = ProductData?.Variants?.find((VariantItem) => VariantItem.IsDefault && isSellableVariant(VariantItem))?.ProductVariantId
+      || ProductData?.Variants?.find(isSellableVariant)?.ProductVariantId
+      || ProductData?.Variants?.find((VariantItem) => VariantItem.IsDefault)?.ProductVariantId
+      || ProductData?.Variants?.[0]?.ProductVariantId
+      || null;
+    SelectedImageUrl.value = ProductData?.Images?.find((ImageItem) => ImageItem.IsPrimary)?.ImageUrl
+      || ProductData?.Images?.[0]?.ImageUrl
+      || "https://placehold.co/600x600?text=No+Image";
+    Quantity.value = 1;
+
+    if (ProductData?.CategoryId) {
+      const RelatedData = await getProducts({ CategoryId: ProductData.CategoryId, PageSize: 4 });
+      RelatedProducts.value = (RelatedData.Items || []).filter((Item) => Item.ProductId !== ProductData.ProductId).slice(0, 3);
+    }
+
+    try {
+      ReviewSummary.value = await getProductReviews(ProductData.ProductId);
+    } catch {
+      ReviewSummary.value = null;
+    }
+  } catch (Error) {
+    Product.value = null;
+    RelatedProducts.value = [];
+    ErrorMessage.value = Error.message;
+  } finally {
+    IsLoading.value = false;
+  }
+};
+
+watch(() => Route.params.slug, loadProduct);
+watch(SelectedVariantId, () => {
+  if (!CanAddToCart.value) {
+    Quantity.value = 1;
+    return;
+  }
+
+  Quantity.value = Math.min(Math.max(1, Quantity.value), DisplayedVariantStock.value);
+});
+onMounted(loadProduct);
+
+const changeQuantity = (Delta) => {
+  if (!Product.value || !CanAddToCart.value) return;
+  Quantity.value = Math.min(DisplayedVariantStock.value, Math.max(1, Quantity.value + Delta));
+};
+
+const handleAddToCart = async (Checkout) => {
+  if (!Product.value || !CanAddToCart.value) {
+    ActionMessage.value = AvailabilityText.value;
+    return;
+  }
+
+  try {
+    await addProductToCart({
+      ProductSlug: Product.value.Slug,
+      ProductVariantId: SelectedVariantId.value,
+      Quantity: Quantity.value,
+    });
+    ActionMessage.value = "Đã thêm sản phẩm vào giỏ hàng.";
+    if (Checkout) {
+      Router.push({ name: "cart" });
+    }
+  } catch (Error) {
+    ActionMessage.value = Error.message;
+  }
+};
+</script>

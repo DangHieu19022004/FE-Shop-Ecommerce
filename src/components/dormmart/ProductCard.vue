@@ -1,22 +1,3 @@
-<script setup>
-import { computed, inject } from "vue";
-import QuickAddCartButton from "@/components/dormmart/QuickAddCartButton.vue";
-import { formatCurrency } from "@/utils/shopFormatters";
-
-const Props = defineProps({
-  Product: {
-    type: Object,
-    required: true,
-  },
-});
-
-const Text = inject("i18nCommon").ProductCard;
-const ProductLink = computed(() => `/products/${Props.Product.Slug}`);
-const HasPrice = computed(() => Number(Props.Product.MinSalePrice) > 0);
-const HasPriceRange = computed(() => Number(Props.Product.MaxSalePrice) > Number(Props.Product.MinSalePrice));
-const IsAvailable = computed(() => Number(Props.Product.Status) === 1);
-</script>
-
 <template>
   <article class="dm-card product-card">
     <router-link :to="ProductLink" class="product-card__media">
@@ -25,9 +6,7 @@ const IsAvailable = computed(() => Number(Props.Product.Status) === 1);
         :alt="Product.Name"
         class="product-card__image"
       />
-      <span class="product-card__status" :class="{ 'product-card__status--inactive': !IsAvailable }">
-        {{ IsAvailable ? Text.Available : Text.Unavailable }}
-      </span>
+      <span v-if="StatusBadgeText" class="product-card__status">{{ StatusBadgeText }}</span>
     </router-link>
 
     <div class="product-card__body">
@@ -47,18 +26,59 @@ const IsAvailable = computed(() => Number(Props.Product.Status) === 1);
         <div class="product-card__price">
           <strong v-if="HasPrice">{{ formatCurrency(Product.MinSalePrice) }}</strong>
           <strong v-else class="product-card__price--pending">{{ Text.PricePending }}</strong>
-          <span v-if="HasPriceRange">{{ Text.ToPrice }} {{ formatCurrency(Product.MaxSalePrice) }}</span>
+          <span v-if="HasPriceRange">{{ formatI18nText(Text.ToPriceAmount, { amount: formatCurrency(Product.MaxSalePrice) }) }}</span>
         </div>
       </div>
     </div>
 
     <QuickAddCartButton
-      v-if="IsAvailable"
+      v-if="CanQuickAdd"
       :ProductSlug="Product.Slug"
       :ImageUrl="Product.PrimaryImageUrl || ''"
     />
   </article>
 </template>
+
+<script setup>
+import { computed, inject } from "vue";
+import QuickAddCartButton from "@/components/dormmart/QuickAddCartButton.vue";
+import { getCartQuantityByProductSlug } from "@/stores/cartStore";
+import { formatI18nText } from "@/utils/i18n";
+import { formatCurrency } from "@/utils/shopFormatters";
+
+const Props = defineProps({
+  Product: {
+    type: Object,
+    required: true,
+  },
+});
+
+const Text = inject("i18nCommon").ProductCard;
+const ProductLink = computed(() => `/products/${Props.Product.Slug}`);
+const HasPrice = computed(() => Number(Props.Product.MinSalePrice) > 0);
+const HasPriceRange = computed(() => Number(Props.Product.MaxSalePrice) > Number(Props.Product.MinSalePrice));
+const IsAvailable = computed(() => Number(Props.Product.Status) === 1);
+const RemainingStock = computed(() => Math.max(0, Number(Props.Product.AvailableStock ?? 0) - getCartQuantityByProductSlug(Props.Product.Slug)));
+const HasSellableVariant = computed(() => {
+  if (typeof Props.Product.HasSellableVariant === "boolean") {
+    return Props.Product.HasSellableVariant && RemainingStock.value > 0;
+  }
+
+  return (Props.Product.Variants || []).some((VariantItem) => Number(VariantItem?.Status ?? 1) === 1 && Number(VariantItem?.AvailableStock ?? 0) > 0);
+});
+const CanQuickAdd = computed(() => IsAvailable.value && HasSellableVariant.value);
+const StatusBadgeText = computed(() => {
+  if (!IsAvailable.value) {
+    return Text.Unavailable;
+  }
+
+  if (!HasSellableVariant.value) {
+    return Text.OutOfStock;
+  }
+
+  return "";
+});
+</script>
 
 <style scoped lang="scss">
 .product-card {
@@ -101,15 +121,10 @@ const IsAvailable = computed(() => Number(Props.Product.Status) === 1);
   right: 10px;
   padding: 5px 9px;
   border-radius: 999px;
-  background: var(--dm-success-soft);
-  color: var(--dm-success);
-  font-size: 11px;
-  font-weight: 800;
-}
-
-.product-card__status--inactive {
   background: var(--dm-danger-soft);
   color: var(--dm-danger);
+  font-size: 11px;
+  font-weight: 800;
 }
 
 .product-card__body {

@@ -1,56 +1,3 @@
-<script setup>
-import { computed, inject, onMounted, ref } from "vue";
-import ProductCard from "@/components/dormmart/ProductCard.vue";
-import { getCategories, getProducts } from "@/services/catalogService";
-import { getActiveFlashSales } from "@/services/checkoutService";
-import { formatCurrency } from "@/utils/shopFormatters";
-
-const Text = inject("i18nCommon").Home;
-const Categories = ref([]);
-const FlashProducts = ref([]);
-const DiscoverProducts = ref([]);
-const IsLoading = ref(false);
-const ErrorMessage = ref("");
-
-const HeroProducts = computed(() => DiscoverProducts.value.slice(0, 4));
-const FlashSaleCount = computed(() => FlashProducts.value.length);
-
-const loadHomeData = async () => {
-  IsLoading.value = true;
-  ErrorMessage.value = "";
-
-  try {
-    const [CategoryData, ProductData, FlashSaleData] = await Promise.all([
-      getCategories(),
-      getProducts({ PageSize: 8, Sort: "newest" }),
-      getActiveFlashSales().catch(() => []),
-    ]);
-
-    Categories.value = CategoryData;
-    FlashProducts.value = (FlashSaleData || []).flatMap((FlashSale) => (FlashSale.Items || []).map((Item) => ({
-      ProductId: Item.ProductVariantId,
-      Slug: Item.Sku,
-      Name: Item.VariantName || Item.Sku,
-      PrimaryImageUrl: Item.PrimaryImageUrl,
-      BrandName: "Flash Sale",
-      CampaignName: FlashSale.Name || "Khuyến mãi",
-      MetaLabel: "Giá đang hiển thị từ API",
-      MinSalePrice: Item.FlashPrice,
-      MaxSalePrice: Item.OriginalPrice,
-    }))).slice(0, 4);
-    DiscoverProducts.value = ProductData.Items || [];
-  } catch (Error) {
-    ErrorMessage.value = Error.message;
-  } finally {
-    IsLoading.value = false;
-  }
-};
-
-onMounted(loadHomeData);
-</script>
-
-<!-- ponytail: flash sale card vẫn chưa deep-link product detail vì API flash-sales chưa trả ProductSlug/ProductId mapping đủ; add CTA link khi backend trả mapping sạch. -->
-
 <template>
   <section class="dm-card" style="overflow: hidden; position: relative; min-height: 360px; margin-bottom: 24px;">
     <img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1600&q=80" :alt="Text.HeroAlt" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;" />
@@ -135,12 +82,67 @@ onMounted(loadHomeData);
       <h2 style="font-size: 24px;">{{ Text.DailyDiscover }}</h2>
       <router-link to="/products" style="color: var(--dm-primary); font-weight: 600;">{{ Text.BrowseCatalog }}</router-link>
     </div>
-    <div v-if="!IsLoading && HeroProducts.length" class="dm-grid dm-grid--products">
-      <ProductCard v-for="ProductItem in HeroProducts" :key="ProductItem.ProductId" :Product="ProductItem" />
+    <div v-if="!IsLoading && HeroProducts.length" class="dm-home-product-rail">
+      <div class="dm-home-product-rail__track">
+        <div v-for="ProductItem in HeroProducts" :key="ProductItem.ProductId" class="dm-home-product-rail__item">
+          <ProductCard :Product="ProductItem" />
+        </div>
+      </div>
     </div>
     <div v-else-if="!IsLoading" class="dm-card" style="padding: 18px; color: var(--dm-text-soft);">{{ Text.DataFakeProducts }}</div>
   </section>
 </template>
+
+<script setup>
+import { computed, inject, onMounted, ref } from "vue";
+import ProductCard from "@/components/dormmart/ProductCard.vue";
+import { getCategories, getProducts } from "@/services/catalogService";
+import { getActiveFlashSales } from "@/services/checkoutService";
+import { formatCurrency } from "@/utils/shopFormatters";
+
+const Text = inject("i18nCommon").Home;
+const Categories = ref([]);
+const FlashProducts = ref([]);
+const DiscoverProducts = ref([]);
+const IsLoading = ref(false);
+const ErrorMessage = ref("");
+
+const HeroProducts = computed(() => DiscoverProducts.value);
+const FlashSaleCount = computed(() => FlashProducts.value.length);
+
+const loadHomeData = async () => {
+  IsLoading.value = true;
+  ErrorMessage.value = "";
+
+  try {
+    const [CategoryData, ProductData, FlashSaleData] = await Promise.all([
+      getCategories(),
+      getProducts({ PageSize: 8, Sort: "newest" }),
+      getActiveFlashSales().catch(() => []),
+    ]);
+
+    Categories.value = CategoryData;
+    FlashProducts.value = (FlashSaleData || []).flatMap((FlashSale) => (FlashSale.Items || []).map((Item) => ({
+      ProductId: Item.ProductVariantId,
+      Slug: Item.Sku,
+      Name: Item.VariantName || Item.Sku,
+      PrimaryImageUrl: Item.PrimaryImageUrl,
+      BrandName: "Flash Sale",
+      CampaignName: FlashSale.Name || "Khuyến mãi",
+      MetaLabel: "Giá đang hiển thị từ API",
+      MinSalePrice: Item.FlashPrice,
+      MaxSalePrice: Item.OriginalPrice,
+    }))).slice(0, 4);
+    DiscoverProducts.value = ProductData.Items || [];
+  } catch (Error) {
+    ErrorMessage.value = Error.message;
+  } finally {
+    IsLoading.value = false;
+  }
+};
+
+onMounted(loadHomeData);
+</script>
 
 <style scoped lang="scss">
 .dm-home-flash {
@@ -250,6 +252,29 @@ onMounted(loadHomeData);
   font-size: 18px;
 }
 
+.dm-home-product-rail {
+  overflow-x: auto;
+  padding-bottom: 6px;
+}
+
+.dm-home-product-rail__track {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(240px, 280px);
+  gap: 16px;
+}
+
+.dm-home-product-rail__item {
+  min-width: 0;
+  scroll-snap-align: start;
+}
+
+@supports (scroll-snap-type: x mandatory) {
+  .dm-home-product-rail {
+    scroll-snap-type: x mandatory;
+  }
+}
+
 @media (max-width: 720px) {
   .dm-home-flash {
     padding: 16px;
@@ -260,5 +285,11 @@ onMounted(loadHomeData);
     flex-direction: column;
     align-items: flex-start;
   }
+
+  .dm-home-product-rail__track {
+    grid-auto-columns: minmax(220px, 82vw);
+  }
 }
 </style>
+
+<!-- ponytail: flash sale card vẫn chưa deep-link product detail vì API flash-sales chưa trả ProductSlug/ProductId mapping đủ; add CTA link khi backend trả mapping sạch. -->

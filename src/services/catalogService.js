@@ -17,6 +17,8 @@ const mapProductVariant = (Item) => ({
   CostPrice: Item?.CostPrice ?? Item?.costPrice ?? 0,
   Color: Item?.Color ?? Item?.color ?? null,
   Size: Item?.Size ?? Item?.size ?? null,
+  AvailableStock: Number(Item?.AvailableStock ?? Item?.availableStock ?? 0),
+  Status: Number(Item?.Status ?? Item?.status ?? 1),
   IsDefault: Item?.IsDefault ?? Item?.isDefault ?? false,
 });
 
@@ -39,13 +41,16 @@ const mapProductItem = (Item) => ({
   BrandName: Item?.BrandName ?? Item?.brandName ?? null,
   ShortDescription: Item?.ShortDescription ?? Item?.shortDescription ?? null,
   Description: Item?.Description ?? Item?.description ?? null,
-  Status: Item?.Status ?? Item?.status ?? 0,
-  MinSalePrice: Item?.MinSalePrice ?? Item?.minSalePrice ?? 0,
-  MaxSalePrice: Item?.MaxSalePrice ?? Item?.maxSalePrice ?? 0,
+  Status: Number(Item?.Status ?? Item?.status ?? 1),
+  AvailableStock: Number(Item?.AvailableStock ?? Item?.availableStock ?? 0),
+  HasSellableVariant: Item?.HasSellableVariant ?? Item?.hasSellableVariant ?? false,
+  MinSalePrice: Number(Item?.MinSalePrice ?? Item?.minSalePrice ?? 0),
+  MaxSalePrice: Number(Item?.MaxSalePrice ?? Item?.maxSalePrice ?? 0),
   PrimaryImageUrl: Item?.PrimaryImageUrl ?? Item?.primaryImageUrl ?? null,
   Variants: Array.isArray(Item?.Variants ?? Item?.variants) ? (Item?.Variants ?? Item?.variants).map(mapProductVariant) : [],
   Images: Array.isArray(Item?.Images ?? Item?.images) ? (Item?.Images ?? Item?.images).map(mapProductImage) : [],
 });
+
 
 export const getCategories = async () => {
   const Response = await axiosInstance.get("/categories");

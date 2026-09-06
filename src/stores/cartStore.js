@@ -15,19 +15,40 @@ export const CartCombos = ref([]);
 export const CartSummary = ref({ CartId: "", Subtotal: 0, Total: 0, ItemCount: 0 });
 export const CartIsLoading = ref(false);
 export const CartErrorMessage = ref("");
-export const CartTotalQuantity = computed(() =>
-  CartItems.value.reduce((Total, CartItem) => Total + CartItem.Quantity, 0)
-  + CartCombos.value.reduce((Total, CartCombo) => Total + CartCombo.Quantity, 0),
-);
+const toSafeNumber = (Value) => Number(Value) || 0;
+export const CartTotalQuantity = computed(() => {
+  const ItemQuantity = CartItems.value.reduce((Total, CartItem) => Total + toSafeNumber(CartItem.Quantity), 0);
+  const ComboQuantity = CartCombos.value.reduce((Total, CartCombo) => Total + toSafeNumber(CartCombo.Quantity), 0);
+  return ItemQuantity + ComboQuantity;
+});
 
 const applyCart = (Cart) => {
-  CartItems.value = Cart?.Items || [];
-  CartCombos.value = Cart?.Combos || [];
+  CartItems.value = Array.isArray(Cart?.Items)
+    ? Cart.Items.map((CartItem) => ({
+      ...CartItem,
+      Quantity: toSafeNumber(CartItem?.Quantity),
+      AvailableStock: toSafeNumber(CartItem?.AvailableStock),
+    }))
+    : [];
+  CartCombos.value = Array.isArray(Cart?.Combos)
+    ? Cart.Combos.map((CartCombo) => ({
+      ...CartCombo,
+      Quantity: toSafeNumber(CartCombo?.Quantity),
+      AvailableStock: toSafeNumber(CartCombo?.AvailableStock),
+      Items: Array.isArray(CartCombo?.Items)
+        ? CartCombo.Items.map((ComboItem) => ({
+          ...ComboItem,
+          Quantity: toSafeNumber(ComboItem?.Quantity),
+          AvailableStock: toSafeNumber(ComboItem?.AvailableStock),
+        }))
+        : [],
+    }))
+    : [];
   CartSummary.value = {
     CartId: Cart?.CartId || "",
-    Subtotal: Cart?.Subtotal || 0,
-    Total: Cart?.Total || 0,
-    ItemCount: Cart?.ItemCount || 0,
+    Subtotal: toSafeNumber(Cart?.Subtotal),
+    Total: toSafeNumber(Cart?.Total),
+    ItemCount: toSafeNumber(Cart?.ItemCount),
   };
 };
 
@@ -48,18 +69,28 @@ export const loadCart = async () => {
   }
 };
 
+const isVariantSellable = (VariantItem) => Number(VariantItem?.Status ?? 1) === 1 && Number(VariantItem?.AvailableStock ?? 0) > 0;
+
+const resolveCartVariantId = (Product, ProductVariantId) => {
+  if (ProductVariantId) {
+    return ProductVariantId;
+  }
+
+  return Product?.Variants?.find((VariantItem) => VariantItem.IsDefault && isVariantSellable(VariantItem))?.ProductVariantId
+    || Product?.Variants?.find(isVariantSellable)?.ProductVariantId
+    || null;
+};
+
 export const addProductToCart = async ({ ProductVariantId, Quantity = 1, ProductSlug = "" }) => {
   let TargetVariantId = ProductVariantId;
 
-  if (!TargetVariantId && ProductSlug) {
+  if (ProductSlug) {
     const Product = await getProductBySlug(ProductSlug);
-    TargetVariantId = Product?.Variants?.find((VariantItem) => VariantItem.IsDefault)?.ProductVariantId
-      || Product?.Variants?.[0]?.ProductVariantId
-      || null;
+    TargetVariantId = resolveCartVariantId(Product, ProductVariantId);
   }
 
   if (!TargetVariantId) {
-    throw new Error("Sản phẩm chưa có biến thể để thêm vào giỏ hàng");
+    throw new Error("Sản phẩm đã hết hàng hoặc chưa có biến thể để thêm vào giỏ hàng");
   }
 
   const Cart = await addCartItem({ ProductVariantId: TargetVariantId, Quantity });
@@ -139,3 +170,27 @@ export const getShippingQuoteItems = () => ([
       Quantity: Item.Quantity,
     }))),
 ]);
+
+export const getCartQuantityByVariantId = (ProductVariantId) => {
+  if (!ProductVariantId) {
+    return 0;
+  }
+
+  return CartItems.value.reduce((Total, CartItem) => Total + (CartItem.ProductVariantId === ProductVariantId ? toSafeNumber(CartItem.Quantity) : 0), 0)
+    + CartCombos.value.reduce((Total, CartCombo) => Total + (CartCombo.Items || []).reduce(
+      (ComboTotal, ComboItem) => ComboTotal + (ComboItem.ProductVariantId === ProductVariantId ? toSafeNumber(ComboItem.Quantity) : 0),
+      0,
+    ), 0);
+};
+
+export const getCartQuantityByProductSlug = (ProductSlug) => {
+  if (!ProductSlug) {
+    return 0;
+  }
+
+  return CartItems.value.reduce((Total, CartItem) => Total + (CartItem.ProductSlug === ProductSlug ? toSafeNumber(CartItem.Quantity) : 0), 0)
+    + CartCombos.value.reduce((Total, CartCombo) => Total + (CartCombo.Items || []).reduce(
+      (ComboTotal, ComboItem) => ComboTotal + (ComboItem.ProductSlug === ProductSlug ? toSafeNumber(ComboItem.Quantity) : 0),
+      0,
+    ), 0);
+};

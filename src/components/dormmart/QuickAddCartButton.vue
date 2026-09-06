@@ -45,8 +45,8 @@ const handleQuickAdd = async (Event) => {
   IsAnimating.value = true;
 
   try {
-    await animateToCart(Event.currentTarget);
     await addProductToCart({ ProductSlug: Props.ProductSlug });
+    await animateToCart(Event.currentTarget);
   } finally {
     IsAnimating.value = false;
   }
