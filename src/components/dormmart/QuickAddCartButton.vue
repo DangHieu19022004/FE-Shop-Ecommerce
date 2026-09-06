@@ -16,7 +16,7 @@ const IsAnimating = ref(false);
 
 const animateToCart = (SourceElement) => {
   const CartTarget = document.querySelector(".dm-cart-button");
-  if (!CartTarget || !Props.ImageUrl) return Promise.resolve();
+  if (!CartTarget || !Props.ImageUrl || !SourceElement) return Promise.resolve();
   const SourceRect = SourceElement.getBoundingClientRect();
   const TargetRect = CartTarget.getBoundingClientRect();
   const FlyingImage = document.createElement("img");
