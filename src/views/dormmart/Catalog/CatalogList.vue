@@ -2,7 +2,6 @@
   <section style="display: flex; flex-direction: column; gap: 20px;">
     <div>
       <h1 style="font-size: 32px; margin-bottom: 6px;">{{ pageTitle }}</h1>
-      <p style="color: var(--dm-text-soft);">{{ Paging.Total }} sản phẩm</p>
     </div>
 
     <div v-if="ErrorMessage" class="dm-card" style="padding: 16px; color: var(--dm-danger);">{{ ErrorMessage }}</div>
@@ -15,11 +14,24 @@
         </h2>
         <div style="display: flex; flex-direction: column; gap: 16px;">
           <section>
-            <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--dm-text-soft); margin-bottom: 10px;">Category</div>
-            <div v-for="item in Categories" :key="item.Id" style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-              <input :checked="Filters.CategoryId === item.Id" type="radio" name="category" @change="$router.push({ query: { ...$route.query, CategoryId: item.Id, PageIndex: 1 } })" />
-              <span>{{ item.Name }}</span>
+            <div class="catalog-filter__label-row">
+              <span class="catalog-filter__label">Category</span>
+              <DMButton
+                v-if="Filters.CategoryId"
+                type="none"
+                :is-tooltip="false"
+                message="Xóa lọc"
+                class="catalog-filter__clear"
+                aria-label="Xóa bộ lọc danh mục"
+                @click="clearCategory"
+              />
             </div>
+            <DMRadio
+              :model-value="Filters.CategoryId"
+              :options="CategoryOptions"
+              name="category"
+              @update:model-value="selectCategory"
+            />
             <div v-if="!Categories.length" style="color: var(--dm-text-soft);">{{ Text.DataFakeCategories }}</div>
           </section>
           <section>
@@ -46,7 +58,6 @@
             <span>Sort by:</span>
             <button v-for="Option in SortOptions" :key="Option.Value" type="button" class="dm-pill" :style="Filters.Sort === Option.Value ? 'background: var(--dm-primary); color: #fff;' : 'background: var(--dm-surface-soft); color: var(--dm-text);'" @click="$router.push({ query: { ...$route.query, Sort: Option.Value, PageIndex: 1 } })">{{ Option.Label }}</button>
           </div>
-          <div class="dm-pill" style="background: var(--dm-surface-soft); color: var(--dm-text);">{{ Paging.PageIndex }} / {{ totalPages }}</div>
         </div>
 
         <div v-if="IsLoading" class="dm-card" style="padding: 16px; text-align: center;">Đang tải sản phẩm...</div>
@@ -54,6 +65,13 @@
           <ProductCard v-for="ProductItem in Products" :key="ProductItem.ProductId" :Product="ProductItem" />
         </div>
         <div v-else class="dm-card" style="padding: 16px;">{{ Text.DataFakeProducts }}</div>
+        <DMPagingFooter
+          :Total="Paging.Total"
+          :PageIndex="Paging.PageIndex"
+          :PageSize="Paging.PageSize"
+          :Disabled="IsLoading"
+          @update:page-index="changePage"
+        />
       </div>
     </div>
   </section>
@@ -61,7 +79,10 @@
 
 <script setup>
 import { computed, inject, onMounted, reactive, ref, watch } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
+import DMButton from "@/components/base/DMButton.vue";
+import DMPagingFooter from "@/components/base/DMPagingFooter.vue";
+import DMRadio from "@/components/base/DMRadio.vue";
 import ProductCard from "@/components/dormmart/ProductCard.vue";
 import { getBrands, getCategories, getProducts } from "@/services/catalogService";
 import { formatI18nText } from "@/utils/i18n";
@@ -69,6 +90,7 @@ import { formatI18nText } from "@/utils/i18n";
 const Text = inject("i18nCommon").ProductList;
 
 const Route = useRoute();
+const Router = useRouter();
 const Categories = ref([]);
 const Brands = ref([]);
 const Products = ref([]);
@@ -97,7 +119,25 @@ const pageTitle = computed(() => {
   return Filters.Search ? formatI18nText(Text.SearchResultTitle, { search: Filters.Search }) : Text.DefaultTitle;
 });
 
-const totalPages = computed(() => Math.max(1, Math.ceil((Paging.Total || 0) / Paging.PageSize)));
+const CategoryOptions = computed(() => Categories.value.map((Item) => ({
+  value: Item.Id,
+  label: Item.Name,
+})));
+
+const selectCategory = (CategoryId) => Router.push({
+  query: { ...Route.query, CategoryId, PageIndex: 1 },
+});
+
+const clearCategory = () => {
+  const Query = { ...Route.query };
+  delete Query.CategoryId;
+  Query.PageIndex = 1;
+  return Router.push({ query: Query });
+};
+
+const changePage = (PageIndex) => Router.push({
+  query: { ...Route.query, PageIndex },
+});
 
 const syncQueryToFilters = () => {
   Filters.Search = typeof Route.query.Search === "string" ? Route.query.Search : "";
@@ -143,3 +183,27 @@ onMounted(async () => {
   await loadCatalog();
 });
 </script>
+
+<style scoped lang="scss">
+.catalog-filter__label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.catalog-filter__label {
+  color: var(--dm-text-soft);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.catalog-filter__clear {
+  padding: 3px 6px;
+  color: var(--dm-primary);
+  font-size: 12px;
+  font-weight: 600;
+}
+</style>

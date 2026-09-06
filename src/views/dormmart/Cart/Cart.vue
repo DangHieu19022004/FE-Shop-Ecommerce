@@ -57,10 +57,10 @@
                 <div>
                   <div class="cart-item__title-row">
                     <router-link :to="getLineRoute(CartItem)" class="cart-item__name">{{ CartItem.Name }}</router-link>
-                    <span v-if="isCombo(CartItem)" class="cart-item__combo-badge">Combo</span>
-                    <span v-if="getComboSaving(CartItem) > 0" class="cart-item__discount-badge">
+                    <DMBadge v-if="isCombo(CartItem)" warning>Combo</DMBadge>
+                    <DMBadge v-if="getComboSaving(CartItem) > 0" error>
                       -{{ formatCurrency(getComboSaving(CartItem)) }}
-                    </span>
+                    </DMBadge>
                   </div>
                   <p class="cart-item__subtitle">{{ getLineSubtitle(CartItem) }}</p>
                   <p class="cart-item__meta">{{ CartItem.Meta }}</p>

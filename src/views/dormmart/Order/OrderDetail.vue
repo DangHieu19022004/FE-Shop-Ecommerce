@@ -23,14 +23,12 @@
         </div>
       </div>
       <div class="order-detail__badge-row">
-        <span class="order-detail__badge order-detail__badge--status" :class="statusClass(Order.Status)">
-          <span class="order-detail__badge-dot"></span>
+        <DMBadge :type="statusBadgeType(Order.Status)" dot>
           {{ getStatusBadgeText(Order.Status) }}
-        </span>
-        <span class="order-detail__badge order-detail__badge--payment" :class="paymentStatusClass(Order.Payment?.Status || Order.PaymentStatus)">
-          <span class="material-symbols-outlined" aria-hidden="true">account_balance</span>
+        </DMBadge>
+        <DMBadge :type="paymentStatusBadgeType(Order.Payment?.Status || Order.PaymentStatus)" icon-name="account_balance">
           {{ getPaymentStatusBadgeText(Order.Payment?.Status || Order.PaymentStatus) }}
-        </span>
+        </DMBadge>
       </div>
     </div>
 
@@ -83,7 +81,7 @@
                 <p>Phương thức: <strong>{{ getPaymentDisplayName() }}</strong></p>
               </div>
             </div>
-            <span class="order-detail__auto-badge">Tự động kích hoạt</span>
+            <DMBadge success icon-name="bolt">Tự động kích hoạt</DMBadge>
           </div>
 
           <div class="order-detail__bank-grid">
@@ -237,7 +235,7 @@
               <span class="material-symbols-outlined" aria-hidden="true">location_on</span>
               <h3>Địa Chỉ Nhận Hàng</h3>
             </div>
-            <span class="order-detail__side-badge">KTX / Nhà Trọ Sinh Viên</span>
+            <DMBadge primary>KTX / Nhà Trọ Sinh Viên</DMBadge>
           </div>
           <div class="order-detail__address-box">
             <div class="order-detail__address-line">
@@ -511,22 +509,20 @@ const getStatusBadgeText = (StatusCode) => {
   return typeof StatusCode === "string" ? `${Label} (${StatusCode})` : Label;
 };
 const getPaymentStatusBadgeText = (PaymentStatus) => getPaymentStatusLabel(PaymentStatus);
-const statusClass = (StatusCode) => {
+const statusBadgeType = (StatusCode) => {
   const StatusKey = getStatusKey(StatusCode);
-  return {
-    "order-status--pending": ["PendingApproval", "Confirmed", "Preparing", "ReadyToShip"].includes(StatusKey),
-    "order-status--shipping": ["Shipping"].includes(StatusKey),
-    "order-status--delivered": ["Completed"].includes(StatusKey),
-    "order-status--cancelled": ["Rejected", "Cancelled"].includes(StatusKey),
-  };
+  if (["Rejected", "Cancelled"].includes(StatusKey)) return "error";
+  if (StatusKey === "Completed") return "success";
+  if (StatusKey === "Shipping") return "info";
+  if (["PendingApproval", "Confirmed", "Preparing", "ReadyToShip"].includes(StatusKey)) return "warning";
+  return "neutral";
 };
-const paymentStatusClass = (PaymentStatus) => {
+const paymentStatusBadgeType = (PaymentStatus) => {
   const PaymentStatusKey = getPaymentStatusKey(PaymentStatus);
-  return {
-    "order-status--pending": ["Pending", "AwaitingProof", "UnderReview"].includes(PaymentStatusKey),
-    "order-status--delivered": ["Paid"].includes(PaymentStatusKey),
-    "order-status--cancelled": ["Rejected", "Cancelled", "Refunded"].includes(PaymentStatusKey),
-  };
+  if (PaymentStatusKey === "Paid") return "success";
+  if (["Rejected", "Cancelled", "Refunded"].includes(PaymentStatusKey)) return "error";
+  if (["Pending", "AwaitingProof", "UnderReview"].includes(PaymentStatusKey)) return "warning";
+  return "neutral";
 };
 
 const CurrentStatusKey = computed(() => getStatusKey(Order.value?.Status));

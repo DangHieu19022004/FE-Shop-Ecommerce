@@ -367,24 +367,11 @@
 .combo-card__badge {
   top: 12px;
   left: 12px;
-  padding: 6px 10px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.92);
-  color: var(--dm-primary);
-  font-size: 10px;
-  font-weight: 800;
-  backdrop-filter: blur(6px);
 }
 
 .combo-card__saving {
   top: 12px;
   right: 12px;
-  padding: 7px 9px;
-  border-radius: 9px;
-  background: var(--dm-secondary);
-  color: var(--dm-secondary-text);
-  font-size: 12px;
-  font-weight: 900;
 }
 
 .combo-card__icon {
@@ -621,12 +608,6 @@
   position: absolute;
   top: 18px;
   left: 18px;
-  padding: 8px 12px;
-  border-radius: 999px;
-  background: var(--dm-secondary);
-  color: var(--dm-secondary-text);
-  font-size: 11px;
-  font-weight: 850;
 }
 
 .combo-detail-hero__content {

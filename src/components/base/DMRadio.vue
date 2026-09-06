@@ -14,12 +14,14 @@
       ]"
     >
       <label
-        v-for="option in options"
+        v-for="(option, OptionIndex) in options"
         :key="option.value"
+        :for="getOptionId(OptionIndex)"
         class="ms-radio__item"
         :class="{ 'ms-radio__item--checked': modelValue === option.value, 'ms-radio__item--disabled': option.disabled }"
       >
         <input
+          :id="getOptionId(OptionIndex)"
           type="radio"
           class="ms-radio__input"
           :name="name"
@@ -47,7 +49,9 @@
 </template>
 
 <script setup>
-defineProps({
+import { useId } from "vue";
+
+const Props = defineProps({
   /** Tên nhóm radio (dùng cho HTML name attr) */
   name:       { type: String,  default: "ms-radio-group" },
   /** Danh sách option: [{ value, label, disabled? }] */
@@ -66,6 +70,8 @@ defineProps({
 });
 
 const emit = defineEmits(["update:modelValue"]);
+const RadioGroupId = useId().replace(/:/g, "");
+const getOptionId = (OptionIndex) => `${Props.name}-${RadioGroupId}-${OptionIndex}`;
 </script>
 
 <style scoped lang="scss">

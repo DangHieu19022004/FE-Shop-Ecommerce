@@ -26,20 +26,23 @@
           </span>
         </router-link>
 
-        <div
-          class="dm-search"
-          role="button"
-          tabindex="0"
-          :aria-label="`${Text.SearchButton} - tính năng đang phát triển`"
-          :title="`${Text.SearchButton} - tính năng đang phát triển`"
-          @click="openSearchPlaceholder"
-          @keydown.enter.prevent="openSearchPlaceholder"
-          @keydown.space.prevent="openSearchPlaceholder"
-        >
-          <span class="material-symbols-outlined">search</span>
-          <input :value="searchValue" type="text" :placeholder="`${Text.SearchPlaceholder} · Tính năng đang phát triển`" readonly />
-          <span class="dm-btn dm-icon-btn"><span class="material-symbols-outlined" aria-hidden="true">search</span></span>
-        </div>
+        <form class="dm-search" role="search" @submit.prevent="submitSearch">
+          <span class="material-symbols-outlined" aria-hidden="true">search</span>
+          <DMInput
+            v-model="SearchValue"
+            type="search"
+            :placeholder="Text.SearchPlaceholder"
+            :aria-label="Text.SearchButton"
+          />
+          <DMButton
+            native-type="submit"
+            type="none"
+            :is-tooltip="false"
+            class="dm-icon-btn"
+            icon-name="search"
+            :aria-label="Text.SearchButton"
+          />
+        </form>
 
         <div class="dm-public-actions">
           <router-link class="dm-icon-btn dm-cart-button" to="/cart" :aria-label="Text.CartLabel">
@@ -97,30 +100,35 @@
 </template>
 
 <script setup>
-import { computed, inject } from "vue";
-import { useRouter } from "vue-router";
+import { computed, inject, ref, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import DMButton from "@/components/base/DMButton.vue";
+import DMInput from "@/components/base/DMInput.vue";
 import { CartTotalQuantity } from "@/stores/cartStore";
 import SupportChatWidget from "@/components/dormmart/SupportChatWidget.vue";
 import { getCurrentSession } from "@/services/authService";
 
+const Route = useRoute();
 const Router = useRouter();
 const Text = inject("i18nCommon").Common;
 const SessionData = computed(() => getCurrentSession());
 const IsAdmin = computed(() => SessionData.value?.Roles?.includes("Admin"));
-const openSearchPlaceholder = () => {
-  Router.push({
-    name: "featureUnavailable",
-    query: {
-      title: "Tìm kiếm đang phát triển",
-      description: "Tìm kiếm nhanh trong header chưa hoàn thiện. Tạm thời dùng danh sách sản phẩm để lọc và duyệt hàng.",
-    },
-  });
+const SearchValue = ref("");
+
+const submitSearch = () => {
+  const Query = Route.name === "productList" ? { ...Route.query } : {};
+  const Search = SearchValue.value.trim();
+  if (Search) Query.Search = Search;
+  else delete Query.Search;
+  Query.PageIndex = 1;
+  return Router.push({ name: "productList", query: Query });
 };
 
-defineProps({
-  searchValue: {
-    type: String,
-    default: "",
+watch(
+  () => Route.query.Search,
+  (Search) => {
+    if (Route.name === "productList") SearchValue.value = typeof Search === "string" ? Search : "";
   },
-});
+  { immediate: true }
+);
 </script>

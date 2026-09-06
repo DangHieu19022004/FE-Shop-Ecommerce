@@ -8,6 +8,12 @@
 }
 
 .material-symbols-outlined {
+  display: inline-flex;
+  width: 1em;
+  flex-shrink: 0;
+  overflow: hidden;
+  line-height: 1;
+  white-space: nowrap;
   font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 24;
 }
 
@@ -181,6 +187,22 @@
   color: inherit;
 }
 
+.dm-search .ms-input {
+  flex: 1;
+  min-width: 0;
+  gap: 0;
+}
+
+.dm-search .ms-input .ms-input-in,
+.dm-search .ms-input .ms-input-in:hover,
+.dm-search .ms-input .ms-input-in:focus {
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
 .dm-public-actions {
   display: flex;
   align-items: center;
@@ -267,35 +289,68 @@
 
 .dm-admin__sidebar {
   width: 250px;
+  flex: 0 0 250px;
   background: var(--dm-surface);
   border-right: 1px solid var(--dm-border);
-  padding: 20px 16px;
+  padding: 12px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 6px;
   position: sticky;
   top: 0;
   height: 100vh;
+  overflow-x: hidden;
+  transition: width 180ms ease, flex-basis 180ms ease, padding 180ms ease;
+}
+
+.dm-admin__sidebar--collapsed {
+  width: 84px;
+  flex-basis: 84px;
+  padding-inline: 12px;
 }
 
 .dm-admin__nav {
   display: flex;
+  min-height: 0;
+  flex: 1;
   flex-direction: column;
-  gap: 8px;
+  gap: 3px;
+  overflow-y: auto;
 }
 
-.dm-admin__link {
+.dm-admin__sidebar .dm-admin__link {
   display: flex;
+  width: 100%;
   align-items: center;
-  gap: 12px;
-  padding: 12px 14px;
-  border-radius: 12px;
+  justify-content: flex-start;
+  gap: 10px;
+  min-height: 38px;
+  padding: 8px 10px;
+  border-radius: 10px;
   color: var(--dm-text-soft);
+  text-align: left;
 }
 
-.dm-admin__link--active {
+.dm-admin__sidebar .dm-admin__link.ms-button--none:hover {
+  background: var(--dm-primary-soft);
+  color: var(--dm-primary);
+}
+
+.dm-admin__sidebar .dm-admin__link--active.ms-button--none,
+.dm-admin__sidebar .dm-admin__link--active.ms-button--none:hover {
   background: var(--dm-primary);
   color: var(--dm-on-primary);
+}
+
+.dm-admin__sidebar--collapsed .dm-admin__link {
+  justify-content: center;
+  gap: 0;
+  padding-inline: 8px;
+}
+
+.dm-admin__logout {
+  margin-top: auto;
+  color: var(--dm-danger);
 }
 
 .dm-admin__body {
@@ -429,14 +484,9 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .dm-admin {
-    flex-direction: column;
-  }
-
-  .dm-admin__sidebar {
-    width: 100%;
-    height: auto;
-    position: relative;
+  .dm-admin__sidebar--collapsed {
+    width: 84px;
+    flex-basis: 84px;
   }
 }
 

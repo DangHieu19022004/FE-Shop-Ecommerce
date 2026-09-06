@@ -47,7 +47,7 @@
       <div class="payment-shipping-status">
         <div class="payment-shipping-status__header">
           <strong>{{ Text.ShippingTitle }}</strong>
-          <span class="dm-pill payment-shipping-status__pill">{{ SelectedAddress?.Province || 'Chưa chọn địa chỉ' }}</span>
+          <DMBadge :type="SelectedAddress ? 'success' : 'warning'" icon-name="local_shipping">{{ SelectedAddress?.Province || 'Chưa chọn địa chỉ' }}</DMBadge>
         </div>
         <div v-if="ShippingQuote" class="payment-shipping-status__body">
           <div>

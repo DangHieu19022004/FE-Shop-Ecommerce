@@ -2,6 +2,7 @@
   <div :class="['ms-input', { 'ms-input--horizontal': horizontal }]">
     <label v-if="label" class="ms-input__label" :for="id">{{ label }} <span v-if="isRequired" class="color-red"> *</span></label>
     <input
+      v-bind="$attrs"
       ref="inputRef"
       :class="['ms-input-in', props.class, { 'ms-input--error': props.errorMessages, 'ms-input-in--trailing-action': hasTrailingAction }]"
       :value="props.type === 'file' ? '' : modelValue"
@@ -31,6 +32,9 @@
 </template>
 <script setup>
 import { ref } from "vue";
+
+defineOptions({ inheritAttrs: false });
+
 const props = defineProps({
   class: {
     type: String,
@@ -41,7 +45,7 @@ const props = defineProps({
     default: "",
   },
   modelValue: {
-    type: String,
+    type: [String, Number],
     default: "",
   },
   type: {

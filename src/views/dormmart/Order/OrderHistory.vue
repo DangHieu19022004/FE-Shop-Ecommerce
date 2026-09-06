@@ -56,13 +56,12 @@
               <span class="order-card__code">{{ Text.OrderCode }}: <b>{{ OrderItem.OrderCode }}</b></span>
             </div>
             <div class="order-card__header-side">
-              <span class="order-status" :class="statusClass(OrderItem.Status)">
-                <span class="material-symbols-outlined" aria-hidden="true">{{ statusIcon(OrderItem.Status) }}</span>
+              <DMBadge :type="statusBadgeType(OrderItem.Status)" :icon-name="statusIcon(OrderItem.Status)">
                 {{ getStatusLabel(OrderItem.Status) }}
-              </span>
-              <span class="order-card__payment" :class="paymentClass(OrderItem.PaymentStatus)">
+              </DMBadge>
+              <DMBadge :type="paymentBadgeType(OrderItem.PaymentStatus)" icon-name="payments">
                 {{ getPaymentLabel(OrderItem.PaymentMethod) }} · {{ getPaymentStatusLabel(OrderItem.PaymentStatus) }}
-              </span>
+              </DMBadge>
             </div>
           </header>
 
@@ -201,14 +200,13 @@ const getOrderPreview = (OrderId) => OrderDetails.value[OrderId] || null;
 const getPrimaryItem = (OrderId) => getOrderPreview(OrderId)?.Items?.[0] || null;
 const getRemainingItemCount = (OrderId) => Math.max((getOrderPreview(OrderId)?.ItemCount || 0) - 1, 0);
 
-const statusClass = (StatusCode) => {
+const statusBadgeType = (StatusCode) => {
   const StatusKey = getStatusKey(StatusCode);
-  return {
-    "order-status--pending": ["PendingApproval", "Confirmed", "Preparing", "ReadyToShip"].includes(StatusKey),
-    "order-status--shipping": StatusKey === "Shipping",
-    "order-status--delivered": StatusKey === "Completed",
-    "order-status--cancelled": ["Rejected", "Cancelled"].includes(StatusKey),
-  };
+  if (["Rejected", "Cancelled"].includes(StatusKey)) return "error";
+  if (StatusKey === "Completed") return "success";
+  if (StatusKey === "Shipping") return "info";
+  if (["PendingApproval", "Confirmed", "Preparing", "ReadyToShip"].includes(StatusKey)) return "warning";
+  return "neutral";
 };
 
 const statusIcon = (StatusCode) => ({
@@ -222,12 +220,12 @@ const statusIcon = (StatusCode) => ({
   Rejected: "block",
 }[getStatusKey(StatusCode)] || "receipt_long");
 
-const paymentClass = (PaymentStatus) => {
+const paymentBadgeType = (PaymentStatus) => {
   const PaymentStatusKey = getPaymentStatusKey(PaymentStatus);
-  return {
-    "order-card__payment--paid": PaymentStatusKey === "Paid",
-    "order-card__payment--danger": ["Rejected", "Cancelled"].includes(PaymentStatusKey),
-  };
+  if (PaymentStatusKey === "Paid") return "success";
+  if (["Rejected", "Cancelled", "Refunded"].includes(PaymentStatusKey)) return "error";
+  if (["Pending", "AwaitingProof", "UnderReview"].includes(PaymentStatusKey)) return "warning";
+  return "neutral";
 };
 
 const StatusFilters = computed(() => [

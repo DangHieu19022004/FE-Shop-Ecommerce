@@ -17,10 +17,10 @@
       <div class="product-gallery">
         <div class="product-gallery__main">
           <img :src="SelectedImageUrl" :alt="Product.Name" />
-          <span v-if="HasDiscount" class="product-gallery__discount">-{{ DiscountPercent }}%</span>
-          <span class="product-gallery__status" :class="{ 'product-gallery__status--inactive': !IsAvailable }">
+          <DMBadge v-if="HasDiscount" error class="product-gallery__discount">-{{ DiscountPercent }}%</DMBadge>
+          <DMBadge :type="IsAvailable ? 'success' : 'error'" class="product-gallery__status" dot>
             {{ AvailabilityText }}
-          </span>
+          </DMBadge>
         </div>
         <div v-if="ProductImages.length" class="product-gallery__thumbnails">
           <button
@@ -68,11 +68,10 @@
             </del>
           </div>
           <div class="product-price__badges">
-            <span v-if="HasDiscount" class="dm-pill product-price__deal">{{ Text.FlashDeal }} -{{ DiscountPercent }}%</span>
-            <span class="dm-pill product-price__shipping">
-              <span class="material-symbols-outlined" aria-hidden="true">local_shipping</span>
+            <DMBadge v-if="HasDiscount" error icon-name="bolt">{{ Text.FlashDeal }} -{{ DiscountPercent }}%</DMBadge>
+            <DMBadge success icon-name="local_shipping">
               {{ Text.FreeShipping }}
-            </span>
+            </DMBadge>
           </div>
         </div>
 

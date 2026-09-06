@@ -47,19 +47,9 @@
 
     <div class="dm-admin__body">
       <header class="dm-admin__topbar">
-        <div
-          class="dm-search"
-          style="max-width: 420px;"
-          role="button"
-          tabindex="0"
-          :aria-label="`${Text.SearchPlaceholder} - tính năng đang phát triển`"
-          :title="`${Text.SearchPlaceholder} - tính năng đang phát triển`"
-          @click="openSearchPlaceholder"
-          @keydown.enter.prevent="openSearchPlaceholder"
-          @keydown.space.prevent="openSearchPlaceholder"
-        >
-          <span class="material-symbols-outlined">search</span>
-          <input type="text" :placeholder="`${Text.SearchPlaceholder} · Tính năng đang phát triển`" readonly />
+        <div class="dm-search" style="max-width: 420px;" role="search">
+          <span class="material-symbols-outlined" aria-hidden="true">search</span>
+          <DMInput v-model="SearchValue" type="search" :placeholder="Text.SearchPlaceholder" :aria-label="Text.SearchPlaceholder" />
         </div>
 
         <div class="dm-public-actions">
@@ -87,23 +77,16 @@
 </template>
 
 <script setup>
-import { computed, inject } from "vue";
+import { computed, inject, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import DMInput from "@/components/base/DMInput.vue";
 import { getCurrentSession, logoutUser } from "@/services/authService";
 
 const route = useRoute();
 const Router = useRouter();
 const Text = inject("i18nCommon").AdminNavigation;
 const SessionData = computed(() => getCurrentSession());
-const openSearchPlaceholder = () => {
-  Router.push({
-    name: "featureUnavailable",
-    query: {
-      title: "Tìm kiếm quản trị đang phát triển",
-      description: "Ô tìm kiếm nhanh trong khu vực admin chưa hoàn thiện. Tạm thời vào từng màn quản trị để tra cứu dữ liệu trực tiếp.",
-    },
-  });
-};
+const SearchValue = ref("");
 
 const linkClass = (path) => {
   const isActive = path === "/admin" ? route.path === path : route.path.startsWith(path);

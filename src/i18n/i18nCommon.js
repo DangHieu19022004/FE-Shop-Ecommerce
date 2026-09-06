@@ -521,7 +521,9 @@ const i18nCommon = {
     AllNotifications: "Xem tất cả thông báo",
     ProfileLabel: "Hồ sơ quản trị viên",
     OpenMenu: "Mở menu quản trị",
-    CloseMenu: "Đóng menu quản trị"
+    CloseMenu: "Đóng menu quản trị",
+    ExpandMenu: "Mở rộng menu quản trị",
+    CollapseMenu: "Thu gọn menu quản trị"
   },
   AdminDashboard: {
     Title: "Trung tâm vận hành",

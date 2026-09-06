@@ -1,9 +1,9 @@
 <template>
-  <section class="dm-card" style="overflow: hidden; position: relative; min-height: 360px; margin-bottom: 24px;">
+  <section class="dm-card dm-home-hero" style="overflow: hidden; position: relative; min-height: 360px; margin-bottom: 24px;">
     <img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1600&q=80" :alt="Text.HeroAlt" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;" />
     <div style="position: absolute; inset: 0; background: linear-gradient(90deg, rgba(0, 23, 66, 0.86), rgba(0, 23, 66, 0.18));"></div>
     <div style="position: relative; z-index: 1; padding: 36px; max-width: 520px; color: #fff;">
-      <div class="dm-pill" style="background: var(--dm-secondary); color: var(--dm-secondary-text); margin-bottom: 18px;">{{ Text.PromotionBadge }}</div>
+      <DMBadge warning style="margin-bottom: 18px;">{{ Text.PromotionBadge }}</DMBadge>
       <h1 style="font-size: clamp(28px, 4vw, 44px); line-height: 1.05; margin-bottom: 12px;">{{ Text.HeroTitle }}</h1>
       <p style="font-size: 16px; line-height: 1.6; margin-bottom: 22px;">{{ Text.HeroDescription }}</p>
       <div style="display: flex; gap: 12px; flex-wrap: wrap;">
@@ -43,8 +43,8 @@
         </div>
       </div>
       <div class="dm-home-flash__badges">
-        <div class="dm-pill dm-home-flash__pill">{{ Text.FlashSaleCountdown }}</div>
-        <div class="dm-pill dm-home-flash__pill dm-home-flash__pill--soft">{{ FlashSaleCount }} sản phẩm</div>
+        <DMBadge error icon-name="timer">{{ Text.FlashSaleCountdown }}</DMBadge>
+        <DMBadge neutral>{{ FlashSaleCount }} sản phẩm</DMBadge>
       </div>
     </div>
 
@@ -54,7 +54,7 @@
         <img :src="ProductItem.PrimaryImageUrl || 'https://placehold.co/400x400?text=No+Image'" :alt="ProductItem.Name" class="dm-product-card__image" />
         <div class="dm-product-card__body dm-home-flash__body">
           <div class="dm-home-flash__meta">
-            <div class="dm-pill" style="align-self: flex-start; background: var(--dm-secondary); color: var(--dm-secondary-text);">{{ ProductItem.BrandName || 'Dorm Mart' }}</div>
+            <DMBadge warning style="align-self: flex-start;">{{ ProductItem.BrandName || 'Dorm Mart' }}</DMBadge>
             <span class="dm-home-flash__campaign">{{ ProductItem.CampaignName }}</span>
           </div>
           <strong class="dm-home-flash__name">{{ ProductItem.Name }}</strong>
@@ -77,19 +77,38 @@
     </div>
   </section>
 
-  <section>
-    <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 16px;">
-      <h2 style="font-size: 24px;">{{ Text.DailyDiscover }}</h2>
-      <router-link to="/products" style="color: var(--dm-primary); font-weight: 600;">{{ Text.BrowseCatalog }}</router-link>
-    </div>
-    <div v-if="!IsLoading && HeroProducts.length" class="dm-home-product-rail">
-      <div class="dm-home-product-rail__track">
-        <div v-for="ProductItem in HeroProducts" :key="ProductItem.ProductId" class="dm-home-product-rail__item">
-          <ProductCard :Product="ProductItem" />
-        </div>
+  <section class="dm-home-discover">
+    <div class="dm-home-discover__header">
+      <div>
+        <h2>{{ Text.DailyDiscover }}</h2>
+        <p>Sản phẩm thiết yếu được chia theo từng nhu cầu để bạn dễ lựa chọn.</p>
       </div>
+      <router-link to="/products" class="dm-home-discover__all-link">{{ Text.BrowseCatalog }}</router-link>
     </div>
-    <div v-else-if="!IsLoading" class="dm-card" style="padding: 18px; color: var(--dm-text-soft);">{{ Text.DataFakeProducts }}</div>
+
+    <div v-if="IsLoading" class="dm-card dm-home-discover__state">Đang tải sản phẩm...</div>
+    <div v-else-if="ProductSections.length" class="dm-home-category-list">
+      <section v-for="SectionItem in ProductSections" :key="SectionItem.Id || SectionItem.Name" class="dm-home-category-section">
+        <div class="dm-home-category-section__header">
+          <div class="dm-home-category-section__title">
+            <span class="material-symbols-outlined" aria-hidden="true">category</span>
+            <div>
+              <h3>{{ SectionItem.Name }}</h3>
+              <span>{{ SectionItem.Products.length }} sản phẩm</span>
+            </div>
+          </div>
+          <router-link :to="SectionItem.Link" class="dm-home-category-section__link">
+            Xem danh mục
+            <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+          </router-link>
+        </div>
+
+        <div class="dm-grid dm-grid--products dm-home-category-section__grid">
+          <ProductCard v-for="ProductItem in SectionItem.Products" :key="ProductItem.ProductId" :Product="ProductItem" />
+        </div>
+      </section>
+    </div>
+    <div v-else class="dm-card dm-home-discover__state">{{ Text.DataFakeProducts }}</div>
   </section>
 </template>
 
@@ -107,8 +126,39 @@ const DiscoverProducts = ref([]);
 const IsLoading = ref(false);
 const ErrorMessage = ref("");
 
-const HeroProducts = computed(() => DiscoverProducts.value);
 const FlashSaleCount = computed(() => FlashProducts.value.length);
+const ProductSections = computed(() => {
+  const SectionsByKey = new Map();
+  const CategoriesByName = new Map(Categories.value.map((CategoryItem) => [CategoryItem.Name.trim().toLocaleLowerCase("vi"), CategoryItem]));
+
+  DiscoverProducts.value.forEach((ProductItem) => {
+    const CategoryById = Categories.value.find((CategoryItem) => CategoryItem.Id === ProductItem.CategoryId);
+    const CategoryByName = CategoriesByName.get((ProductItem.CategoryName || "").trim().toLocaleLowerCase("vi"));
+    const CategoryItem = CategoryById || CategoryByName;
+    const CategoryId = CategoryItem?.Id || ProductItem.CategoryId || "";
+    const CategoryName = CategoryItem?.Name || ProductItem.CategoryName || "Sản phẩm khác";
+    const CategoryKey = CategoryId || CategoryName;
+
+    if (!SectionsByKey.has(CategoryKey)) {
+      SectionsByKey.set(CategoryKey, {
+        Id: CategoryKey,
+        Name: CategoryName,
+        Products: [],
+        Link: CategoryId ? { path: "/products", query: { CategoryId } } : "/products",
+      });
+    }
+
+    SectionsByKey.get(CategoryKey).Products.push(ProductItem);
+  });
+
+  const OrderedCategoryKeys = Categories.value.map((CategoryItem) => CategoryItem.Id);
+  return [
+    ...OrderedCategoryKeys.map((CategoryKey) => SectionsByKey.get(CategoryKey)).filter(Boolean),
+    ...Array.from(SectionsByKey.entries())
+      .filter(([CategoryKey]) => !OrderedCategoryKeys.includes(CategoryKey))
+      .map(([, SectionItem]) => SectionItem),
+  ];
+});
 
 const loadHomeData = async () => {
   IsLoading.value = true;
@@ -117,7 +167,7 @@ const loadHomeData = async () => {
   try {
     const [CategoryData, ProductData, FlashSaleData] = await Promise.all([
       getCategories(),
-      getProducts({ PageSize: 8, Sort: "newest" }),
+      getProducts({ PageSize: 48, Sort: "newest" }),
       getActiveFlashSales().catch(() => []),
     ]);
 
@@ -252,27 +302,103 @@ onMounted(loadHomeData);
   font-size: 18px;
 }
 
-.dm-home-product-rail {
-  overflow-x: auto;
-  padding-bottom: 6px;
+.dm-home-discover {
+  display: grid;
+  gap: 20px;
 }
 
-.dm-home-product-rail__track {
-  display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: minmax(240px, 280px);
+.dm-home-discover__header,
+.dm-home-category-section__header,
+.dm-home-category-section__title,
+.dm-home-category-section__link {
+  display: flex;
+  align-items: center;
+}
+
+.dm-home-discover__header,
+.dm-home-category-section__header {
+  justify-content: space-between;
   gap: 16px;
 }
 
-.dm-home-product-rail__item {
-  min-width: 0;
-  scroll-snap-align: start;
+.dm-home-discover__header h2,
+.dm-home-discover__header p,
+.dm-home-category-section__title h3 {
+  margin: 0;
 }
 
-@supports (scroll-snap-type: x mandatory) {
-  .dm-home-product-rail {
-    scroll-snap-type: x mandatory;
-  }
+.dm-home-discover__header h2 {
+  font-size: 24px;
+}
+
+.dm-home-discover__header p {
+  margin-top: 5px;
+  color: var(--dm-text-soft);
+  font-size: 14px;
+}
+
+.dm-home-discover__all-link,
+.dm-home-category-section__link {
+  flex-shrink: 0;
+  color: var(--dm-primary);
+  font-weight: 700;
+}
+
+.dm-home-category-list {
+  display: grid;
+  gap: 30px;
+}
+
+.dm-home-category-section {
+  display: grid;
+  gap: 16px;
+}
+
+.dm-home-category-section__header {
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--dm-primary-soft);
+}
+
+.dm-home-category-section__title {
+  gap: 10px;
+}
+
+.dm-home-category-section__title > .material-symbols-outlined {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border-radius: 12px;
+  background: var(--dm-primary-soft);
+  color: var(--dm-primary);
+}
+
+.dm-home-category-section__title h3 {
+  color: var(--dm-primary);
+  font-size: 20px;
+}
+
+.dm-home-category-section__title div > span {
+  color: var(--dm-text-soft);
+  font-size: 12px;
+}
+
+.dm-home-category-section__link {
+  gap: 4px;
+  font-size: 14px;
+}
+
+.dm-home-category-section__link .material-symbols-outlined {
+  font-size: 18px;
+}
+
+.dm-home-category-section__grid {
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+}
+
+.dm-home-discover__state {
+  padding: 18px;
+  color: var(--dm-text-soft);
 }
 
 @media (max-width: 720px) {
@@ -286,8 +412,13 @@ onMounted(loadHomeData);
     align-items: flex-start;
   }
 
-  .dm-home-product-rail__track {
-    grid-auto-columns: minmax(220px, 82vw);
+  .dm-home-discover__header,
+  .dm-home-category-section__header {
+    align-items: flex-start;
+  }
+
+  .dm-home-category-section__grid {
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
   }
 }
 </style>

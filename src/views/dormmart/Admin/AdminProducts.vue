@@ -2,6 +2,8 @@
 import { computed, inject, onMounted, reactive, ref } from "vue";
 import DMButton from "@/components/base/DMButton.vue";
 import DMInput from "@/components/base/DMInput.vue";
+import DMPagingFooter from "@/components/base/DMPagingFooter.vue";
+import DMRadio from "@/components/base/DMRadio.vue";
 import {
   createAdminBrand,
   createAdminCategory,
@@ -25,6 +27,7 @@ const IsSaving = ref(false);
 const IsCreatingCategory = ref(false);
 const IsCreatingBrand = ref(false);
 const EditingProductId = ref("");
+const Paging = reactive({ Total: 0, PageIndex: 1, PageSize: 12 });
 
 const CategoryForm = reactive({
   Name: "",
@@ -80,6 +83,8 @@ const formatText = (Template, Values = {}) =>
   Object.entries(Values).reduce((Result, [Key, Value]) => Result.replaceAll(`{${Key}}`, Value), Template);
 
 const isEditing = computed(() => Boolean(EditingProductId.value));
+const defaultVariantIndex = computed(() => ProductForm.Variants.findIndex((Item) => Item.IsDefault));
+const primaryImageIndex = computed(() => ProductForm.Images.findIndex((Item) => Item.IsPrimary));
 
 const resetMessages = () => {
   ErrorMessage.value = "";
@@ -232,16 +237,24 @@ const loadAdminData = async () => {
     const [CategoryData, BrandData, ProductData] = await Promise.all([
       getCategories(),
       getBrands(),
-      getAdminProducts({ PageIndex: 1, PageSize: 100 }),
+      getAdminProducts({ PageIndex: Paging.PageIndex, PageSize: Paging.PageSize }),
     ]);
     Categories.value = CategoryData;
     Brands.value = BrandData;
     Products.value = Array.isArray(ProductData?.Items) ? ProductData.Items : [];
+    Paging.Total = Number(ProductData?.Total) || 0;
+    Paging.PageIndex = Number(ProductData?.PageIndex) || Paging.PageIndex;
+    Paging.PageSize = Number(ProductData?.PageSize) || Paging.PageSize;
   } catch (Error) {
     ErrorMessage.value = Error.message;
   } finally {
     IsLoading.value = false;
   }
+};
+
+const changePage = async (PageIndex) => {
+  Paging.PageIndex = PageIndex;
+  await loadAdminData();
 };
 
 const submitCategoryForm = async () => {
@@ -403,6 +416,12 @@ const setPrimaryImage = (Index) => {
 };
 
 const statusLabel = (Status) => statusOptions.find((Item) => Item.Value === Number(Status))?.Label || `Status ${Status}`;
+const statusBadgeType = (Status) => ({
+  0: "warning",
+  1: "success",
+  2: "error",
+  3: "warning",
+}[Number(Status)] || "neutral");
 
 onMounted(async () => {
   resetForm();
@@ -460,7 +479,7 @@ onMounted(async () => {
                 <td>{{ Item.CategoryName }}</td>
                 <td>{{ Item.BrandName || '-' }}</td>
                 <td>{{ formatCurrency(Item.MinSalePrice) }}<span v-if="Item.MinSalePrice !== Item.MaxSalePrice"> - {{ formatCurrency(Item.MaxSalePrice) }}</span></td>
-                <td><span class="dm-pill" style="background: var(--dm-surface-soft); color: var(--dm-text);">{{ statusLabel(Item.Status) }}</span></td>
+                <td><DMBadge :type="statusBadgeType(Item.Status)" dot>{{ statusLabel(Item.Status) }}</DMBadge></td>
                 <td>
                   <div style="display: flex; gap: 8px; flex-wrap: wrap;">
                     <DMButton type="none" :is-tooltip="false" :message="Text.Edit" class="admin-button" @click="startEdit(Item.ProductId)" />
@@ -474,6 +493,13 @@ onMounted(async () => {
             </tbody>
           </table>
         </div>
+        <DMPagingFooter
+          :Total="Paging.Total"
+          :PageIndex="Paging.PageIndex"
+          :PageSize="Paging.PageSize"
+          :Disabled="IsLoading"
+          @update:page-index="changePage"
+        />
       </article>
 
       <article class="dm-card" style="padding: 18px; display: grid; gap: 16px;">
@@ -556,10 +582,12 @@ onMounted(async () => {
               <DMInput v-model="Item.Color" :label="Text.VariantColor" />
               <DMInput v-model="Item.Size" :label="Text.VariantSize" />
             </div>
-            <label style="display: flex; align-items: center; gap: 8px;">
-              <input :checked="Item.IsDefault" type="radio" name="defaultVariant" @change="setDefaultVariant(Index)" />
-              <span>{{ Text.DefaultVariant }}</span>
-            </label>
+            <DMRadio
+              :model-value="defaultVariantIndex"
+              :options="[{ value: Index, label: Text.DefaultVariant }]"
+              name="defaultVariant"
+              @update:model-value="setDefaultVariant"
+            />
           </div>
         </section>
 
@@ -576,10 +604,12 @@ onMounted(async () => {
             <DMInput v-model="Item.ImageUrl" :label="Text.ImageUrl" />
             <DMInput v-model="Item.AltText" :label="Text.AltText" />
             <DMInput v-model="Item.SortOrder" :label="Text.SortOrder" type="number" />
-            <label style="display: flex; align-items: center; gap: 8px;">
-              <input :checked="Item.IsPrimary" type="radio" name="primaryImage" @change="setPrimaryImage(Index)" />
-              <span>{{ Text.PrimaryImage }}</span>
-            </label>
+            <DMRadio
+              :model-value="primaryImageIndex"
+              :options="[{ value: Index, label: Text.PrimaryImage }]"
+              name="primaryImage"
+              @update:model-value="setPrimaryImage"
+            />
           </div>
         </section>
 

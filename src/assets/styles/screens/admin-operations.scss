@@ -31,8 +31,6 @@
 .admin-search { min-width: min(100%, 340px); }
 .admin-table-wrap { overflow-x: auto; }
 .admin-table-actions { display: flex; justify-content: flex-end; gap: 8px; }
-.admin-status { display: inline-flex; padding: 5px 10px; border-radius: 999px; background: var(--dm-success-soft); color: var(--dm-success); font-size: 12px; font-weight: 700; }
-.admin-status--warning { background: var(--dm-danger-soft); color: var(--dm-danger); }
 .admin-order-card { display: grid; grid-template-columns: 1fr 1fr auto; gap: 18px; align-items: center; padding: 18px; border-bottom: 1px solid var(--dm-border); }
 .admin-order-card:last-child { border-bottom: 0; }
 .admin-order-card__meta { display: grid; gap: 5px; color: var(--dm-text-soft); font-size: 13px; }

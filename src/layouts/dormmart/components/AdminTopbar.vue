@@ -1,10 +1,17 @@
 <template>
   <header class="dm-admin__topbar">
-    <button type="button" class="dm-icon-btn dm-admin__menu-toggle" :aria-label="Text.OpenMenu" @click="Emit('toggle-sidebar')">
+    <button
+      type="button"
+      class="dm-icon-btn dm-admin__menu-toggle"
+      :aria-label="isSidebarCollapsed ? Text.ExpandMenu : Text.CollapseMenu"
+      :aria-pressed="isSidebarCollapsed"
+      @click="Emit('toggle-sidebar')"
+    >
       <span class="material-symbols-outlined" aria-hidden="true">menu</span>
     </button>
-    <div class="dm-search" style="max-width: 420px;" role="button" tabindex="0" :aria-label="formatI18nText(Text.SearchDevelopingAria, { placeholder: Text.SearchPlaceholder })" :title="formatI18nText(Text.SearchDevelopingAria, { placeholder: Text.SearchPlaceholder })" @click="openSearchPlaceholder" @keydown.enter.prevent="openSearchPlaceholder" @keydown.space.prevent="openSearchPlaceholder">
-      <span class="material-symbols-outlined">search</span><input type="text" :placeholder="formatI18nText(Text.SearchDevelopingPlaceholder, { placeholder: Text.SearchPlaceholder })" readonly />
+    <div class="dm-search" style="max-width: 420px;" role="search">
+      <span class="material-symbols-outlined" aria-hidden="true">search</span>
+      <DMInput v-model="SearchValue" type="search" :placeholder="Text.SearchPlaceholder" :aria-label="Text.SearchPlaceholder" />
     </div>
     <div class="dm-public-actions">
       <DMDropdown
@@ -25,15 +32,19 @@
 
 <script setup>
 import { computed, inject, onMounted, ref } from "vue";
-import { useRouter } from "vue-router";
 import { getCurrentSession } from "@/services/authService";
-import { formatI18nText } from "@/utils/i18n";
+import DMInput from "@/components/base/DMInput.vue";
 import DMDropdown from "@/components/base/DMDropdown.vue";
 import { getNotifications, getUnreadNotificationCount, markNotificationRead } from "@/services/expansionService";
 import { formatDateTime } from "@/utils/shopFormatters";
 
-const Router = useRouter();
 const Text = inject("i18nCommon").AdminNavigation;
+defineProps({
+  isSidebarCollapsed: {
+    type: Boolean,
+    default: false,
+  },
+});
 const Emit = defineEmits(["toggle-sidebar"]);
 const SessionData = computed(() => getCurrentSession());
 const Notifications = ref([]);
@@ -41,6 +52,7 @@ const UnreadCount = ref(0);
 const IsLoading = ref(false);
 const NotificationError = ref('');
 const PendingId = ref(null);
+const SearchValue = ref("");
 const NotificationItems = computed(() => Notifications.value.map((Item) => ({
   Id: Item.NotificationId,
   Title: Item.Title,
@@ -74,5 +86,4 @@ const readNotification = async (Item) => {
   finally { PendingId.value = null; }
 };
 onMounted(loadNotifications);
-const openSearchPlaceholder = () => Router.push({ name: "featureUnavailable", query: { title: "Tìm kiếm quản trị đang phát triển", description: "Ô tìm kiếm nhanh trong khu vực admin chưa hoàn thiện. Tạm thời vào từng màn quản trị để tra cứu dữ liệu trực tiếp." } });
 </script>

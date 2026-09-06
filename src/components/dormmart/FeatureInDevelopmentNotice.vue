@@ -48,7 +48,7 @@ const goBack = () => {
       <span class="material-symbols-outlined" aria-hidden="true">construction</span>
     </div>
     <div class="feature-dev-notice__content">
-      <div class="dm-pill feature-dev-notice__pill">{{ Text.Badge }}</div>
+      <DMBadge warning class="feature-dev-notice__pill" icon-name="construction">{{ Text.Badge }}</DMBadge>
       <h2>{{ title }}</h2>
       <p>{{ description }}</p>
     </div>

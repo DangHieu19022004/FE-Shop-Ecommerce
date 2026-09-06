@@ -64,7 +64,7 @@ onMounted(loadNotifications);
               <small>{{ Item.Type }} · {{ formatDateTime(Item.CreateDate) }}</small>
             </div>
             <DMButton v-if="!Item.IsRead" type="none" :is-tooltip="false" message="Đánh dấu đã đọc" class="admin-button" @click="handleRead(Item.NotificationId)" />
-            <span v-else class="admin-status">Đã đọc</span>
+            <DMBadge v-else success dot>Đã đọc</DMBadge>
           </div>
         </div>
       </div>

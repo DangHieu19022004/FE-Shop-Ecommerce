@@ -317,7 +317,7 @@ onMounted(loadCombos);
           <h2>{{ ComboForm.ComboId ? 'Cập nhật combo' : 'Tạo combo' }}</h2>
           <p>{{ ModeLabel }}</p>
         </div>
-        <span class="admin-status" :class="{ 'admin-status--warning': !ComboForm.IsActive }">{{ ComboForm.IsActive ? 'Active' : 'Inactive' }}</span>
+        <DMBadge :type="ComboForm.IsActive ? 'success' : 'error'" dot>{{ ComboForm.IsActive ? 'Active' : 'Inactive' }}</DMBadge>
       </div>
 
       <div class="admin-combos__grid">
@@ -387,7 +387,7 @@ onMounted(loadCombos);
                 <span>{{ Combo.Items?.length || 0 }} item</span>
               </div>
             </div>
-            <span class="admin-status" :class="{ 'admin-status--warning': !Combo.IsActive }">{{ Combo.IsActive ? 'Active' : 'Inactive' }}</span>
+            <DMBadge :type="Combo.IsActive ? 'success' : 'error'" dot>{{ Combo.IsActive ? 'Active' : 'Inactive' }}</DMBadge>
           </div>
 
           <div class="admin-combos__price-row">

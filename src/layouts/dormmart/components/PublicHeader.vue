@@ -20,11 +20,11 @@
       <router-link to="/" class="dm-brand" :aria-label="Text.HomeAriaLabel">
         <span class="dm-brand__lockup" aria-hidden="true"><span class="dm-brand-icon dm-brand-icon--horizontal-logo"></span><span class="dm-brand__tagline">{{ Text.BrandTagline }}</span></span>
       </router-link>
-      <div class="dm-search" role="button" tabindex="0" :aria-label="formatI18nText(Text.SearchDevelopingAria, { action: Text.SearchButton })" :title="formatI18nText(Text.SearchDevelopingAria, { action: Text.SearchButton })" @click="openSearchPlaceholder" @keydown.enter.prevent="openSearchPlaceholder" @keydown.space.prevent="openSearchPlaceholder">
-        <span class="material-symbols-outlined">search</span>
-        <input type="text" :placeholder="Text.SearchPlaceholder" readonly />
-        <span class="dm-btn dm-icon-btn"><span class="material-symbols-outlined" aria-hidden="true">search</span></span>
-      </div>
+      <form class="dm-search" role="search" @submit.prevent="submitSearch">
+        <span class="material-symbols-outlined" aria-hidden="true">search</span>
+        <DMInput v-model="SearchValue" type="search" :placeholder="Text.SearchPlaceholder" :aria-label="Text.SearchButton" />
+        <DMButton native-type="submit" type="none" :is-tooltip="false" class="dm-icon-btn" icon-name="search" :aria-label="Text.SearchButton" />
+      </form>
       <div class="dm-public-actions">
         <router-link class="dm-icon-btn dm-cart-button" to="/shop" :aria-label="Text.CartLabel"><span class="material-symbols-outlined">shopping_cart</span><span v-if="CartTotalQuantity" class="dm-badge-dot">{{ CartTotalQuantity }}</span></router-link>
         <router-link class="dm-icon-btn" to="/profile" :aria-label="Text.AccountLabel"><span class="material-symbols-outlined">person</span></router-link>
@@ -34,17 +34,35 @@
 </template>
 
 <script setup>
-import { computed, inject, onMounted } from "vue";
-import { useRouter } from "vue-router";
+import { computed, inject, onMounted, ref, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import DMButton from "@/components/base/DMButton.vue";
+import DMInput from "@/components/base/DMInput.vue";
 import { CartTotalQuantity, loadCart } from "@/stores/cartStore";
 import { getCurrentSession } from "@/services/authService";
-import { formatI18nText } from "@/utils/i18n";
 
+const Route = useRoute();
 const Router = useRouter();
 const Text = inject("i18nCommon").Common;
 const SessionData = computed(() => getCurrentSession());
 const IsAdmin = computed(() => SessionData.value?.Roles?.includes("Admin"));
-const openSearchPlaceholder = () => Router.push({ name: "featureUnavailable", query: { title: "Tìm kiếm đang phát triển", description: "Tìm kiếm nhanh trong header chưa hoàn thiện. Tạm thời dùng danh sách sản phẩm để lọc và duyệt hàng." } });
+const SearchValue = ref("");
+const submitSearch = () => {
+  const Query = Route.name === "productList" ? { ...Route.query } : {};
+  const Search = SearchValue.value.trim();
+  if (Search) Query.Search = Search;
+  else delete Query.Search;
+  Query.PageIndex = 1;
+  return Router.push({ name: "productList", query: Query });
+};
+
+watch(
+  () => Route.query.Search,
+  (Search) => {
+    if (Route.name === "productList") SearchValue.value = typeof Search === "string" ? Search : "";
+  },
+  { immediate: true }
+);
 
 onMounted(() => {
   if (!SessionData.value) {

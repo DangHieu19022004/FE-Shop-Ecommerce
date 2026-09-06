@@ -15,7 +15,7 @@
     <section class="combo-detail-hero">
       <div class="combo-detail-hero__visual">
         <img :src="Combo.ImageUrl" :alt="Combo.Name" />
-        <span class="combo-detail-hero__badge">{{ Combo.Badge }}</span>
+        <DMBadge warning class="combo-detail-hero__badge">{{ Combo.Badge }}</DMBadge>
       </div>
       <div class="combo-detail-hero__content">
         <span class="combo-section__eyebrow">{{ Combo.CategoryName }} · {{ Combo.ComboCode }}</span>

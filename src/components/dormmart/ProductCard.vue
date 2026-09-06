@@ -6,12 +6,12 @@
         :alt="Product.Name"
         class="product-card__image"
       />
-      <span v-if="StatusBadgeText" class="product-card__status">{{ StatusBadgeText }}</span>
+      <DMBadge v-if="StatusBadgeText" :type="StatusBadgeType" class="product-card__status">{{ StatusBadgeText }}</DMBadge>
     </router-link>
 
     <div class="product-card__body">
       <div class="product-card__meta">
-        <span class="product-card__category">{{ Product.CategoryName || Text.Uncategorized }}</span>
+        <DMBadge primary class="product-card__category">{{ Product.CategoryName || Text.Uncategorized }}</DMBadge>
         <span v-if="Product.ProductCode" class="product-card__code">{{ Product.ProductCode }}</span>
       </div>
 
@@ -78,6 +78,7 @@ const StatusBadgeText = computed(() => {
 
   return "";
 });
+const StatusBadgeType = computed(() => IsAvailable.value ? "warning" : "error");
 </script>
 
 <style scoped lang="scss">
@@ -119,12 +120,6 @@ const StatusBadgeText = computed(() => {
   position: absolute;
   top: 10px;
   right: 10px;
-  padding: 5px 9px;
-  border-radius: 999px;
-  background: var(--dm-danger-soft);
-  color: var(--dm-danger);
-  font-size: 11px;
-  font-weight: 800;
 }
 
 .product-card__body {
@@ -148,13 +143,8 @@ const StatusBadgeText = computed(() => {
 }
 
 .product-card__category {
+  max-width: 70%;
   overflow: hidden;
-  padding: 5px 9px;
-  border-radius: 999px;
-  background: var(--dm-primary-soft);
-  color: var(--dm-primary);
-  font-size: 11px;
-  font-weight: 800;
   text-overflow: ellipsis;
   white-space: nowrap;
 }

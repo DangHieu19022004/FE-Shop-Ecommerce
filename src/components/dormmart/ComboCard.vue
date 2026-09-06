@@ -28,9 +28,9 @@ const TotalQuantity = computed(() => Props.Combo.Items.reduce((Total, Item) => T
     <router-link :to="{ name: 'comboDetail', params: { slug: Combo.Slug } }" class="combo-card__visual">
       <img :src="Combo.ImageUrl" :alt="Combo.Name" class="combo-card__image" />
       <div class="combo-card__visual-overlay"></div>
-      <span class="combo-card__badge">{{ Combo.Badge }}</span>
+      <DMBadge warning class="combo-card__badge">{{ Combo.Badge }}</DMBadge>
       <span class="material-symbols-outlined combo-card__icon" aria-hidden="true">{{ Combo.Icon }}</span>
-      <span class="combo-card__saving">-{{ SavingPercent }}%</span>
+      <DMBadge error class="combo-card__saving">-{{ SavingPercent }}%</DMBadge>
     </router-link>
 
     <div class="combo-card__content">

@@ -273,7 +273,7 @@ onMounted(loadPromotions);
             <h2>Voucher</h2>
             <p>{{ VoucherModeLabel }}</p>
           </div>
-          <span class="admin-status" :class="{ 'admin-status--warning': !VoucherForm.IsActive }">{{ VoucherForm.IsActive ? 'Active' : 'Draft' }}</span>
+          <DMBadge :type="VoucherForm.IsActive ? 'success' : 'warning'" dot>{{ VoucherForm.IsActive ? 'Active' : 'Draft' }}</DMBadge>
         </div>
         <div class="admin-promotions__grid">
           <DMInput v-model="VoucherForm.Code" label="Mã" />
@@ -302,7 +302,7 @@ onMounted(loadPromotions);
             <h2>Flash sale</h2>
             <p>{{ FlashSaleModeLabel }}</p>
           </div>
-          <span class="admin-status" :class="{ 'admin-status--warning': !FlashSaleForm.IsActive }">{{ FlashSaleForm.IsActive ? 'Active' : 'Draft' }}</span>
+          <DMBadge :type="FlashSaleForm.IsActive ? 'success' : 'warning'" dot>{{ FlashSaleForm.IsActive ? 'Active' : 'Draft' }}</DMBadge>
         </div>
         <div class="admin-promotions__grid">
           <DMInput v-model="FlashSaleForm.Name" label="Tên" />
@@ -350,7 +350,7 @@ onMounted(loadPromotions);
             <td>{{ formatCurrency(Voucher.MinOrderAmount) }}</td>
             <td>{{ Voucher.UsedCount }}</td>
             <td>{{ formatDateTime(Voucher.ExpiresAt) }}</td>
-            <td><span class="admin-status" :class="{ 'admin-status--warning': !Voucher.IsActive }">{{ Voucher.IsActive ? 'Active' : 'Inactive' }}</span></td>
+            <td><DMBadge :type="Voucher.IsActive ? 'success' : 'error'" dot>{{ Voucher.IsActive ? 'Active' : 'Inactive' }}</DMBadge></td>
             <td>
               <div class="admin-table-actions">
                 <DMButton type="none" :is-tooltip="false" message="Sửa" class="admin-button" @click="editVoucher(Voucher)" />
@@ -389,7 +389,7 @@ onMounted(loadPromotions);
             <td><strong>{{ FlashSale.Name }}</strong></td>
             <td>{{ formatDateTime(FlashSale.StartsAt) }}</td>
             <td>{{ formatDateTime(FlashSale.EndsAt) }}</td>
-            <td><span class="admin-status" :class="{ 'admin-status--warning': !FlashSale.IsActive }">{{ FlashSale.IsActive ? 'Active' : 'Inactive' }}</span></td>
+            <td><DMBadge :type="FlashSale.IsActive ? 'success' : 'error'" dot>{{ FlashSale.IsActive ? 'Active' : 'Inactive' }}</DMBadge></td>
             <td>{{ FlashSale.Items?.length || 0 }}</td>
             <td>{{ FlashSale.Items?.[0]?.Sku || '-' }}</td>
             <td>
