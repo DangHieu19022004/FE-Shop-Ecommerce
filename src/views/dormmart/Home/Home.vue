@@ -43,28 +43,31 @@
         </div>
       </div>
       <div class="dm-home-flash__badges">
-        <DMBadge error icon-name="timer">{{ Text.FlashSaleCountdown }}</DMBadge>
-        <DMBadge neutral>{{ FlashSaleCount }} sản phẩm</DMBadge>
+        <div class="dm-pill dm-home-flash__pill">{{ FlashSaleCountdownText }}</div>
+        <div class="dm-pill dm-home-flash__pill dm-home-flash__pill--soft">{{ FlashSaleCount }} sản phẩm</div>
       </div>
     </div>
 
     <div v-if="IsLoading" class="dm-card" style="padding: 16px; text-align: center;">Đang tải sản phẩm...</div>
     <div v-else-if="FlashProducts.length" class="dm-grid dm-grid--products">
       <article v-for="ProductItem in FlashProducts" :key="ProductItem.ProductId" class="dm-card dm-product-card dm-home-flash__card">
-        <img :src="ProductItem.PrimaryImageUrl || 'https://placehold.co/400x400?text=No+Image'" :alt="ProductItem.Name" class="dm-product-card__image" />
+        <div class="dm-home-flash__media">
+          <img :src="ProductItem.PrimaryImageUrl || 'https://placehold.co/400x400?text=No+Image'" :alt="ProductItem.Name" class="dm-product-card__image" />
+          <span class="dm-home-flash__campaign-badge">{{ ProductItem.CampaignName }}</span>
+        </div>
         <div class="dm-product-card__body dm-home-flash__body">
           <div class="dm-home-flash__meta">
-            <DMBadge warning style="align-self: flex-start;">{{ ProductItem.BrandName || 'Dorm Mart' }}</DMBadge>
-            <span class="dm-home-flash__campaign">{{ ProductItem.CampaignName }}</span>
+            <div class="dm-pill dm-home-flash__brand">{{ ProductItem.BrandName || 'Dorm Mart' }}</div>
+            <span class="dm-home-flash__stock" v-if="ProductItem.BadgeText">{{ ProductItem.BadgeText }}</span>
           </div>
           <strong class="dm-home-flash__name">{{ ProductItem.Name }}</strong>
           <div class="dm-home-flash__price-row">
             <span class="dm-home-flash__sale-price">{{ formatCurrency(ProductItem.MinSalePrice) }}</span>
-            <span class="dm-home-flash__base-price">{{ formatCurrency(ProductItem.MaxSalePrice) }}</span>
+            <span class="dm-home-flash__base-price" v-if="Number(ProductItem.MaxSalePrice) > Number(ProductItem.MinSalePrice)">{{ formatCurrency(ProductItem.MaxSalePrice) }}</span>
           </div>
-          <div class="dm-home-flash__footer">
-            <span>{{ ProductItem.CampaignName }}</span>
-            <span>{{ ProductItem.MetaLabel }}</span>
+          <div class="dm-home-flash__bottom">
+            <div class="dm-home-flash__pricing-note">{{ ProductItem.CampaignName }}</div>
+            <QuickAddCartButton class="dm-home-flash__add" :ProductSlug="ProductItem.Slug" :ProductVariantId="ProductItem.ProductVariantId" :ImageUrl="ProductItem.PrimaryImageUrl || ''" />
           </div>
         </div>
       </article>
@@ -113,20 +116,42 @@
 </template>
 
 <script setup>
-import { computed, inject, onMounted, ref } from "vue";
+import { computed, inject, onMounted, onUnmounted, ref } from "vue";
 import ProductCard from "@/components/dormmart/ProductCard.vue";
+import QuickAddCartButton from "@/components/dormmart/QuickAddCartButton.vue";
 import { getCategories, getProducts } from "@/services/catalogService";
 import { getActiveFlashSales } from "@/services/checkoutService";
 import { formatCurrency } from "@/utils/shopFormatters";
 
 const Text = inject("i18nCommon").Home;
 const Categories = ref([]);
+const FlashSales = ref([]);
 const FlashProducts = ref([]);
 const DiscoverProducts = ref([]);
 const IsLoading = ref(false);
 const ErrorMessage = ref("");
+const Now = ref(Date.now());
+let CountdownTimer = null;
 
 const FlashSaleCount = computed(() => FlashProducts.value.length);
+const ActiveFlashSale = computed(() => FlashSales.value[0] || null);
+const ActiveFlashSaleEndsAt = computed(() => ActiveFlashSale.value?.EndsAt ? new Date(ActiveFlashSale.value.EndsAt).getTime() : 0);
+const CountdownParts = computed(() => {
+  const Remaining = Math.max(0, ActiveFlashSaleEndsAt.value - Now.value);
+  const TotalSeconds = Math.floor(Remaining / 1000);
+  const Hours = Math.floor(TotalSeconds / 3600);
+  const Minutes = Math.floor((TotalSeconds % 3600) / 60);
+  const Seconds = TotalSeconds % 60;
+  return { Hours, Minutes, Seconds, Remaining };
+});
+const FlashSaleCountdownText = computed(() => {
+  if (!ActiveFlashSale.value) return Text.FlashSaleCountdown;
+  if (CountdownParts.value.Remaining <= 0) return "Flash sale đã kết thúc";
+  const { Hours, Minutes, Seconds } = CountdownParts.value;
+  if (Hours > 0) return `Còn ${Hours}h ${String(Minutes).padStart(2, "0")}m ${String(Seconds).padStart(2, "0")}s`;
+  if (Minutes > 0) return `Còn ${Minutes}m ${String(Seconds).padStart(2, "0")}s`;
+  return `Còn ${Seconds}s`;
+});
 const ProductSections = computed(() => {
   const SectionsByKey = new Map();
   const CategoriesByName = new Map(Categories.value.map((CategoryItem) => [CategoryItem.Name.trim().toLocaleLowerCase("vi"), CategoryItem]));
@@ -172,14 +197,16 @@ const loadHomeData = async () => {
     ]);
 
     Categories.value = CategoryData;
-    FlashProducts.value = (FlashSaleData || []).flatMap((FlashSale) => (FlashSale.Items || []).map((Item) => ({
+    FlashSales.value = Array.isArray(FlashSaleData) ? FlashSaleData : [];
+    FlashProducts.value = FlashSales.value.flatMap((FlashSale) => (FlashSale.Items || []).map((Item) => ({
       ProductId: Item.ProductVariantId,
-      Slug: Item.Sku,
-      Name: Item.VariantName || Item.Sku,
+      ProductVariantId: Item.ProductVariantId,
+      Slug: Item.ProductSlug || Item.Slug || Item.Sku,
+      Name: Item.VariantName || Item.ProductName || Item.Sku,
       PrimaryImageUrl: Item.PrimaryImageUrl,
-      BrandName: "Flash Sale",
+      BrandName: Item.BrandName || Item.ProductBrandName || "Flash Sale",
       CampaignName: FlashSale.Name || "Khuyến mãi",
-      MetaLabel: "Giá đang hiển thị từ API",
+      BadgeText: Item.SoldCount || Item.FlashStock ? `Còn ${Math.max(0, Number(Item.FlashStock || 0) - Number(Item.SoldCount || 0))} sp` : "",
       MinSalePrice: Item.FlashPrice,
       MaxSalePrice: Item.OriginalPrice,
     }))).slice(0, 4);
@@ -191,7 +218,16 @@ const loadHomeData = async () => {
   }
 };
 
-onMounted(loadHomeData);
+onMounted(() => {
+  loadHomeData();
+  CountdownTimer = window.setInterval(() => {
+    Now.value = Date.now();
+  }, 1000);
+});
+
+onUnmounted(() => {
+  if (CountdownTimer) window.clearInterval(CountdownTimer);
+});
 </script>
 
 <style scoped lang="scss">
@@ -206,7 +242,6 @@ onMounted(loadHomeData);
 .dm-home-flash__header,
 .dm-home-flash__badges,
 .dm-home-flash__title,
-.dm-home-flash__meta,
 .dm-home-flash__note {
   display: flex;
   align-items: center;
@@ -228,13 +263,6 @@ onMounted(loadHomeData);
   margin-bottom: 6px;
 }
 
-.dm-home-flash__header p,
-.dm-home-flash__campaign,
-.dm-home-flash__footer,
-.dm-home-flash__note {
-  color: var(--dm-text-soft);
-}
-
 .dm-home-flash__pill {
   background: rgba(186, 26, 26, 0.08);
   color: var(--dm-danger);
@@ -249,31 +277,59 @@ onMounted(loadHomeData);
   border-color: rgba(186, 26, 26, 0.1);
 }
 
+.dm-home-flash__media {
+  position: relative;
+  overflow: hidden;
+  border-bottom: 1px solid var(--dm-border);
+}
+
+.dm-home-flash__campaign-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(185, 28, 28, 0.92);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
 .dm-home-flash__body {
   gap: 10px;
 }
 
 .dm-home-flash__meta {
   justify-content: space-between;
-  align-items: flex-start;
-  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
 }
 
-.dm-home-flash__campaign {
-  font-size: 13px;
+.dm-home-flash__brand {
+  background: var(--dm-primary-soft);
+  color: var(--dm-primary);
+}
+
+.dm-home-flash__stock {
+  color: var(--dm-text-soft);
+  font-size: 12px;
   font-weight: 600;
 }
 
 .dm-home-flash__name {
+  display: -webkit-box;
+  overflow: hidden;
   line-height: 1.45;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
-.dm-home-flash__price-row,
-.dm-home-flash__footer {
+.dm-home-flash__price-row {
   display: flex;
+  align-items: baseline;
   justify-content: space-between;
   gap: 10px;
-  align-items: baseline;
 }
 
 .dm-home-flash__sale-price {
@@ -284,11 +340,25 @@ onMounted(loadHomeData);
 
 .dm-home-flash__base-price {
   color: var(--dm-text-soft);
+  font-size: 13px;
   text-decoration: line-through;
 }
 
-.dm-home-flash__footer {
-  font-size: 13px;
+.dm-home-flash__bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 8px;
+  border-top: 1px solid var(--dm-border);
+}
+
+.dm-home-flash__pricing-note {
+  min-width: 0;
+  flex: 1;
+  color: var(--dm-text-soft);
+  font-size: 12px;
+  line-height: 1.4;
 }
 
 .dm-home-flash__note {

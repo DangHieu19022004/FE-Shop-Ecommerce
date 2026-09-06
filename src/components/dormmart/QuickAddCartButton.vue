@@ -1,5 +1,5 @@
 <template>
-  <DMButton type="none" :is-tooltip="false" class="quick-add-cart" icon-name="add" :aria-label="Text.QuickAddCart" :un-active="IsAnimating" @click="handleQuickAdd" />
+  <DMButton type="none" :is-tooltip="false" class="quick-add-cart quick-add-cart--compact" icon-name="add" :aria-label="Text.QuickAddCart" :un-active="IsAnimating" @click="handleQuickAdd" />
 </template>
 
 <script setup>
@@ -8,7 +8,8 @@ import DMButton from "@/components/base/DMButton.vue";
 import { addProductToCart } from "@/stores/cartStore";
 
 const Props = defineProps({
-  ProductSlug: { type: String, required: true },
+  ProductSlug: { type: String, default: "" },
+  ProductVariantId: { type: String, default: "" },
   ImageUrl: { type: String, default: "" },
 });
 const Text = inject("i18nCommon").Common;
@@ -45,10 +46,17 @@ const handleQuickAdd = async (Event) => {
   IsAnimating.value = true;
 
   try {
-    await addProductToCart({ ProductSlug: Props.ProductSlug });
+    await addProductToCart({ ProductSlug: Props.ProductSlug, ProductVariantId: Props.ProductVariantId });
     await animateToCart(Event.currentTarget);
   } finally {
     IsAnimating.value = false;
   }
 };
 </script>
+
+<style scoped>
+.quick-add-cart--compact {
+  transform: scale(0.82);
+  transform-origin: center right;
+}
+</style>

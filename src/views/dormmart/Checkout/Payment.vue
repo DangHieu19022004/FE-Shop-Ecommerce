@@ -120,11 +120,11 @@
       <h2>{{ Text.SummaryTitle }}</h2>
       <div class="payment-summary__content">
         <div class="payment-summary__rows">
-          <div><span>{{ Text.MerchandiseSubtotal }}</span><strong>{{ formatCurrency(MerchandiseSubtotal) }}</strong></div>
+          <div><span>{{ Text.MerchandiseSubtotal }}</span><strong>{{ formatCurrency(MerchandiseSubtotal) }}</strong><small>Tạm tính sau flash sale</small></div>
           <div><span>{{ Text.ShippingSubtotal }}</span><strong>{{ formatCurrency(ShippingFee) }}</strong></div>
-          <div v-if="SelectedVoucher && IsVoucherEligible" class="payment-summary__discount"><span>Giảm từ voucher</span><strong>-{{ formatCurrency(VoucherDiscountPreview) }}</strong></div>
-          <div class="payment-summary__total"><span>Tổng ước tính</span><strong>{{ formatCurrency(EstimatedTotal) }}</strong></div>
-          <small class="payment-summary__note">Tổng trên là ước tính từ cart + shipping quote + voucher hiện chọn. Checkout thật vẫn do backend chốt.</small>
+          <div v-if="SelectedVoucher && IsVoucherEligible" class="payment-summary__discount"><span>Giảm voucher</span><strong>-{{ formatCurrency(VoucherDiscountPreview) }}</strong></div>
+          <div class="payment-summary__total"><span>Tổng cuối</span><strong>{{ formatCurrency(EstimatedTotal) }}</strong></div>
+          <small class="payment-summary__note">Tổng trên là giá cuối sau flash sale + voucher + phí vận chuyển. Checkout thật vẫn do backend chốt.</small>
         </div>
         <div class="payment-summary__action">
           <div v-if="VisibleValidationMessages.length" class="payment-alert payment-alert--danger dm-card" role="alert" style="margin-bottom: 12px;">

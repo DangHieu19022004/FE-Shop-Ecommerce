@@ -220,7 +220,7 @@ const i18nCommon = {
     Total: "Tổng thanh toán",
     Checkout: "Thanh toán",
     CheckoutWithCount: "Thanh toán ({count})",
-    ShippingNote: "Miễn phí vận chuyển cho đơn từ 100.000 ₫",
+    ShippingNote: "Miễn phí vận chuyển cho đơn từ 100.000 ₫ trong nội thành Hà Nội",
     ContactPrice: "Liên hệ",
     CurrencyLocale: "vi-VN",
     CurrencyCode: "VND",

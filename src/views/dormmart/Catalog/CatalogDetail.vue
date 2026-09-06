@@ -60,12 +60,12 @@
 
         <div class="product-price">
           <div class="product-price__values">
-            <strong>
-              {{ Product.MinSalePrice > 0 ? formatCurrency(Product.MinSalePrice) : Text.ContactPrice }}
-            </strong>
             <del v-if="HasDiscount">
-              {{ formatCurrency(Product.MaxSalePrice) }}
+              {{ OldPriceText }}
             </del>
+            <strong>
+              {{ Product.MinSalePrice > 0 ? CurrentPriceText : Text.ContactPrice }}
+            </strong>
           </div>
           <div class="product-price__badges">
             <DMBadge v-if="HasDiscount" error icon-name="bolt">{{ Text.FlashDeal }} -{{ DiscountPercent }}%</DMBadge>
@@ -144,8 +144,8 @@
               <img :src="RelatedItem.PrimaryImageUrl || 'https://placehold.co/240x240?text=No+Image'" :alt="RelatedItem.Name" />
               <div class="related-product__body">
                 <strong>{{ RelatedItem.Name }}</strong>
-                <span>{{ formatCurrency(RelatedItem.MinSalePrice) }}</span>
-                <small>{{ formatCompactNumber(RelatedItem.MaxSalePrice) }}</small>
+                <span>{{ formatPriceRange(RelatedItem.MinSalePrice, RelatedItem.MaxSalePrice) }}</span>
+                <small v-if="hasProductDiscount(RelatedItem)">{{ formatPriceRange(RelatedItem.BaseMinSalePrice, RelatedItem.BaseMaxSalePrice) }}</small>
               </div>
             </router-link>
           </div>
@@ -211,7 +211,20 @@ const SelectedVariant = computed(() =>
   || null,
 );
 const FirstSellableVariant = computed(() => ProductVariants.value.find(isSellableVariant) || null);
-const HasDiscount = computed(() => Number(Product.value?.MaxSalePrice) > Number(Product.value?.MinSalePrice));
+const formatPriceRange = (MinPrice, MaxPrice) => {
+  const Min = Number(MinPrice || 0);
+  const Max = Number(MaxPrice || 0);
+  return Max > Min ? `${formatCurrency(Min)} - ${formatCurrency(Max)}` : formatCurrency(Min);
+};
+const hasProductDiscount = (ProductItem) => Number(ProductItem?.BaseMinSalePrice ?? ProductItem?.MinSalePrice ?? 0) > Number(ProductItem?.MinSalePrice ?? 0)
+  || Number(ProductItem?.BaseMaxSalePrice ?? ProductItem?.MaxSalePrice ?? 0) > Number(ProductItem?.MaxSalePrice ?? 0);
+const BaseMinPrice = computed(() => Number(Product.value?.BaseMinSalePrice ?? Product.value?.MinSalePrice ?? 0));
+const BaseMaxPrice = computed(() => Number(Product.value?.BaseMaxSalePrice ?? Product.value?.MaxSalePrice ?? BaseMinPrice.value));
+const CurrentMinPrice = computed(() => Number(Product.value?.MinSalePrice ?? 0));
+const CurrentMaxPrice = computed(() => Number(Product.value?.MaxSalePrice ?? CurrentMinPrice.value));
+const HasDiscount = computed(() => BaseMinPrice.value > CurrentMinPrice.value || BaseMaxPrice.value > CurrentMaxPrice.value);
+const OldPriceText = computed(() => formatPriceRange(BaseMinPrice.value, BaseMaxPrice.value));
+const CurrentPriceText = computed(() => formatPriceRange(CurrentMinPrice.value, CurrentMaxPrice.value));
 const SelectedVariantStock = computed(() => Number(SelectedVariant.value?.AvailableStock ?? 0));
 const ReservedVariantQuantity = computed(() => getCartQuantityByVariantId(SelectedVariant.value?.ProductVariantId));
 const DisplayedVariantStock = computed(() => Math.max(0, SelectedVariantStock.value - ReservedVariantQuantity.value));
@@ -234,8 +247,8 @@ const AvailabilityText = computed(() => {
   return Text.OutOfStock;
 });
 const DiscountPercent = computed(() => {
-  const OriginalPrice = Number(Product.value?.MaxSalePrice || 0);
-  const SalePrice = Number(Product.value?.MinSalePrice || 0);
+  const OriginalPrice = BaseMaxPrice.value;
+  const SalePrice = CurrentMinPrice.value;
 
   if (OriginalPrice <= SalePrice || OriginalPrice <= 0) return 0;
   return Math.round(((OriginalPrice - SalePrice) / OriginalPrice) * 100);

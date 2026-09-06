@@ -1,6 +1,10 @@
 import axiosInstance from "@/services/axios";
 
-const unwrapData = (Response) => Response?.Data ?? null;
+const unwrapData = (Response) => Response?.Data ?? Response?.data ?? Response?.Items ?? Response?.items ?? Response ?? null;
+const unwrapList = (Response) => {
+  const Data = unwrapData(Response);
+  return Array.isArray(Data) ? Data : (Array.isArray(Data?.Items) ? Data.Items : (Array.isArray(Data?.items) ? Data.items : []));
+};
 
 export const getAdminInventories = async (Params = {}) => {
   const Response = await axiosInstance.get("/admin/inventories", { params: Params });
@@ -24,7 +28,7 @@ export const adjustAdminInventory = async (VariantId, Payload) => {
 
 export const getAdminVouchers = async () => {
   const Response = await axiosInstance.get("/admin/vouchers");
-  return unwrapData(Response) || [];
+  return unwrapList(Response);
 };
 
 export const createAdminVoucher = async (Payload) => {
@@ -139,7 +143,7 @@ export const deleteAdminComboDiscount = async (ComboId, DiscountId) => {
 
 export const getAdminFlashSales = async () => {
   const Response = await axiosInstance.get("/admin/flash-sales");
-  return unwrapData(Response) || [];
+  return unwrapList(Response);
 };
 
 export const createAdminFlashSale = async (Payload) => {
@@ -154,6 +158,16 @@ export const updateAdminFlashSale = async (FlashSaleId, Payload) => {
 
 export const deleteAdminFlashSale = async (FlashSaleId) => {
   const Response = await axiosInstance.delete(`/admin/flash-sales/${FlashSaleId}`);
+  return unwrapData(Response);
+};
+
+export const addAdminFlashSaleItem = async (FlashSaleId, Payload) => {
+  const Response = await axiosInstance.post(`/admin/flash-sales/${FlashSaleId}/items`, Payload);
+  return unwrapData(Response);
+};
+
+export const deleteAdminFlashSaleItem = async (FlashSaleId, FlashSaleItemId) => {
+  const Response = await axiosInstance.delete(`/admin/flash-sales/${FlashSaleId}/items/${FlashSaleItemId}`);
   return unwrapData(Response);
 };
 
