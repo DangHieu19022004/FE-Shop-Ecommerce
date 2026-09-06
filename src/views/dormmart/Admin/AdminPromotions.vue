@@ -2,6 +2,7 @@
 import { computed, onMounted, reactive, ref } from "vue";
 import DMButton from "@/components/base/DMButton.vue";
 import DMInput from "@/components/base/DMInput.vue";
+import DMBadge from "@/components/base/DMBadge.vue";
 import DMSelect from "@/components/base/DMSelect.vue";
 import {
   addAdminFlashSaleItem,
@@ -17,10 +18,7 @@ import {
   updateAdminFlashSale,
   updateAdminVoucher,
 } from "@/services/adminService";
-import { getProducts } from "@/services/catalogService";
 import { formatCurrency, formatDateTime } from "@/utils/shopFormatters";
-
-const formatPercent = (Value) => `${Math.max(0, Math.min(100, Number(Value) || 0)).toFixed(0)}%`;
 
 const Vouchers = ref([]);
 const FlashSales = ref([]);
@@ -81,16 +79,8 @@ const FlashSaleVariantOptions = computed(() => {
 const FlashSaleSelectedVariant = computed(() => FlashSaleVariantOptions.value.find((Item) => Item.Value === FlashSaleItemForm.ProductVariantId) || null);
 const flashSaleStatusLabel = (IsActive) => (IsActive ? "Đang bật" : "Bản nháp");
 const flashSaleItemCountLabel = (Count) => `${Count} item`;
-const flashSaleVariantCountLabel = (Count) => `${Count} biến thể`;
-const flashSaleVariantCountHint = computed(() => flashSaleVariantCountLabel(FlashSaleVariantOptions.value.length));
 const SelectedFlashSale = computed(() => FlashSales.value.find((FlashSale) => FlashSale.FlashSaleId === FlashSaleItemForm.FlashSaleId) || null);
 const SelectedFlashSaleItems = computed(() => SelectedFlashSale.value?.Items || []);
-const formatFlashSaleDiscount = (OriginalPrice, FlashPrice) => {
-  const Origin = Number(OriginalPrice) || 0;
-  const Sale = Number(FlashPrice) || 0;
-  if (!Origin || Sale >= Origin) return "0%";
-  return `${Math.max(0, Math.round((1 - Sale / Origin) * 100))}%`;
-};
 const formatDiscountType = (DiscountType) => Number(DiscountType) === 0 ? "%" : "VND";
 
 const VoucherDiscountTypeOptions = [
@@ -440,7 +430,7 @@ onMounted(loadPromotions);
             <h2>Voucher</h2>
             <p>{{ VoucherModeLabel }}</p>
           </div>
-          <span class="admin-status" :class="{ 'admin-status--warning': !VoucherForm.IsActive }">{{ VoucherForm.IsActive ? 'Đang bật' : 'Bản nháp' }}</span>
+          <DMBadge :type="VoucherForm.IsActive ? 'success' : 'warning'" dot>{{ VoucherForm.IsActive ? 'Đang bật' : 'Bản nháp' }}</DMBadge>
         </div>
         <div class="admin-promotions__grid">
           <div class="admin-promotions__field">
@@ -506,7 +496,7 @@ onMounted(loadPromotions);
             <h2>Flash sale</h2>
             <p>{{ FlashSaleModeLabel }}</p>
           </div>
-          <span class="admin-status" :class="{ 'admin-status--warning': !FlashSaleForm.IsActive }">{{ flashSaleStatusLabel(FlashSaleForm.IsActive) }}</span>
+          <DMBadge :type="FlashSaleForm.IsActive ? 'success' : 'warning'" dot>{{ flashSaleStatusLabel(FlashSaleForm.IsActive) }}</DMBadge>
         </div>
         <div class="admin-promotions__grid">
           <DMInput v-model="FlashSaleForm.Name" label="Tên" />
@@ -658,7 +648,7 @@ onMounted(loadPromotions);
               <td><strong>{{ FlashSale.Name }}</strong></td>
               <td>{{ formatDateTime(FlashSale.StartsAt) }}</td>
               <td>{{ formatDateTime(FlashSale.EndsAt) }}</td>
-              <td><span class="admin-status" :class="{ 'admin-status--warning': !FlashSale.IsActive }">{{ FlashSale.IsActive ? 'Active' : 'Inactive' }}</span></td>
+              <td><DMBadge :type="FlashSale.IsActive ? 'success' : 'error'" dot>{{ FlashSale.IsActive ? 'Active' : 'Inactive' }}</DMBadge></td>
               <td>{{ FlashSale.Items?.length || 0 }}</td>
               <td>{{ FlashSale.Items?.[0]?.Sku || '-' }}</td>
               <td>

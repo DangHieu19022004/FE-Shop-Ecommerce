@@ -43,8 +43,8 @@
         </div>
       </div>
       <div class="dm-home-flash__badges">
-        <div class="dm-pill dm-home-flash__pill">{{ FlashSaleCountdownText }}</div>
-        <div class="dm-pill dm-home-flash__pill dm-home-flash__pill--soft">{{ FlashSaleCount }} sản phẩm</div>
+        <DMBadge error icon-name="timer">{{ FlashSaleCountdownText }}</DMBadge>
+        <DMBadge neutral>{{ FlashSaleCount }} sản phẩm</DMBadge>
       </div>
     </div>
 
@@ -57,7 +57,7 @@
         </div>
         <div class="dm-product-card__body dm-home-flash__body">
           <div class="dm-home-flash__meta">
-            <div class="dm-pill dm-home-flash__brand">{{ ProductItem.BrandName || 'Dorm Mart' }}</div>
+            <DMBadge warning>{{ ProductItem.BrandName || 'Dorm Mart' }}</DMBadge>
             <span class="dm-home-flash__stock" v-if="ProductItem.BadgeText">{{ ProductItem.BadgeText }}</span>
           </div>
           <strong class="dm-home-flash__name">{{ ProductItem.Name }}</strong>
@@ -263,16 +263,6 @@ onUnmounted(() => {
   margin-bottom: 6px;
 }
 
-.dm-home-flash__pill {
-  background: rgba(186, 26, 26, 0.08);
-  color: var(--dm-danger);
-}
-
-.dm-home-flash__pill--soft {
-  background: var(--dm-surface);
-  border: 1px solid rgba(186, 26, 26, 0.14);
-}
-
 .dm-home-flash__card {
   border-color: rgba(186, 26, 26, 0.1);
 }
@@ -304,11 +294,6 @@ onUnmounted(() => {
   justify-content: space-between;
   align-items: center;
   gap: 8px;
-}
-
-.dm-home-flash__brand {
-  background: var(--dm-primary-soft);
-  color: var(--dm-primary);
 }
 
 .dm-home-flash__stock {
