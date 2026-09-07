@@ -24,8 +24,8 @@
 .admin-chart__legend span::before { content: ""; display: inline-block; width: 10px; height: 10px; margin-right: 6px; border-radius: 3px; background: var(--dm-primary); }
 .admin-chart__legend span:last-child::before { background: var(--dm-secondary); }
 .admin-form { display: grid; gap: 14px; }
-.admin-form .ms-input-in { min-height: 42px; }
-.admin-button { min-height: 42px; background: var(--dm-primary) !important; color: var(--dm-on-primary) !important; font-weight: 700; }
+.admin-form .ms-input-in { min-height: var(--dm-control-height); }
+.admin-button { min-height: var(--dm-control-height); background: var(--dm-primary) !important; color: var(--dm-on-primary) !important; font-weight: 700; }
 .admin-button--danger { background: var(--dm-danger-soft) !important; color: var(--dm-danger) !important; }
 .admin-toolbar { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
 .admin-search { min-width: min(100%, 340px); }

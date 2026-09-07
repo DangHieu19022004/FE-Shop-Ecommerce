@@ -177,9 +177,12 @@ const hideTooltip = () => {
 <style scoped lang="scss">
 .ms-button {
   display: inline-flex;
+  height: var(--dm-control-height, 46px);
+  min-height: var(--dm-control-height, 46px);
+  box-sizing: border-box;
   align-items: center;
   justify-content: center;
-  padding: 0.5rem 1rem;
+  padding: 0 1rem;
   border: none;
   border-radius: 8px;
   cursor: pointer;

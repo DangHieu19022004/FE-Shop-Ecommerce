@@ -173,7 +173,9 @@ const handleFocus = () => {
 
 .ms-input-in {
   width: 100%;
-  min-height: 46px;
+  height: var(--dm-control-height, 46px);
+  min-height: var(--dm-control-height, 46px);
+  box-sizing: border-box;
   padding: 0 14px;
   border: 1px solid var(--dm-border);
   border-radius: 12px;

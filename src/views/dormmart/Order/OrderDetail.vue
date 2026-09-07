@@ -52,11 +52,9 @@
             'order-detail__step-card--done': Step.State === 'done',
             'order-detail__step-card--active': Step.State === 'active',
             'order-detail__step-card--todo': Step.State === 'todo',
-            'order-detail__step-card--loading': Step.IsLoading,
           }">
             <div class="order-detail__step-icon-wrap">
-              <span v-if="Step.IsLoading" class="material-symbols-outlined order-detail__step-spinner" aria-hidden="true">progress_activity</span>
-              <span v-else class="material-symbols-outlined" aria-hidden="true">{{ Step.Icon }}</span>
+              <span class="material-symbols-outlined" aria-hidden="true">{{ Step.Icon }}</span>
             </div>
             <span class="order-detail__step-title">{{ Step.Index }}. {{ Step.Label }}</span>
             <span class="order-detail__step-meta">{{ Step.Meta }}</span>
@@ -68,7 +66,7 @@
 
     <div class="order-detail__plan-grid">
       <div class="order-detail__plan-main">
-        <article class="order-detail__bank-card dm-card">
+        <article v-if="!FulfillmentView" class="order-detail__bank-card dm-card">
           <div class="order-detail__bank-decor order-detail__bank-decor--top"></div>
           <div class="order-detail__bank-decor order-detail__bank-decor--bottom"></div>
           <div class="order-detail__bank-head">
@@ -205,6 +203,62 @@
               </div>
             </div>
           </div>
+        </article>
+
+        <article
+          v-else
+          class="order-detail__fulfillment-card dm-card"
+          :class="`order-detail__fulfillment-card--${FulfillmentView.Tone}`"
+        >
+          <header class="order-detail__fulfillment-head">
+            <div class="order-detail__fulfillment-heading">
+              <span class="material-symbols-outlined order-detail__fulfillment-heading-icon" aria-hidden="true">{{ FulfillmentView.Icon }}</span>
+              <div>
+                <span class="order-detail__fulfillment-eyebrow">Bước {{ FulfillmentView.Step }} trong 5</span>
+                <h3>{{ FulfillmentView.Title }}</h3>
+              </div>
+            </div>
+            <DMBadge :type="FulfillmentView.BadgeType" dot>{{ FulfillmentView.Badge }}</DMBadge>
+          </header>
+
+          <section class="order-detail__fulfillment-hero">
+            <span class="material-symbols-outlined" aria-hidden="true">{{ FulfillmentView.HeroIcon }}</span>
+            <div>
+              <strong>{{ FulfillmentView.Headline }}</strong>
+              <p>{{ FulfillmentView.Description }}</p>
+            </div>
+          </section>
+
+          <dl class="order-detail__fulfillment-metrics">
+            <div v-for="Metric in FulfillmentView.Metrics" :key="Metric.Label">
+              <span class="material-symbols-outlined" aria-hidden="true">{{ Metric.Icon }}</span>
+              <dt>{{ Metric.Label }}</dt>
+              <dd>{{ Metric.Value }}</dd>
+            </div>
+          </dl>
+
+          <section class="order-detail__fulfillment-journey">
+            <h4>{{ FulfillmentView.JourneyTitle }}</h4>
+            <div class="order-detail__fulfillment-list">
+              <div
+                v-for="JourneyItem in FulfillmentView.Journey"
+                :key="JourneyItem.Label"
+                :class="`order-detail__fulfillment-item--${JourneyItem.State}`"
+                class="order-detail__fulfillment-item"
+              >
+                <span class="material-symbols-outlined" aria-hidden="true">{{ JourneyItem.State === 'done' ? 'check_circle' : JourneyItem.State === 'active' ? 'radio_button_checked' : 'radio_button_unchecked' }}</span>
+                <div>
+                  <strong>{{ JourneyItem.Label }}</strong>
+                  <small>{{ JourneyItem.Meta }}</small>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <footer class="order-detail__fulfillment-note">
+            <span class="material-symbols-outlined" aria-hidden="true">{{ FulfillmentView.NoteIcon }}</span>
+            <div><strong>{{ FulfillmentView.NoteTitle }}</strong><p>{{ FulfillmentView.Note }}</p></div>
+          </footer>
         </article>
 
         <article v-if="Order.StatusHistories?.length" class="order-detail__history-card dm-card">
@@ -477,8 +531,8 @@ const SHIPMENT_STATUS_LABELS = {
 };
 
 const ORDER_STEP_DEFINITIONS = [
-  { Key: "PendingApproval", Label: "Đặt hàng thành công", Icon: "check", ActiveMeta: "Đơn vừa được tạo", DoneLabel: "Hoàn tất", ActiveLabel: "Hiện tại", TodoLabel: "Chờ xử lý" },
-  { Key: "Confirmed", Label: "Chuyển khoản & Duyệt", Icon: "sync", ActiveMeta: "Đang chờ thanh toán", DoneLabel: "Hoàn tất", ActiveLabel: "Hiện tại", TodoLabel: "Chờ duyệt" },
+  { Key: "PendingApproval", Label: "Đặt hàng thành công", Icon: "check_circle", ActiveMeta: "Đơn vừa được tạo", DoneLabel: "Hoàn tất", ActiveLabel: "Hiện tại", TodoLabel: "Chờ xử lý" },
+  { Key: "Confirmed", Label: "Chuyển khoản & Duyệt", Icon: "payments", ActiveMeta: "Đang chờ thanh toán", DoneLabel: "Hoàn tất", ActiveLabel: "Hiện tại", TodoLabel: "Chờ duyệt" },
   { Key: "Preparing", Label: "Đóng gói chuẩn bị", Icon: "inventory_2", ActiveMeta: "Kho Dorm Mart", DoneLabel: "Hoàn tất", ActiveLabel: "Hiện tại", TodoLabel: "Chờ duyệt" },
   { Key: "Shipping", Label: "Đang giao hàng", Icon: "local_shipping", ActiveMeta: "Shipper KTX", DoneLabel: "Hoàn tất", ActiveLabel: "Hiện tại", TodoLabel: "Dự kiến 24-48h" },
   { Key: "Completed", Label: "Nhận hàng thành công", Icon: "verified", ActiveMeta: "Hoàn tất đơn", DoneLabel: "Hoàn tất", ActiveLabel: "Hiện tại", TodoLabel: "Chờ giao" },
@@ -540,6 +594,103 @@ const IsGatewayPending = computed(() => IsGateway.value && ["Pending", "Awaiting
 const IsCancelable = computed(() => CurrentStatusKey.value === "PendingApproval");
 const canReviewOrder = computed(() => CurrentStatusKey.value === "Completed");
 const ProofCount = computed(() => Order.value?.Payment?.ProofCount || Order.value?.Payment?.Proofs?.length || 0);
+const FulfillmentView = computed(() => {
+  const StatusKey = CurrentStatusKey.value;
+  const Shipment = Order.value?.Shipment || {};
+  const ItemCount = (Order.value?.Items || []).reduce((Total, Item) => Total + Number(Item.Quantity || 0), 0);
+  const PaidLabel = CurrentPaymentStatusKey.value === "Paid" ? "Đã thanh toán" : getPaymentStatusLabel(Order.value?.Payment?.Status || Order.value?.PaymentStatus);
+
+  if (["Preparing", "ReadyToShip"].includes(StatusKey)) {
+    const IsReady = StatusKey === "ReadyToShip";
+    return {
+      Step: 3,
+      Tone: "preparing",
+      BadgeType: IsReady ? "success" : "warning",
+      Badge: IsReady ? "Sẵn sàng bàn giao" : "Đang chuẩn bị",
+      Icon: "inventory_2",
+      HeroIcon: IsReady ? "package_2" : "inventory",
+      Title: IsReady ? "Đơn hàng đã đóng gói xong" : "Dorm Mart đang chuẩn bị đơn hàng",
+      Headline: IsReady ? "Kiện hàng đang chờ đơn vị vận chuyển" : "Sản phẩm đang được kiểm tra và đóng gói",
+      Description: IsReady
+        ? "Đơn hàng đã hoàn tất khâu đóng gói và sẽ sớm được bàn giao cho tài xế."
+        : "Kho đang đối chiếu sản phẩm, số lượng và bảo vệ kiện hàng trước khi giao.",
+      Metrics: [
+        { Icon: "shopping_bag", Label: "Số lượng", Value: `${ItemCount} sản phẩm` },
+        { Icon: "payments", Label: "Thanh toán", Value: PaidLabel },
+        { Icon: "schedule", Label: "Dự kiến bàn giao", Value: IsReady ? "Trong ngày" : "Trong 24 giờ" },
+      ],
+      JourneyTitle: "Quy trình chuẩn bị",
+      Journey: [
+        { Label: "Xác nhận đơn", Meta: "Thông tin đơn hàng hợp lệ", State: "done" },
+        { Label: "Kiểm hàng & đóng gói", Meta: IsReady ? "Đã hoàn tất đóng gói" : "Kho đang xử lý", State: IsReady ? "done" : "active" },
+        { Label: "Bàn giao vận chuyển", Meta: IsReady ? "Đang chờ tài xế nhận hàng" : "Bước tiếp theo", State: IsReady ? "active" : "todo" },
+      ],
+      NoteIcon: "info",
+      NoteTitle: "Bạn chưa cần thao tác",
+      Note: "Dorm Mart sẽ cập nhật mã vận đơn ngay sau khi kiện hàng được bàn giao.",
+    };
+  }
+
+  if (StatusKey === "Shipping") {
+    return {
+      Step: 4,
+      Tone: "shipping",
+      BadgeType: "info",
+      Badge: "Đang giao hàng",
+      Icon: "local_shipping",
+      HeroIcon: "delivery_truck_speed",
+      Title: "Đơn hàng đang trên đường giao đến bạn",
+      Headline: "Tài xế đang vận chuyển kiện hàng",
+      Description: "Hãy giữ điện thoại bên cạnh để đơn vị vận chuyển có thể liên hệ khi đến nơi.",
+      Metrics: [
+        { Icon: "local_shipping", Label: "Đơn vị vận chuyển", Value: Shipment.CarrierName || Shipment.Provider || "Đang cập nhật" },
+        { Icon: "tag", Label: "Mã vận đơn", Value: Shipment.TrackingCode || Text.NoTrackingCode },
+        { Icon: "event", Label: "Dự kiến nhận", Value: Order.value?.EstimatedDeliveryAt ? formatDateTime(Order.value.EstimatedDeliveryAt) : "Trong 24–48 giờ" },
+      ],
+      JourneyTitle: "Hành trình giao hàng",
+      Journey: [
+        { Label: "Đã đóng gói", Meta: "Kiện hàng đã rời kho", State: "done" },
+        { Label: "Đơn vị vận chuyển đã nhận", Meta: Shipment.ShippedAt ? formatDateTime(Shipment.ShippedAt) : "Đã tiếp nhận kiện hàng", State: "done" },
+        { Label: "Đang giao đến bạn", Meta: Shipment.Note || "Tài xế đang di chuyển", State: "active" },
+        { Label: "Giao hàng thành công", Meta: "Bước tiếp theo", State: "todo" },
+      ],
+      NoteIcon: "phone_in_talk",
+      NoteTitle: "Lưu ý khi nhận hàng",
+      Note: `Người nhận ${Order.value?.Address?.RecipientName || "của đơn hàng"} vui lòng kiểm tra kiện hàng trước khi xác nhận.`,
+    };
+  }
+
+  if (StatusKey === "Completed") {
+    return {
+      Step: 5,
+      Tone: "completed",
+      BadgeType: "success",
+      Badge: "Hoàn tất",
+      Icon: "verified",
+      HeroIcon: "celebration",
+      Title: "Đơn hàng đã được giao thành công",
+      Headline: "Cảm ơn bạn đã mua sắm tại Dorm Mart",
+      Description: "Kiện hàng đã đến tay người nhận. Bạn có thể đánh giá sản phẩm để chia sẻ trải nghiệm.",
+      Metrics: [
+        { Icon: "event_available", Label: "Thời gian nhận", Value: Shipment.DeliveredAt ? formatDateTime(Shipment.DeliveredAt) : getDeliveryDisplay() },
+        { Icon: "person", Label: "Người nhận", Value: Order.value?.Address?.RecipientName || "-" },
+        { Icon: "payments", Label: "Thanh toán", Value: PaidLabel },
+      ],
+      JourneyTitle: "Đơn hàng hoàn tất",
+      Journey: [
+        { Label: "Xác nhận & thanh toán", Meta: "Đã hoàn tất", State: "done" },
+        { Label: "Chuẩn bị đơn hàng", Meta: "Đã hoàn tất", State: "done" },
+        { Label: "Vận chuyển", Meta: "Đã hoàn tất", State: "done" },
+        { Label: "Giao hàng thành công", Meta: Shipment.DeliveredAt ? formatDateTime(Shipment.DeliveredAt) : "Đã giao", State: "done" },
+      ],
+      NoteIcon: "star",
+      NoteTitle: "Đánh giá sản phẩm",
+      Note: "Kéo xuống phần đánh giá để gửi nhận xét cho từng sản phẩm trong đơn.",
+    };
+  }
+
+  return null;
+});
 const OrderSteps = computed(() => {
   const StatusKey = CurrentStatusKey.value;
   const PaymentStatusKey = CurrentPaymentStatusKey.value;
@@ -555,7 +706,7 @@ const OrderSteps = computed(() => {
     ? null
     : IsPaymentReviewStep
       ? "Confirmed"
-      : StatusKey;
+      : StatusKey === "ReadyToShip" ? "Preparing" : StatusKey;
   const CurrentIndex = ORDER_STEP_DEFINITIONS.findIndex((Step) => Step.Key === ActiveStepKey);
 
   return ORDER_STEP_DEFINITIONS.map((Step, Index) => {
@@ -576,7 +727,6 @@ const OrderSteps = computed(() => {
       ...Step,
       Index: Index + 1,
       State,
-      IsLoading: State === "active" && ((Step.Key === "Confirmed" && IsPaymentReviewStep) || ["PendingApproval", "Preparing", "Shipping"].includes(Step.Key)),
       Meta: HistoryItem?.CreateDate
         ? formatDateTime(HistoryItem.CreateDate)
         : State === "active"

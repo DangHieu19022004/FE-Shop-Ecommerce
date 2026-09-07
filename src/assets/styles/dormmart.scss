@@ -5,6 +5,7 @@
   --dm-radius-sm: 12px;
   --dm-radius: 16px;
   --dm-radius-lg: 20px;
+  --dm-control-height: 46px;
 }
 
 .material-symbols-outlined {
@@ -41,9 +42,10 @@
 .dm-btn,
 .dm-btn-ghost,
 .dm-btn-danger {
+  height: var(--dm-control-height);
   border: 0;
   border-radius: 10px;
-  padding: 11px 16px;
+  padding: 0 16px;
   font: inherit;
   cursor: pointer;
   transition: transform 0.15s ease, opacity 0.15s ease, background 0.15s ease;
@@ -450,13 +452,24 @@
 
 .dm-field {
   width: 100%;
-  min-height: 42px;
+  min-height: var(--dm-control-height);
   padding: 0 14px;
   border-radius: 10px;
   border: 1px solid var(--dm-border);
   background: var(--dm-surface);
   color: var(--dm-text);
   font: inherit;
+}
+
+input.dm-field,
+select.dm-field {
+  height: var(--dm-control-height);
+}
+
+textarea.dm-field {
+  min-height: 112px;
+  padding-block: 12px;
+  resize: vertical;
 }
 
 .dm-auth {

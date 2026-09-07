@@ -69,33 +69,64 @@
 .order-detail__mono--strong { color: var(--dm-primary); font-weight: 800; }
 .order-detail__title { margin: 4px 0 0; color: var(--dm-primary); font-size: 32px; line-height: 1.2; }
 .order-detail__badge-row { display: flex; flex-wrap: wrap; gap: 12px; }
-.order-detail__progress-card { display: grid; gap: 20px; padding: 24px; border: 1px solid var(--dm-border); border-radius: 24px; background: var(--dm-surface); box-shadow: 0 12px 28px rgba(0, 0, 0, 0.06); }
+.order-detail__progress-card { display: grid; gap: 18px; padding: 22px 24px; border: 1px solid var(--dm-border); border-radius: 20px; background: var(--dm-surface); box-shadow: 0 6px 18px rgba(0, 0, 0, 0.04); }
 .order-detail__progress-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
 .order-detail__progress-head h2 { margin: 0 0 6px; color: var(--dm-text); font-size: 22px; }
 .order-detail__progress-head p { margin: 0; color: var(--dm-text-soft); }
 .order-detail__progress-user { display: inline-flex; align-items: center; gap: 8px; color: var(--dm-text-soft); }
-.order-detail__stepper-shell { position: relative; display: grid; gap: 12px; padding: 8px 0 4px; }
-.order-detail__stepper-line { position: absolute; top: 34px; left: 5%; right: 5%; height: 4px; border-radius: 999px; background: var(--dm-border); }
-.order-detail__stepper-line-fill { height: 100%; border-radius: inherit; background: #f3bf18; }
-.order-detail__stepper-grid { position: relative; z-index: 1; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 16px; }
-.order-detail__step-card { position: relative; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 6px; padding: 6px 4px; border-radius: 18px; transition: transform 0.2s ease, opacity 0.2s ease, box-shadow 0.2s ease, background 0.2s ease; }
-.order-detail__step-icon-wrap { display: grid; place-items: center; width: 48px; height: 48px; margin-bottom: 2px; border-radius: 999px; background: #e6e8ec; color: var(--dm-text-soft); transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease; }
-.order-detail__step-card--done .order-detail__step-icon-wrap { background: var(--dm-success); color: var(--dm-on-primary); box-shadow: 0 10px 18px rgba(28, 152, 95, 0.2); }
-.order-detail__step-card--active { background: linear-gradient(180deg, rgba(253, 192, 3, 0.12), rgba(253, 192, 3, 0.04)); box-shadow: 0 10px 22px rgba(243, 191, 24, 0.12); transform: translateY(-2px); }
-.order-detail__step-card--active .order-detail__step-icon-wrap { background: #f3bf18; color: #4c3900; box-shadow: 0 0 0 6px #fff3c8, 0 10px 24px rgba(243, 191, 24, 0.28); }
-.order-detail__step-card--loading .order-detail__step-icon-wrap { background: #f3bf18; color: #4c3900; }
-.order-detail__step-spinner { animation: spin 1s linear infinite; }
-.order-detail__step-card--todo { opacity: 0.62; }
-.order-detail__step-title { color: var(--dm-text); font-size: 15px; font-weight: 800; }
+.order-detail__stepper-shell { position: relative; padding: 2px 0 0; }
+.order-detail__stepper-line { position: absolute; top: 21px; right: 10%; left: 10%; height: 2px; background: var(--dm-border); }
+.order-detail__stepper-line-fill { height: 100%; background: var(--dm-primary); transition: width 0.2s ease; }
+.order-detail__stepper-grid { position: relative; z-index: 1; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
+.order-detail__step-card { position: relative; display: flex; min-width: 0; flex-direction: column; align-items: center; gap: 5px; padding: 0 6px; text-align: center; }
+.order-detail__step-icon-wrap { display: grid; width: 40px; height: 40px; margin-bottom: 2px; place-items: center; border: 2px solid var(--dm-surface); border-radius: 50%; background: var(--dm-surface-soft); color: var(--dm-text-soft); }
+.order-detail__step-icon-wrap .material-symbols-outlined { font-size: 21px; }
+.order-detail__step-card--done .order-detail__step-icon-wrap { background: var(--dm-success); color: var(--dm-on-primary); }
+.order-detail__step-card--active .order-detail__step-icon-wrap { background: var(--dm-primary); color: var(--dm-on-primary); box-shadow: 0 0 0 4px var(--dm-primary-soft); }
+.order-detail__step-card--todo { opacity: 0.68; }
+.order-detail__step-title { color: var(--dm-text); font-size: 14px; font-weight: 800; }
 .order-detail__step-card--active .order-detail__step-title { color: var(--dm-primary); }
 .order-detail__step-meta, .order-detail__step-state { font-size: 12px; }
 .order-detail__step-meta { color: var(--dm-text-soft); }
 .order-detail__step-state { color: var(--dm-text-soft); }
 .order-detail__step-card--done .order-detail__step-state { color: var(--dm-success); font-weight: 800; }
-.order-detail__step-card--active .order-detail__step-state { padding: 3px 9px; border-radius: 999px; background: #fff3c8; color: #6b5200; font-weight: 800; }
+.order-detail__step-card--active .order-detail__step-state { color: var(--dm-primary); font-weight: 800; }
 .order-detail__plan-grid { display: grid; grid-template-columns: minmax(0, 7fr) minmax(320px, 5fr); gap: 24px; align-items: start; }
 .order-detail__plan-main, .order-detail__plan-side { display: flex; flex-direction: column; gap: 24px; }
 .order-detail__bank-card, .order-detail__history-card, .order-detail__address-card, .order-detail__products-card, .order-detail__summary-card, .order-detail__extra-card { position: relative; overflow: hidden; padding: 24px; border: 1px solid var(--dm-border); border-radius: 24px; background: var(--dm-surface); box-shadow: 0 12px 28px rgba(0, 0, 0, 0.06); }
+.order-detail__fulfillment-card { --fulfillment-accent: var(--dm-primary); --fulfillment-soft: var(--dm-primary-soft); display: grid; gap: 22px; padding: 24px; overflow: hidden; border: 1px solid var(--dm-border); border-radius: 24px; background: var(--dm-surface); box-shadow: 0 12px 28px rgba(0, 0, 0, 0.06); }
+.order-detail__fulfillment-card--preparing { --fulfillment-accent: #936c00; --fulfillment-soft: #fff5cf; }
+.order-detail__fulfillment-card--shipping { --fulfillment-accent: #00658f; --fulfillment-soft: #e3f4ff; }
+.order-detail__fulfillment-card--completed { --fulfillment-accent: var(--dm-success); --fulfillment-soft: var(--dm-success-soft); }
+.order-detail__fulfillment-head, .order-detail__fulfillment-heading, .order-detail__fulfillment-hero, .order-detail__fulfillment-note { display: flex; align-items: center; }
+.order-detail__fulfillment-head { justify-content: space-between; gap: 16px; }
+.order-detail__fulfillment-heading { min-width: 0; gap: 12px; }
+.order-detail__fulfillment-heading-icon { display: grid; width: 48px; height: 48px; flex: 0 0 48px; place-items: center; border-radius: 15px; background: var(--fulfillment-soft); color: var(--fulfillment-accent); }
+.order-detail__fulfillment-eyebrow { display: block; margin-bottom: 3px; color: var(--dm-text-soft); font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+.order-detail__fulfillment-heading h3 { margin: 0; color: var(--dm-primary); font-size: 21px; }
+.order-detail__fulfillment-hero { gap: 16px; padding: 22px; border-radius: 20px; background: var(--fulfillment-soft); }
+.order-detail__fulfillment-hero > .material-symbols-outlined { display: grid; width: 58px; height: 58px; flex: 0 0 58px; place-items: center; border-radius: 50%; background: var(--dm-surface); color: var(--fulfillment-accent); font-size: 29px; }
+.order-detail__fulfillment-hero strong { display: block; color: var(--fulfillment-accent); font-size: 19px; }
+.order-detail__fulfillment-hero p, .order-detail__fulfillment-note p { margin: 5px 0 0; color: var(--dm-text-soft); line-height: 1.55; }
+.order-detail__fulfillment-metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 0; }
+.order-detail__fulfillment-metrics > div { display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 3px 8px; min-width: 0; padding: 15px; border: 1px solid var(--dm-border); border-radius: 16px; background: var(--dm-surface); }
+.order-detail__fulfillment-metrics .material-symbols-outlined { grid-row: 1 / span 2; color: var(--fulfillment-accent); font-size: 21px; }
+.order-detail__fulfillment-metrics dt { color: var(--dm-text-soft); font-size: 11px; font-weight: 700; text-transform: uppercase; }
+.order-detail__fulfillment-metrics dd { min-width: 0; margin: 0; overflow-wrap: anywhere; color: var(--dm-text); font-size: 13px; font-weight: 800; }
+.order-detail__fulfillment-journey { display: grid; gap: 12px; }
+.order-detail__fulfillment-journey h4 { margin: 0; color: var(--dm-primary); }
+.order-detail__fulfillment-list { display: grid; gap: 0; }
+.order-detail__fulfillment-item { position: relative; display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: 10px; padding: 10px 0; }
+.order-detail__fulfillment-item:not(:last-child)::before { position: absolute; top: 34px; bottom: -8px; left: 11px; width: 2px; background: var(--dm-border); content: ""; }
+.order-detail__fulfillment-item > .material-symbols-outlined { color: var(--dm-text-soft); font-size: 23px; }
+.order-detail__fulfillment-item strong, .order-detail__fulfillment-item small { display: block; }
+.order-detail__fulfillment-item small { margin-top: 3px; color: var(--dm-text-soft); }
+.order-detail__fulfillment-item--done > .material-symbols-outlined { color: var(--dm-success); }
+.order-detail__fulfillment-item--active > .material-symbols-outlined, .order-detail__fulfillment-item--active strong { color: var(--fulfillment-accent); }
+.order-detail__fulfillment-note { align-items: flex-start; gap: 12px; padding: 15px 16px; border-radius: 16px; background: var(--dm-overlay-soft); }
+.order-detail__fulfillment-note > .material-symbols-outlined { color: var(--fulfillment-accent); }
+.order-detail__fulfillment-note strong { color: var(--dm-text); }
+.order-detail__fulfillment-note p { font-size: 13px; }
 .order-detail__bank-decor { position: absolute; pointer-events: none; border-radius: 999px; }
 .order-detail__bank-decor--top { top: -56px; right: -32px; width: 190px; height: 190px; background: rgba(243, 191, 24, 0.09); filter: blur(24px); }
 .order-detail__bank-decor--bottom { bottom: -60px; left: -26px; width: 180px; height: 180px; background: rgba(13, 58, 121, 0.08); filter: blur(24px); }
@@ -219,7 +250,6 @@
 .order-detail__note-text { margin: 0; color: var(--dm-text); white-space: pre-wrap; }
 .order-detail__shipment, .order-detail__products, .order-detail__timeline, .order-detail__panel { border: 1px solid var(--dm-border); }
 .order-detail__products, .order-detail__timeline, .order-detail__shipment, .order-detail__panel { padding: 22px; }
-@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 @media (max-width: 1100px) {
   .order-detail__plan-grid { grid-template-columns: 1fr; }
   .order-detail__bank-grid { grid-template-columns: 1fr; }
@@ -228,8 +258,13 @@
 @media (max-width: 900px) {
   .order-history__panel-head, .order-card__preview, .order-detail__upload-head, .order-detail__bank-head, .order-detail__copy-card, .order-detail__transfer-row, .order-detail__history-row, .order-detail__summary-total-box > div { align-items: flex-start; flex-direction: column; }
   .order-history__search { width: 100%; }
-  .order-detail__stepper-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .order-detail__stepper-grid { grid-template-columns: 1fr; gap: 12px; }
   .order-detail__stepper-line { display: none; }
+  .order-detail__step-card { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; column-gap: 12px; padding: 4px 0; text-align: left; }
+  .order-detail__step-icon-wrap { grid-row: 1 / span 2; margin: 0; }
+  .order-detail__step-title { grid-column: 2; align-self: end; }
+  .order-detail__step-meta { grid-column: 2; align-self: start; }
+  .order-detail__step-state { grid-column: 3; grid-row: 1 / span 2; align-self: center; }
 }
 @media (max-width: 720px) {
   .order-detail__title { font-size: 28px; }
@@ -237,7 +272,10 @@
   .order-detail__product-card { flex-direction: column; }
   .order-detail__product-image-wrap { width: 100%; height: 220px; }
   .order-detail__review-grid, .order-detail__extra-block dl div, .order-card__meta-grid { grid-template-columns: 1fr; }
-  .order-detail__stepper-grid { grid-template-columns: 1fr; }
+  .order-detail__fulfillment-card { padding: 18px; }
+  .order-detail__fulfillment-head, .order-detail__fulfillment-hero { align-items: flex-start; }
+  .order-detail__fulfillment-head { flex-direction: column; }
+  .order-detail__fulfillment-metrics { grid-template-columns: 1fr; }
   .order-card__footer { align-items: stretch; flex-direction: column; }
   .order-card__detail-link { justify-content: center; }
 }

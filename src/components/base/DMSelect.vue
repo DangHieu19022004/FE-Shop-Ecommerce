@@ -177,6 +177,7 @@ defineExpose({
 .ms-select {
   display: flex;
   flex-direction: column;
+  gap: 7px;
   /* Không set cứng width: 100% — để parent/class override tự do.
      display: flex block-level tự nhiên full-width trừng khi bị giới hạn */
   position: relative;
@@ -209,11 +210,12 @@ defineExpose({
 ══════════════════════════ */
 .ms-select__label {
   display: block;
-  margin-bottom: 4px;
-  font-size: 13px;
-  font-weight: 500;
-  color: #344054;
+  margin: 0;
+  color: var(--dm-text);
+  font-size: 14px;
+  font-weight: 700;
   line-height: 1.4;
+  user-select: none;
 }
 
 .ms-select__required {
@@ -232,7 +234,8 @@ defineExpose({
    Root multiselect element
 ══════════════════════════ */
 .ms-multiselect.multiselect {
-  min-height: 36px;
+  height: var(--dm-control-height, 46px);
+  min-height: var(--dm-control-height, 46px);
   /* QUAN TRỌNG: đây là positioning context của .multiselect__select */
   position: relative;
 }
@@ -241,12 +244,14 @@ defineExpose({
    Tags (ô input trigger)
 ══════════════════════════ */
 .ms-multiselect .multiselect__tags {
-  min-height: 32px;
+  height: var(--dm-control-height, 46px);
+  min-height: var(--dm-control-height, 46px);
+  box-sizing: border-box;
   /* padding-right nhường chỗ cho icon (36px) */
   padding: 0 32px 0 12px;
-  border: 1.5px solid #d0d5dd;
-  border-radius: 8px;
-  background: #fff;
+  border: 1px solid var(--dm-border);
+  border-radius: 12px;
+  background: var(--dm-surface);
   display: flex;
   align-items: center;
   cursor: pointer;
@@ -260,7 +265,7 @@ defineExpose({
 
 .ms-multiselect.multiselect--active .multiselect__tags {
   border-color: #0E9A62;
-  border-radius: 8px;
+  border-radius: 12px;
 }
 
 .ms-multiselect.ms-multiselect--error .multiselect__tags {
