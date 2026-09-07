@@ -50,27 +50,7 @@
 
     <div v-if="IsLoading" class="dm-card" style="padding: 16px; text-align: center;">Đang tải sản phẩm...</div>
     <div v-else-if="FlashProducts.length" class="dm-grid dm-grid--products">
-      <article v-for="ProductItem in FlashProducts" :key="ProductItem.ProductId" class="dm-card dm-product-card dm-home-flash__card">
-        <div class="dm-home-flash__media">
-          <img :src="ProductItem.PrimaryImageUrl || 'https://placehold.co/400x400?text=No+Image'" :alt="ProductItem.Name" class="dm-product-card__image" />
-          <span class="dm-home-flash__campaign-badge">{{ ProductItem.CampaignName }}</span>
-        </div>
-        <div class="dm-product-card__body dm-home-flash__body">
-          <div class="dm-home-flash__meta">
-            <DMBadge warning>{{ ProductItem.BrandName || 'Dorm Mart' }}</DMBadge>
-            <span class="dm-home-flash__stock" v-if="ProductItem.BadgeText">{{ ProductItem.BadgeText }}</span>
-          </div>
-          <strong class="dm-home-flash__name">{{ ProductItem.Name }}</strong>
-          <div class="dm-home-flash__price-row">
-            <span class="dm-home-flash__sale-price">{{ formatCurrency(ProductItem.MinSalePrice) }}</span>
-            <span class="dm-home-flash__base-price" v-if="Number(ProductItem.MaxSalePrice) > Number(ProductItem.MinSalePrice)">{{ formatCurrency(ProductItem.MaxSalePrice) }}</span>
-          </div>
-          <div class="dm-home-flash__bottom">
-            <div class="dm-home-flash__pricing-note">{{ ProductItem.CampaignName }}</div>
-            <QuickAddCartButton class="dm-home-flash__add" :ProductSlug="ProductItem.Slug" :ProductVariantId="ProductItem.ProductVariantId" :ImageUrl="ProductItem.PrimaryImageUrl || ''" />
-          </div>
-        </div>
-      </article>
+      <ProductCard v-for="ProductItem in FlashProducts" :key="ProductItem.ProductId" :Product="ProductItem" />
     </div>
     <div v-else class="dm-card" style="padding: 16px; text-align: center; color: var(--dm-text-soft);">Chưa có flash sale đang hoạt động.</div>
 
@@ -118,10 +98,8 @@
 <script setup>
 import { computed, inject, onMounted, onUnmounted, ref } from "vue";
 import ProductCard from "@/components/dormmart/ProductCard.vue";
-import QuickAddCartButton from "@/components/dormmart/QuickAddCartButton.vue";
 import { getCategories, getProducts } from "@/services/catalogService";
 import { getActiveFlashSales } from "@/services/checkoutService";
-import { formatCurrency } from "@/utils/shopFormatters";
 
 const Text = inject("i18nCommon").Home;
 const Categories = ref([]);
@@ -198,18 +176,28 @@ const loadHomeData = async () => {
 
     Categories.value = CategoryData;
     FlashSales.value = Array.isArray(FlashSaleData) ? FlashSaleData : [];
-    FlashProducts.value = FlashSales.value.flatMap((FlashSale) => (FlashSale.Items || []).map((Item) => ({
-      ProductId: Item.ProductVariantId,
-      ProductVariantId: Item.ProductVariantId,
-      Slug: Item.ProductSlug || Item.Slug || Item.Sku,
-      Name: Item.VariantName || Item.ProductName || Item.Sku,
-      PrimaryImageUrl: Item.PrimaryImageUrl,
-      BrandName: Item.BrandName || Item.ProductBrandName || "Flash Sale",
-      CampaignName: FlashSale.Name || "Khuyến mãi",
-      BadgeText: Item.SoldCount || Item.FlashStock ? `Còn ${Math.max(0, Number(Item.FlashStock || 0) - Number(Item.SoldCount || 0))} sp` : "",
-      MinSalePrice: Item.FlashPrice,
-      MaxSalePrice: Item.OriginalPrice,
-    }))).slice(0, 4);
+    FlashProducts.value = FlashSales.value.flatMap((FlashSale) => (FlashSale.Items || []).map((Item) => {
+      const RemainingStock = Math.max(0, Number(Item.FlashStock || 0) - Number(Item.SoldCount || 0));
+      return {
+        ProductId: Item.ProductVariantId,
+        ProductVariantId: Item.ProductVariantId,
+        Slug: Item.ProductSlug || Item.Slug || Item.Sku,
+        Name: Item.VariantName || Item.ProductName || Item.Sku,
+        PrimaryImageUrl: Item.PrimaryImageUrl,
+        BrandName: Item.BrandName || Item.ProductBrandName || "Flash Sale",
+        CampaignName: FlashSale.Name || "Khuyến mãi",
+        BadgeText: Item.SoldCount || Item.FlashStock ? `Còn ${RemainingStock} sp` : "",
+        ShortDescription: Item.ShortDescription || `Ưu đãi thuộc ${FlashSale.Name || "chương trình flash sale"}`,
+        ProductCode: Item.Sku,
+        Status: 1,
+        AvailableStock: RemainingStock,
+        HasSellableVariant: RemainingStock > 0,
+        MinSalePrice: Item.FlashPrice,
+        MaxSalePrice: Item.FlashPrice,
+        BaseMinSalePrice: Item.OriginalPrice,
+        BaseMaxSalePrice: Item.OriginalPrice,
+      };
+    })).slice(0, 4);
     DiscoverProducts.value = ProductData.Items || [];
   } catch (Error) {
     ErrorMessage.value = Error.message;
@@ -261,89 +249,6 @@ onUnmounted(() => {
 .dm-home-flash__title {
   color: var(--dm-danger);
   margin-bottom: 6px;
-}
-
-.dm-home-flash__card {
-  border-color: rgba(186, 26, 26, 0.1);
-}
-
-.dm-home-flash__media {
-  position: relative;
-  overflow: hidden;
-  border-bottom: 1px solid var(--dm-border);
-}
-
-.dm-home-flash__campaign-badge {
-  position: absolute;
-  top: 12px;
-  left: 12px;
-  padding: 6px 10px;
-  border-radius: 999px;
-  background: rgba(185, 28, 28, 0.92);
-  color: #fff;
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.02em;
-}
-
-.dm-home-flash__body {
-  gap: 10px;
-}
-
-.dm-home-flash__meta {
-  justify-content: space-between;
-  align-items: center;
-  gap: 8px;
-}
-
-.dm-home-flash__stock {
-  color: var(--dm-text-soft);
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.dm-home-flash__name {
-  display: -webkit-box;
-  overflow: hidden;
-  line-height: 1.45;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-}
-
-.dm-home-flash__price-row {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 10px;
-}
-
-.dm-home-flash__sale-price {
-  color: var(--dm-danger);
-  font-size: 20px;
-  font-weight: 800;
-}
-
-.dm-home-flash__base-price {
-  color: var(--dm-text-soft);
-  font-size: 13px;
-  text-decoration: line-through;
-}
-
-.dm-home-flash__bottom {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding-top: 8px;
-  border-top: 1px solid var(--dm-border);
-}
-
-.dm-home-flash__pricing-note {
-  min-width: 0;
-  flex: 1;
-  color: var(--dm-text-soft);
-  font-size: 12px;
-  line-height: 1.4;
 }
 
 .dm-home-flash__note {
@@ -461,12 +366,6 @@ onUnmounted(() => {
     padding: 16px;
   }
 
-  .dm-home-flash__price-row,
-  .dm-home-flash__footer {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
   .dm-home-discover__header,
   .dm-home-category-section__header {
     align-items: flex-start;
@@ -477,5 +376,3 @@ onUnmounted(() => {
   }
 }
 </style>
-
-<!-- ponytail: flash sale card vẫn chưa deep-link product detail vì API flash-sales chưa trả ProductSlug/ProductId mapping đủ; add CTA link khi backend trả mapping sạch. -->

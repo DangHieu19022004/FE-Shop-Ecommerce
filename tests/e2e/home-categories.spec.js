@@ -28,6 +28,24 @@ const Products = Categories.flatMap((Category, CategoryIndex) => [
   createProduct(CategoryIndex * 2 + 2, Category),
 ]);
 
+const FlashSales = [{
+  Name: 'Flash đồ dùng thiết yếu',
+  EndsAt: '2099-12-31T23:59:59Z',
+  Items: [{
+    ProductVariantId: 'flash-variant-1',
+    ProductSlug: 'tui-khan-giay-uot-mini-tien-loi',
+    ProductName: 'Túi khăn giấy ướt mini tiện lợi',
+    VariantName: 'Túi khăn giấy ướt mini tiện lợi',
+    Sku: 'GD-005',
+    BrandName: 'Kho Sỉ Hàng Nguyên',
+    ShortDescription: 'Khăn giấy ướt mini, set 8 sản phẩm',
+    FlashPrice: 21000,
+    OriginalPrice: 35000,
+    FlashStock: 20,
+    SoldCount: 7,
+  }],
+}];
+
 test('home groups products by category in wrapping grids without a horizontal rail', async ({ page }) => {
   let RequestedPageSize = null;
 
@@ -55,7 +73,7 @@ test('home groups products by category in wrapping grids without a horizontal ra
     }
 
     if (Url.pathname.endsWith('/flash-sales')) {
-      await Route.fulfill({ json: { Data: [] } });
+      await Route.fulfill({ json: { Data: FlashSales } });
       return;
     }
 
@@ -66,6 +84,12 @@ test('home groups products by category in wrapping grids without a horizontal ra
 
   await expect(page.locator('.dm-home-category-section')).toHaveCount(Categories.length);
   await expect(page.locator('.dm-home-category-section .product-card')).toHaveCount(Products.length);
+  await expect(page.locator('.dm-home-flash .product-card')).toHaveCount(1);
+  await expect(page.locator('.dm-home-flash .dm-product-card')).toHaveCount(0);
+  await expect(page.locator('.dm-home-flash .product-card__campaign')).toHaveText('Flash đồ dùng thiết yếu');
+  await expect(page.locator('.dm-home-flash .product-card__stock')).toHaveText('Còn 13 sp');
+  await expect(page.locator('.dm-home-flash .product-card__price strong')).toHaveText('21.000 ₫');
+  await expect(page.locator('.dm-home-flash .product-card__price del')).toHaveText('35.000 ₫');
   await expect(page.locator('.dm-home-category-section .dm-badge--primary')).toHaveCount(Products.length);
   await expect(page.locator('.dm-home-category-section .dm-badge--error')).toHaveCount(1);
   await expect(page.locator('.dm-home-hero .dm-badge--warning')).toBeVisible();
@@ -78,5 +102,22 @@ test('home groups products by category in wrapping grids without a horizontal ra
     (Element) => Element.scrollWidth > Element.clientWidth + 1,
   );
   expect(HasHorizontalOverflow).toBe(false);
+  const FlashCardContentFits = await page.locator('.dm-home-flash .product-card').evaluate((Element) => (
+    Element.scrollWidth <= Element.clientWidth + 1 && Element.scrollHeight <= Element.clientHeight + 1
+  ));
+  expect(FlashCardContentFits).toBe(true);
+  const PriceAndButtonDoNotOverlap = await page.locator('.dm-home-flash .product-card').evaluate((Element) => {
+    const PriceRect = Element.querySelector('.product-card__price').getBoundingClientRect();
+    const ButtonRect = Element.querySelector('.quick-add-cart').getBoundingClientRect();
+    return PriceRect.right <= ButtonRect.left;
+  });
+  expect(PriceAndButtonDoNotOverlap).toBe(true);
+
+  await page.setViewportSize({ width: 360, height: 800 });
+  await expect(page.locator('.dm-home-flash .product-card__price strong')).toBeVisible();
+  const MobileCardFits = await page.locator('.dm-home-flash .product-card').evaluate((Element) => (
+    Element.scrollWidth <= Element.clientWidth + 1
+  ));
+  expect(MobileCardFits).toBe(true);
   await expect(page.locator('.dm-home-product-rail')).toHaveCount(0);
 });

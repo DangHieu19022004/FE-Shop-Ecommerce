@@ -6,12 +6,13 @@
         :alt="Product.Name"
         class="product-card__image"
       />
+      <DMBadge v-if="Product.CampaignName" error class="product-card__campaign">{{ Product.CampaignName }}</DMBadge>
       <DMBadge v-if="StatusBadgeText" :type="StatusBadgeType" class="product-card__status">{{ StatusBadgeText }}</DMBadge>
     </router-link>
 
     <div class="product-card__body">
       <div class="product-card__meta">
-        <DMBadge primary class="product-card__category">{{ Product.CategoryName || Text.Uncategorized }}</DMBadge>
+        <DMBadge :type="Product.CampaignName ? 'warning' : 'primary'" class="product-card__category">{{ Product.CategoryName || Product.CampaignName || Text.Uncategorized }}</DMBadge>
         <span v-if="Product.ProductCode" class="product-card__code">{{ Product.ProductCode }}</span>
       </div>
 
@@ -19,25 +20,28 @@
       <p class="product-card__description">{{ Product.ShortDescription || Text.NoDescription }}</p>
 
       <div class="product-card__footer">
-        <div class="product-card__brand-wrap">
+        <div class="product-card__details">
           <div class="product-card__brand">
             <span class="material-symbols-outlined" aria-hidden="true">verified</span>
             <span class="product-card__brand-text">{{ Product.BrandName || Text.NoBrand }}</span>
           </div>
+          <span v-if="Product.BadgeText" class="product-card__stock">{{ Product.BadgeText }}</span>
         </div>
-        <div class="product-card__price">
-          <del v-if="HasDiscount">{{ OldPriceText }}</del>
-          <strong v-if="HasPrice">{{ CurrentPriceText }}</strong>
-          <strong v-else class="product-card__price--pending">{{ Text.PricePending }}</strong>
+
+        <div class="product-card__commerce">
+          <div class="product-card__price">
+            <del v-if="HasDiscount">{{ OldPriceText }}</del>
+            <strong v-if="HasPrice">{{ CurrentPriceText }}</strong>
+            <strong v-else class="product-card__price--pending">{{ Text.PricePending }}</strong>
+          </div>
+          <QuickAddCartButton
+            v-if="CanQuickAdd"
+            :ProductSlug="Product.Slug"
+            :ProductVariantId="Product.ProductVariantId"
+            :ImageUrl="Product.PrimaryImageUrl || ''"
+          />
         </div>
       </div>
-    </div>
-
-    <div v-if="CanQuickAdd" class="product-card__action">
-      <QuickAddCartButton
-        :ProductSlug="Product.Slug"
-        :ImageUrl="Product.PrimaryImageUrl || ''"
-      />
     </div>
   </article>
 </template>
@@ -130,10 +134,23 @@ const StatusBadgeType = computed(() => IsAvailable.value ? "warning" : "error");
   transform: scale(1.025);
 }
 
-.product-card__status {
+.product-card__status,
+.product-card__campaign {
   position: absolute;
   top: 10px;
+}
+
+.product-card__status {
   right: 10px;
+}
+
+.product-card__campaign {
+  left: 10px;
+  max-width: calc(100% - 20px);
+}
+
+.product-card__campaign + .product-card__status {
+  top: 46px;
 }
 
 .product-card__body {
@@ -194,14 +211,30 @@ const StatusBadgeType = computed(() => IsAvailable.value ? "warning" : "error");
 }
 
 .product-card__footer {
-  align-items: flex-end;
+  display: grid;
   margin-top: auto;
   padding-top: 10px;
-  gap: 12px;
+  gap: 9px;
   border-top: 1px solid var(--dm-border);
 }
 
-.product-card__brand-wrap {
+.product-card__details,
+.product-card__commerce {
+  display: flex;
+  min-width: 0;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.product-card__details {
+  align-items: flex-start;
+}
+
+.product-card__commerce {
+  align-items: flex-end;
+}
+
+.product-card__brand {
   min-width: 0;
   flex: 1;
 }
@@ -213,6 +246,13 @@ const StatusBadgeType = computed(() => IsAvailable.value ? "warning" : "error");
   gap: 4px;
   color: var(--dm-text-soft);
   font-size: 12px;
+}
+
+.product-card__stock {
+  flex-shrink: 0;
+  color: var(--dm-text-soft);
+  font-size: 12px;
+  font-weight: 700;
 }
 
 .product-card__brand-text {
@@ -232,14 +272,18 @@ const StatusBadgeType = computed(() => IsAvailable.value ? "warning" : "error");
 
 .product-card__price {
   display: flex;
+  min-width: 0;
+  flex: 1;
   flex-direction: column;
-  align-items: flex-end;
+  align-items: flex-start;
   gap: 2px;
   color: var(--dm-danger);
 }
 
 .product-card__price strong {
   font-size: 17px;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
 }
 
 .product-card__price del {
@@ -252,14 +296,11 @@ const StatusBadgeType = computed(() => IsAvailable.value ? "warning" : "error");
   font-size: 13px;
 }
 
-.product-card__action {
-  display: flex;
-  justify-content: flex-end;
-  padding: 0 14px 14px;
-}
-
-.product-card__action :deep(.quick-add-cart--compact) {
-  transform: scale(0.72);
-  transform-origin: center center;
+.product-card__commerce :deep(.quick-add-cart--compact) {
+  position: static !important;
+  width: 38px !important;
+  height: 38px !important;
+  flex: 0 0 38px;
+  transform: none;
 }
 </style>
