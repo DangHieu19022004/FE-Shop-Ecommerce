@@ -2,6 +2,7 @@
   <section v-if="IsLoading" class="order-empty dm-card">
     <h1>Đang tải đơn hàng...</h1>
   </section>
+  <CheckoutSuccess v-else-if="Order && ShouldShowCheckoutSuccess" :order="Order" />
   <section v-else-if="Order" class="order-detail">
     <div class="order-detail__topbar">
       <div class="order-detail__topbar-left">
@@ -413,6 +414,7 @@ import { useRoute } from "vue-router";
 import DMButton from "@/components/base/DMButton.vue";
 import DMInput from "@/components/base/DMInput.vue";
 import DMTextarea from "@/components/base/DMTextarea.vue";
+import CheckoutSuccess from "@/views/dormmart/Checkout/CheckoutSuccess.vue";
 import { cancelOrder, getOrders, getOrderById } from "@/services/orderService";
 import { uploadPaymentProof } from "@/services/adminService";
 import { createReview, getProductReviews } from "@/services/expansionService";
@@ -531,9 +533,9 @@ const SHIPMENT_STATUS_LABELS = {
 };
 
 const ORDER_STEP_DEFINITIONS = [
-  { Key: "PendingApproval", Label: "Đặt hàng thành công", Icon: "check_circle", ActiveMeta: "Đơn vừa được tạo", DoneLabel: "Hoàn tất", ActiveLabel: "Hiện tại", TodoLabel: "Chờ xử lý" },
-  { Key: "Confirmed", Label: "Chuyển khoản & Duyệt", Icon: "payments", ActiveMeta: "Đang chờ thanh toán", DoneLabel: "Hoàn tất", ActiveLabel: "Hiện tại", TodoLabel: "Chờ duyệt" },
-  { Key: "Preparing", Label: "Đóng gói chuẩn bị", Icon: "inventory_2", ActiveMeta: "Kho Dorm Mart", DoneLabel: "Hoàn tất", ActiveLabel: "Hiện tại", TodoLabel: "Chờ duyệt" },
+  { Key: "PendingApproval", Label: "Đặt hàng thành công", Icon: "check", ActiveMeta: "Đơn vừa được tạo", DoneLabel: "Hoàn tất", ActiveLabel: "Hiện tại", TodoLabel: "Chờ xử lý" },
+  { Key: "Confirmed", Label: "Thanh toán", Icon: "sync", ActiveMeta: "Đang chờ chuyển khoản", DoneLabel: "Hoàn tất", ActiveLabel: "Hiện tại", TodoLabel: "Chờ thanh toán" },
+  { Key: "Preparing", Label: "Đang chuẩn bị hàng", Icon: "inventory_2", ActiveMeta: "Kho Dorm Mart đang đóng gói", DoneLabel: "Hoàn tất", ActiveLabel: "Hiện tại", TodoLabel: "Chờ thanh toán" },
   { Key: "Shipping", Label: "Đang giao hàng", Icon: "local_shipping", ActiveMeta: "Shipper KTX", DoneLabel: "Hoàn tất", ActiveLabel: "Hiện tại", TodoLabel: "Dự kiến 24-48h" },
   { Key: "Completed", Label: "Nhận hàng thành công", Icon: "verified", ActiveMeta: "Hoàn tất đơn", DoneLabel: "Hoàn tất", ActiveLabel: "Hiện tại", TodoLabel: "Chờ giao" },
 ];
@@ -591,6 +593,7 @@ const PaymentQrImageUrl = computed(() => {
   return `https://vietqr.app/img?acc=${encodeURIComponent(Payment.BankAccountNumber)}&bank=${encodeURIComponent(Payment.BankName)}&amount=${Number(Payment.Amount || Order.value?.Total || 0)}&des=${encodeURIComponent(Payment.TransferContent || Order.value.OrderCode)}`;
 });
 const IsGatewayPending = computed(() => IsGateway.value && ["Pending", "AwaitingProof", "UnderReview"].includes(CurrentPaymentStatusKey.value));
+const ShouldShowCheckoutSuccess = computed(() => ["Preparing", "ReadyToShip", "Shipping", "Completed"].includes(CurrentStatusKey.value));
 const IsCancelable = computed(() => CurrentStatusKey.value === "PendingApproval");
 const canReviewOrder = computed(() => CurrentStatusKey.value === "Completed");
 const ProofCount = computed(() => Order.value?.Payment?.ProofCount || Order.value?.Payment?.Proofs?.length || 0);
@@ -730,7 +733,7 @@ const OrderSteps = computed(() => {
       Meta: HistoryItem?.CreateDate
         ? formatDateTime(HistoryItem.CreateDate)
         : State === "active"
-          ? (Step.Key === "Confirmed" && IsPaymentReviewStep ? "Đang chờ chuyển khoản hoặc duyệt biên lai" : Step.ActiveMeta)
+          ? (Step.Key === "Confirmed" && IsPaymentReviewStep ? "Đang chờ hệ thống xác nhận chuyển khoản" : Step.ActiveMeta)
           : Step.TodoLabel,
       StateLabel: State === "done" ? Step.DoneLabel : State === "active" ? Step.ActiveLabel : Step.TodoLabel,
     };
