@@ -122,15 +122,15 @@ test('admin orders screen renders dashboard table, filters pending orders, and c
   await expect(page.getByRole('heading', { name: 'Quản Lý Đơn Hàng' })).toBeVisible();
   await expect(page.getByText('Tổng số đơn hàng')).toBeVisible();
   await expect(page.getByText('2', { exact: true }).first()).toBeVisible();
-  await expect(page.getByText('ORD-20260906165645-81C389')).toBeVisible();
-  await expect(page.getByText('ORD-20260906165515-AB052A')).toBeVisible();
+  await expect(page.getByRole('cell', { name: /ORD-20260906165645-81C389/ })).toBeVisible();
+  await expect(page.getByRole('cell', { name: /ORD-20260906165515-AB052A/ })).toBeVisible();
   await expect(page.getByText('Sinh viên A')).toBeVisible();
   await expect(page.getByText('Mì ly Hảo Hảo')).toBeVisible();
 
   await page.getByRole('button', { name: /Chờ duyệt/ }).click();
-  await expect(page.getByText('ORD-20260906165645-81C389')).toBeVisible();
-  await expect(page.getByText('ORD-20260906165515-AB052A')).toHaveCount(0);
+  await expect(page.getByRole('cell', { name: /ORD-20260906165645-81C389/ })).toBeVisible();
+  await expect(page.getByRole('cell', { name: /ORD-20260906165515-AB052A/ })).toHaveCount(0);
 
-  await page.getByRole('button', { name: 'Duyệt' }).first().click();
-  expect(orderActionRequests).toEqual([{ Note: '' }]);
+  await page.locator('.admin-orders-table .admin-orders-action--success').first().click();
+  await expect.poll(() => orderActionRequests).toEqual([{ Note: '' }]);
 });
