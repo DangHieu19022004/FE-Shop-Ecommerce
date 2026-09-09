@@ -57,9 +57,6 @@
 .order-empty > .material-symbols-outlined { color: var(--dm-primary); font-size: 48px; }
 .order-empty h1, .order-empty h2, .order-empty p { margin: 0; }
 .order-empty p { color: var(--dm-text-soft); }
-.order-detail__toast { position: fixed; top: 24px; right: 24px; z-index: 30; display: inline-flex; align-items: center; gap: 10px; padding: 14px 18px; border-radius: 16px; background: var(--dm-primary); color: var(--dm-on-primary); box-shadow: 0 16px 38px rgba(0, 0, 0, 0.14); transform: translateY(-16px); opacity: 0; pointer-events: none; transition: opacity 0.24s ease, transform 0.24s ease; }
-.order-detail__toast--visible { transform: translateY(0); opacity: 1; }
-.order-detail__toast .material-symbols-outlined { color: var(--dm-secondary, #fdc003); }
 .order-detail__topbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 6px; }
 .order-detail__topbar-left { display: flex; align-items: center; gap: 12px; }
 .order-detail__back-shell, .order-detail__back { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 14px; background: var(--dm-overlay-soft); color: var(--dm-text); }

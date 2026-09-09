@@ -3,11 +3,6 @@
     <h1>Đang tải đơn hàng...</h1>
   </section>
   <section v-else-if="Order" class="order-detail">
-    <div class="order-detail__toast" :class="{ 'order-detail__toast--visible': ToastMessage }">
-      <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
-      <span>{{ ToastMessage }}</span>
-    </div>
-
     <div class="order-detail__topbar">
       <div class="order-detail__topbar-left">
         <router-link :to="{ name: 'orderHistory' }" class="order-detail__back-shell">
@@ -421,6 +416,7 @@ import DMTextarea from "@/components/base/DMTextarea.vue";
 import { cancelOrder, getOrders, getOrderById } from "@/services/orderService";
 import { uploadPaymentProof } from "@/services/adminService";
 import { createReview, getProductReviews } from "@/services/expansionService";
+import { showDanger, showSuccess, showWarning } from "@/stores/alertStore";
 import { formatI18nText } from "@/utils/i18n";
 import { formatAddress, formatCurrency, formatDateTime } from "@/utils/shopFormatters";
 
@@ -437,8 +433,6 @@ const ActionMessage = ref("");
 const IsUploadingProof = ref(false);
 const IsRefreshingPayment = ref(false);
 const SelectedProofFile = ref(null);
-const ToastMessage = ref("");
-let ToastTimer = null;
 const QrPattern = new Set([1,2,3,4,5,12,16,23,24,25,34,36,45,46,47,56,57,58,63,67,69,71,72,73,78,81,84,89,90,91,94,95,100,103,104,105,108,111,114,116,117,118,119,120,121]);
 
 const loadOrderDetail = async () => {
@@ -776,22 +770,15 @@ const getHistoryDescription = (HistoryItem) => {
   return `Hệ thống cập nhật đơn sang trạng thái ${getStatusLabel(HistoryItem?.Status)}.`;
 };
 
-const showToast = (Message) => {
-  ToastMessage.value = Message;
-  if (ToastTimer) clearTimeout(ToastTimer);
-  ToastTimer = setTimeout(() => {
-    ToastMessage.value = "";
-  }, 2800);
-};
-
 const copyValue = async (Value, Label) => {
   if (!Value) return;
 
   try {
     await navigator.clipboard.writeText(String(Value));
-    showToast(`Đã sao chép: ${Label}`);
+    showSuccess(`Đã sao chép: ${Label}`);
   } catch {
     ActionMessage.value = `Không thể sao chép: ${Label}`;
+    showDanger(ActionMessage.value);
   }
 };
 
@@ -799,20 +786,20 @@ const handleFileSelect = (Event) => {
   const File = Event.target.files?.[0] || null;
   SelectedProofFile.value = File;
   if (File) {
-    showToast(`Đã đính kèm: ${File.name}`);
+    showSuccess(`Đã đính kèm: ${File.name}`);
   }
 };
 
 const removeSelectedFile = () => {
   SelectedProofFile.value = null;
-  showToast("Đã hủy chọn tệp");
+  showWarning("Đã hủy chọn tệp");
 };
 
 const formatSelectedProofSize = (File) => `${(Number(File?.size || 0) / 1024 / 1024).toFixed(2)} MB`;
 
 const submitSelectedProof = async () => {
   if (!SelectedProofFile.value || !Order.value?.Payment?.PaymentId) {
-    showToast("Vui lòng chọn ảnh chụp biên lai trước khi gửi!");
+    showWarning("Vui lòng chọn ảnh chụp biên lai trước khi gửi!");
     return;
   }
 
@@ -824,10 +811,11 @@ const submitSelectedProof = async () => {
       Payment: PaymentData,
     };
     SelectedProofFile.value = null;
-    showToast("Tải lên biên lai thành công!");
+    showSuccess("Tải lên biên lai thành công!");
     ActionMessage.value = "Đã upload payment proof.";
   } catch (Error) {
     ActionMessage.value = Error.message;
+    showDanger(Error.message);
   } finally {
     IsUploadingProof.value = false;
   }
