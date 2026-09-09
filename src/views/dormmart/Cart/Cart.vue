@@ -188,6 +188,7 @@ import {
   deleteCartItem,
   loadCart,
 } from "@/stores/cartStore";
+import { confirmDelete } from "@/stores/confirmStore";
 import { formatI18nText } from "@/utils/i18n";
 import { formatCurrency } from "@/utils/shopFormatters";
 
@@ -266,7 +267,7 @@ const changeQuantity = async (CartItem, Delta) => {
   }
 };
 
-const removeItem = async (CartItem) => {
+const deleteCartLine = async (CartItem) => {
   if (CartItem.Type === "Combo") {
     await deleteCartCombo(CartItem.Id);
   } else {
@@ -276,14 +277,21 @@ const removeItem = async (CartItem) => {
   SelectedItemIds.value = SelectedItemIds.value.filter((ItemId) => ItemId !== CartItem.Id);
 };
 
+const removeItem = async (CartItem) => {
+  if (!await confirmDelete(`Xóa ${CartItem.Name || "sản phẩm"} khỏi giỏ hàng?`)) return;
+  await deleteCartLine(CartItem);
+};
+
 const removeSelectedItems = async () => {
   const Targets = [...SelectedItems.value];
   if (!Targets.length) {
     return;
   }
 
+  if (!await confirmDelete(`Xóa ${Targets.length} mục đã chọn khỏi giỏ hàng?`)) return;
+
   for (const CartItem of Targets) {
-    await removeItem(CartItem);
+    await deleteCartLine(CartItem);
   }
 };
 

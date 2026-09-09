@@ -117,8 +117,11 @@ test('admin Combo sidebar item opens a working combo CRUD screen', async ({ page
   await expect(page.locator('.admin-combos__card').filter({ hasText: 'Combo phòng trọ mới' })).toBeVisible();
   expect(Requests[1]).toMatchObject({ Method: 'PUT', Payload: { Name: 'Combo phòng trọ mới' } });
 
-  page.once('dialog', (Dialog) => Dialog.accept());
   await page.locator('.admin-combos__card').filter({ hasText: 'Combo phòng trọ mới' }).getByRole('button', { name: 'Xóa', exact: true }).click();
+  const ConfirmDialog = page.getByRole('alertdialog', { name: 'Xác nhận xóa' });
+  await expect(ConfirmDialog).toBeVisible();
+  expect(Requests).toHaveLength(2);
+  await ConfirmDialog.getByRole('button', { name: 'Xóa', exact: true }).click();
 
   await expect(page.getByText('Đã xóa combo.')).toBeVisible();
   await expect(page.locator('.admin-combos__card')).toHaveCount(0);

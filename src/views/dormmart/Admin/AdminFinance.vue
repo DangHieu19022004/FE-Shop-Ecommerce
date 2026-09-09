@@ -4,6 +4,7 @@ import DMButton from "@/components/base/DMButton.vue";
 import DMInput from "@/components/base/DMInput.vue";
 import DMSelect from "@/components/base/DMSelect.vue";
 import { createExpense, deleteExpense, getExpenses, getFinanceProfit, getFinanceRevenue, getFinanceSummary } from "@/services/adminService";
+import { confirmDelete } from "@/stores/confirmStore";
 import { formatCurrency } from "@/utils/shopFormatters";
 
 const Text = inject("i18nCommon").AdminFinance;
@@ -70,6 +71,8 @@ const addExpense = async () => {
 };
 
 const removeExpense = async (ExpenseId) => {
+  if (!await confirmDelete("Xóa khoản chi này?")) return;
+
   try {
     await deleteExpense(ExpenseId);
     await loadFinance();

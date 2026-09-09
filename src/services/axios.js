@@ -5,6 +5,7 @@ import {
   PrimaryApiBaseUrl,
 } from "@/config/apiConfig";
 import i18nCommon from "@/i18n/i18nCommon";
+import { showDanger } from "@/stores/alertStore";
 import {
   clearAuthSession,
   getStoredAccessToken,
@@ -74,7 +75,14 @@ axiosInstance.interceptors.request.use(
 
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => {
+    if (!error?.config?.SuppressErrorAlert) {
+      showDanger(error?.message || "Không thể gửi yêu cầu đến máy chủ", {
+        Title: "Không thể gửi yêu cầu",
+      });
+    }
+    return Promise.reject(error);
+  }
 );
 
 axiosInstance.interceptors.response.use(
@@ -150,11 +158,19 @@ axiosInstance.interceptors.response.use(
       console.error(`[API] ${Text.NetworkError}`);
     }
 
-    return Promise.reject({
+    const ApiError = {
       status: Status || 0,
       message: error.response?.data?.UserMessage || error.response?.data?.DevMessage || error.message || "Có lỗi xảy ra",
       data: error.response?.data || null,
-    });
+    };
+
+    if (!RequestConfig?.SuppressErrorAlert) {
+      showDanger(ApiError.message, {
+        Title: Status ? `Lỗi API (${Status})` : "Không thể kết nối máy chủ",
+      });
+    }
+
+    return Promise.reject(ApiError);
   }
 );
 

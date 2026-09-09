@@ -18,6 +18,7 @@ import {
   updateAdminFlashSale,
   updateAdminVoucher,
 } from "@/services/adminService";
+import { confirmDelete } from "@/stores/confirmStore";
 import { formatCurrency, formatDateTime } from "@/utils/shopFormatters";
 
 const Vouchers = ref([]);
@@ -304,7 +305,7 @@ const editFlashSale = (FlashSale) => {
 };
 
 const removeVoucher = async (VoucherId) => {
-  if (!window.confirm("Xóa voucher này?")) return;
+  if (!await confirmDelete("Xóa voucher này?")) return;
 
   try {
     await deleteAdminVoucher(VoucherId);
@@ -316,7 +317,7 @@ const removeVoucher = async (VoucherId) => {
 };
 
 const removeFlashSale = async (FlashSaleId) => {
-  if (!window.confirm("Xóa flash sale này?")) return;
+  if (!await confirmDelete("Xóa flash sale này?")) return;
 
   try {
     await deleteAdminFlashSale(FlashSaleId);
@@ -370,7 +371,7 @@ const submitFlashSaleItem = async () => {
 };
 
 const removeFlashSaleItem = async (FlashSaleId, FlashSaleItemId) => {
-  if (!window.confirm("Xóa item flash sale này?")) return;
+  if (!await confirmDelete("Xóa item flash sale này?")) return;
 
   try {
     await deleteAdminFlashSaleItem(FlashSaleId, FlashSaleItemId);

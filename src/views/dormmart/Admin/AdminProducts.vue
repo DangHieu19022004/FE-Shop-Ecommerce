@@ -14,6 +14,7 @@ import {
   updateAdminProduct,
 } from "@/services/adminService";
 import { getBrands, getCategories } from "@/services/catalogService";
+import { confirmDelete } from "@/stores/confirmStore";
 import { formatCurrency } from "@/utils/shopFormatters";
 
 const Text = inject("i18nCommon").AdminProducts;
@@ -360,7 +361,7 @@ const submitForm = async () => {
 
 const removeProduct = async (Product) => {
   resetMessages();
-  const Confirmed = window.confirm(formatText(Text.ConfirmDelete, { name: Product.Name }));
+  const Confirmed = await confirmDelete(formatText(Text.ConfirmDelete, { name: Product.Name }));
   if (!Confirmed) return;
 
   try {
@@ -380,11 +381,12 @@ const addVariant = () => {
   ensureVariantDefaults();
 };
 
-const removeVariant = (Index) => {
+const removeVariant = async (Index) => {
   if (ProductForm.Variants.length === 1) {
     ErrorMessage.value = Text.KeepOneVariant;
     return;
   }
+  if (!await confirmDelete(`Xóa biến thể ${ProductForm.Variants[Index]?.Name || Index + 1} khỏi sản phẩm?`)) return;
   ProductForm.Variants.splice(Index, 1);
   ensureVariantDefaults();
 };
@@ -400,7 +402,8 @@ const addImage = () => {
   ensureImageDefaults();
 };
 
-const removeImage = (Index) => {
+const removeImage = async (Index) => {
+  if (!await confirmDelete(`Xóa ảnh số ${Index + 1} khỏi sản phẩm?`)) return;
   if (ProductForm.Images.length === 1) {
     ProductForm.Images[0] = { ...createEmptyImage(), IsPrimary: true };
     return;

@@ -40,5 +40,8 @@ test('browse product, add to cart, checkout COD, cancel order', async ({ page })
   const cancelButton = page.getByRole('button', { name: /Hủy đơn|Cancel/i });
   if (await cancelButton.count()) {
     await cancelButton.first().click();
+    const ConfirmDialog = page.getByRole('alertdialog', { name: 'Xác nhận hủy đơn' });
+    await expect(ConfirmDialog).toBeVisible();
+    await ConfirmDialog.getByRole('button', { name: 'Hủy đơn', exact: true }).click();
   }
 });

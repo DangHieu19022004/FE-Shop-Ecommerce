@@ -4,6 +4,7 @@ import DMButton from "@/components/base/DMButton.vue";
 import DMInput from "@/components/base/DMInput.vue";
 import { createAdminCategory, deleteAdminCategory, updateAdminCategory } from "@/services/adminService";
 import { getCategories } from "@/services/catalogService";
+import { confirmDelete } from "@/stores/confirmStore";
 
 const Text = inject("i18nCommon").AdminCategories;
 const Categories = ref([]);
@@ -98,7 +99,7 @@ const submitForm = async () => {
 
 const removeCategory = async (Category) => {
   resetMessages();
-  if (!window.confirm(formatText(Text.ConfirmDelete, { name: Category.Name }))) return;
+  if (!await confirmDelete(formatText(Text.ConfirmDelete, { name: Category.Name }))) return;
 
   try {
     await deleteAdminCategory(Category.Id);

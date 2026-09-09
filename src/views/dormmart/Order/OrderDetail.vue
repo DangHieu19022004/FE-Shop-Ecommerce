@@ -417,6 +417,7 @@ import { cancelOrder, getOrders, getOrderById } from "@/services/orderService";
 import { uploadPaymentProof } from "@/services/adminService";
 import { createReview, getProductReviews } from "@/services/expansionService";
 import { showDanger, showSuccess, showWarning } from "@/stores/alertStore";
+import { confirmAction } from "@/stores/confirmStore";
 import { formatI18nText } from "@/utils/i18n";
 import { formatAddress, formatCurrency, formatDateTime } from "@/utils/shopFormatters";
 
@@ -465,6 +466,11 @@ const loadOrderDetail = async () => {
 
 const handleCancelOrder = async () => {
   if (!Order.value) return;
+  if (!await confirmAction({
+    Title: "Xác nhận hủy đơn",
+    Message: `Bạn có chắc chắn muốn hủy đơn ${Order.value.OrderCode}?`,
+    ConfirmText: "Hủy đơn",
+  })) return;
 
   try {
     Order.value = await cancelOrder(Order.value.OrderId);
@@ -815,7 +821,6 @@ const submitSelectedProof = async () => {
     ActionMessage.value = "Đã upload payment proof.";
   } catch (Error) {
     ActionMessage.value = Error.message;
-    showDanger(Error.message);
   } finally {
     IsUploadingProof.value = false;
   }

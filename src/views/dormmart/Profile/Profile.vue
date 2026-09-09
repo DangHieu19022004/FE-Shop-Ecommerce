@@ -12,6 +12,7 @@ import {
   logoutUser,
   updateMyAddress,
 } from "@/services/authService";
+import { confirmDelete } from "@/stores/confirmStore";
 import { formatAddress } from "@/utils/shopFormatters";
 
 const Text = inject("i18nCommon").Profile;
@@ -142,7 +143,7 @@ const submitAddress = async () => {
 };
 
 const removeAddress = async (Address) => {
-  if (!window.confirm(`Xóa địa chỉ của ${Address.RecipientName}?`)) return;
+  if (!await confirmDelete(`Xóa địa chỉ của ${Address.RecipientName}?`)) return;
 
   DeletingAddressId.value = Address.UserAddressId;
   AddressErrorMessage.value = "";

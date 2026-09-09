@@ -12,6 +12,7 @@ import {
   updateAdminCombo,
   updateAdminComboDiscount,
 } from "@/services/adminService";
+import { confirmDelete } from "@/stores/confirmStore";
 import { formatCurrency, formatDateTime } from "@/utils/shopFormatters";
 
 const Combos = ref([]);
@@ -116,8 +117,9 @@ const addItemRow = () => {
   });
 };
 
-const removeItemRow = (Index) => {
+const removeItemRow = async (Index) => {
   if (ComboForm.Items.length <= 2) return;
+  if (!await confirmDelete(`Xóa item số ${Index + 1} khỏi combo?`)) return;
   ComboForm.Items.splice(Index, 1);
   ComboForm.Items.forEach((Item, ItemIndex) => {
     Item.SortOrder = ItemIndex + 1;
@@ -208,7 +210,7 @@ const editCombo = async (ComboId) => {
 };
 
 const removeCombo = async (ComboId) => {
-  if (!window.confirm("Xóa combo này?")) return;
+  if (!await confirmDelete("Xóa combo này?")) return;
 
   try {
     await deleteAdminCombo(ComboId);
@@ -265,7 +267,7 @@ const submitDiscount = async (ComboId) => {
 };
 
 const removeDiscount = async (ComboId, DiscountId) => {
-  if (!window.confirm("Xóa discount combo này?")) return;
+  if (!await confirmDelete("Xóa discount combo này?")) return;
 
   try {
     await deleteAdminComboDiscount(ComboId, DiscountId);

@@ -4,6 +4,7 @@ import DMButton from "@/components/base/DMButton.vue";
 import DMInput from "@/components/base/DMInput.vue";
 import { createAdminBrand, deleteAdminBrand, updateAdminBrand } from "@/services/adminService";
 import { getBrands } from "@/services/catalogService";
+import { confirmDelete } from "@/stores/confirmStore";
 
 const Text = inject("i18nCommon").AdminBrands;
 const Brands = ref([]);
@@ -111,7 +112,7 @@ const submitForm = async () => {
 
 const removeBrand = async (Brand) => {
   resetMessages();
-  if (!window.confirm(formatText(Text.ConfirmDelete, { name: Brand.Name }))) return;
+  if (!await confirmDelete(formatText(Text.ConfirmDelete, { name: Brand.Name }))) return;
 
   try {
     await deleteAdminBrand(Brand.Id);

@@ -3,6 +3,7 @@ import { computed, inject, onMounted, ref } from "vue";
 import DMButton from "@/components/base/DMButton.vue";
 import DMInput from "@/components/base/DMInput.vue";
 import { deleteAdminAccount, getAdminAccounts, lockAdminAccount, unlockAdminAccount } from "@/services/adminService";
+import { confirmDelete } from "@/stores/confirmStore";
 import { formatDateTime } from "@/utils/shopFormatters";
 
 const Text = inject("i18nCommon").AdminAccounts;
@@ -53,6 +54,8 @@ const toggleAccount = async (Item) => {
 };
 
 const deleteAccount = async (UserId) => {
+  if (!await confirmDelete("Xóa tài khoản này? Dữ liệu liên quan có thể không khôi phục được.")) return;
+
   try {
     PendingUserId.value = UserId;
     ErrorMessage.value = "";

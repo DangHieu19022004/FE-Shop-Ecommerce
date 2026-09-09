@@ -3,6 +3,7 @@ import { computed, inject, onMounted, reactive, ref } from "vue";
 import DMButton from "@/components/base/DMButton.vue";
 import DMInput from "@/components/base/DMInput.vue";
 import { getAdminOrders, getAdminPayments, getAdminShipments, runAdminOrderAction, runAdminPaymentAction, runAdminShipmentAction } from "@/services/adminService";
+import { confirmAction } from "@/stores/confirmStore";
 import { formatCurrency } from "@/utils/shopFormatters";
 
 const Text = inject("i18nCommon").AdminOrders;
@@ -46,6 +47,12 @@ const loadAdminData = async () => {
 };
 
 const runOrderAction = async (OrderId, Action, Note = "") => {
+  if (Action === "cancel" && !await confirmAction({
+    Title: "Xác nhận hủy đơn",
+    Message: "Bạn có chắc chắn muốn hủy đơn hàng này?",
+    ConfirmText: "Hủy đơn",
+  })) return;
+
   try {
     await runAdminOrderAction(OrderId, Action, Note);
     SuccessMessage.value = `Đã chạy action ${Action}`;
@@ -82,6 +89,12 @@ const bookShipment = async (ShipmentId, OrderId) => {
 };
 
 const runShipmentAction = async (ShipmentId, Action, OrderId) => {
+  if (Action === "cancel" && !await confirmAction({
+    Title: "Xác nhận hủy vận chuyển",
+    Message: "Bạn có chắc chắn muốn hủy vận chuyển của đơn hàng này?",
+    ConfirmText: "Hủy vận chuyển",
+  })) return;
+
   const Form = ensureShipmentForm(OrderId);
   try {
     await runAdminShipmentAction(ShipmentId, Action, { Note: Form.Note });
