@@ -28,6 +28,13 @@ const Products = Categories.flatMap((Category, CategoryIndex) => [
   createProduct(CategoryIndex * 2 + 2, Category),
 ]);
 
+Object.assign(Products[0], {
+  Name: 'Bộ chăm sóc cá nhân dành cho sinh viên ở ký túc xá',
+  ProductCode: 'PERSONAL-CARE-LONG-001',
+  BrandName: 'Kho Sỉ Hàng Nguyên - Nhà phân phối chính hãng',
+  ShortDescription: 'Bộ sản phẩm đầy đủ cho nhu cầu chăm sóc hằng ngày, có mô tả dài nhưng vẫn phải được hiển thị trọn vẹn trên card.',
+});
+
 const FlashSales = [{
   Name: 'Flash đồ dùng thiết yếu',
   EndsAt: '2099-12-31T23:59:59Z',
@@ -113,11 +120,46 @@ test('home groups products by category in wrapping grids without a horizontal ra
   });
   expect(PriceAndButtonDoNotOverlap).toBe(true);
 
+  const LongContentLayout = await page.locator('.dm-home-category-section .product-card').first().evaluate((Element) => {
+    const Selectors = [
+      '.product-card__category .dm-badge__label',
+      '.product-card__code',
+      '.product-card__name',
+      '.product-card__description',
+      '.product-card__brand-text',
+    ];
+    const ContentFits = Selectors.every((Selector) => {
+      const ContentElement = Element.querySelector(Selector);
+      return ContentElement.scrollWidth <= ContentElement.clientWidth + 1
+        && ContentElement.scrollHeight <= ContentElement.clientHeight + 1;
+    });
+    const DescriptionRect = Element.querySelector('.product-card__description').getBoundingClientRect();
+    const FooterRect = Element.querySelector('.product-card__footer').getBoundingClientRect();
+    return {
+      ContentFits,
+      FooterFollowsDescription: FooterRect.top >= DescriptionRect.bottom,
+      CardHasNoHorizontalOverflow: Element.scrollWidth <= Element.clientWidth + 1,
+    };
+  });
+  expect(LongContentLayout).toEqual({
+    ContentFits: true,
+    FooterFollowsDescription: true,
+    CardHasNoHorizontalOverflow: true,
+  });
+
+  await page.screenshot({ path: 'test-results/product-card-redesign-desktop.png', fullPage: true });
+
   await page.setViewportSize({ width: 360, height: 800 });
   await expect(page.locator('.dm-home-flash .product-card__price strong')).toBeVisible();
   const MobileCardFits = await page.locator('.dm-home-flash .product-card').evaluate((Element) => (
     Element.scrollWidth <= Element.clientWidth + 1
   ));
   expect(MobileCardFits).toBe(true);
+  const MobileLongCardFits = await page.locator('.dm-home-category-section .product-card').first().evaluate((Element) => (
+    Element.scrollWidth <= Element.clientWidth + 1
+    && Element.querySelector('.product-card__body').scrollHeight <= Element.querySelector('.product-card__body').clientHeight + 1
+  ));
+  expect(MobileLongCardFits).toBe(true);
+  await page.screenshot({ path: 'test-results/product-card-redesign-mobile.png', fullPage: true });
   await expect(page.locator('.dm-home-product-rail')).toHaveCount(0);
 });

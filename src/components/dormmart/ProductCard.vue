@@ -107,6 +107,7 @@ const StatusBadgeType = computed(() => IsAvailable.value ? "warning" : "error");
   height: 100%;
   overflow: hidden;
   flex-direction: column;
+  border: 1px solid var(--dm-border);
   transition: transform 180ms ease, box-shadow 180ms ease;
 }
 
@@ -120,12 +121,13 @@ const StatusBadgeType = computed(() => IsAvailable.value ? "warning" : "error");
   display: block;
   overflow: hidden;
   background: var(--dm-surface-soft);
+  border-bottom: 1px solid var(--dm-border);
 }
 
 .product-card__image {
   display: block;
   width: 100%;
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 16 / 10;
   object-fit: cover;
   transition: transform 220ms ease;
 }
@@ -157,8 +159,8 @@ const StatusBadgeType = computed(() => IsAvailable.value ? "warning" : "error");
   display: flex;
   flex: 1;
   flex-direction: column;
-  gap: 10px;
-  padding: 14px 14px 16px;
+  gap: 12px;
+  padding: 16px;
 }
 
 .product-card__meta,
@@ -169,53 +171,50 @@ const StatusBadgeType = computed(() => IsAvailable.value ? "warning" : "error");
 }
 
 .product-card__meta {
-  align-items: center;
+  align-items: flex-start;
   min-width: 0;
+  flex-wrap: wrap;
 }
 
 .product-card__category {
-  max-width: 70%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  max-width: 100%;
+  white-space: normal;
 }
 
 .product-card__code {
+  max-width: 100%;
   flex-shrink: 0;
+  padding: 4px 8px;
+  border-radius: 8px;
+  background: var(--dm-surface-soft);
   color: var(--dm-text-soft);
   font-size: 11px;
+  font-weight: 700;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
 }
 
 .product-card__name {
-  display: -webkit-box;
-  min-height: 44px;
-  overflow: hidden;
+  display: block;
+  overflow-wrap: anywhere;
   color: var(--dm-text);
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 800;
-  line-height: 1.4;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
+  line-height: 1.35;
 }
 
 .product-card__description {
-  display: -webkit-box;
-  min-height: 40px;
   margin: 0;
-  overflow: hidden;
+  overflow-wrap: anywhere;
   color: var(--dm-text-soft);
   font-size: 13px;
-  line-height: 1.5;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
+  line-height: 1.55;
 }
 
 .product-card__footer {
   display: grid;
   margin-top: auto;
-  padding-top: 10px;
-  gap: 9px;
-  border-top: 1px solid var(--dm-border);
+  gap: 12px;
 }
 
 .product-card__details,
@@ -227,11 +226,16 @@ const StatusBadgeType = computed(() => IsAvailable.value ? "warning" : "error");
 }
 
 .product-card__details {
-  align-items: flex-start;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--dm-surface-soft);
 }
 
 .product-card__commerce {
   align-items: flex-end;
+  padding-top: 12px;
+  border-top: 1px solid var(--dm-border);
 }
 
 .product-card__brand {
@@ -259,9 +263,6 @@ const StatusBadgeType = computed(() => IsAvailable.value ? "warning" : "error");
   min-width: 0;
   overflow-wrap: anywhere;
   line-height: 1.35;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
 }
 
 .product-card__brand .material-symbols-outlined {
@@ -281,7 +282,7 @@ const StatusBadgeType = computed(() => IsAvailable.value ? "warning" : "error");
 }
 
 .product-card__price strong {
-  font-size: 17px;
+  font-size: 19px;
   line-height: 1.25;
   overflow-wrap: anywhere;
 }
@@ -298,9 +299,24 @@ const StatusBadgeType = computed(() => IsAvailable.value ? "warning" : "error");
 
 .product-card__commerce :deep(.quick-add-cart--compact) {
   position: static !important;
-  width: 38px !important;
-  height: 38px !important;
-  flex: 0 0 38px;
+  width: 44px !important;
+  height: 44px !important;
+  flex: 0 0 44px;
   transform: none;
+}
+
+@media (max-width: 520px) {
+  .product-card__body {
+    padding: 14px;
+  }
+
+  .product-card__details,
+  .product-card__commerce {
+    gap: 8px;
+  }
+
+  .product-card__price strong {
+    font-size: 17px;
+  }
 }
 </style>
