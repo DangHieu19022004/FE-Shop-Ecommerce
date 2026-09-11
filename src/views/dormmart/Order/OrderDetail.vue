@@ -2,7 +2,6 @@
   <section v-if="IsLoading" class="order-empty dm-card">
     <h1>Đang tải đơn hàng...</h1>
   </section>
-  <CheckoutSuccess v-else-if="Order && ShouldShowCheckoutSuccess" :order="Order" />
   <section v-else-if="Order" class="order-detail">
     <div class="order-detail__topbar">
       <div class="order-detail__topbar-left">
@@ -62,7 +61,7 @@
 
     <div class="order-detail__plan-grid">
       <div class="order-detail__plan-main">
-        <article v-if="!FulfillmentView" class="order-detail__bank-card dm-card">
+        <article v-if="(IsBankTransfer || IsGateway) && !FulfillmentView" class="order-detail__bank-card dm-card">
           <div class="order-detail__bank-decor order-detail__bank-decor--top"></div>
           <div class="order-detail__bank-decor order-detail__bank-decor--bottom"></div>
           <div class="order-detail__bank-head">
@@ -75,7 +74,7 @@
                 <p>Phương thức: <strong>{{ getPaymentDisplayName() }}</strong></p>
               </div>
             </div>
-            <DMBadge success icon-name="bolt">Tự động kích hoạt</DMBadge>
+            <DMBadge success :icon-name="IsGateway ? 'bolt' : 'fact_check'">{{ IsGateway ? 'Tự động kích hoạt' : 'Admin đối soát' }}</DMBadge>
           </div>
 
           <div class="order-detail__bank-grid">
@@ -143,7 +142,8 @@
 
           <div class="order-detail__note-box">
             <span class="material-symbols-outlined" aria-hidden="true">info</span>
-            <p><strong>Lưu ý:</strong> Đơn hàng sẽ được Admin Dorm Mart tự động duyệt sau khi nhận được thông báo chuyển khoản hợp lệ từ ngân hàng. Vui lòng ghi đúng 100% nội dung chuyển khoản để hệ thống đối soát tự động.</p>
+            <p v-if="IsGateway"><strong>Lưu ý:</strong> Đơn hàng sẽ được Admin Dorm Mart tự động duyệt sau khi nhận được thông báo chuyển khoản hợp lệ từ ngân hàng. Vui lòng ghi đúng 100% nội dung chuyển khoản để hệ thống đối soát tự động.</p>
+            <p v-else><strong>Lưu ý:</strong> Gửi biên lai chuyển khoản để Admin Dorm Mart đối soát và xác nhận thanh toán trước khi chuẩn bị hàng.</p>
           </div>
 
           <div v-if="IsGatewayPending" class="order-detail__upload-actions" style="margin-bottom: 16px;">
@@ -160,7 +160,7 @@
                 <h4>Tải Lên Bằng Chứng Chuyển Khoản</h4>
                 <p>Ảnh chụp màn hình giao dịch chuyển khoản thành công từ Internet Banking</p>
               </div>
-              <span>JPG, PNG, PDF tối đa 10MB</span>
+              <span>JPG, PNG, PDF tối đa 5MB</span>
             </div>
 
             <label class="order-detail__upload-dropzone">
@@ -202,7 +202,7 @@
         </article>
 
         <article
-          v-else
+          v-else-if="FulfillmentView"
           class="order-detail__fulfillment-card dm-card"
           :class="`order-detail__fulfillment-card--${FulfillmentView.Tone}`"
         >
@@ -305,9 +305,19 @@
           <div class="order-detail__card-head">
             <div>
               <span class="material-symbols-outlined" aria-hidden="true">shopping_bag</span>
-              <h3>Sản Phẩm Đã Mua ({{ Order.Items.length }})</h3>
+              <h3>Sản Phẩm Đã Mua ({{ PurchasedLineCount }})</h3>
             </div>
-            <span class="order-detail__muted">{{ Order.Items.length }} {{ HistoryText.ProductCount.toLowerCase() }}</span>
+            <span class="order-detail__muted">{{ PurchasedLineCount }} {{ HistoryText.ProductCount.toLowerCase() }}</span>
+          </div>
+          <div v-if="Order.Combos?.length" class="order-detail__combo-list">
+            <div v-for="Combo in Order.Combos" :key="Combo.OrderComboId" class="order-detail__combo-card">
+              <div>
+                <strong>{{ Combo.Name }}</strong>
+                <span>{{ Combo.ComboCode }} · x {{ Combo.Quantity }}</span>
+                <small v-if="Combo.Items?.length">{{ Combo.Items.map((Item) => `${Item.ProductName} × ${Item.Quantity}`).join(', ') }}</small>
+              </div>
+              <strong>{{ formatCurrency(Combo.LineTotal) }}</strong>
+            </div>
           </div>
           <div class="order-detail__product-list">
             <div v-for="Item in Order.Items" :key="Item.OrderItemId" class="order-detail__product-card">
@@ -414,7 +424,6 @@ import { useRoute } from "vue-router";
 import DMButton from "@/components/base/DMButton.vue";
 import DMInput from "@/components/base/DMInput.vue";
 import DMTextarea from "@/components/base/DMTextarea.vue";
-import CheckoutSuccess from "@/views/dormmart/Checkout/CheckoutSuccess.vue";
 import { cancelOrder, getOrders, getOrderById } from "@/services/orderService";
 import { uploadPaymentProof } from "@/services/adminService";
 import { createReview, getProductReviews } from "@/services/expansionService";
@@ -525,7 +534,7 @@ const PAYMENT_STATUS_LABELS = {
 
 const SHIPMENT_STATUS_LABELS = {
   Pending: "Chờ xử lý",
-  ReadyToShip: "Sẵn sàng giao",
+  Booked: "Đã tạo vận đơn",
   Shipping: "Đang giao",
   Delivered: "Đã giao",
   Failed: "Giao thất bại",
@@ -593,10 +602,10 @@ const PaymentQrImageUrl = computed(() => {
   return `https://vietqr.app/img?acc=${encodeURIComponent(Payment.BankAccountNumber)}&bank=${encodeURIComponent(Payment.BankName)}&amount=${Number(Payment.Amount || Order.value?.Total || 0)}&des=${encodeURIComponent(Payment.TransferContent || Order.value.OrderCode)}`;
 });
 const IsGatewayPending = computed(() => IsGateway.value && ["Pending", "AwaitingProof", "UnderReview"].includes(CurrentPaymentStatusKey.value));
-const ShouldShowCheckoutSuccess = computed(() => ["Preparing", "ReadyToShip", "Shipping", "Completed"].includes(CurrentStatusKey.value));
 const IsCancelable = computed(() => CurrentStatusKey.value === "PendingApproval");
 const canReviewOrder = computed(() => CurrentStatusKey.value === "Completed");
 const ProofCount = computed(() => Order.value?.Payment?.ProofCount || Order.value?.Payment?.Proofs?.length || 0);
+const PurchasedLineCount = computed(() => (Order.value?.Items?.length || 0) + (Order.value?.Combos?.length || 0));
 const FulfillmentView = computed(() => {
   const StatusKey = CurrentStatusKey.value;
   const Shipment = Order.value?.Shipment || {};
@@ -702,12 +711,12 @@ const OrderSteps = computed(() => {
   const IsPastApproval = ["Confirmed", "Preparing", "ReadyToShip", "Shipping", "Completed"].includes(StatusKey);
   const IsPaymentReviewStep = IsBankTransfer.value
     && ["PendingApproval", "Confirmed"].includes(StatusKey)
-    && ["Pending", "AwaitingProof", "UnderReview"].includes(PaymentStatusKey);
-  const IsPaymentStepDone = IsBankTransfer.value
-    && (["Paid"].includes(PaymentStatusKey) || IsPastApproval);
+    && ["Pending", "AwaitingProof", "UnderReview", "Rejected"].includes(PaymentStatusKey);
+  const IsPaymentStepDone = IsBankTransfer.value && PaymentStatusKey === "Paid";
+  const IsPaymentReadyForPreparing = IsBankTransfer.value && PaymentStatusKey === "Paid" && StatusKey === "Confirmed";
   const ActiveStepKey = IsCancelled
     ? null
-    : IsPaymentReviewStep
+    : (IsPaymentReviewStep || IsPaymentReadyForPreparing)
       ? "Confirmed"
       : StatusKey === "ReadyToShip" ? "Preparing" : StatusKey;
   const CurrentIndex = ORDER_STEP_DEFINITIONS.findIndex((Step) => Step.Key === ActiveStepKey);

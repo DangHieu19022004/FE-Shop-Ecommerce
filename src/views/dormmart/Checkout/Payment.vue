@@ -153,7 +153,7 @@ import DMRadio from "@/components/base/DMRadio.vue";
 import DMTextarea from "@/components/base/DMTextarea.vue";
 import { getMyAddresses } from "@/services/authService";
 import { checkoutOrder, getActiveVouchers } from "@/services/checkoutService";
-import { getShippingQuote, uploadPaymentProof } from "@/services/adminService";
+import { getShippingQuote } from "@/services/adminService";
 import { CartSummary, getCheckoutItems, getShippingQuoteItems, loadCart } from "@/stores/cartStore";
 import { formatI18nText } from "@/utils/i18n";
 import { formatAddress, formatCurrency, formatDate } from "@/utils/shopFormatters";
@@ -179,7 +179,6 @@ const ShippingQuoteMessage = ref("");
 const PaymentOptions = [
   { value: 0, label: "COD", PaymentName: "COD", PaymentDescription: "Thanh toán khi nhận hàng", IconName: "payments" },
   { value: 1, label: "Bank Transfer", PaymentName: "Chuyển khoản", PaymentDescription: "Chuyển khoản thủ công", IconName: "account_balance" },
-  { value: 2, label: "Gateway", PaymentName: "Cổng thanh toán", PaymentDescription: "Thanh toán qua cổng", IconName: "credit_card" },
 ];
 
 const MerchandiseSubtotal = computed(() => CartSummary.value.Subtotal || 0);

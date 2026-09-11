@@ -54,7 +54,7 @@
         </router-link>
       </div>
       <div class="combo-featured__visual">
-        <img :src="FeaturedCombo.ImageUrl" :alt="FeaturedCombo.Name" />
+        <ComboVisual :Items="FeaturedCombo.Items" :AltText="FeaturedCombo.Name" :Icon="FeaturedCombo.Icon" />
         <div><span>{{ Text.ComboPrice }}</span><strong>{{ formatCurrency(FeaturedCombo.ComboPrice) }}</strong></div>
       </div>
     </section>
@@ -89,6 +89,7 @@
 <script setup>
 import { computed, inject, onMounted, ref } from "vue";
 import ComboCard from "@/components/dormmart/ComboCard.vue";
+import ComboVisual from "@/components/dormmart/ComboVisual.vue";
 import DMInput from "@/components/base/DMInput.vue";
 import { getComboCategories, getCombos } from "@/services/comboService";
 import { addComboToCart } from "@/stores/cartStore";

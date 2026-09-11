@@ -2,8 +2,14 @@
 import { computed, inject, onMounted, ref } from "vue";
 import DMButton from "@/components/base/DMButton.vue";
 import DMInput from "@/components/base/DMInput.vue";
-import { getAdminOrders, getAdminPayments, getAdminShipments, runAdminOrderAction, runAdminPaymentAction, runAdminShipmentAction, getAdminOrderById } from "@/services/adminService";
-import { confirmAction } from "@/stores/confirmStore";
+import {
+  deleteAdminOrder,
+  getAdminOrderById,
+  getAdminOrders,
+  runAdminOrderAction,
+  runAdminPaymentAction,
+  runAdminShipmentAction,
+} from "@/services/adminService";
 import { formatCurrency } from "@/utils/shopFormatters";
 
 const Text = inject("i18nCommon").AdminOrders;
@@ -18,6 +24,7 @@ const SearchText = ref("");
 const PaymentMethod = ref("all");
 const PaymentStatus = ref("all");
 const OrderDate = ref("");
+const DeleteConfirmOrder = ref(null);
 
 const OrderStatuses = {
   0: { Text: "Chờ duyệt", Tone: "warning", Icon: "pending" },
@@ -44,6 +51,15 @@ const PaymentStatuses = {
   4: "Hủy",
   5: "Đã thanh toán",
   6: "Đã hoàn tiền",
+};
+
+const ShipmentStatuses = {
+  0: "Chờ tạo vận đơn",
+  1: "Đã tạo vận đơn",
+  2: "Đang giao",
+  3: "Đã giao",
+  4: "Giao thất bại",
+  5: "Đã hủy",
 };
 
 const StatusTabs = [
@@ -81,10 +97,12 @@ const FilteredOrders = computed(() => Orders.value.filter((Order) => {
 }));
 
 const FastOrder = computed(() => PendingOrders.value[0] || Orders.value[0] || null);
+const CanPrepareSelectedOrder = computed(() => !SelectedOrder.value || SelectedOrder.value.PaymentMethod === 0 || SelectedOrder.value.PaymentStatus === 5);
 
 const orderStatus = (Status) => OrderStatuses[Status] || { Text: `Trạng thái ${Status}`, Tone: "muted", Icon: "help" };
 const paymentMethodText = (Method) => PaymentMethods[Method] || `PT thanh toán ${Method}`;
 const paymentStatusText = (Status) => PaymentStatuses[Status] || `TT thanh toán ${Status}`;
+const shipmentStatusText = (Status) => ShipmentStatuses[Status] || `TT vận chuyển ${Status}`;
 const dateTimeText = (Value) => Value ? new Intl.DateTimeFormat("vi-VN", { hour: "2-digit", minute: "2-digit", day: "2-digit", month: "2-digit", year: "numeric" }).format(new Date(Value)) : "-";
 const shortId = (Value) => String(Value || "").slice(0, 8);
 
@@ -122,6 +140,14 @@ const runOrderAction = async (OrderId, Action, Note = "") => {
     ConfirmText: "Hủy đơn",
   })) return;
 
+  if (Action === "prepare") {
+    const Order = SelectedOrder.value?.OrderId === OrderId ? SelectedOrder.value : Orders.value.find((OrderItem) => OrderItem.OrderId === OrderId);
+    if (Order?.PaymentMethod !== 0 && Order?.PaymentStatus !== 5) {
+      ErrorMessage.value = "Đơn chuyển khoản cần thanh toán xong trước khi chuẩn bị hàng.";
+      return;
+    }
+  }
+
   try {
     const Order = await runAdminOrderAction(OrderId, Action, Note);
     SuccessMessage.value = `Đã xử lý đơn hàng: ${Action}`;
@@ -132,13 +158,61 @@ const runOrderAction = async (OrderId, Action, Note = "") => {
   }
 };
 
+const deleteCancelledOrder = async () => {
+  if (!DeleteConfirmOrder.value?.OrderId) return;
+  ErrorMessage.value = "";
+  SuccessMessage.value = "";
+
+  try {
+    await deleteAdminOrder(DeleteConfirmOrder.value.OrderId);
+    DeleteConfirmOrder.value = null;
+    SelectedOrder.value = null;
+    SuccessMessage.value = "Đã xóa đơn đã hủy.";
+    await loadAdminData();
+  } catch (Error) {
+    ErrorMessage.value = Error.message;
+  }
+};
+
+const runPaymentAction = async (Action) => {
+  const PaymentId = SelectedOrder.value?.Payment?.PaymentId;
+  if (!PaymentId) return;
+  ErrorMessage.value = "";
+  SuccessMessage.value = "";
+
+  try {
+    const CurrentOrderId = SelectedOrder.value.OrderId;
+    await runAdminPaymentAction(PaymentId, Action, { Note: `Admin ${Action}` });
+    SuccessMessage.value = `Đã xử lý thanh toán: ${Action}`;
+    Orders.value = await getAdminOrders();
+    await selectOrder({ OrderId: CurrentOrderId });
+  } catch (Error) {
+    ErrorMessage.value = Error.message;
+  }
+};
+
+const runShipmentAction = async (Action, Payload = {}) => {
+  const ShipmentId = SelectedOrder.value?.Shipment?.ShipmentId;
+  if (!ShipmentId) return;
+  ErrorMessage.value = "";
+  SuccessMessage.value = "";
+
+  try {
+    const CurrentOrderId = SelectedOrder.value.OrderId;
+    await runAdminShipmentAction(ShipmentId, Action, Payload);
+    SuccessMessage.value = `Đã xử lý vận chuyển: ${Action}`;
+    Orders.value = await getAdminOrders();
+    await selectOrder({ OrderId: CurrentOrderId });
+  } catch (Error) {
+    ErrorMessage.value = Error.message;
+  }
+};
+
 const actionsFor = (Status) => {
   const Actions = {
     0: [{ Action: "confirm", Label: "Duyệt", Tone: "success", Icon: "check" }, { Action: "reject", Label: "Từ chối", Tone: "danger", Icon: "close" }],
     1: [{ Action: "prepare", Label: "Chuẩn bị", Tone: "primary", Icon: "inventory" }],
     3: [{ Action: "ready-to-ship", Label: "Sẵn sàng giao", Tone: "success", Icon: "package_2" }],
-    4: [{ Action: "ship", Label: "Giao", Tone: "primary", Icon: "local_shipping" }],
-    5: [{ Action: "complete", Label: "Hoàn thành", Tone: "success", Icon: "task_alt" }],
   }[Status] || [];
 
   if (![2, 6, 7].includes(Status)) {
@@ -161,6 +235,24 @@ const runShipmentAction = async (ShipmentId, Action, OrderId) => {
     ErrorMessage.value = Error.message;
   }
   return Actions;
+};
+
+const paymentActionsFor = (Order) => {
+  if (!Order?.Payment?.PaymentId || Order.PaymentMethod !== 1) return [];
+  return {
+    1: [{ Action: "verify", Label: "Đối soát biên lai", Tone: "primary", Icon: "fact_check" }, { Action: "reject", Label: "Từ chối TT", Tone: "danger", Icon: "close" }],
+    2: [{ Action: "mark-paid", Label: "Xác nhận đã trả", Tone: "success", Icon: "payments" }, { Action: "reject", Label: "Từ chối TT", Tone: "danger", Icon: "close" }],
+    3: [{ Action: "verify", Label: "Đối soát lại", Tone: "primary", Icon: "fact_check" }],
+  }[Order.Payment.Status] || [];
+};
+
+const shipmentActionsFor = (Order) => {
+  if (!Order?.Shipment?.ShipmentId) return [];
+  return {
+    0: [{ Action: "book-manually", Label: "Tạo vận đơn", Tone: "primary", Icon: "edit_note", Payload: () => ({ CarrierName: "Dorm Mart", TrackingCode: Order.OrderCode, Note: "Tạo vận đơn nội bộ" }) }],
+    1: [{ Action: "start-shipping", Label: "Bắt đầu giao", Tone: "primary", Icon: "local_shipping", Payload: () => ({ Note: "Bắt đầu giao hàng" }) }, { Action: "cancel", Label: "Hủy vận đơn", Tone: "danger", Icon: "cancel", Payload: () => ({ Note: "Hủy vận đơn" }) }],
+    2: [{ Action: "mark-delivered", Label: "Đã giao", Tone: "success", Icon: "task_alt", Payload: () => ({ Note: "Giao hàng thành công" }) }, { Action: "mark-failed", Label: "Giao thất bại", Tone: "danger", Icon: "report", Payload: () => ({ Note: "Giao hàng thất bại" }) }],
+  }[Order.Shipment.Status] || [];
 };
 
 onMounted(loadAdminData);
@@ -301,7 +393,8 @@ onMounted(loadAdminData);
                       :class="['admin-orders-action', `admin-orders-action--${ActionItem.Tone}`]"
                       @click.stop="runOrderAction(OrderItem.OrderId, ActionItem.Action)"
                     />
-                    <DMButton v-if="!actionsFor(OrderItem.Status).length" type="none" :is-tooltip="false" message="Chi tiết" icon-name="visibility" class="admin-orders-action" @click.stop="selectOrder(OrderItem)" />
+                    <DMButton v-if="OrderItem.Status === 7" type="none" :is-tooltip="false" message="Xóa đơn đã hủy" icon-name="delete" class="admin-orders-action admin-orders-action--danger" @click.stop="DeleteConfirmOrder = OrderItem" />
+                    <DMButton v-if="!actionsFor(OrderItem.Status).length && OrderItem.Status !== 7" type="none" :is-tooltip="false" message="Chi tiết" icon-name="visibility" class="admin-orders-action" @click.stop="selectOrder(OrderItem)" />
                   </div>
                 </td>
               </tr>
@@ -331,6 +424,8 @@ onMounted(loadAdminData);
             <div><span>Thời gian đặt</span><strong>{{ dateTimeText(SelectedOrder.CreateDate) }}</strong></div>
             <div><span>Số lượng sản phẩm</span><strong>{{ SelectedOrder.ItemCount }} mặt hàng</strong></div>
             <div><span>Phương thức thanh toán</span><strong>{{ paymentMethodText(SelectedOrder.PaymentMethod) }}</strong></div>
+            <div><span>Trạng thái thanh toán</span><strong>{{ paymentStatusText(SelectedOrder.Payment?.Status ?? SelectedOrder.PaymentStatus) }}</strong></div>
+            <div><span>Trạng thái vận chuyển</span><strong>{{ SelectedOrder.Shipment ? shipmentStatusText(SelectedOrder.Shipment.Status) : 'Chưa tạo vận đơn' }}</strong></div>
             <div><span>Người nhận</span><strong>{{ SelectedOrder.Address?.RecipientName || '-' }}</strong></div>
             <div><span>Điện thoại</span><strong>{{ SelectedOrder.Address?.PhoneNumber || '-' }}</strong></div>
             <div class="admin-orders-summary__total"><span>Tổng giá trị đơn</span><strong>{{ formatCurrency(SelectedOrder.Total) }}</strong></div>
@@ -339,6 +434,59 @@ onMounted(loadAdminData);
           <div class="admin-orders-note">
             <strong><span class="material-symbols-outlined">verified_user</span>Chính sách Ký túc xá:</strong>
             <p>Kiểm tra biên lai chuyển khoản trước khi duyệt để kho soạn đơn và giao tận phòng.</p>
+            <small v-if="SelectedOrder.Status === 1 && !CanPrepareSelectedOrder">Đơn chuyển khoản cần được xác nhận đã thanh toán trước khi chuẩn bị hàng.</small>
+          </div>
+
+          <div class="admin-orders-payment" v-if="SelectedOrder.Payment">
+            <strong>Thanh toán</strong>
+            <div class="admin-orders-item">
+              <span>{{ paymentMethodText(SelectedOrder.Payment.PaymentMethod) }} · {{ paymentStatusText(SelectedOrder.Payment.Status) }}</span>
+              <strong>{{ formatCurrency(SelectedOrder.Payment.Amount) }}</strong>
+            </div>
+            <div v-if="SelectedOrder.Payment.Proofs?.length" class="admin-orders-proof-list">
+              <small v-for="Proof in SelectedOrder.Payment.Proofs" :key="Proof.PaymentProofId">{{ Proof.FileName }} · {{ dateTimeText(Proof.CreateDate) }}</small>
+            </div>
+            <div v-if="paymentActionsFor(SelectedOrder).length" class="admin-orders-actions admin-orders-actions--left">
+              <DMButton
+                v-for="ActionItem in paymentActionsFor(SelectedOrder)"
+                :key="ActionItem.Action"
+                type="none"
+                :is-tooltip="false"
+                :message="ActionItem.Label"
+                :icon-name="ActionItem.Icon"
+                :class="['admin-orders-action', `admin-orders-action--${ActionItem.Tone}`]"
+                @click="runPaymentAction(ActionItem.Action)"
+              />
+            </div>
+          </div>
+
+          <div class="admin-orders-shipment" v-if="SelectedOrder.Shipment">
+            <strong>Vận chuyển</strong>
+            <div class="admin-orders-item">
+              <span>{{ shipmentStatusText(SelectedOrder.Shipment.Status) }} · {{ SelectedOrder.Shipment.CarrierName || SelectedOrder.Shipment.Provider || 'Chưa có đơn vị' }}</span>
+              <strong>{{ SelectedOrder.Shipment.TrackingCode || '-' }}</strong>
+            </div>
+            <div v-if="shipmentActionsFor(SelectedOrder).length" class="admin-orders-actions admin-orders-actions--left">
+              <DMButton
+                v-for="ActionItem in shipmentActionsFor(SelectedOrder)"
+                :key="ActionItem.Action"
+                type="none"
+                :is-tooltip="false"
+                :message="ActionItem.Label"
+                :icon-name="ActionItem.Icon"
+                :class="['admin-orders-action', `admin-orders-action--${ActionItem.Tone}`]"
+                @click="runShipmentAction(ActionItem.Action, ActionItem.Payload?.() || {})"
+              />
+            </div>
+          </div>
+
+          <div v-if="SelectedOrder.Combos?.length" class="admin-orders-items">
+            <strong>Combo sản phẩm</strong>
+            <div v-for="Combo in SelectedOrder.Combos" :key="Combo.OrderComboId" class="admin-orders-item admin-orders-item--stacked">
+              <span>{{ Combo.Name }} · {{ Combo.ComboCode }} · x {{ Combo.Quantity }}</span>
+              <small v-if="Combo.Items?.length">{{ Combo.Items.map((Item) => `${Item.ProductName} × ${Item.Quantity}`).join(', ') }}</small>
+              <strong>{{ formatCurrency(Combo.LineTotal) }}</strong>
+            </div>
           </div>
 
           <div class="admin-orders-items">
@@ -360,11 +508,34 @@ onMounted(loadAdminData);
               :class="['admin-orders-action', `admin-orders-action--${ActionItem.Tone}`]"
               @click="runOrderAction(SelectedOrder.OrderId, ActionItem.Action)"
             />
+            <DMButton
+              v-if="SelectedOrder.Status === 7"
+              type="none"
+              :is-tooltip="false"
+              icon-name="delete"
+              message="Xóa đơn đã hủy"
+              class="admin-orders-action admin-orders-action--danger"
+              @click="DeleteConfirmOrder = SelectedOrder"
+            />
             <DMButton type="border-secondary" :is-tooltip="false" icon-name="chat" message="Liên hệ sinh viên qua Zalo" un-active tooltip-message="Chưa có Zalo API" />
           </div>
         </template>
       </aside>
     </div>
+
+    <Teleport to="body">
+      <div v-if="DeleteConfirmOrder" class="admin-orders-dialog-backdrop">
+        <section class="dm-card admin-orders-dialog" role="dialog" aria-modal="true" aria-labelledby="admin-orders-delete-title">
+          <span class="material-symbols-outlined admin-orders-dialog__icon">warning</span>
+          <h2 id="admin-orders-delete-title">Xóa đơn đã hủy?</h2>
+          <p>Đơn {{ DeleteConfirmOrder.OrderCode }} sẽ bị ẩn khỏi danh sách quản trị. Thao tác này chỉ áp dụng với đơn đã hủy.</p>
+          <div class="admin-orders-dialog__actions">
+            <DMButton type="border-secondary" :is-tooltip="false" message="Hủy" @click="DeleteConfirmOrder = null" />
+            <DMButton type="danger" :is-tooltip="false" icon-name="delete" message="Xác nhận xóa" @click="deleteCancelledOrder" />
+          </div>
+        </section>
+      </div>
+    </Teleport>
   </section>
 </template>
 

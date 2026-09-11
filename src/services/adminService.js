@@ -202,6 +202,11 @@ export const runAdminOrderAction = async (OrderId, Action, Note = "") => {
   return unwrapData(Response);
 };
 
+export const deleteAdminOrder = async (OrderId) => {
+  const Response = await axiosInstance.delete(`/admin/orders/${OrderId}`);
+  return unwrapData(Response);
+};
+
 export const getAdminPayments = async () => {
   const Response = await axiosInstance.get("/admin/payments");
   return unwrapData(Response) || [];

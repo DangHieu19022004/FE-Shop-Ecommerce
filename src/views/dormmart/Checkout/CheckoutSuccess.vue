@@ -183,6 +183,7 @@ const STEP_DEFINITIONS = [
   { Key: "PendingApproval", Label: "Đặt hàng thành công", Icon: "check", ActiveMeta: "Đơn vừa được tạo" },
   { Key: "Confirmed", Label: "Chuyển khoản & Duyệt", Icon: "verified", ActiveMeta: "Đang chờ thanh toán hoặc duyệt" },
   { Key: "Preparing", Label: "Đóng gói chuẩn bị", Icon: "inventory_2", ActiveMeta: "Kho Dorm Mart" },
+  { Key: "ReadyToShip", Label: "Sẵn sàng giao", Icon: "package_2", ActiveMeta: "Chờ tài xế nhận hàng" },
   { Key: "Shipping", Label: "Đang giao hàng", Icon: "local_shipping", ActiveMeta: "Shipper KTX" },
   { Key: "Completed", Label: "Nhận hàng thành công", Icon: "verified", ActiveMeta: "Hoàn tất đơn" },
 ];
@@ -218,7 +219,7 @@ const Steps = computed(() => {
 
   return STEP_DEFINITIONS.map((Step, Index) => {
     const HistoryItem = HistoryMap.get(Step.Key);
-    const State = Index < CurrentIndex ? "done" : Index === CurrentIndex ? "active" : "todo";
+    const State = StatusKey === "Completed" || Index < CurrentIndex ? "done" : Index === CurrentIndex ? "active" : "todo";
     return {
       ...Step,
       Index: Index + 1,

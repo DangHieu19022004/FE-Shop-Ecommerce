@@ -136,7 +136,6 @@
 
 <script setup>
 import { computed, inject, onMounted, ref } from "vue";
-import DMButton from "@/components/base/DMButton.vue";
 import DMInput from "@/components/base/DMInput.vue";
 import { getOrderById, getOrders } from "@/services/orderService";
 import { formatI18nText } from "@/utils/i18n";
@@ -197,8 +196,19 @@ const getStatusLabel = (StatusCode) => normalizeEnumValue(StatusCode, STATUS_LAB
 const getPaymentLabel = (PaymentMethod) => normalizeEnumValue(PaymentMethod, PAYMENT_METHOD_LABELS);
 const getPaymentStatusLabel = (PaymentStatus) => normalizeEnumValue(PaymentStatus, PAYMENT_STATUS_LABELS);
 const getOrderPreview = (OrderId) => OrderDetails.value[OrderId] || null;
-const getPrimaryItem = (OrderId) => getOrderPreview(OrderId)?.Items?.[0] || null;
-const getRemainingItemCount = (OrderId) => Math.max((getOrderPreview(OrderId)?.ItemCount || 0) - 1, 0);
+const getPreviewLines = (OrderId) => [...(getOrderPreview(OrderId)?.Combos || []), ...(getOrderPreview(OrderId)?.Items || [])];
+const getPrimaryItem = (OrderId) => {
+  const PrimaryLine = getPreviewLines(OrderId)[0];
+  if (!PrimaryLine) return null;
+  return {
+    PrimaryImageUrl: PrimaryLine.PrimaryImageUrl || PrimaryLine.ImageUrl,
+    ProductName: PrimaryLine.ProductName || PrimaryLine.Name,
+    VariantName: PrimaryLine.VariantName || PrimaryLine.ComboCode,
+    Quantity: PrimaryLine.Quantity,
+    LineTotal: PrimaryLine.LineTotal,
+  };
+};
+const getRemainingItemCount = (OrderId) => Math.max(getPreviewLines(OrderId).length - 1, 0);
 
 const statusBadgeType = (StatusCode) => {
   const StatusKey = getStatusKey(StatusCode);
@@ -246,6 +256,7 @@ const FilteredOrders = computed(() => Orders.value.filter((OrderItem) => {
     getPaymentStatusLabel(OrderItem.PaymentStatus),
     PrimaryItem?.ProductName,
     PrimaryItem?.VariantName,
+    ...(getOrderPreview(OrderItem.OrderId)?.Combos || []).flatMap((Combo) => [Combo.Name, Combo.ComboCode]),
   ].filter(Boolean).join(" ").toLowerCase();
   const IsStatusMatched = SelectedStatusCode.value === "ALL" || getStatusKey(OrderItem.Status) === SelectedStatusCode.value;
   return IsStatusMatched && SearchText.includes(SearchValue.value.trim().toLowerCase());

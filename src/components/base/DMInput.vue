@@ -1,6 +1,7 @@
 <template lang="">
   <div :class="['ms-input', { 'ms-input--horizontal': horizontal }]">
     <label v-if="label" class="ms-input__label" :for="id">{{ label }} <span v-if="isRequired" class="color-red"> *</span></label>
+    <p v-if="description" class="ms-input__description">{{ description }}</p>
     <input
       v-bind="$attrs"
       ref="inputRef"
@@ -53,6 +54,10 @@ const props = defineProps({
     default: "text",
   },
   placeholder: {
+    type: String,
+    default: "",
+  },
+  description: {
     type: String,
     default: "",
   },
@@ -169,6 +174,14 @@ const handleFocus = () => {
   font-weight: 700;
   line-height: 1.4;
   user-select: none;
+}
+
+.ms-input__description {
+  margin: -2px 0 2px;
+  color: var(--dm-text-soft);
+  font-size: 12px;
+  line-height: 1.45;
+  user-select: text;
 }
 
 .ms-input-in {

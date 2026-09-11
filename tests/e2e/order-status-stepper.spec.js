@@ -13,7 +13,30 @@ const OrderDetail = {
   PaymentStatus: 'UnderReview',
   Subtotal: 21000,
   Total: 21000,
-  Items: [],
+  Items: [
+    {
+      OrderItemId: 'item-status-test',
+      ProductId: 'product-status-test',
+      ProductName: 'Mì ly Hảo Hảo',
+      VariantName: 'Tôm chua cay',
+      UnitPrice: 11000,
+      Quantity: 1,
+      LineTotal: 11000,
+    },
+  ],
+  Combos: [
+    {
+      OrderComboId: 'combo-status-test',
+      ComboCode: 'COMBO-KTX',
+      Name: 'Combo ăn đêm KTX',
+      Quantity: 1,
+      LineTotal: 10000,
+      Items: [
+        { ProductName: 'Bánh mì', Quantity: 1 },
+        { ProductName: 'Sữa hộp', Quantity: 1 },
+      ],
+    },
+  ],
   StatusHistories: [{
     Status: 'PendingApproval',
     CreateDate: '2026-09-06T16:56:00Z',
@@ -67,8 +90,12 @@ test('order progress is a simple static stepper without an infinite spinner', as
   await expect(Stepper).toBeVisible();
   await expect(Stepper.locator('.order-detail__step-card')).toHaveCount(5);
   await expect(Stepper.locator('.order-detail__step-card--active')).toHaveCount(1);
-  await expect(Stepper.locator('.order-detail__step-card--active')).toContainText('Chuyển khoản & Duyệt');
+  await expect(Stepper.locator('.order-detail__step-card--active')).toContainText('Thanh toán');
   await expect(Stepper.locator('.order-detail__step-spinner')).toHaveCount(0);
+  await expect(page.locator('.order-detail__combo-card')).toContainText('Combo ăn đêm KTX');
+  await expect(page.locator('.order-detail__combo-card')).toContainText('COMBO-KTX');
+  await expect(page.locator('.order-detail__combo-card')).toContainText('Bánh mì × 1');
+  await expect(page.getByRole('heading', { name: 'Sản Phẩm Đã Mua (2)' })).toBeVisible();
 
   const IconAnimations = await Stepper.locator('.order-detail__step-icon-wrap .material-symbols-outlined').evaluateAll(
     (Icons) => Icons.map((Icon) => getComputedStyle(Icon).animationName),
@@ -95,7 +122,7 @@ const FulfillmentScenarios = [
     ClassName: 'preparing',
     Step: 'Bước 3 trong 5',
     Title: 'Dorm Mart đang chuẩn bị đơn hàng',
-    ActiveStep: 'Đóng gói chuẩn bị',
+    ActiveStep: 'Đang chuẩn bị hàng',
     Shipment: null,
   },
   {

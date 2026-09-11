@@ -14,7 +14,7 @@
 
     <section class="combo-detail-hero">
       <div class="combo-detail-hero__visual">
-        <img :src="Combo.ImageUrl" :alt="Combo.Name" />
+        <ComboVisual :Items="Combo.Items" :AltText="Combo.Name" :Icon="Combo.Icon" />
         <DMBadge warning class="combo-detail-hero__badge">{{ Combo.Badge }}</DMBadge>
       </div>
       <div class="combo-detail-hero__content">
@@ -105,6 +105,7 @@
 import { computed, inject, onMounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import DMButton from "@/components/base/DMButton.vue";
+import ComboVisual from "@/components/dormmart/ComboVisual.vue";
 import { getComboBySlug } from "@/services/comboService";
 import { addComboToCart } from "@/stores/cartStore";
 import { formatI18nText } from "@/utils/i18n";

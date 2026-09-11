@@ -1,6 +1,7 @@
 <script setup>
 import { computed, inject } from "vue";
 import DMButton from "@/components/base/DMButton.vue";
+import ComboVisual from "@/components/dormmart/ComboVisual.vue";
 import { formatCompactNumber, formatCurrency } from "@/utils/shopFormatters";
 
 const Props = defineProps({
@@ -26,7 +27,7 @@ const TotalQuantity = computed(() => Props.Combo.Items.reduce((Total, Item) => T
 <template>
   <article class="combo-card" :class="`combo-card--${Combo.Theme.toLowerCase()}`">
     <router-link :to="{ name: 'comboDetail', params: { slug: Combo.Slug } }" class="combo-card__visual">
-      <img :src="Combo.ImageUrl" :alt="Combo.Name" class="combo-card__image" />
+      <ComboVisual :Items="Combo.Items" :AltText="Combo.Name" :Icon="Combo.Icon" class="combo-card__image" />
       <div class="combo-card__visual-overlay"></div>
       <DMBadge warning class="combo-card__badge">{{ Combo.Badge }}</DMBadge>
       <span class="material-symbols-outlined combo-card__icon" aria-hidden="true">{{ Combo.Icon }}</span>
