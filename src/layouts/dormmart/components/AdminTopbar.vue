@@ -9,10 +9,11 @@
     >
       <span class="material-symbols-outlined" aria-hidden="true">menu</span>
     </button>
-    <div class="dm-search" style="max-width: 420px;" role="search">
+    <form class="dm-search" style="max-width: 420px;" role="search" @submit.prevent="submitSearch">
       <span class="material-symbols-outlined" aria-hidden="true">search</span>
       <DMInput v-model="SearchValue" type="search" :placeholder="Text.SearchPlaceholder" :aria-label="Text.SearchPlaceholder" />
-    </div>
+      <button type="submit" class="dm-admin-search-submit" aria-label="Tìm kiếm"><span class="material-symbols-outlined">arrow_forward</span></button>
+    </form>
     <div class="dm-public-actions">
       <DMDropdown
         :Items="NotificationItems" :Label="Text.NotificationLabel" Icon="notifications"
@@ -37,6 +38,7 @@ import DMInput from "@/components/base/DMInput.vue";
 import DMDropdown from "@/components/base/DMDropdown.vue";
 import { getNotifications, getUnreadNotificationCount, markNotificationRead } from "@/services/expansionService";
 import { formatDateTime } from "@/utils/shopFormatters";
+import { useRoute, useRouter } from "vue-router";
 
 const Text = inject("i18nCommon").AdminNavigation;
 defineProps({
@@ -53,6 +55,14 @@ const IsLoading = ref(false);
 const NotificationError = ref('');
 const PendingId = ref(null);
 const SearchValue = ref("");
+const Router = useRouter();
+const Route = useRoute();
+const submitSearch = () => {
+  const Query = SearchValue.value.trim();
+  if (!Query) return;
+  const IsOrderSearch = Route.name === "adminOrders" || /^(ord[-_]|[0-9a-f]{8}-)/i.test(Query);
+  Router.push({ name: IsOrderSearch ? "adminOrders" : "adminAccounts", query: { Search: Query } });
+};
 const NotificationItems = computed(() => Notifications.value.map((Item) => ({
   Id: Item.NotificationId,
   Title: Item.Title,
@@ -87,3 +97,8 @@ const readNotification = async (Item) => {
 };
 onMounted(loadNotifications);
 </script>
+<style scoped>
+.dm-admin-search-submit { display: grid; width: 36px; height: 36px; place-items: center; flex: 0 0 36px; border: 0; border-radius: 9px; color: var(--dm-primary); background: transparent; cursor: pointer; }
+.dm-admin-search-submit:hover { background: var(--dm-primary-soft); }
+.dm-admin-search-submit .material-symbols-outlined { font-size: 19px; }
+</style>

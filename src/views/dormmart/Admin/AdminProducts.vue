@@ -72,6 +72,7 @@ const createEmptyForm = () => ({
 });
 
 const ProductForm = reactive(createEmptyForm());
+const IsFormOpen = ref(false);
 
 const statusOptions = [
   { Value: 0, Label: Text.Draft },
@@ -105,6 +106,12 @@ const resetBrandForm = () => {
 const resetForm = () => {
   Object.assign(ProductForm, createEmptyForm());
   EditingProductId.value = "";
+};
+
+const closeForm = () => {
+  resetMessages();
+  resetForm();
+  IsFormOpen.value = false;
 };
 
 const validateCategoryForm = () => {
@@ -314,6 +321,7 @@ const submitBrandForm = async () => {
 const startCreate = () => {
   resetMessages();
   resetForm();
+  IsFormOpen.value = true;
 };
 
 const startEdit = async (ProductId) => {
@@ -324,6 +332,7 @@ const startEdit = async (ProductId) => {
     const Product = await getAdminProductById(ProductId);
     fillForm(Product);
     EditingProductId.value = ProductId;
+    IsFormOpen.value = true;
   } catch (Error) {
     ErrorMessage.value = Error.message;
   } finally {
@@ -351,6 +360,7 @@ const submitForm = async () => {
       SuccessMessage.value = formatText(Text.CreateSuccess, { name: Payload.Name });
     }
     resetForm();
+    IsFormOpen.value = false;
     await loadAdminData();
   } catch (Error) {
     ErrorMessage.value = Error.message;
@@ -368,6 +378,7 @@ const removeProduct = async (Product) => {
     await deleteAdminProduct(Product.ProductId);
     if (EditingProductId.value === Product.ProductId) {
       resetForm();
+      IsFormOpen.value = false;
     }
     SuccessMessage.value = formatText(Text.DeleteSuccess, { name: Product.Name });
     await loadAdminData();
@@ -449,7 +460,7 @@ onMounted(async () => {
     <div v-if="SuccessMessage" class="dm-card" style="padding: 16px; color: var(--dm-primary);">{{ SuccessMessage }}</div>
     <div v-if="IsLoading" class="dm-card" style="padding: 16px;">{{ Text.LoadMessage }}</div>
 
-    <div style="display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(320px, 1fr); gap: 18px; align-items: start;">
+    <div :class="['admin-products-layout', { 'admin-products-layout--form-open': IsFormOpen }]">
       <article class="dm-card" style="overflow: hidden;">
         <div style="overflow-x: auto;">
           <table class="dm-table" style="min-width: 980px;">
@@ -461,6 +472,7 @@ onMounted(async () => {
                 <th>{{ Text.Category }}</th>
                 <th>{{ Text.Brand }}</th>
                 <th>{{ Text.SalesPriceRange }}</th>
+                <th>Tồn khả dụng</th>
                 <th>{{ Text.Status }}</th>
                 <th>{{ Text.Actions }}</th>
               </tr>
@@ -482,6 +494,7 @@ onMounted(async () => {
                 <td>{{ Item.CategoryName }}</td>
                 <td>{{ Item.BrandName || '-' }}</td>
                 <td>{{ formatCurrency(Item.MinSalePrice) }}<span v-if="Item.MinSalePrice !== Item.MaxSalePrice"> - {{ formatCurrency(Item.MaxSalePrice) }}</span></td>
+                <td><strong>{{ Item.AvailableStock ?? '—' }}</strong><small v-if="Item.HasSellableVariant === false" class="admin-products-stock-warning">Chưa thể bán</small></td>
                 <td><DMBadge :type="statusBadgeType(Item.Status)" dot>{{ statusLabel(Item.Status) }}</DMBadge></td>
                 <td>
                   <div style="display: flex; gap: 8px; flex-wrap: wrap;">
@@ -491,7 +504,7 @@ onMounted(async () => {
                 </td>
               </tr>
               <tr v-if="!Products.length && !IsLoading">
-                <td colspan="8" style="text-align: center; padding: 24px; color: var(--dm-text-soft);">{{ Text.EmptyState }}</td>
+                <td colspan="9" style="text-align: center; padding: 24px; color: var(--dm-text-soft);">{{ Text.EmptyState }}</td>
               </tr>
             </tbody>
           </table>
@@ -505,10 +518,12 @@ onMounted(async () => {
         />
       </article>
 
-      <article class="dm-card" style="padding: 18px; display: grid; gap: 16px;">
-        <div>
-          <h2 style="margin-bottom: 6px;">{{ isEditing ? Text.UpdateTitle : Text.CreateTitle }}</h2>
+      <article v-if="IsFormOpen" class="dm-card admin-products-form">
+        <div class="admin-products-form__header">
+          <div><h2 style="margin-bottom: 6px;">{{ isEditing ? Text.UpdateTitle : Text.CreateTitle }}</h2>
           <p style="color: var(--dm-text-soft); margin: 0;">{{ Text.FormSubtitle }}</p>
+          </div>
+          <button type="button" class="dm-btn" @click="closeForm">Đóng</button>
         </div>
 
         <DMInput v-model="ProductForm.Name" :label="Text.Name" />
@@ -626,5 +641,13 @@ onMounted(async () => {
 </template>
 
 <style scoped lang="scss" src="@/assets/styles/screens/admin-operations.scss"></style>
+<style scoped lang="scss">
+.admin-products-layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: 18px; align-items: start; }
+.admin-products-layout--form-open { grid-template-columns: minmax(0, 1.35fr) minmax(380px, .85fr); }
+.admin-products-form { display: grid; gap: 16px; padding: 18px; max-height: calc(100vh - 110px); overflow-y: auto; position: sticky; top: 90px; }
+.admin-products-form__header { display: flex; align-items: start; justify-content: space-between; gap: 12px; }
+.admin-products-stock-warning { display: block; margin-top: 4px; color: var(--dm-danger); white-space: nowrap; }
+@media (max-width: 1150px) { .admin-products-layout--form-open { grid-template-columns: 1fr; } .admin-products-form { position: static; max-height: none; grid-row: 1; } }
+</style>
 
 <!-- ponytail: giữ CRUD + form trong cùng view; tách composable/component khi admin product flow lớn thêm hoặc cần paging/filter thật. -->

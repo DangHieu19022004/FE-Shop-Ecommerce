@@ -196,8 +196,8 @@ test('admin orders screen renders dashboard table, filters pending orders, and c
   await expect(page.getByRole('heading', { name: 'Quản Lý Đơn Hàng' })).toBeVisible();
   await expect(page.getByText('Tổng số đơn hàng')).toBeVisible();
   await expect(page.getByText('2', { exact: true }).first()).toBeVisible();
-  await expect(page.getByText('ORD-20260906165645-81C389')).toBeVisible();
-  await expect(page.getByText('ORD-20260906165515-AB052A')).toBeVisible();
+  await expect(page.getByText('ORD-20260906165645-81C389', { exact: true }).first()).toBeVisible();
+  await expect(page.getByText('ORD-20260906165515-AB052A', { exact: true }).first()).toBeVisible();
   await expect(page.getByText('Sinh viên A')).toBeVisible();
   await expect(page.getByText('Mì ly Hảo Hảo')).toBeVisible();
   await expect(page.getByText('Combo ăn đêm KTX')).toBeVisible();

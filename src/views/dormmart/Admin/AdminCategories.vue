@@ -13,6 +13,7 @@ const SuccessMessage = ref("");
 const IsLoading = ref(false);
 const IsSaving = ref(false);
 const EditingCategoryId = ref("");
+const IsFormOpen = ref(false);
 const Form = reactive({
   Name: "",
   Description: "",
@@ -59,6 +60,7 @@ const buildPayload = () => ({
 const startCreate = () => {
   resetMessages();
   resetForm();
+  IsFormOpen.value = true;
 };
 
 const startEdit = (Category) => {
@@ -66,6 +68,7 @@ const startEdit = (Category) => {
   EditingCategoryId.value = Category.Id;
   Form.Name = Category.Name || "";
   Form.Description = Category.Description || "";
+  IsFormOpen.value = true;
 };
 
 const submitForm = async () => {
@@ -89,6 +92,7 @@ const submitForm = async () => {
     }
 
     resetForm();
+    IsFormOpen.value = false;
     await loadCategories();
   } catch (Error) {
     ErrorMessage.value = Error.message;
@@ -133,7 +137,7 @@ onMounted(loadCategories);
     <div v-if="SuccessMessage" class="dm-card" style="padding: 16px; color: var(--dm-primary);">{{ SuccessMessage }}</div>
     <div v-if="IsLoading" class="dm-card" style="padding: 16px;">{{ Text.LoadMessage }}</div>
 
-    <div style="display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(320px, 1fr); gap: 18px; align-items: start;">
+    <div :class="['admin-entity-layout', { 'admin-entity-layout--form-open': IsFormOpen }]">
       <article class="dm-card" style="overflow: hidden;">
         <div style="overflow-x: auto;">
           <table class="dm-table" style="min-width: 720px;">
@@ -165,7 +169,7 @@ onMounted(loadCategories);
         </div>
       </article>
 
-      <article class="dm-card" style="padding: 18px; display: grid; gap: 16px;">
+      <article v-if="IsFormOpen" class="dm-card admin-entity-form">
         <div>
           <h2 style="margin-bottom: 6px;">{{ isEditing ? Text.UpdateTitle : Text.CreateTitle }}</h2>
           <p style="color: var(--dm-text-soft); margin: 0;">{{ Text.FormSubtitle }}</p>
@@ -177,6 +181,7 @@ onMounted(loadCategories);
         <div style="display: flex; gap: 8px; flex-wrap: wrap;">
           <DMButton type="none" :is-tooltip="false" :message="IsSaving ? Text.Saving : (isEditing ? Text.SaveUpdating : Text.SaveCreating)" class="admin-button" @click="submitForm" />
           <DMButton type="none" :is-tooltip="false" :message="Text.Reset" class="dm-btn" @click="resetForm" />
+          <button type="button" class="dm-btn" @click="IsFormOpen = false; resetForm()">Đóng</button>
         </div>
       </article>
     </div>
@@ -184,3 +189,9 @@ onMounted(loadCategories);
 </template>
 
 <style scoped lang="scss" src="@/assets/styles/screens/admin-operations.scss"></style>
+<style scoped>
+.admin-entity-layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: 18px; align-items: start; }
+.admin-entity-layout--form-open { grid-template-columns: minmax(0, 1.3fr) minmax(320px, 1fr); }
+.admin-entity-form { display: grid; gap: 16px; padding: 18px; }
+@media (max-width: 900px) { .admin-entity-layout--form-open { grid-template-columns: 1fr; } .admin-entity-form { grid-row: 1; } }
+</style>

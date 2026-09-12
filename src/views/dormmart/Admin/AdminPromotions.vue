@@ -392,7 +392,7 @@ onMounted(loadPromotions);
     <header class="admin-page__header">
       <div>
         <h1>Khuyến mãi</h1>
-        <p>Quản lý voucher và flash sale đang chạy trên API thật, đủ để rà dữ liệu và thao tác nhanh sau merge.</p>
+        <p>Quản lý voucher, chương trình giảm giá nhanh và tồn kho bán flash.</p>
       </div>
       <DMButton type="none" :is-tooltip="false" message="Tải lại" class="admin-button" @click="loadPromotions" />
     </header>
@@ -487,7 +487,7 @@ onMounted(loadPromotions);
         </div>
         <div class="admin-toolbar">
           <DMButton type="none" :is-tooltip="false" :message="VoucherForm.VoucherId ? 'Cập nhật voucher' : 'Tạo voucher'" class="admin-button" @click="submitVoucher" />
-          <DMButton type="none" :is-tooltip="false" message="Reset voucher" class="admin-button" @click="resetVoucherForm" />
+          <DMButton type="none" :is-tooltip="false" message="Làm lại voucher" class="admin-button" @click="resetVoucherForm" />
         </div>
       </article>
 
@@ -510,7 +510,7 @@ onMounted(loadPromotions);
         </div>
         <div class="admin-toolbar">
           <DMButton type="none" :is-tooltip="false" :message="FlashSaleForm.FlashSaleId ? 'Cập nhật flash sale' : 'Tạo flash sale'" class="admin-button" @click="submitFlashSale" />
-          <DMButton type="none" :is-tooltip="false" message="Reset flash sale" class="admin-button" @click="resetFlashSaleForm" />
+          <DMButton type="none" :is-tooltip="false" message="Làm lại flash sale" class="admin-button" @click="resetFlashSaleForm" />
         </div>
 
         <div class="admin-panel__header" style="margin-top: 18px;">
@@ -574,7 +574,7 @@ onMounted(loadPromotions);
         </div>
         <div class="admin-toolbar">
           <DMButton type="none" :is-tooltip="false" message="Thêm item flash sale" class="admin-button" @click="submitFlashSaleItem" />
-          <DMButton type="none" :is-tooltip="false" message="Reset item flash sale" class="admin-button" @click="resetFlashSaleItemForm" />
+          <DMButton type="none" :is-tooltip="false" message="Làm lại sản phẩm flash sale" class="admin-button" @click="resetFlashSaleItemForm" />
         </div>
       </article>
     </section>
@@ -609,7 +609,7 @@ onMounted(loadPromotions);
             <td>{{ formatCurrency(Voucher.MinOrderAmount) }}</td>
             <td>{{ Voucher.UsedCount }}</td>
             <td>{{ formatDateTime(Voucher.ExpiresAt) }}</td>
-            <td><DMBadge :type="Voucher.IsActive ? 'success' : 'error'" dot>{{ Voucher.IsActive ? 'Active' : 'Inactive' }}</DMBadge></td>
+            <td><DMBadge :type="Voucher.IsActive ? 'success' : 'error'" dot>{{ Voucher.IsActive ? 'Đang bật' : 'Đang tắt' }}</DMBadge></td>
             <td>
               <div class="admin-table-actions">
                 <DMButton type="none" :is-tooltip="false" message="Sửa" class="admin-button" @click="editVoucher(Voucher)" />
@@ -628,7 +628,7 @@ onMounted(loadPromotions);
       <div class="admin-panel__header">
         <div>
           <h2>Flash sales</h2>
-          <p>Header + item CRUD cùng nhìn ở đây. Item hiện lên theo flash sale đã chọn.</p>
+          <p>Thông tin chương trình và sản phẩm áp dụng được quản lý trong cùng danh sách.</p>
         </div>
       </div>
       <table class="dm-table" style="min-width: 1120px;">
@@ -649,7 +649,7 @@ onMounted(loadPromotions);
               <td><strong>{{ FlashSale.Name }}</strong></td>
               <td>{{ formatDateTime(FlashSale.StartsAt) }}</td>
               <td>{{ formatDateTime(FlashSale.EndsAt) }}</td>
-              <td><DMBadge :type="FlashSale.IsActive ? 'success' : 'error'" dot>{{ FlashSale.IsActive ? 'Active' : 'Inactive' }}</DMBadge></td>
+              <td><DMBadge :type="FlashSale.IsActive ? 'success' : 'error'" dot>{{ FlashSale.IsActive ? 'Đang bật' : 'Đang tắt' }}</DMBadge></td>
               <td>{{ FlashSale.Items?.length || 0 }}</td>
               <td>{{ FlashSale.Items?.[0]?.Sku || '-' }}</td>
               <td>

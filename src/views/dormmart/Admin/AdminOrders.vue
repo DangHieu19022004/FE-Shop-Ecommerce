@@ -1,5 +1,5 @@
 <script setup>
-import { computed, inject, onMounted, ref } from "vue";
+import { computed, inject, onMounted, ref, watch } from "vue";
 import DMButton from "@/components/base/DMButton.vue";
 import DMInput from "@/components/base/DMInput.vue";
 import {
@@ -10,7 +10,8 @@ import {
   runAdminPaymentAction,
   runAdminShipmentAction,
 } from "@/services/adminService";
-import { formatCurrency } from "@/utils/shopFormatters";
+import { formatAddress, formatCurrency } from "@/utils/shopFormatters";
+import { useRoute } from "vue-router";
 
 const Text = inject("i18nCommon").AdminOrders;
 const Orders = ref([]);
@@ -20,7 +21,9 @@ const SuccessMessage = ref("");
 const IsLoading = ref(false);
 const IsDetailLoading = ref(false);
 const ActiveStatus = ref("all");
-const SearchText = ref("");
+const Route = useRoute();
+const SearchText = ref(String(Route.query.Search || ""));
+watch(() => Route.query.Search, (Value) => { SearchText.value = String(Value || ""); });
 const PaymentMethod = ref("all");
 const PaymentStatus = ref("all");
 const OrderDate = ref("");
@@ -219,21 +222,6 @@ const actionsFor = (Status) => {
     return [...Actions, { Action: "cancel", Label: "Hủy", Tone: "danger", Icon: "cancel" }];
   }
 
-const runShipmentAction = async (ShipmentId, Action, OrderId) => {
-  if (Action === "cancel" && !await confirmAction({
-    Title: "Xác nhận hủy vận chuyển",
-    Message: "Bạn có chắc chắn muốn hủy vận chuyển của đơn hàng này?",
-    ConfirmText: "Hủy vận chuyển",
-  })) return;
-
-  const Form = ensureShipmentForm(OrderId);
-  try {
-    await runAdminShipmentAction(ShipmentId, Action, { Note: Form.Note });
-    SuccessMessage.value = `Đã xử lý shipment ${Action}`;
-    await loadAdminData();
-  } catch (Error) {
-    ErrorMessage.value = Error.message;
-  }
   return Actions;
 };
 
@@ -428,6 +416,10 @@ onMounted(loadAdminData);
             <div><span>Trạng thái vận chuyển</span><strong>{{ SelectedOrder.Shipment ? shipmentStatusText(SelectedOrder.Shipment.Status) : 'Chưa tạo vận đơn' }}</strong></div>
             <div><span>Người nhận</span><strong>{{ SelectedOrder.Address?.RecipientName || '-' }}</strong></div>
             <div><span>Điện thoại</span><strong>{{ SelectedOrder.Address?.PhoneNumber || '-' }}</strong></div>
+            <div><span>Địa chỉ giao hàng</span><strong>{{ formatAddress(SelectedOrder.Address) || '-' }}</strong></div>
+            <div><span>Tạm tính</span><strong>{{ formatCurrency(SelectedOrder.Subtotal) }}</strong></div>
+            <div><span>Phí giao hàng</span><strong>{{ formatCurrency(SelectedOrder.ShippingFee) }}</strong></div>
+            <div><span>Giảm giá</span><strong>-{{ formatCurrency(SelectedOrder.Discount) }}</strong></div>
             <div class="admin-orders-summary__total"><span>Tổng giá trị đơn</span><strong>{{ formatCurrency(SelectedOrder.Total) }}</strong></div>
           </div>
 
@@ -443,6 +435,8 @@ onMounted(loadAdminData);
               <span>{{ paymentMethodText(SelectedOrder.Payment.PaymentMethod) }} · {{ paymentStatusText(SelectedOrder.Payment.Status) }}</span>
               <strong>{{ formatCurrency(SelectedOrder.Payment.Amount) }}</strong>
             </div>
+            <div v-if="SelectedOrder.Payment.TransferContent" class="admin-orders-item"><span>Nội dung chuyển khoản</span><strong>{{ SelectedOrder.Payment.TransferContent }}</strong></div>
+            <div v-if="SelectedOrder.Payment.ReviewNote || SelectedOrder.Payment.Note" class="admin-orders-note"><strong>Ghi chú đối soát</strong><p>{{ SelectedOrder.Payment.ReviewNote || SelectedOrder.Payment.Note }}</p></div>
             <div v-if="SelectedOrder.Payment.Proofs?.length" class="admin-orders-proof-list">
               <small v-for="Proof in SelectedOrder.Payment.Proofs" :key="Proof.PaymentProofId">{{ Proof.FileName }} · {{ dateTimeText(Proof.CreateDate) }}</small>
             </div>
@@ -466,6 +460,9 @@ onMounted(loadAdminData);
               <span>{{ shipmentStatusText(SelectedOrder.Shipment.Status) }} · {{ SelectedOrder.Shipment.CarrierName || SelectedOrder.Shipment.Provider || 'Chưa có đơn vị' }}</span>
               <strong>{{ SelectedOrder.Shipment.TrackingCode || '-' }}</strong>
             </div>
+            <div class="admin-orders-item"><span>Phí vận chuyển thực tế</span><strong>{{ SelectedOrder.Shipment.ActualShippingFee == null ? '—' : formatCurrency(SelectedOrder.Shipment.ActualShippingFee) }}</strong></div>
+            <div v-if="SelectedOrder.Shipment.ShippedAt || SelectedOrder.Shipment.DeliveredAt" class="admin-orders-item admin-orders-item--stacked"><small v-if="SelectedOrder.Shipment.ShippedAt">Bắt đầu giao: {{ dateTimeText(SelectedOrder.Shipment.ShippedAt) }}</small><small v-if="SelectedOrder.Shipment.DeliveredAt">Đã giao: {{ dateTimeText(SelectedOrder.Shipment.DeliveredAt) }}</small></div>
+            <a v-if="SelectedOrder.Shipment.TrackingUrl" :href="SelectedOrder.Shipment.TrackingUrl" target="_blank" rel="noopener noreferrer">Theo dõi vận đơn →</a>
             <div v-if="shipmentActionsFor(SelectedOrder).length" class="admin-orders-actions admin-orders-actions--left">
               <DMButton
                 v-for="ActionItem in shipmentActionsFor(SelectedOrder)"
@@ -492,10 +489,12 @@ onMounted(loadAdminData);
           <div class="admin-orders-items">
             <strong>Sản phẩm</strong>
             <div v-for="Item in SelectedOrder.Items" :key="Item.OrderItemId" class="admin-orders-item">
-              <span>{{ Item.ProductName }} · {{ Item.VariantName }}</span>
-              <strong>{{ Item.Quantity }} × {{ formatCurrency(Item.UnitPrice) }}</strong>
+              <span>{{ Item.ProductName }} · {{ Item.VariantName }}<small>{{ [Item.Sku, Item.Color, Item.Size].filter(Boolean).join(' · ') }}</small></span>
+              <strong>{{ Item.Quantity }} × {{ formatCurrency(Item.UnitPrice) }}<small>{{ formatCurrency(Item.LineTotal) }}</small></strong>
             </div>
           </div>
+
+          <div v-if="SelectedOrder.Note" class="admin-orders-note"><strong>Ghi chú đơn hàng</strong><p>{{ SelectedOrder.Note }}</p></div>
 
           <div class="admin-orders-detail__actions">
             <DMButton

@@ -22,7 +22,17 @@ test('admin Combo sidebar item opens a working combo CRUD screen', async ({ page
     const ComboMatch = Url.pathname.match(/\/admin\/combos\/([^/]+)$/);
 
     if (Url.pathname.endsWith('/admin/products')) {
-      await Route.fulfill({ json: { Data: { Items: [], Total: 0, PageIndex: 1, PageSize: 12 } } });
+      await Route.fulfill({ json: { Data: { Items: [{ ProductId: 'product-1' }, { ProductId: 'product-2' }], Total: 2, PageIndex: 1, PageSize: 12 } } });
+      return;
+    }
+
+    if (Url.pathname.endsWith('/admin/products/product-1')) {
+      await Route.fulfill({ json: { Data: { ProductId: 'product-1', Name: 'Sản phẩm 1', ProductCode: 'SP-1', Variants: [{ ProductVariantId: 'variant-1', Name: 'Mặc định', Sku: 'SP-1-DF', SalePrice: 100000 }] } } });
+      return;
+    }
+
+    if (Url.pathname.endsWith('/admin/products/product-2')) {
+      await Route.fulfill({ json: { Data: { ProductId: 'product-2', Name: 'Sản phẩm 2', ProductCode: 'SP-2', Variants: [{ ProductVariantId: 'variant-2', Name: 'Mặc định', Sku: 'SP-2-DF', SalePrice: 80000 }] } } });
       return;
     }
 
@@ -94,8 +104,10 @@ test('admin Combo sidebar item opens a working combo CRUD screen', async ({ page
   await field('Mã combo').fill('CB-001');
   await field('Tên combo').fill('Combo phòng trọ');
   const ItemRows = page.locator('.admin-combos__item-row');
-  await ItemRows.nth(0).locator('input').first().fill('variant-1');
-  await ItemRows.nth(1).locator('input').first().fill('variant-2');
+  await ItemRows.nth(0).getByRole('combobox').click();
+  await page.getByRole('option', { name: /Sản phẩm 1/ }).click();
+  await ItemRows.nth(1).getByRole('combobox').click();
+  await page.getByRole('option', { name: /Sản phẩm 2/ }).click();
   await page.getByRole('button', { name: 'Tạo combo', exact: true }).click();
 
   await expect(page.getByText('Đã tạo combo.')).toBeVisible();
