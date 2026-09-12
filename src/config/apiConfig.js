@@ -1,8 +1,8 @@
-const ApiProtocol = import.meta.env.VITE_API_PROTOCOL || "https";
-const ApiPort = import.meta.env.VITE_API_PORT || "7173";
+const ApiProtocol = import.meta.env.VITE_API_PROTOCOL || "http";
+const ApiPort = import.meta.env.VITE_API_PORT || "5237";
 const ApiPath = import.meta.env.VITE_API_PATH || "/api";
 const PrimaryApiHost = import.meta.env.VITE_API_PRIMARY_HOST || "trandanghieu.online";
-const FallbackApiHost = import.meta.env.VITE_API_FALLBACK_HOST || "127.0.0.0";
+const FallbackApiHost = import.meta.env.VITE_API_FALLBACK_HOST || PrimaryApiHost;
 const ApiTimeoutMs = Number(import.meta.env.VITE_API_TIMEOUT_MS || 15000);
 
 /**

@@ -32,8 +32,8 @@ npm run test:e2e
 
 ## API behavior
 
-- The primary API defaults to `https://trandanghieu.online:7173/api`.
-- Network failures and status codes 502, 503 or 504 retry against `https://127.0.0.0:7173/api`.
+- The primary API defaults to `http://trandanghieu.online:5237/api`.
+- The fallback URL defaults to the same public API, so retries only switch hosts when `VITE_API_FALLBACK_*` is configured explicitly.
 - Hosts, port, protocol, path, timeout and complete base URLs can be overridden with `VITE_*` environment variables defined in `src/config/apiConfig.js`.
 - `src/services/axios.js` attaches the bearer token, unwraps response data, retries the fallback host and handles token refresh.
 
