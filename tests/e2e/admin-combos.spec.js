@@ -85,6 +85,11 @@ test('admin Combo sidebar item opens a working combo CRUD screen', async ({ page
   await expect(Sidebar.getByRole('button', { name: 'Combo' })).toHaveAttribute('aria-current', 'page');
   await expect(page.getByRole('heading', { name: 'Combo', exact: true })).toBeVisible();
 
+  await page.getByRole('button', { name: 'Tạo combo', exact: true }).scrollIntoViewIfNeeded();
+  await page.getByRole('button', { name: 'Tạo combo', exact: true }).click();
+  await expect(page.getByText('Nhập mã combo và tên combo.')).toBeInViewport();
+  expect(Requests).toHaveLength(0);
+
   const field = (Label) => page.locator('.ms-input').filter({ hasText: Label }).locator('input').first();
   await field('Mã combo').fill('CB-001');
   await field('Tên combo').fill('Combo phòng trọ');

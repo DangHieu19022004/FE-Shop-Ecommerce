@@ -1,5 +1,5 @@
 <script setup>
-import { computed, inject, onMounted, reactive, ref } from "vue";
+import { computed, inject, nextTick, onMounted, reactive, ref } from "vue";
 import DMButton from "@/components/base/DMButton.vue";
 import DMInput from "@/components/base/DMInput.vue";
 import AdminProductVariantCombobox from "@/components/dormmart/AdminProductVariantCombobox.vue";
@@ -23,6 +23,7 @@ const Combos = ref([]);
 const ProductVariants = ref([]);
 const ErrorMessage = ref("");
 const SuccessMessage = ref("");
+const AlertRef = ref(null);
 const IsLoading = ref(false);
 const IsSaving = ref(false);
 const ComboForm = reactive({
@@ -103,6 +104,12 @@ const resetComboForm = () => {
 
 const toIsoOrNull = (Value) => Value ? new Date(Value).toISOString() : null;
 
+const showError = async (Message) => {
+  ErrorMessage.value = Message;
+  await nextTick();
+  AlertRef.value?.scrollIntoView({ behavior: "smooth", block: "center" });
+};
+
 const loadProductVariants = async () => {
   const ProductData = await getAdminProducts({ PageIndex: 1, PageSize: 100 });
   const ProductItems = Array.isArray(ProductData?.Items) ? ProductData.Items : [];
@@ -162,7 +169,7 @@ const submitCombo = async () => {
   SuccessMessage.value = "";
 
   if (!ComboForm.ComboCode.trim() || !ComboForm.Name.trim()) {
-    ErrorMessage.value = Text.ValidationCodeAndNameRequired;
+    await showError(Text.ValidationCodeAndNameRequired);
     return;
   }
 
@@ -171,7 +178,7 @@ const submitCombo = async () => {
     .filter((Item) => Item.ProductVariantId && Item.Quantity > 0);
 
   if (Items.length < 2) {
-    ErrorMessage.value = Text.ValidationItemsRequired;
+    await showError(Text.ValidationItemsRequired);
     return;
   }
 
@@ -202,7 +209,7 @@ const submitCombo = async () => {
     resetComboForm();
     await loadCombos();
   } catch (Error) {
-    ErrorMessage.value = Error.message;
+    await showError(Error.message);
   } finally {
     IsSaving.value = false;
   }
@@ -214,6 +221,7 @@ const editCombo = async (ComboId) => {
 
   try {
     const Combo = await getAdminComboById(ComboId);
+    AlertRef.value?.scrollIntoView({ behavior: "smooth", block: "center" });
     ComboForm.ComboId = Combo.ComboId;
     ComboForm.ComboCode = Combo.ComboCode || "";
     ComboForm.Name = Combo.Name || "";
@@ -232,7 +240,7 @@ const editCombo = async (ComboId) => {
     }));
     SuccessMessage.value = Text.EditingSuccess.replace("{name}", Combo.Name || Combo.ComboCode);
   } catch (Error) {
-    ErrorMessage.value = Error.message;
+    await showError(Error.message);
   }
 };
 
@@ -244,7 +252,7 @@ const removeCombo = async (ComboId) => {
     SuccessMessage.value = Text.DeleteSuccess;
     await loadCombos();
   } catch (Error) {
-    ErrorMessage.value = Error.message;
+    await showError(Error.message);
   }
 };
 
@@ -266,7 +274,7 @@ const submitDiscount = async (ComboId) => {
   SuccessMessage.value = "";
 
   if ((Number(Form.DiscountValue) || 0) <= 0) {
-    ErrorMessage.value = Text.ValidationDiscountValueRequired;
+    await showError(Text.ValidationDiscountValueRequired);
     return;
   }
 
@@ -289,7 +297,7 @@ const submitDiscount = async (ComboId) => {
     resetDiscountForm(ComboId);
     await loadCombos();
   } catch (Error) {
-    ErrorMessage.value = Error.message;
+    await showError(Error.message);
   }
 };
 
@@ -301,7 +309,7 @@ const removeDiscount = async (ComboId, DiscountId) => {
     SuccessMessage.value = Text.DiscountDeleteSuccess;
     await loadCombos();
   } catch (Error) {
-    ErrorMessage.value = Error.message;
+    await showError(Error.message);
   }
 };
 
@@ -336,8 +344,8 @@ onMounted(loadCombos);
       </article>
     </div>
 
-    <div v-if="ErrorMessage" class="admin-combos__alert admin-combos__alert--danger dm-card">{{ ErrorMessage }}</div>
-    <div v-if="SuccessMessage" class="admin-combos__alert dm-card">{{ SuccessMessage }}</div>
+    <div v-if="ErrorMessage" ref="AlertRef" class="admin-combos__alert admin-combos__alert--danger dm-card" role="alert" tabindex="-1">{{ ErrorMessage }}</div>
+    <div v-else-if="SuccessMessage" ref="AlertRef" class="admin-combos__alert dm-card" role="status" tabindex="-1">{{ SuccessMessage }}</div>
     <div v-if="IsLoading" class="admin-combos__alert dm-card">{{ Text.Loading }}</div>
 
     <article class="dm-card admin-panel admin-form">
@@ -357,14 +365,14 @@ onMounted(loadCombos);
         <DMInput v-model="ComboForm.CategoryName" :label="Text.CategoryName" :description="buildFieldDescription(Text.CategoryNameHint, Text.CategoryNamePlaceholder)" :placeholder="Text.CategoryNamePlaceholder" />
         <DMInput v-model="ComboForm.Badge" :label="Text.Badge" :description="buildFieldDescription(Text.BadgeHint, Text.BadgePlaceholder)" :placeholder="Text.BadgePlaceholder" />
         <DMInput v-model="ComboForm.Description" :label="Text.Description" :description="buildFieldDescription(Text.DescriptionHint, Text.DescriptionPlaceholder)" :placeholder="Text.DescriptionPlaceholder" />
-        <label class="admin-combos__toggle">
+        <div class="admin-combos__toggle">
           <span>{{ Text.IsFeatured }}</span>
           <input v-model="ComboForm.IsFeatured" type="checkbox" />
-        </label>
-        <label class="admin-combos__toggle">
+        </div>
+        <div class="admin-combos__toggle">
           <span>{{ Text.IsActive }}</span>
           <input v-model="ComboForm.IsActive" type="checkbox" />
-        </label>
+        </div>
       </div>
 
       <div class="admin-panel__header" style="margin-top: 18px;">
@@ -386,10 +394,10 @@ onMounted(loadCombos);
           />
           <DMInput v-model="Item.Quantity" :label="Text.Quantity" type="number" :description="buildFieldDescription(Text.QuantityHint, Text.QuantityPlaceholder)" :placeholder="Text.QuantityPlaceholder" />
           <DMInput v-model="Item.SortOrder" :label="Text.SortOrder" type="number" :description="buildFieldDescription(Text.SortOrderHint, Text.SortOrderPlaceholder)" :placeholder="Text.SortOrderPlaceholder" />
-          <label class="admin-combos__toggle">
+          <div class="admin-combos__toggle">
             <span>{{ Text.Required }}</span>
             <input v-model="Item.IsRequired" type="checkbox" />
-          </label>
+          </div>
           <DMButton type="none" :is-tooltip="false" :message="Text.RemoveItem" class="admin-button admin-button--danger" :un-active="ComboForm.Items.length <= 2" @click="removeItemRow(Index)" />
         </div>
       </div>

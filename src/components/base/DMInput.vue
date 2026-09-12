@@ -1,6 +1,6 @@
 <template lang="">
   <div :class="['ms-input', { 'ms-input--horizontal': horizontal }]">
-    <label v-if="label" class="ms-input__label" :for="id">{{ label }} <span v-if="isRequired" class="color-red"> *</span></label>
+    <label v-if="label" class="ms-input__label" :for="id || undefined">{{ label }} <span v-if="isRequired" class="color-red"> *</span></label>
     <p v-if="description" class="ms-input__description">{{ description }}</p>
     <input
       v-bind="$attrs"
