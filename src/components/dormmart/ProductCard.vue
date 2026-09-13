@@ -215,6 +215,7 @@ const StatusBadgeType = computed(() => IsAvailable.value ? "warning" : "error");
   display: grid;
   margin-top: auto;
   gap: 12px;
+  justify-content: normal;
 }
 
 .product-card__details,

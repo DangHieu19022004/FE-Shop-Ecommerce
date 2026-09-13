@@ -2,6 +2,7 @@
 import { computed, inject, nextTick, onMounted, reactive, ref } from "vue";
 import DMButton from "@/components/base/DMButton.vue";
 import DMInput from "@/components/base/DMInput.vue";
+import DMSelect from "@/components/base/DMSelect.vue";
 import AdminProductVariantCombobox from "@/components/dormmart/AdminProductVariantCombobox.vue";
 import {
   createAdminCombo,
@@ -56,6 +57,10 @@ const ProductVariantOptions = computed(() => ProductVariants.value.map((Variant)
   Price: Number(Variant.SalePrice) || 0,
   ImageUrl: Variant.ImageUrl,
 })));
+const DiscountTypeOptions = computed(() => [
+  { Value: 0, Label: Text.DiscountTypePercent },
+  { Value: 1, Label: Text.DiscountTypeFixed },
+]);
 const buildFieldDescription = (...Parts) => Parts.filter(Boolean).join(" · ");
 
 const createEmptyDiscountForm = () => ({
@@ -449,7 +454,19 @@ onMounted(loadCombos);
           <div class="admin-combos__discount-box">
             <h3>{{ Text.DiscountTitle }}</h3>
             <div class="admin-combos__discount-grid">
-              <DMInput v-model="ensureDiscountForm(Combo.ComboId).DiscountType" :label="Text.DiscountType" type="number" :description="buildFieldDescription(Text.DiscountTypeHint, Text.DiscountTypePlaceholder)" :placeholder="Text.DiscountTypePlaceholder" />
+              <div class="admin-combos__field">
+                <DMSelect
+                  v-model="ensureDiscountForm(Combo.ComboId).DiscountType"
+                  :label-text="Text.DiscountType"
+                  :data="DiscountTypeOptions"
+                  option-label="Label"
+                  track-by="Value"
+                  :allow-empty="false"
+                  :searchable="false"
+                  width="100%"
+                />
+                <p class="admin-combos__help">{{ Text.DiscountTypeHint }}</p>
+              </div>
               <DMInput v-model="ensureDiscountForm(Combo.ComboId).DiscountValue" :label="Text.DiscountValue" type="number" :description="buildFieldDescription(Text.DiscountValueHint, Text.DiscountValuePlaceholder)" :placeholder="Text.DiscountValuePlaceholder" />
               <DMInput v-model="ensureDiscountForm(Combo.ComboId).StartsAt" :label="Text.StartsAt" type="datetime-local" :description="Text.StartsAtHint" />
               <DMInput v-model="ensureDiscountForm(Combo.ComboId).ExpiresAt" :label="Text.ExpiresAt" type="datetime-local" :description="Text.ExpiresAtHint" />
@@ -535,6 +552,18 @@ onMounted(loadCombos);
 .admin-combos__toggle input {
   width: 18px;
   height: 18px;
+}
+
+.admin-combos__field {
+  display: grid;
+  gap: 8px;
+}
+
+.admin-combos__help {
+  margin: 0;
+  color: var(--dm-text-soft);
+  font-size: 12px;
+  line-height: 1.4;
 }
 
 .admin-combos__items,
