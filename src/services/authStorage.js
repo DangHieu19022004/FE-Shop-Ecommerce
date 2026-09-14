@@ -3,7 +3,7 @@ export const REFRESH_TOKEN_STORAGE_KEY = "DORM_MART_REFRESH_TOKEN_V2";
 export const SESSION_STORAGE_KEY = "DORM_MART_SESSION_V2";
 export const SESSION_PERSIST_STORAGE_KEY = "DORM_MART_SESSION_PERSIST_V2";
 
-const getStorage = (ShouldPersist) => (ShouldPersist ? localStorage : sessionStorage);
+const getStorage = () => localStorage;
 
 const clearKey = (Key) => {
   localStorage.removeItem(Key);
