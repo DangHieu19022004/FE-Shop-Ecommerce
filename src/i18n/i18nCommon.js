@@ -113,6 +113,8 @@ const i18nCommon = {
     PricePending: "Giá đang cập nhật",
     ToPrice: "đến",
     ToPriceAmount: "đến {amount}",
+    BuyNow: "Mua ngay",
+    BuyingNow: "Đang chuyển...",
   },
   Combo: {
     Eyebrow: "Mua gọn hơn · Tiết kiệm hơn",

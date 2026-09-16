@@ -34,12 +34,22 @@
             <strong v-if="HasPrice">{{ CurrentPriceText }}</strong>
             <strong v-else class="product-card__price--pending">{{ Text.PricePending }}</strong>
           </div>
-          <QuickAddCartButton
-            v-if="CanQuickAdd"
-            :ProductSlug="Product.Slug"
-            :ProductVariantId="Product.ProductVariantId"
-            :ImageUrl="Product.PrimaryImageUrl || ''"
-          />
+          <div v-if="CanQuickAdd" class="product-card__actions">
+            <QuickAddCartButton
+              :ProductSlug="Product.Slug"
+              :ProductVariantId="Product.ProductVariantId"
+              :ImageUrl="Product.PrimaryImageUrl || ''"
+            />
+            <DMButton
+              type="warning"
+              :is-tooltip="false"
+              class="product-card__buy-now"
+              icon-name="shopping_bag"
+              :message="IsBuyingNow ? Text.BuyingNow : Text.BuyNow"
+              :un-active="IsBuyingNow"
+              @click="handleBuyNow"
+            />
+          </div>
         </div>
       </div>
     </div>
@@ -47,9 +57,11 @@
 </template>
 
 <script setup>
-import { computed, inject } from "vue";
+import { computed, inject, ref } from "vue";
+import { useRouter } from "vue-router";
+import DMButton from "@/components/base/DMButton.vue";
 import QuickAddCartButton from "@/components/dormmart/QuickAddCartButton.vue";
-import { getCartQuantityByProductSlug } from "@/stores/cartStore";
+import { addProductToCart, getCartQuantityByProductSlug } from "@/stores/cartStore";
 import { formatI18nText } from "@/utils/i18n";
 import { formatCurrency } from "@/utils/shopFormatters";
 
@@ -61,6 +73,8 @@ const Props = defineProps({
 });
 
 const Text = inject("i18nCommon").ProductCard;
+const Router = useRouter();
+const IsBuyingNow = ref(false);
 const ProductLink = computed(() => `/products/${Props.Product.Slug}`);
 const formatPriceRange = (MinPrice, MaxPrice) => {
   const Min = Number(MinPrice || 0);
@@ -97,6 +111,24 @@ const StatusBadgeText = computed(() => {
   return "";
 });
 const StatusBadgeType = computed(() => IsAvailable.value ? "warning" : "error");
+
+const handleBuyNow = async () => {
+  if (!CanQuickAdd.value || IsBuyingNow.value) return;
+  IsBuyingNow.value = true;
+
+  try {
+    await addProductToCart({
+      ProductSlug: Props.Product.Slug,
+      ProductVariantId: Props.Product.ProductVariantId,
+      Quantity: 1,
+    });
+    await Router.push({ name: "payment" });
+  } catch {
+    // ponytail: axios interceptor surfaces the API error in the global alert stack.
+  } finally {
+    IsBuyingNow.value = false;
+  }
+};
 </script>
 
 <style scoped lang="scss">
@@ -234,7 +266,8 @@ const StatusBadgeType = computed(() => IsAvailable.value ? "warning" : "error");
 }
 
 .product-card__commerce {
-  align-items: flex-end;
+  align-items: stretch;
+  flex-direction: column;
   padding-top: 12px;
   border-top: 1px solid var(--dm-border);
 }
@@ -304,6 +337,23 @@ const StatusBadgeType = computed(() => IsAvailable.value ? "warning" : "error");
   height: 44px !important;
   flex: 0 0 44px;
   transform: none;
+}
+
+.product-card__actions {
+  display: flex;
+  width: 100%;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 8px;
+}
+
+.product-card__buy-now {
+  width: 100%;
+  flex: 1;
+  min-height: 44px;
+  height: 44px;
+  padding: 0 12px;
+  font-weight: 750;
 }
 
 @media (max-width: 520px) {

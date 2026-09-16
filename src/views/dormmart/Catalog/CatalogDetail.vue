@@ -359,7 +359,7 @@ const handleAddToCart = async (Checkout) => {
     });
     ActionMessage.value = "Đã thêm sản phẩm vào giỏ hàng.";
     if (Checkout) {
-      Router.push({ name: "cart" });
+      Router.push({ name: "payment" });
     }
   } catch (Error) {
     ActionMessage.value = Error.message;

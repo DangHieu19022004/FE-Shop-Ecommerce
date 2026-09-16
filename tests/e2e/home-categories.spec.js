@@ -127,7 +127,7 @@ test('home groups products by category in wrapping grids without a horizontal ra
   const PriceAndButtonDoNotOverlap = await page.locator('.dm-home-flash .product-card').evaluate((Element) => {
     const PriceRect = Element.querySelector('.product-card__price').getBoundingClientRect();
     const ButtonRect = Element.querySelector('.quick-add-cart').getBoundingClientRect();
-    return PriceRect.right <= ButtonRect.left;
+    return PriceRect.bottom <= ButtonRect.top || PriceRect.right <= ButtonRect.left;
   });
   expect(PriceAndButtonDoNotOverlap).toBe(true);
 
