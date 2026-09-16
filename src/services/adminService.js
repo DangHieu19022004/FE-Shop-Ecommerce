@@ -207,6 +207,23 @@ export const deleteAdminOrder = async (OrderId) => {
   return unwrapData(Response);
 };
 
+export const getAdminInvoiceOrders = async () => {
+  const Response = await axiosInstance.get("/admin/invoices/orders");
+  return unwrapData(Response) || [];
+};
+
+export const getAdminInvoiceDraft = async (OrderId) => {
+  const Response = await axiosInstance.get(`/admin/invoices/orders/${OrderId}/draft`);
+  return unwrapData(Response);
+};
+
+export const exportAdminInvoice = async (Payload) => {
+  const Response = await axiosInstance.post("/admin/invoices/export", Payload, {
+    responseType: "blob",
+  });
+  return Response;
+};
+
 export const getAdminPayments = async () => {
   const Response = await axiosInstance.get("/admin/payments");
   return unwrapData(Response) || [];

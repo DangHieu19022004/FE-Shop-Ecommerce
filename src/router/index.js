@@ -28,6 +28,7 @@ import AdminProducts from "@/views/dormmart/Admin/AdminProducts.vue";
 import AdminCategories from "@/views/dormmart/Admin/AdminCategories.vue";
 import AdminBrands from "@/views/dormmart/Admin/AdminBrands.vue";
 import AdminOrders from "@/views/dormmart/Admin/AdminOrders.vue";
+import AdminInvoices from "@/views/dormmart/Admin/AdminInvoices.vue";
 import AdminFinance from "@/views/dormmart/Admin/AdminFinance.vue";
 import AdminAccounts from "@/views/dormmart/Admin/AdminAccounts.vue";
 import AdminSupport from "@/views/dormmart/Admin/AdminSupport.vue";
@@ -268,7 +269,7 @@ const routes = [
       {
         path: "invoices",
         name: "adminInvoices",
-        component: () => import("@/views/dormmart/Admin/AdminInvoices.vue"),
+        component: AdminInvoices,
         meta: { isActive: true },
       },
       {

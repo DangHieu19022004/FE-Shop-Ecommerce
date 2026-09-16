@@ -21,7 +21,7 @@ const PhonePattern = /^(0|\+84)[0-9]{9}$/;
 
 const redirectAfterLogin = () => {
   const RedirectPath = typeof Route.query.Redirect === "string" ? Route.query.Redirect : "/";
-  Router.push({ path: RedirectPath, query: { AuthMessage: Text.LoginSuccess } });
+  Router.push(RedirectPath);
 };
 
 const mapSocialAuthError = (Error, FallbackMessage) => Error?.message || FallbackMessage;

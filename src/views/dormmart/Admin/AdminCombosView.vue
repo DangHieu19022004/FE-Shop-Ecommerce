@@ -17,6 +17,7 @@ import {
   updateAdminComboDiscount,
 } from "@/services/adminService";
 import { confirmDelete } from "@/stores/confirmStore";
+import { createEmptyDiscountForm, getDiscountStatus, hydrateDiscountFormFromCombo, toApiLocalDateTime } from "./adminComboDiscountForms";
 import { formatCurrency, formatDateTime } from "@/utils/shopFormatters";
 
 const Text = inject("i18nCommon").AdminCombos;
@@ -61,16 +62,14 @@ const DiscountTypeOptions = computed(() => [
   { Value: 0, Label: Text.DiscountTypePercent },
   { Value: 1, Label: Text.DiscountTypeFixed },
 ]);
+const DiscountStatusText = {
+  Active: Text.DiscountStatusActive,
+  Inactive: Text.DiscountStatusInactive,
+  Scheduled: Text.DiscountStatusScheduled,
+  Expired: Text.DiscountStatusExpired,
+};
+const formatDiscountStatus = (Discount) => DiscountStatusText[getDiscountStatus(Discount)] || Text.DiscountStatusInactive;
 const buildFieldDescription = (...Parts) => Parts.filter(Boolean).join(" · ");
-
-const createEmptyDiscountForm = () => ({
-  ComboDiscountId: "",
-  DiscountType: 1,
-  DiscountValue: 0,
-  StartsAt: "",
-  ExpiresAt: "",
-  IsActive: true,
-});
 
 const ensureDiscountForm = (ComboId) => {
   if (!DiscountForms[ComboId]) {
@@ -107,8 +106,6 @@ const resetComboForm = () => {
   ];
 };
 
-const toIsoOrNull = (Value) => Value ? new Date(Value).toISOString() : null;
-
 const showError = async (Message) => {
   ErrorMessage.value = Message;
   await nextTick();
@@ -143,7 +140,7 @@ const loadCombos = async () => {
       loadProductVariants(),
     ]);
     Combos.value = ComboData;
-    Combos.value.forEach((Item) => ensureDiscountForm(Item.ComboId));
+    Combos.value.forEach((Item) => hydrateDiscountFormFromCombo(ensureDiscountForm(Item.ComboId), Item));
   } catch (Error) {
     ErrorMessage.value = Error.message;
   } finally {
@@ -243,6 +240,7 @@ const editCombo = async (ComboId) => {
       SortOrder: Number(Item.SortOrder || Index + 1),
       IsRequired: Boolean(Item.IsRequired),
     }));
+    hydrateDiscountFormFromCombo(ensureDiscountForm(Combo.ComboId), Combo);
     SuccessMessage.value = Text.EditingSuccess.replace("{name}", Combo.Name || Combo.ComboCode);
   } catch (Error) {
     await showError(Error.message);
@@ -286,8 +284,8 @@ const submitDiscount = async (ComboId) => {
   const Payload = {
     DiscountType: Number(Form.DiscountType),
     DiscountValue: Number(Form.DiscountValue) || 0,
-    StartsAt: toIsoOrNull(Form.StartsAt),
-    ExpiresAt: toIsoOrNull(Form.ExpiresAt),
+    StartsAt: toApiLocalDateTime(Form.StartsAt),
+    ExpiresAt: toApiLocalDateTime(Form.ExpiresAt),
     IsActive: Boolean(Form.IsActive),
   };
 
@@ -496,7 +494,7 @@ onMounted(loadCombos);
                   <td>{{ formatCurrency(Discount.DiscountValue || 0) }}</td>
                   <td>{{ formatDateTime(Discount.StartsAt) }}</td>
                   <td>{{ formatDateTime(Discount.ExpiresAt) }}</td>
-                  <td>{{ Discount.IsActive ? Text.Active : Text.Inactive }}</td>
+                  <td>{{ formatDiscountStatus(Discount) }}</td>
                   <td>
                     <div class="admin-table-actions">
                       <DMButton type="none" :is-tooltip="false" :message="Text.Edit" class="admin-button" @click="editDiscount(Combo.ComboId, Discount)" />
