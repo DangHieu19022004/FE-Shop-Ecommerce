@@ -89,6 +89,8 @@ test('home groups products by category in wrapping grids without a horizontal ra
 
   await page.goto('/');
 
+  await expect(page.getByRole('heading', { name: 'Mua sắm theo danh mục' })).toBeVisible();
+  await expect(page.locator('.dm-home-combos')).toHaveCount(0);
   await expect(page.locator('.dm-home-category-section')).toHaveCount(Categories.length);
   await expect(page.locator('.dm-home-category-section .product-card')).toHaveCount(Products.length);
   await expect(page.locator('.dm-home-flash .product-card')).toHaveCount(1);
@@ -99,7 +101,16 @@ test('home groups products by category in wrapping grids without a horizontal ra
   await expect(page.locator('.dm-home-flash .product-card__price del')).toHaveText('35.000 ₫');
   await expect(page.locator('.dm-home-category-section .dm-badge--primary')).toHaveCount(Products.length);
   await expect(page.locator('.dm-home-category-section .dm-badge--error')).toHaveCount(1);
-  await expect(page.locator('.dm-home-hero .dm-badge--warning')).toBeVisible();
+  await expect(page.locator('.dm-home-hero__slide')).toHaveCount(3);
+  await expect(page.locator('.dm-home-hero__slide--active .dm-badge--warning')).toBeVisible();
+  await expect(page.locator('.dm-home-hero__dot')).toHaveCount(3);
+  const HeroActionPositions = await page.locator('.dm-home-hero__actions').evaluateAll((Elements) => Elements.map((Element) => {
+    const Bounds = Element.getBoundingClientRect();
+    return `${Math.round(Bounds.left)}:${Math.round(Bounds.top)}`;
+  }));
+  expect(new Set(HeroActionPositions).size).toBe(1);
+  await page.locator('.dm-home-hero__dot').nth(2).click();
+  await expect(page.locator('.dm-home-hero__slide--active h1')).toHaveText('Canh giờ săn giá sốc');
   await expect(page.getByRole('heading', { name: 'Chăm sóc cá nhân' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Đồ điện gia dụng' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Vệ sinh nhà cửa' })).toBeVisible();

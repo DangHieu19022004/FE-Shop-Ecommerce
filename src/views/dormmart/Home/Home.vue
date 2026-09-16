@@ -1,15 +1,56 @@
 <template>
-  <section class="dm-card dm-home-hero" style="overflow: hidden; position: relative; min-height: 360px; margin-bottom: 24px;">
-    <img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1600&q=80" :alt="Text.HeroAlt" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;" />
-    <div style="position: absolute; inset: 0; background: linear-gradient(90deg, rgba(0, 23, 66, 0.86), rgba(0, 23, 66, 0.18));"></div>
-    <div style="position: relative; z-index: 1; padding: 36px; max-width: 520px; color: #fff;">
-      <DMBadge warning style="margin-bottom: 18px;">{{ Text.PromotionBadge }}</DMBadge>
-      <h1 style="font-size: clamp(28px, 4vw, 44px); line-height: 1.05; margin-bottom: 12px;">{{ Text.HeroTitle }}</h1>
-      <p style="font-size: 16px; line-height: 1.6; margin-bottom: 22px;">{{ Text.HeroDescription }}</p>
-      <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-        <router-link to="/products" class="dm-btn-ghost" style="background: #fff;">{{ Text.ShopCatalog }}</router-link>
-        <router-link :to="{ name: 'comboList' }" class="dm-btn-ghost" style="background: var(--dm-primary-soft); color: var(--dm-primary);">{{ Text.ExploreCombos }}</router-link>
+  <section
+    class="dm-card dm-home-hero"
+    role="region"
+    aria-roledescription="carousel"
+    :aria-label="Text.HeroCarouselLabel"
+    tabindex="0"
+    @mouseenter="pauseHeroSlider"
+    @mouseleave="resumeHeroSlider"
+    @focusin="pauseHeroSlider"
+    @focusout="resumeHeroSlider"
+    @keydown.left.prevent="previousHeroSlide"
+    @keydown.right.prevent="nextHeroSlide"
+  >
+    <article
+      v-for="(Slide, SlideIndex) in HeroSlides"
+      :key="Slide.Id"
+      class="dm-home-hero__slide"
+      :class="{ 'dm-home-hero__slide--active': SlideIndex === ActiveHeroSlideIndex }"
+      :aria-hidden="SlideIndex !== ActiveHeroSlideIndex"
+    >
+      <img class="dm-home-hero__image" :src="Slide.ImageUrl" :alt="Slide.ImageAlt" />
+      <div class="dm-home-hero__overlay"></div>
+      <div class="dm-home-hero__content">
+        <DMBadge warning class="dm-home-hero__badge">{{ Slide.Badge }}</DMBadge>
+        <h1>{{ Slide.Title }}</h1>
+        <p>{{ Slide.Description }}</p>
+        <div class="dm-home-hero__actions">
+          <router-link :to="Slide.PrimaryLink" class="dm-btn-ghost dm-home-hero__primary-action">{{ Slide.PrimaryAction }}</router-link>
+          <router-link :to="Slide.SecondaryLink" class="dm-btn-ghost dm-home-hero__secondary-action">{{ Slide.SecondaryAction }}</router-link>
+        </div>
       </div>
+    </article>
+
+    <div class="dm-home-hero__controls" aria-label="Điều khiển slide">
+      <button type="button" class="dm-home-hero__arrow" :aria-label="Text.PreviousSlide" @click="previousHeroSlide">
+        <span class="material-symbols-outlined" aria-hidden="true">chevron_left</span>
+      </button>
+      <div class="dm-home-hero__dots">
+        <button
+          v-for="(Slide, SlideIndex) in HeroSlides"
+          :key="`${Slide.Id}-dot`"
+          type="button"
+          class="dm-home-hero__dot"
+          :class="{ 'dm-home-hero__dot--active': SlideIndex === ActiveHeroSlideIndex }"
+          :aria-label="`${Text.GoToSlide} ${SlideIndex + 1}: ${Slide.Title}`"
+          :aria-current="SlideIndex === ActiveHeroSlideIndex ? 'true' : undefined"
+          @click="selectHeroSlide(SlideIndex)"
+        ></button>
+      </div>
+      <button type="button" class="dm-home-hero__arrow" :aria-label="Text.NextSlide" @click="nextHeroSlide">
+        <span class="material-symbols-outlined" aria-hidden="true">chevron_right</span>
+      </button>
     </div>
   </section>
 
@@ -102,6 +143,44 @@ import { getCategories, getProducts } from "@/services/catalogService";
 import { getActiveFlashSales } from "@/services/checkoutService";
 
 const Text = inject("i18nCommon").Home;
+const HeroSlides = [
+  {
+    Id: "student-space",
+    Badge: Text.PromotionBadge,
+    Title: Text.HeroTitle,
+    Description: Text.HeroDescription,
+    ImageAlt: Text.HeroAlt,
+    ImageUrl: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1600&q=80",
+    PrimaryAction: Text.ShopCatalog,
+    PrimaryLink: { name: "productList" },
+    SecondaryAction: Text.ExploreCombos,
+    SecondaryLink: { name: "comboList" },
+  },
+  {
+    Id: "combo-deal",
+    Badge: Text.ComboSlideBadge,
+    Title: Text.ComboSlideTitle,
+    Description: Text.ComboSlideDescription,
+    ImageAlt: Text.ComboSlideAlt,
+    ImageUrl: "https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&w=1600&q=80",
+    PrimaryAction: Text.ComboSlideAction,
+    PrimaryLink: { name: "comboList" },
+    SecondaryAction: Text.ShopCatalog,
+    SecondaryLink: { name: "productList" },
+  },
+  {
+    Id: "flash-sale",
+    Badge: Text.FlashSlideBadge,
+    Title: Text.FlashSlideTitle,
+    Description: Text.FlashSlideDescription,
+    ImageAlt: Text.FlashSlideAlt,
+    ImageUrl: "https://images.unsplash.com/photo-1607082349566-187342175e2f?auto=format&fit=crop&w=1600&q=80",
+    PrimaryAction: Text.FlashSlideAction,
+    PrimaryLink: { name: "productList", query: { Sort: "price_asc" } },
+    SecondaryAction: Text.ExploreCombos,
+    SecondaryLink: { name: "comboList" },
+  },
+];
 const Categories = ref([]);
 const FlashSales = ref([]);
 const FlashProducts = ref([]);
@@ -109,7 +188,47 @@ const DiscoverProducts = ref([]);
 const IsLoading = ref(false);
 const ErrorMessage = ref("");
 const Now = ref(Date.now());
+const ActiveHeroSlideIndex = ref(0);
+const IsHeroSliderPaused = ref(false);
 let CountdownTimer = null;
+let HeroSlideTimer = null;
+
+const stopHeroSlider = () => {
+  if (!HeroSlideTimer) return;
+  window.clearInterval(HeroSlideTimer);
+  HeroSlideTimer = null;
+};
+
+const startHeroSlider = () => {
+  stopHeroSlider();
+  if (IsHeroSliderPaused.value || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  HeroSlideTimer = window.setInterval(() => {
+    ActiveHeroSlideIndex.value = (ActiveHeroSlideIndex.value + 1) % HeroSlides.length;
+  }, 2000);
+};
+
+const selectHeroSlide = (SlideIndex) => {
+  ActiveHeroSlideIndex.value = SlideIndex;
+  startHeroSlider();
+};
+
+const nextHeroSlide = () => {
+  selectHeroSlide((ActiveHeroSlideIndex.value + 1) % HeroSlides.length);
+};
+
+const previousHeroSlide = () => {
+  selectHeroSlide((ActiveHeroSlideIndex.value - 1 + HeroSlides.length) % HeroSlides.length);
+};
+
+const pauseHeroSlider = () => {
+  IsHeroSliderPaused.value = true;
+  stopHeroSlider();
+};
+
+const resumeHeroSlider = () => {
+  IsHeroSliderPaused.value = false;
+  startHeroSlider();
+};
 
 const FlashSaleCount = computed(() => FlashProducts.value.length);
 const ActiveFlashSale = computed(() => FlashSales.value[0] || null);
@@ -208,6 +327,7 @@ const loadHomeData = async () => {
 
 onMounted(() => {
   loadHomeData();
+  startHeroSlider();
   CountdownTimer = window.setInterval(() => {
     Now.value = Date.now();
   }, 1000);
@@ -215,10 +335,190 @@ onMounted(() => {
 
 onUnmounted(() => {
   if (CountdownTimer) window.clearInterval(CountdownTimer);
+  stopHeroSlider();
 });
 </script>
 
 <style scoped lang="scss">
+.dm-home-hero {
+  position: relative;
+  min-height: 360px;
+  overflow: hidden;
+  margin-bottom: 24px;
+  background: #0b244d;
+  color: #fff;
+  isolation: isolate;
+}
+
+.dm-home-hero:focus-visible {
+  outline: 3px solid var(--dm-warning);
+  outline-offset: 3px;
+}
+
+.dm-home-hero__slide {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.55s ease, visibility 0.55s ease;
+}
+
+.dm-home-hero__slide--active {
+  z-index: 1;
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.dm-home-hero__image,
+.dm-home-hero__overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.dm-home-hero__image {
+  object-fit: cover;
+  transform: scale(1.035);
+  transition: transform 5s ease-out;
+}
+
+.dm-home-hero__slide--active .dm-home-hero__image {
+  transform: scale(1);
+}
+
+.dm-home-hero__overlay {
+  background: linear-gradient(90deg, rgba(0, 23, 66, 0.9) 0%, rgba(0, 23, 66, 0.66) 44%, rgba(0, 23, 66, 0.12) 100%);
+}
+
+.dm-home-hero__content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  min-height: 360px;
+  max-width: 570px;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 36px 36px 72px;
+}
+
+.dm-home-hero__badge {
+  margin-bottom: 18px;
+}
+
+.dm-home-hero__content h1,
+.dm-home-hero__content p {
+  margin-top: 0;
+}
+
+.dm-home-hero__content h1 {
+  max-width: 540px;
+  min-height: 2.1em;
+  margin-bottom: 12px;
+  font-size: clamp(28px, 4vw, 44px);
+  line-height: 1.05;
+}
+
+.dm-home-hero__content p {
+  max-width: 520px;
+  min-height: 3.2em;
+  margin-bottom: 22px;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.dm-home-hero__actions,
+.dm-home-hero__controls,
+.dm-home-hero__dots {
+  display: flex;
+  align-items: center;
+}
+
+.dm-home-hero__actions {
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.dm-home-hero__primary-action {
+  background: #fff;
+}
+
+.dm-home-hero__secondary-action {
+  border-color: rgba(255, 255, 255, 0.45);
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+  backdrop-filter: blur(8px);
+}
+
+.dm-home-hero__controls {
+  position: absolute;
+  right: 24px;
+  bottom: 22px;
+  z-index: 4;
+  gap: 10px;
+  padding: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
+  background: rgba(0, 23, 66, 0.46);
+  backdrop-filter: blur(10px);
+}
+
+.dm-home-hero__arrow,
+.dm-home-hero__dot {
+  border: 0;
+  cursor: pointer;
+}
+
+.dm-home-hero__arrow {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+}
+
+.dm-home-hero__arrow:hover,
+.dm-home-hero__arrow:focus-visible {
+  background: #fff;
+  color: var(--dm-primary);
+}
+
+.dm-home-hero__arrow .material-symbols-outlined {
+  font-size: 22px;
+}
+
+.dm-home-hero__dots {
+  gap: 7px;
+}
+
+.dm-home-hero__dot {
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.5);
+  transition: width 0.2s ease, background 0.2s ease;
+}
+
+.dm-home-hero__dot--active {
+  width: 26px;
+  background: var(--dm-warning);
+}
+
+.dm-home-hero__arrow:focus-visible,
+.dm-home-hero__dot:focus-visible,
+.dm-home-hero__actions a:focus-visible {
+  outline: 3px solid var(--dm-warning);
+  outline-offset: 2px;
+}
+
 .dm-home-flash {
   display: grid;
   gap: 18px;
@@ -362,6 +662,32 @@ onUnmounted(() => {
 }
 
 @media (max-width: 720px) {
+  .dm-home-hero {
+    min-height: 480px;
+  }
+
+  .dm-home-hero__content {
+    min-height: 480px;
+    padding: 28px 20px 92px;
+  }
+
+  .dm-home-hero__content p {
+    min-height: 4.8em;
+    font-size: 15px;
+  }
+
+  .dm-home-hero__actions {
+    width: min(100%, 240px);
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .dm-home-hero__controls {
+    right: auto;
+    left: 20px;
+    bottom: 20px;
+  }
+
   .dm-home-flash {
     padding: 16px;
   }
@@ -373,6 +699,14 @@ onUnmounted(() => {
 
   .dm-home-category-section__grid {
     grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dm-home-hero__slide,
+  .dm-home-hero__image,
+  .dm-home-hero__dot {
+    transition: none;
   }
 }
 </style>
