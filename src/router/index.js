@@ -8,6 +8,7 @@ import CatalogList from "@/views/dormmart/Catalog/CatalogList.vue";
 import CatalogDetail from "@/views/dormmart/Catalog/CatalogDetail.vue";
 import ComboList from "@/views/dormmart/Combo/ComboList.vue";
 import ComboDetail from "@/views/dormmart/Combo/ComboDetail.vue";
+import PromotionList from "@/views/dormmart/Promotion/PromotionList.vue";
 import Cart from "@/views/dormmart/Cart/Cart.vue";
 import Checkout from "@/views/dormmart/Checkout/Checkout.vue";
 import Payment from "@/views/dormmart/Checkout/Payment.vue";
@@ -87,6 +88,12 @@ const routes = [
         path: "combos/:slug",
         name: "comboDetail",
         component: ComboDetail,
+        meta: { isActive: true },
+      },
+      {
+        path: "promotions",
+        name: "promotionList",
+        component: PromotionList,
         meta: { isActive: true },
       },
       {
@@ -256,6 +263,12 @@ const routes = [
         path: "orders",
         name: "adminOrders",
         component: AdminOrders,
+        meta: { isActive: true },
+      },
+      {
+        path: "invoices",
+        name: "adminInvoices",
+        component: () => import("@/views/dormmart/Admin/AdminInvoices.vue"),
         meta: { isActive: true },
       },
       {

@@ -6,6 +6,7 @@
           <router-link v-if="IsAdmin" to="/admin">Admin</router-link>
           <router-link to="/">Trang chủ</router-link>
           <router-link to="/products">Danh sách sản phẩm</router-link>
+          <router-link :to="{ name: 'promotionList' }">{{ Text.PromotionLink }}</router-link>
           <router-link :to="{ name: 'comboList' }">{{ Text.ComboLink }}</router-link>
           <router-link to="/about">Về chúng tôi</router-link>
         </div>

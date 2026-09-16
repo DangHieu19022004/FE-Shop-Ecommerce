@@ -29,6 +29,7 @@
           <span class="material-symbols-outlined">shopping_cart</span>
           <span>{{ Text.Orders }}</span>
         </router-link>
+        <router-link :class="linkClass('/admin/invoices')" to="/admin/invoices"><span class="material-symbols-outlined">receipt_long</span><span>{{ Text.Invoices }}</span></router-link>
         <router-link :class="linkClass('/admin/support')" to="/admin/support"><span class="material-symbols-outlined">support_agent</span><span>{{ Text.Support }}</span></router-link>
         <router-link :class="linkClass('/admin/reviews')" to="/admin/reviews"><span class="material-symbols-outlined">reviews</span><span>Đánh giá</span></router-link>
         <router-link :class="linkClass('/admin/promotions')" to="/admin/promotions"><span class="material-symbols-outlined">sell</span><span>Khuyến mãi</span></router-link>

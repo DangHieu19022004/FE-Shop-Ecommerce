@@ -56,6 +56,7 @@ const NavigationItems = computed(() => [
   { Path: "/admin/categories", Icon: "category", Label: Text.Categories },
   { Path: "/admin/brands", Icon: "branding_watermark", Label: Text.Brands },
   { Path: "/admin/orders", Icon: "shopping_cart", Label: Text.Orders },
+  { Path: "/admin/invoices", Icon: "receipt_long", Label: Text.Invoices },
   { Path: "/admin/support", Icon: "support_agent", Label: Text.Support },
   { Path: "/admin/reviews", Icon: "reviews", Label: "Đánh giá" },
   { Path: "/admin/promotions", Icon: "sell", Label: "Khuyến mãi" },

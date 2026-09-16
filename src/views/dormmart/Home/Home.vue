@@ -58,20 +58,50 @@
     {{ ErrorMessage }}
   </div>
 
-  <section style="margin-bottom: 24px;">
-    <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 16px;">
-      <h2 style="font-size: 24px;">{{ Text.CategoryTitle }}
-      </h2>
-      <router-link to="/products" style="color: var(--dm-primary); font-weight: 600;">{{ Text.SeeAll }}</router-link>
+  <section class="dm-home-shopping-categories">
+    <div class="dm-home-shopping-categories__header">
+      <div>
+        <h2>{{ Text.CategoryTitle }}</h2>
+        <p>{{ Text.CategorySubtitle }}</p>
+      </div>
+      <router-link to="/products">{{ Text.SeeAll }}</router-link>
     </div>
-    <div class="dm-grid" style="grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));">
-      <router-link v-for="CategoryItem in Categories" :key="CategoryItem.Id" :to="`/products?CategoryId=${CategoryItem.Id}`" class="dm-card" style="padding: 18px 12px; text-align: center; display: block; color: inherit;">
-        <div style="width: 52px; height: 52px; border-radius: 50%; margin: 0 auto 10px; background: var(--dm-primary-soft); color: var(--dm-primary); display: grid; place-items: center;">
-          <span class="material-symbols-outlined">category</span>
-        </div>
-        <div style="font-weight: 600;">{{ CategoryItem.Name }}</div>
+
+    <div class="dm-home-shopping-categories__grid">
+      <router-link
+        :to="{ name: 'promotionList', query: { type: 'flash-sale' } }"
+        class="dm-card dm-home-category-card dm-home-category-card--sale"
+        :aria-label="`${Text.DiscountCategory}: ${Text.DiscountCategoryDescription}`"
+      >
+        <span class="dm-home-category-card__flag">{{ Text.DiscountCategoryBadge }}</span>
+        <span class="dm-home-category-card__icon" aria-hidden="true">
+          <span class="material-symbols-outlined">bolt</span>
+        </span>
+        <strong>{{ Text.DiscountCategory }}</strong>
+        <small>{{ Text.DiscountCategoryDescription }}</small>
+        <span class="dm-home-category-card__arrow material-symbols-outlined" aria-hidden="true">arrow_forward</span>
       </router-link>
-      <div v-if="!Categories.length && !IsLoading" class="dm-card" style="padding: 18px; color: var(--dm-text-soft);">{{ Text.DataFakeCategories }}</div>
+
+      <router-link
+        v-for="CategoryItem in Categories"
+        :key="CategoryItem.Id"
+        :to="{ name: 'productList', query: { CategoryId: CategoryItem.Id } }"
+        class="dm-card dm-home-category-card"
+      >
+        <span class="dm-home-category-card__icon" aria-hidden="true">
+          <span class="material-symbols-outlined">category</span>
+        </span>
+        <strong>{{ CategoryItem.Name }}</strong>
+        <small>{{ Text.CategoryCardDescription }}</small>
+        <span class="dm-home-category-card__arrow material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+      </router-link>
+
+      <div v-if="!Categories.length && !IsLoading" class="dm-card dm-home-category-card dm-home-category-card--empty">
+        <span class="dm-home-category-card__icon" aria-hidden="true">
+          <span class="material-symbols-outlined">category</span>
+        </span>
+        <strong>{{ Text.DataFakeCategories }}</strong>
+      </div>
     </div>
   </section>
 
@@ -176,7 +206,7 @@ const HeroSlides = [
     ImageAlt: Text.FlashSlideAlt,
     ImageUrl: "https://images.unsplash.com/photo-1607082349566-187342175e2f?auto=format&fit=crop&w=1600&q=80",
     PrimaryAction: Text.FlashSlideAction,
-    PrimaryLink: { name: "productList", query: { Sort: "price_asc" } },
+    PrimaryLink: { name: "promotionList", query: { type: "flash-sale" } },
     SecondaryAction: Text.ExploreCombos,
     SecondaryLink: { name: "comboList" },
   },
@@ -519,6 +549,158 @@ onUnmounted(() => {
   outline-offset: 2px;
 }
 
+.dm-home-shopping-categories {
+  margin-bottom: 28px;
+}
+
+.dm-home-shopping-categories__header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.dm-home-shopping-categories__header h2,
+.dm-home-shopping-categories__header p {
+  margin: 0;
+}
+
+.dm-home-shopping-categories__header h2 {
+  color: var(--dm-text);
+  font-size: 24px;
+}
+
+.dm-home-shopping-categories__header p {
+  margin-top: 5px;
+  color: var(--dm-text-soft);
+  font-size: 14px;
+}
+
+.dm-home-shopping-categories__header > a {
+  flex-shrink: 0;
+  color: var(--dm-primary);
+  font-weight: 750;
+}
+
+.dm-home-shopping-categories__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(168px, 1fr));
+  gap: 14px;
+}
+
+.dm-home-category-card {
+  position: relative;
+  display: grid;
+  min-width: 0;
+  min-height: 178px;
+  overflow: hidden;
+  align-content: start;
+  gap: 7px;
+  padding: 18px;
+  border: 1px solid var(--dm-border);
+  color: var(--dm-text);
+  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.dm-home-category-card:hover {
+  border-color: var(--dm-primary);
+  box-shadow: var(--dm-shadow);
+  transform: translateY(-3px);
+}
+
+.dm-home-category-card__icon {
+  display: grid;
+  width: 52px;
+  height: 52px;
+  margin-bottom: 4px;
+  place-items: center;
+  border-radius: 16px;
+  background: var(--dm-primary-soft);
+  color: var(--dm-primary);
+}
+
+.dm-home-category-card__icon .material-symbols-outlined {
+  font-size: 27px;
+}
+
+.dm-home-category-card strong {
+  overflow-wrap: anywhere;
+  font-size: 16px;
+  line-height: 1.35;
+}
+
+.dm-home-category-card small {
+  color: var(--dm-text-soft);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.dm-home-category-card__arrow {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  color: var(--dm-primary);
+  font-size: 20px;
+  transition: transform 180ms ease;
+}
+
+.dm-home-category-card:hover .dm-home-category-card__arrow {
+  transform: translateX(3px);
+}
+
+.dm-home-category-card--sale {
+  border-color: transparent;
+  background: linear-gradient(145deg, #991b1b 0%, #ef4444 58%, #f59e0b 100%);
+  color: #fff;
+  box-shadow: 0 14px 32px rgba(220, 38, 38, 0.2);
+}
+
+.dm-home-category-card--sale::after {
+  position: absolute;
+  width: 120px;
+  height: 120px;
+  border: 28px solid rgba(255, 255, 255, 0.09);
+  border-radius: 50%;
+  content: "";
+  right: -58px;
+  top: -58px;
+}
+
+.dm-home-category-card--sale:hover {
+  border-color: transparent;
+  box-shadow: 0 18px 38px rgba(220, 38, 38, 0.28);
+}
+
+.dm-home-category-card--sale .dm-home-category-card__icon {
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+}
+
+.dm-home-category-card--sale small,
+.dm-home-category-card--sale .dm-home-category-card__arrow {
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.dm-home-category-card__flag {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 1;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #fff;
+  color: #dc2626;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.dm-home-category-card--empty {
+  color: var(--dm-text-soft);
+  pointer-events: none;
+}
+
 .dm-home-flash {
   display: grid;
   gap: 18px;
@@ -690,6 +872,29 @@ onUnmounted(() => {
 
   .dm-home-flash {
     padding: 16px;
+  }
+
+  .dm-home-shopping-categories__header {
+    align-items: flex-start;
+  }
+
+  .dm-home-shopping-categories__header p {
+    max-width: 240px;
+  }
+
+  .dm-home-shopping-categories__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .dm-home-category-card {
+    min-height: 164px;
+    padding: 14px;
+  }
+
+  .dm-home-category-card__arrow {
+    right: 13px;
+    bottom: 13px;
   }
 
   .dm-home-discover__header,

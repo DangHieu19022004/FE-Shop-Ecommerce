@@ -33,6 +33,7 @@ const mapCombo = (Item) => ({
   ImageUrl: Item?.ImageUrl || "",
   Rating: Number(Item?.Rating || 0),
   SoldCount: Number(Item?.SoldCount || 0),
+  SortOrder: Item?.SortOrder ?? Item?.sortOrder ?? null,
   IsFeatured: Boolean(Item?.IsFeatured),
   IsActive: Boolean(Item?.IsActive ?? true),
   Discounts: Array.isArray(Item?.Discounts) ? Item.Discounts : [],

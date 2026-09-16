@@ -84,12 +84,21 @@ test('home groups products by category in wrapping grids without a horizontal ra
       return;
     }
 
+    if (Url.pathname.endsWith('/combos')) {
+      await Route.fulfill({ json: { Data: [] } });
+      return;
+    }
+
     await Route.fulfill({ status: 404, json: { Data: null } });
   });
 
   await page.goto('/');
 
   await expect(page.getByRole('heading', { name: 'Mua sắm theo danh mục' })).toBeVisible();
+  await expect(page.locator('.dm-home-shopping-categories .dm-home-category-card')).toHaveCount(Categories.length + 1);
+  const DiscountCategory = page.getByRole('link', { name: 'Đang giảm giá: Săn Flash Sale giá tốt' });
+  await expect(DiscountCategory).toBeVisible();
+  await expect(DiscountCategory).toHaveAttribute('href', '/promotions?type=flash-sale');
   await expect(page.locator('.dm-home-combos')).toHaveCount(0);
   await expect(page.locator('.dm-home-category-section')).toHaveCount(Categories.length);
   await expect(page.locator('.dm-home-category-section .product-card')).toHaveCount(Products.length);
@@ -173,4 +182,6 @@ test('home groups products by category in wrapping grids without a horizontal ra
   expect(MobileLongCardFits).toBe(true);
   await page.screenshot({ path: 'test-results/product-card-redesign-mobile.png', fullPage: true });
   await expect(page.locator('.dm-home-product-rail')).toHaveCount(0);
+  await DiscountCategory.click();
+  await expect(page).toHaveURL(/\/promotions\?type=flash-sale$/);
 });
