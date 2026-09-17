@@ -16,8 +16,12 @@
       v-for="(Slide, SlideIndex) in HeroSlides"
       :key="Slide.Id"
       class="dm-home-hero__slide"
-      :class="{ 'dm-home-hero__slide--active': SlideIndex === ActiveHeroSlideIndex }"
+      :class="{
+        'dm-home-hero__slide--active': SlideIndex === ActiveHeroSlideIndex,
+        'dm-home-hero__slide--clickable': Slide.ClickLink,
+      }"
       :aria-hidden="SlideIndex !== ActiveHeroSlideIndex"
+      @click="openHeroSlide(Slide, $event)"
     >
       <img class="dm-home-hero__image" :src="Slide.ImageUrl" :alt="Slide.ImageAlt" />
       <div class="dm-home-hero__overlay"></div>
@@ -168,11 +172,13 @@
 
 <script setup>
 import { computed, inject, onMounted, onUnmounted, ref } from "vue";
+import { useRouter } from "vue-router";
 import ProductCard from "@/components/dormmart/ProductCard.vue";
 import { getCategories, getProducts } from "@/services/catalogService";
 import { getActiveFlashSales } from "@/services/checkoutService";
 
 const Text = inject("i18nCommon").Home;
+const Router = useRouter();
 const HeroSlides = [
   {
     Id: "student-space",
@@ -195,6 +201,7 @@ const HeroSlides = [
     ImageUrl: "https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&w=1600&q=80",
     PrimaryAction: Text.ComboSlideAction,
     PrimaryLink: { name: "comboList" },
+    ClickLink: { name: "comboList" },
     SecondaryAction: Text.ShopCatalog,
     SecondaryLink: { name: "productList" },
   },
@@ -207,6 +214,7 @@ const HeroSlides = [
     ImageUrl: "https://images.unsplash.com/photo-1607082349566-187342175e2f?auto=format&fit=crop&w=1600&q=80",
     PrimaryAction: Text.FlashSlideAction,
     PrimaryLink: { name: "promotionList", query: { type: "flash-sale" } },
+    ClickLink: { name: "promotionList", query: { type: "flash-sale" } },
     SecondaryAction: Text.ExploreCombos,
     SecondaryLink: { name: "comboList" },
   },
@@ -248,6 +256,11 @@ const nextHeroSlide = () => {
 
 const previousHeroSlide = () => {
   selectHeroSlide((ActiveHeroSlideIndex.value - 1 + HeroSlides.length) % HeroSlides.length);
+};
+
+const openHeroSlide = (Slide, Event) => {
+  if (!Slide.ClickLink || Event.target.closest("a, button, input, select, textarea")) return;
+  Router.push(Slide.ClickLink);
 };
 
 const pauseHeroSlider = () => {
@@ -551,6 +564,15 @@ onUnmounted(() => {
 
 .dm-home-shopping-categories {
   margin-bottom: 28px;
+}
+
+.dm-home-hero__slide--clickable {
+  cursor: pointer;
+}
+
+.dm-home-hero__slide--clickable:focus-visible {
+  outline: 3px solid var(--dm-warning);
+  outline-offset: -6px;
 }
 
 .dm-home-shopping-categories__header {

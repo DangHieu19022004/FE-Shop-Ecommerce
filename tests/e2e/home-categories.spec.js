@@ -185,3 +185,32 @@ test('home groups products by category in wrapping grids without a horizontal ra
   await DiscountCategory.click();
   await expect(page).toHaveURL(/\/promotions\?type=flash-sale$/);
 });
+
+test('combo and flash sale hero slides navigate when their content is clicked', async ({ page }) => {
+  await page.route('**/api/**', async (Route) => {
+    const Url = new URL(Route.request().url());
+
+    if (Url.pathname.endsWith('/products')) {
+      await Route.fulfill({ json: { Data: { Items: [], Total: 0, PageIndex: 1, PageSize: 48 } } });
+      return;
+    }
+
+    await Route.fulfill({ json: { Data: [] } });
+  });
+
+  await page.goto('/');
+  await page.getByRole('button', { name: /Đi đến slide 2:/ }).click();
+
+  const ComboSlide = page.locator('.dm-home-hero__slide').nth(1);
+  await expect(ComboSlide).toHaveClass(/dm-home-hero__slide--clickable/);
+  await ComboSlide.getByRole('heading', { name: 'Mua theo combo, tiết kiệm hơn' }).click();
+  await expect(page).toHaveURL(/\/combos$/);
+
+  await page.goto('/');
+  await page.getByRole('button', { name: /Đi đến slide 3:/ }).click();
+
+  const FlashSaleSlide = page.locator('.dm-home-hero__slide').nth(2);
+  await expect(FlashSaleSlide).toHaveClass(/dm-home-hero__slide--clickable/);
+  await FlashSaleSlide.getByRole('heading', { name: 'Canh giờ săn giá sốc' }).click();
+  await expect(page).toHaveURL(/\/promotions\?type=flash-sale$/);
+});
