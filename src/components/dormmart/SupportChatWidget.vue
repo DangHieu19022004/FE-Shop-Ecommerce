@@ -16,8 +16,8 @@ const collapseWidget = () => {
   IsWidgetCollapsed.value = true;
 };
 const restoreWidget = () => { IsWidgetCollapsed.value = false; };
-const handleSend = () => { if (sendChatMessage(MessageInput.value, Text.AutoReply)) { MessageInput.value = ""; scrollToLatest(); } };
-const handleQuickReply = (QuickReplyText) => { MessageInput.value = QuickReplyText; handleSend(); };
+const handleSend = async () => { if (await sendChatMessage(MessageInput.value)) { MessageInput.value = ""; scrollToLatest(); } };
+const handleQuickReply = async (QuickReplyText) => { MessageInput.value = QuickReplyText; await handleSend(); };
 const formatTime = (DateValue) => new Intl.DateTimeFormat("vi-VN", { hour: "2-digit", minute: "2-digit" }).format(new Date(DateValue));
 watch([ChatMessages, IsChatOpen], scrollToLatest, { deep: true });
 </script>

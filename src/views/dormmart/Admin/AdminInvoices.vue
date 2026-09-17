@@ -3,8 +3,8 @@ import { computed, onMounted, reactive, ref, watch } from "vue";
 import DMButton from "@/components/base/DMButton.vue";
 import DMInput from "@/components/base/DMInput.vue";
 import DMTextarea from "@/components/base/DMTextarea.vue";
-import { getAdminOrderById, getAdminOrders } from "@/services/adminService";
-import { buildInvoiceQrDataUrl, generateInvoicePdf } from "@/services/invoiceService";
+import { exportAdminInvoice, getAdminInvoiceDraft, getAdminInvoiceOrders } from "@/services/adminService";
+import { buildInvoiceQrDataUrl } from "@/services/invoiceService";
 import { formatCurrency } from "@/utils/shopFormatters";
 
 const Orders = ref([]);
@@ -27,9 +27,7 @@ const Form = reactive({
   Note: "",
 });
 
-const paymentStatus = (Order) => Number(Order?.PaymentStatus ?? Order?.Payment?.Status ?? -1);
-const isInvoiceEligible = (Order) => Number(Order?.Status) === 1 && paymentStatus(Order) === 5;
-const EligibleOrders = computed(() => Orders.value.filter(isInvoiceEligible));
+const EligibleOrders = computed(() => Orders.value);
 const FilteredOrders = computed(() => {
   const Keyword = Search.value.trim().toLocaleLowerCase("vi");
   if (!Keyword) return EligibleOrders.value;
@@ -48,16 +46,15 @@ const CanExport = computed(() => Boolean(
 ));
 
 const resetFormErrors = () => Object.keys(FormErrors).forEach((Key) => delete FormErrors[Key]);
-const hydrateForm = (Order) => {
-  const Address = Order?.Address || Order?.ShippingAddress || {};
+const hydrateForm = (Draft) => {
   Object.assign(Form, {
-    RecipientName: Address.RecipientName ?? Address.recipientName ?? Order?.RecipientName ?? "",
-    PhoneNumber: Address.PhoneNumber ?? Address.phoneNumber ?? Order?.PhoneNumber ?? "",
-    AddressLine: Address.AddressLine ?? Address.addressLine ?? "",
-    Ward: Address.Ward ?? Address.ward ?? "",
-    District: Address.District ?? Address.district ?? "",
-    Province: Address.Province ?? Address.province ?? "",
-    Note: Order?.Note ?? "",
+    RecipientName: Draft?.RecipientName ?? "",
+    PhoneNumber: Draft?.PhoneNumber ?? "",
+    AddressLine: Draft?.AddressLine ?? "",
+    Ward: Draft?.Ward ?? "",
+    District: Draft?.District ?? "",
+    Province: Draft?.Province ?? "",
+    Note: Draft?.Order?.Note ?? "",
   });
   resetFormErrors();
 };
@@ -68,12 +65,12 @@ const selectOrder = async (Order) => {
   ErrorMessage.value = "";
   SuccessMessage.value = "";
   try {
-    const Detail = await getAdminOrderById(Order.OrderId);
-    if (!isInvoiceEligible(Detail)) throw new Error("Đơn hàng không còn ở trạng thái đã xác nhận và đã thanh toán.");
-    SelectedOrder.value = Detail;
-    hydrateForm(Detail);
+    const Draft = await getAdminInvoiceDraft(Order.OrderId);
+    SelectedOrder.value = Draft?.Order ?? null;
+    hydrateForm(Draft);
   } catch (Error) {
-    ErrorMessage.value = Error.message || "Không thể tải chi tiết đơn hàng.";
+    SelectedOrder.value = null;
+    ErrorMessage.value = Error.message || "Không thể tải chi tiết hóa đơn.";
   } finally {
     IsDetailLoading.value = false;
   }
@@ -83,7 +80,7 @@ const loadOrders = async () => {
   IsLoading.value = true;
   ErrorMessage.value = "";
   try {
-    Orders.value = await getAdminOrders();
+    Orders.value = await getAdminInvoiceOrders();
     const FirstEligibleOrder = EligibleOrders.value[0];
     if (FirstEligibleOrder) await selectOrder(FirstEligibleOrder);
     else SelectedOrder.value = null;
@@ -104,16 +101,45 @@ const validateForm = () => {
   return Object.keys(FormErrors).length === 0;
 };
 
+const fileNameFromDisposition = (Disposition) => {
+  const Match = String(Disposition || "").match(/filename\*?=(?:UTF-8''|\")?([^\";]+)/i);
+  return Match ? decodeURIComponent(Match[1].replaceAll('"', '').trim()) : null;
+};
+
+const downloadBlob = (BlobData, FileName) => {
+  const Url = URL.createObjectURL(BlobData);
+  const Link = document.createElement("a");
+  Link.href = Url;
+  Link.download = FileName;
+  document.body.appendChild(Link);
+  Link.click();
+  Link.remove();
+  URL.revokeObjectURL(Url);
+};
+
+const messageFromExportError = async (Error) => {
+  if (!(Error?.data instanceof Blob)) return Error.message;
+  try {
+    const Payload = JSON.parse(await Error.data.text());
+    return Payload.UserMessage || Payload.DevMessage || Error.message;
+  } catch {
+    return Error.message;
+  }
+};
+
 const exportInvoice = async () => {
   if (!SelectedOrder.value || !validateForm()) return;
   IsExporting.value = true;
   ErrorMessage.value = "";
   SuccessMessage.value = "";
   try {
-    const Result = await generateInvoicePdf({ Order: SelectedOrder.value, Form: { ...Form } });
-    SuccessMessage.value = `Đã tạo ${Result.FileName}. File sẵn sàng để in.`;
+    const Response = await exportAdminInvoice({ OrderId: SelectedOrder.value.OrderId, ...Form });
+    const SafeOrderCode = String(SelectedOrder.value.OrderCode || SelectedOrder.value.OrderId || "invoice").replace(/[^a-zA-Z0-9_-]/g, "-");
+    const FileName = fileNameFromDisposition(Response?.headers?.["content-disposition"]) || `invoice-${SafeOrderCode}.pdf`;
+    downloadBlob(Response, FileName);
+    SuccessMessage.value = `Đã tải ${FileName}.`;
   } catch (Error) {
-    ErrorMessage.value = Error.message || "Chưa thể tạo file hóa đơn.";
+    ErrorMessage.value = await messageFromExportError(Error) || "Chưa thể tạo file hóa đơn.";
   } finally {
     IsExporting.value = false;
   }
@@ -249,7 +275,7 @@ onMounted(loadOrders);
           </section>
 
           <footer class="admin-invoices__actions">
-            <div><span class="material-symbols-outlined">lock</span><p><strong>Xử lý tại frontend</strong><small>Chưa ghi dữ liệu hóa đơn lên backend.</small></p></div>
+            <div><span class="material-symbols-outlined">lock</span><p><strong>Xuất từ backend</strong><small>PDF được tạo từ API hóa đơn.</small></p></div>
             <DMButton
               type="warning"
               :is-tooltip="false"

@@ -46,6 +46,26 @@
         </form>
 
         <div class="dm-public-actions">
+          <DMDropdown
+            v-if="SessionData"
+            :Items="NotificationItems"
+            :Label="Text.NotificationLabel"
+            Icon="notifications"
+            :BadgeCount="UnreadCount"
+            :Loading="IsLoadingNotifications"
+            :LoadingText="Text.NotificationsLoading"
+            :ErrorText="NotificationError"
+            :RetryText="Text.RetryNotifications"
+            :EmptyText="Text.NotificationsEmpty"
+            :CloseOnSelect="false"
+            @open="loadNotifications"
+            @retry="loadNotifications"
+            @select="readNotification"
+          >
+            <template #footer="{ close }">
+              <router-link to="/profile/notifications" @click="close">{{ Text.AllNotifications }}</router-link>
+            </template>
+          </DMDropdown>
           <router-link class="dm-icon-btn dm-cart-button" to="/cart" :aria-label="Text.CartLabel">
             <span class="material-symbols-outlined">shopping_cart</span>
             <span v-if="CartTotalQuantity" class="dm-badge-dot">{{ CartTotalQuantity }}</span>
@@ -101,13 +121,16 @@
 </template>
 
 <script setup>
-import { computed, inject, ref, watch } from "vue";
+import { computed, inject, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import DMButton from "@/components/base/DMButton.vue";
+import DMDropdown from "@/components/base/DMDropdown.vue";
 import DMInput from "@/components/base/DMInput.vue";
 import { CartTotalQuantity } from "@/stores/cartStore";
 import SupportChatWidget from "@/components/dormmart/SupportChatWidget.vue";
 import { getCurrentSession } from "@/services/authService";
+import { getNotifications, getUnreadNotificationCount, markNotificationRead } from "@/services/expansionService";
+import { formatDateTime } from "@/utils/shopFormatters";
 
 const Route = useRoute();
 const Router = useRouter();
@@ -115,6 +138,21 @@ const Text = inject("i18nCommon").Common;
 const SessionData = computed(() => getCurrentSession());
 const IsAdmin = computed(() => SessionData.value?.Roles?.includes("Admin"));
 const SearchValue = ref("");
+const Notifications = ref([]);
+const UnreadCount = ref(0);
+const IsLoadingNotifications = ref(false);
+const NotificationError = ref("");
+const PendingNotificationId = ref(null);
+
+const NotificationItems = computed(() => Notifications.value.map((Item) => ({
+  Id: Item.NotificationId,
+  Title: Item.Title,
+  Description: Item.Content,
+  Meta: Item.CreateDate ? formatDateTime(Item.CreateDate) : "",
+  IsUnread: !Item.IsRead,
+  Icon: Item.IsRead ? "drafts" : "mark_email_unread",
+  Disabled: PendingNotificationId.value === Item.NotificationId,
+})));
 
 const submitSearch = () => {
   const Query = Route.name === "productList" ? { ...Route.query } : {};
@@ -125,6 +163,36 @@ const submitSearch = () => {
   return Router.push({ name: "productList", query: Query });
 };
 
+const loadNotifications = async () => {
+  if (!SessionData.value || IsLoadingNotifications.value) return;
+  IsLoadingNotifications.value = true;
+  NotificationError.value = "";
+  try {
+    const [List, Count] = await Promise.all([getNotifications(), getUnreadNotificationCount()]);
+    Notifications.value = List;
+    UnreadCount.value = Count;
+  } catch {
+    NotificationError.value = Text.NotificationsError;
+  } finally {
+    IsLoadingNotifications.value = false;
+  }
+};
+
+const readNotification = async (Item) => {
+  if (!Item.IsUnread || PendingNotificationId.value !== null) return;
+  PendingNotificationId.value = Item.Id;
+  try {
+    await markNotificationRead(Item.Id);
+    const Notification = Notifications.value.find((Entry) => Entry.NotificationId === Item.Id);
+    if (Notification) Notification.IsRead = true;
+    UnreadCount.value = Math.max(0, UnreadCount.value - 1);
+  } catch {
+    NotificationError.value = Text.NotificationsError;
+  } finally {
+    PendingNotificationId.value = null;
+  }
+};
+
 watch(
   () => Route.query.Search,
   (Search) => {
@@ -132,4 +200,6 @@ watch(
   },
   { immediate: true }
 );
+
+onMounted(loadNotifications);
 </script>

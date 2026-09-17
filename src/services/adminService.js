@@ -217,12 +217,10 @@ export const getAdminInvoiceDraft = async (OrderId) => {
   return unwrapData(Response);
 };
 
-export const exportAdminInvoice = async (Payload) => {
-  const Response = await axiosInstance.post("/admin/invoices/export", Payload, {
-    responseType: "blob",
-  });
-  return Response;
-};
+export const exportAdminInvoice = async (Payload) => axiosInstance.post("/admin/invoices/export", Payload, {
+  responseType: "blob",
+  SuppressErrorAlert: true,
+});
 
 export const getAdminPayments = async () => {
   const Response = await axiosInstance.get("/admin/payments");

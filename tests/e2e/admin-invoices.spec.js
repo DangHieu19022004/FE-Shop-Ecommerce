@@ -15,6 +15,9 @@ const ConfirmedPaidOrder = {
   Status: 1,
   PaymentMethod: 1,
   PaymentStatus: 5,
+  RecipientName: 'Nguyễn Văn An',
+  PhoneNumber: '0901234567',
+  AddressText: 'Phòng A101, Ký túc xá Đại học Quốc gia, Phường Linh Trung, Thành phố Thủ Đức, TP. Hồ Chí Minh',
   Subtotal: 170000,
   ShippingFee: 15000,
   Discount: 10000,
@@ -23,48 +26,50 @@ const ConfirmedPaidOrder = {
   CreateDate: '2026-09-16T08:30:00Z',
 };
 
-const PendingOrder = {
-  OrderId: 'invoice-order-pending',
-  OrderCode: 'ORD-PENDING-002',
-  Status: 0,
-  PaymentMethod: 1,
-  PaymentStatus: 2,
-  Total: 80000,
-  ItemCount: 1,
-};
-
-const ConfirmedPaidOrderDetail = {
+const ConfirmedPaidInvoiceDraft = {
   ...ConfirmedPaidOrder,
   Note: 'Gọi trước khi giao',
-  Address: {
-    RecipientName: 'Nguyễn Văn An',
-    PhoneNumber: '0901234567',
-    AddressLine: 'Phòng A101, Ký túc xá Đại học Quốc gia',
-    Ward: 'Phường Linh Trung',
-    District: 'Thành phố Thủ Đức',
-    Province: 'TP. Hồ Chí Minh',
+  AddressLine: 'Phòng A101, Ký túc xá Đại học Quốc gia',
+  Ward: 'Phường Linh Trung',
+  District: 'Thành phố Thủ Đức',
+  Province: 'TP. Hồ Chí Minh',
+  QrPayload: 'Mã đơn: ORD-INVOICE-001\nNgười nhận: Nguyễn Văn An\nSĐT: 0901234567\nĐịa chỉ: Phòng A101, Ký túc xá Đại học Quốc gia, Phường Linh Trung, Thành phố Thủ Đức, TP. Hồ Chí Minh',
+  Order: {
+    ...ConfirmedPaidOrder,
+    Note: 'Gọi trước khi giao',
+    Address: {
+      RecipientName: 'Nguyễn Văn An',
+      PhoneNumber: '0901234567',
+      AddressLine: 'Phòng A101, Ký túc xá Đại học Quốc gia',
+      Ward: 'Phường Linh Trung',
+      District: 'Thành phố Thủ Đức',
+      Province: 'TP. Hồ Chí Minh',
+    },
+    Items: [{
+      OrderItemId: 'invoice-item-1',
+      ProductName: 'Ấm siêu tốc Dorm Mart',
+      VariantName: 'Màu trắng',
+      Sku: 'AM-ST-001',
+      UnitPrice: 120000,
+      Quantity: 1,
+      LineTotal: 120000,
+    }],
+    Combos: [{
+      OrderComboId: 'invoice-combo-1',
+      ComboCode: 'COMBO-KTX',
+      Name: 'Combo nhập trọ',
+      Quantity: 1,
+      LineTotal: 50000,
+    }],
   },
-  Items: [{
-    OrderItemId: 'invoice-item-1',
-    ProductName: 'Ấm siêu tốc Dorm Mart',
-    VariantName: 'Màu trắng',
-    Sku: 'AM-ST-001',
-    UnitPrice: 120000,
-    Quantity: 1,
-    LineTotal: 120000,
-  }],
-  Combos: [{
-    OrderComboId: 'invoice-combo-1',
-    ComboCode: 'COMBO-KTX',
-    Name: 'Combo nhập trọ',
-    Quantity: 1,
-    LineTotal: 50000,
-  }],
 };
 
-test('admin invoice screen extracts a paid order and downloads a printable PDF with QR', async ({ page }) => {
+const PdfBytes = Buffer.from('%PDF-1.4\n1 0 obj<</Type/Catalog>>endobj\ntrailer<</Root 1 0 R>>\n%%EOF');
+
+test('admin invoice screen loads invoice API draft and downloads backend PDF', async ({ page }) => {
   const PageErrors = [];
   const UnexpectedRequests = [];
+  const ExportRequests = [];
   page.on('pageerror', (Error) => PageErrors.push(Error.message));
 
   await page.addInitScript((Session) => {
@@ -85,13 +90,25 @@ test('admin invoice screen extracts a paid order and downloads a printable PDF w
       return;
     }
 
-    if (Url.pathname.endsWith('/admin/orders')) {
-      await Route.fulfill({ json: { Data: [PendingOrder, ConfirmedPaidOrder] } });
+    if (Url.pathname.endsWith('/admin/invoices/orders')) {
+      await Route.fulfill({ json: { Data: [ConfirmedPaidOrder] } });
       return;
     }
 
-    if (Url.pathname.endsWith(`/admin/orders/${ConfirmedPaidOrder.OrderId}`)) {
-      await Route.fulfill({ json: { Data: ConfirmedPaidOrderDetail } });
+    if (Url.pathname.endsWith(`/admin/invoices/orders/${ConfirmedPaidOrder.OrderId}/draft`)) {
+      await Route.fulfill({ json: { Data: ConfirmedPaidInvoiceDraft } });
+      return;
+    }
+
+    if (Url.pathname.endsWith('/admin/invoices/export')) {
+      ExportRequests.push(JSON.parse(Route.request().postData() || '{}'));
+      await Route.fulfill({
+        body: PdfBytes,
+        headers: {
+          'Content-Type': 'application/pdf',
+          'Content-Disposition': 'attachment; filename="invoice-ORD-INVOICE-001.pdf"',
+        },
+      });
       return;
     }
 
@@ -104,7 +121,6 @@ test('admin invoice screen extracts a paid order and downloads a printable PDF w
   await expect(page.getByRole('heading', { name: 'Xuất hóa đơn' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Xuất hóa đơn' })).toBeVisible();
   await expect(page.getByText('ORD-INVOICE-001', { exact: true }).first()).toBeVisible();
-  await expect(page.getByText('ORD-PENDING-002')).toHaveCount(0);
 
   const field = (Label) => page.locator('.ms-input').filter({ hasText: Label }).locator('input');
   await expect(field('Tên người nhận')).toHaveValue('Nguyễn Văn An');
@@ -117,28 +133,26 @@ test('admin invoice screen extracts a paid order and downloads a printable PDF w
   const QrImage = page.getByAltText('Mã QR chứa địa chỉ và số điện thoại người nhận');
   await expect(QrImage).toBeVisible();
   await expect(QrImage).toHaveAttribute('src', /^data:image\/png;base64,/);
-  const QrPayload = await QrImage.evaluate(async (Image) => {
-    if (!('BarcodeDetector' in window)) return null;
-    const Detector = new window.BarcodeDetector({ formats: ['qr_code'] });
-    const Results = await Detector.detect(Image);
-    return Results[0]?.rawValue || null;
-  });
-  if (QrPayload) {
-    expect(QrPayload).toContain('0901234567');
-    expect(QrPayload).toContain('TP. Hồ Chí Minh');
-  }
   await page.screenshot({ path: 'test-results/admin-invoices-desktop.png', fullPage: true });
 
   const DownloadPromise = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Xác nhận & xuất PDF' }).click();
   const Download = await DownloadPromise;
-  expect(Download.suggestedFilename()).toBe('hoa-don-ORD-INVOICE-001.pdf');
+  expect(Download.suggestedFilename()).toBe('invoice-ORD-INVOICE-001.pdf');
   const DownloadPath = await Download.path();
-  const PdfBytes = await readFile(DownloadPath);
-  expect(PdfBytes.subarray(0, 5).toString()).toBe('%PDF-');
-  expect(PdfBytes.length).toBeGreaterThan(20_000);
-  await Download.saveAs('test-results/admin-invoice-sample.pdf');
-  await expect(page.getByText('File sẵn sàng để in.')).toBeVisible();
+  const DownloadedBytes = await readFile(DownloadPath);
+  expect(DownloadedBytes.subarray(0, 5).toString()).toBe('%PDF-');
+  await expect(page.getByText('Đã tải invoice-ORD-INVOICE-001.pdf.')).toBeVisible();
+  expect(ExportRequests).toEqual([{
+    OrderId: ConfirmedPaidOrder.OrderId,
+    RecipientName: 'Nguyễn Văn An',
+    PhoneNumber: '0901234567',
+    AddressLine: 'Phòng A101, Ký túc xá Đại học Quốc gia',
+    Ward: 'Phường Linh Trung',
+    District: 'Thành phố Thủ Đức',
+    Province: 'TP. Hồ Chí Minh',
+    Note: 'Gọi trước khi giao',
+  }]);
 
   await page.setViewportSize({ width: 390, height: 844 });
   const HasHorizontalOverflow = await page.locator('.admin-invoices').evaluate(
